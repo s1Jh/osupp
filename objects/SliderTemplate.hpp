@@ -2,7 +2,7 @@
 
 #include "define.hpp"
 #include "BaseObjectTemplate.hpp"
-#include "SliderTypes.h"
+#include "SliderTypes.hpp"
 #include "Vec2.hpp"
 
 namespace GAME_TITLE {

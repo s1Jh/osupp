@@ -3,6 +3,7 @@
 #include "define.hpp"
 
 #include "Texture.hpp"
+#include "Shader.hpp"
 #include "Resources.hpp"
 
 namespace GAME_TITLE {
@@ -22,5 +23,7 @@ namespace GAME_TITLE {
         static Texture Spinner;
         static Texture SpinnerCenter;
         static Texture SpinnerMeter;
+
+        static Shader SliderShader;
     };
 }

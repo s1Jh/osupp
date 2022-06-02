@@ -32,7 +32,7 @@ namespace GAME_TITLE {
     }
 
     bool Image::load(const std::string &path) {
-        ;
+
         data.reset((color8 *) stbi_load(
                 path.c_str(), &width, &height,
                 &channels, STBI_rgb_alpha), deleteImage);

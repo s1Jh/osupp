@@ -15,6 +15,7 @@
 #include "Color.hpp"
 #include "Camera.hpp"
 
+
 namespace GAME_TITLE {
 
     enum BlendMode {
@@ -22,12 +23,11 @@ namespace GAME_TITLE {
     };
 
     struct Transform2D {
-        operator std::unique_ptr<Mat3f>() const;
-
         operator Mat3f() const;
 
         fvec2d translate = {0.f, 0.f};
         float rotate = 0.f;
+        fvec2d rotationCenter = {0.0f, 0.0f};
         fvec2d scale = {1.f, 1.f};
         fvec2d shear = {0.f, 0.f};
         bool reflectX = false;
@@ -79,16 +79,16 @@ namespace GAME_TITLE {
         void drawClear(const color &color);
 
         void drawRect(const drect &rec, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                      std::unique_ptr<Mat3f> transform = nullptr);
+                      const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
 
         void drawCircle(const dcircle &circ, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                        std::unique_ptr<Mat3f> transform = nullptr);
+                        const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
 
         void drawSegment(const GLLine &seg, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                         std::unique_ptr<Mat3f> transform = nullptr);
+                         const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
 
         void drawMesh(const Mesh &mesh, const Shader &shader, const Shader::Uniforms &shaderUniforms = {},
-                      const Shader::Textures &textures = {}, std::unique_ptr<Mat3f> transform = nullptr);
+                      const Shader::Textures &textures = {}, const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
 
     private:
         static void onError(int code, const char* msg);

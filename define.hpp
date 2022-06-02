@@ -17,6 +17,8 @@
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 
+#define ARRAY_SIZE(ARR) sizeof(ARR) / sizeof(ARR[0])
+
 #define _STRINGIFY(x) #x
 #define TOSTRING(x) _STRINGIFY(x)
 

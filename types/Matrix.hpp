@@ -27,6 +27,37 @@ namespace GAME_TITLE {
                     m_Values[x][y] = data[y * w + x];
         }
 
+        Mat(const Mat& other) {
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    m_Values[x][y] = other.m_Values[x][y];
+        }
+
+        Mat(const Mat&& other)  noexcept {
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    m_Values[x][y] = other.m_Values[x][y];
+        }
+
+        inline Mat& operator=(const Mat& other) {
+            if (this == &other)
+                return *this;
+
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    m_Values[x][y] = other.m_Values[x][y];
+
+            return *this;
+        }
+
+        inline Mat& operator=(Mat&& other) noexcept {
+            for (int x = 0; x < w; x++)
+                for (int y = 0; y < h; y++)
+                    m_Values[x][y] = other.m_Values[x][y];
+
+            return *this;
+        }
+
         class CollumnView {
         public:
             CollumnView(Mat<T, w, h> &original, size_t column) :

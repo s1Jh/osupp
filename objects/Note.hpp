@@ -2,7 +2,7 @@
 
 #include "define.hpp"
 #include "HitObject.tpp"
-#include "NoteTemplate.h"
+#include "NoteTemplate.hpp"
 
 namespace GAME_TITLE {
 

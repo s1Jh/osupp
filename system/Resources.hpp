@@ -27,7 +27,7 @@ namespace GAME_TITLE {
     private:
         static T makeDefault();
 
-        static const std::vector<std::string> persistentAssets;
+        static const char* persistentAssets[];
         Resources &resourceRef;
         std::map<std::string, T> loadedAssets;
         T null;
@@ -60,8 +60,8 @@ namespace GAME_TITLE {
     int ResourcePile<T>::loadPersistent() {
         null = makeDefault();
         int c = 0;
-        for (const auto &path: ResourcePile<T>::persistentAssets) {
-            c += loadOne(path);
+        for (int i = 0; i < ARRAY_SIZE(persistentAssets); i++) {
+            c += loadOne(persistentAssets[i]);
         }
         return c;
     }

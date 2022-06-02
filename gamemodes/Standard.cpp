@@ -23,10 +23,11 @@ namespace GAME_TITLE {
                         // The onUpdate loop will then start with that object, ignoring all objects before,
                         // who we've assumed to already be done.
                         auto nextIt = std::next(it);
-                        if (last != nextIt)
-                        {
-                            last = nextIt;
-                        }
+                        if (nextIt != activeObjects.end())
+                            if (last != nextIt && (*last)->getEndTime() < (*nextIt)->getEndTime())
+                            {
+                                last = nextIt;
+                            }
                         continue;
                     } else {
                         // The object is ahead of our field of vision, since objects are sorted
@@ -96,9 +97,11 @@ namespace GAME_TITLE {
 
             const auto &obj = *it;
             if (obj->getState() == HitObjectState::Invisible) {
-                break;
+                if (!obj->isFinished())
+                    break;      // we are in not yet passed territory
+                else
+                    continue;   // skip drawing invisible object
             }
-
             obj->draw(renderer);
         }
     }

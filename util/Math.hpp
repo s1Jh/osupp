@@ -52,17 +52,20 @@ namespace GAME_TITLE {
         return in >= 0;
     }
 
-    template<typename T>
-    constexpr T Min(T a, T b) {
-        return a < b ? a : b;
+    template<typename T1, typename T2>
+    requires std::is_arithmetic_v<T1> and std::is_arithmetic_v<T2>
+    constexpr T1 Min(T1 a, T2 b) {
+        return a < (T1)b ? a : (T1)b;
+    }
+
+    template<typename T1, typename T2>
+    requires std::is_arithmetic_v<T1> and std::is_arithmetic_v<T2>
+    constexpr T1 Max(T1 a, T2 b) {
+        return a > (T1)b ? a : (T1)b;
     }
 
     template<typename T>
-    constexpr T Max(T a, T b) {
-        return a > b ? a : b;
-    }
-
-    template<typename T>
+    requires std::is_arithmetic_v<T>
     constexpr vec2d<T> Abs(vec2d<T> in) {
         return Mag(in) >= 0 ? in : in * -1;
     }
@@ -118,10 +121,10 @@ namespace GAME_TITLE {
         );
     }
 
-    template<typename XT, typename MaxT, typename MinT>
-    XT Clamp(XT x, MaxT a, MinT b) {
-        x = Max(x, a);
-        x = Min(x, b);
+    template<typename XT, typename MinT, typename MaxT>
+    XT Clamp(XT x, MinT min, MaxT max) {
+        x = Max(x, min);
+        x = Min(x, max);
         return x;
     }
 
@@ -404,14 +407,17 @@ namespace GAME_TITLE {
     }
 
     template<typename T>
-    inline Mat3<T> MakeRotationMatrix(float rotation) {
-        return Mat3<T>(
-                {
-                        std::cos(rotation), -std::sin(rotation), 0.f,
-                        std::sin(rotation), std::cos(rotation), 0.f,
-                        0.f, 0.f, 1.f
-                }
-        );
+    inline Mat3<T> MakeRotationMatrix(float rotation, fvec2d center = {0.0f, 0.0f}) {
+        auto rotMatrix = Mat3<T>(
+            {
+                    std::cos(rotation), -std::sin(rotation), 0.f,
+                    std::sin(rotation), std::cos(rotation), 0.f,
+                    0.f, 0.f, 1.f
+            });
+        return
+            MakeTranslationMatrix(center * -1) *
+            rotMatrix *
+            MakeTranslationMatrix(center);
     }
 
     template<typename T>

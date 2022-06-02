@@ -1,7 +1,7 @@
 #include "BaseGameMode.hpp"
 
 #include "Util.hpp"
-#include "HitObjects.h"
+#include "HitObjects.hpp"
 #include "Math.hpp"
 
 #define MAKE_CASE(TYPE) \
@@ -79,8 +79,8 @@ namespace GAME_TITLE {
     void BaseGameMode::setPlayField(const frect &field) {
         playField = field;
         transform =
-                MakeTranslationMatrix(field.position) *
-                MakeScaleMatrix(fvec2d(1.f / field.size));
+                MakeScaleMatrix( fvec2d(field.size) ) *
+                MakeTranslationMatrix(field.position);
     }
 
     fvec2d BaseGameMode::getCursorPosition() const {
@@ -92,5 +92,9 @@ namespace GAME_TITLE {
 
     MapInfo *BaseGameMode::getMap() const {
         return info;
+    }
+
+    const Mat3f &BaseGameMode::getObjectTransform() const {
+        return transform;
     }
 }

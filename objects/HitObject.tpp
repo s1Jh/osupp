@@ -169,22 +169,25 @@ namespace GAME_TITLE {
     template<typename TemplateT>
     requires IsTemplateV<TemplateT>
     void HitObject<TemplateT>::draw(Renderer &renderer) {
-        auto state = getState();
+        const auto objectTransform = session->getObjectTransform();
 
-        if (isApproachCircleDrawn()) {
-            auto arCircleScale = 1.5f;
+        if (isApproachCircleDrawn() && this->needsApproachCircle()) {
+            auto acCircleScale = 1.5f;
             float x = session->getCurrentTime() - getStartTime();
             float a = x > 0 ? session->getMap()->getHitWindow() : session->getMap()->getApproachTime();
-            float acSize = Lerp(session->getMap()->getCircleSize() * arCircleScale, 0, LinearES(x, a));
+            float acSize = Lerp(session->getMap()->getCircleSize() * acCircleScale, 0, LinearES(x, a));
+            acSize = Max(acSize, 0.0);
             renderer.drawRect(
                     { { acSize, acSize }, SOF.position },
                     {
                         .texture = &StandardResources::ApproachCircle,
                         .blendMode = BlendMode::Multiply,
                         .fillColor = WHITE
-                    });
+                    }, objectTransform);
 
         }
+
+        this->onDraw(renderer);
 
         color col = WHITE;
         auto alpha = getAlpha();
@@ -197,9 +200,9 @@ namespace GAME_TITLE {
                         .texture = &StandardResources::NoteBase,
                         .blendMode = BlendMode::Multiply,
                          .fillColor = col
-                });
+                }, objectTransform);
 
-        switch (state) {
+        switch (getState()) {
             case HitObjectState::Approaching: col = MAGENTA; break;
             case HitObjectState::Ready: col = GREEN; break;
             case HitObjectState::Active: col = LIME; break;
@@ -215,10 +218,7 @@ namespace GAME_TITLE {
                         .texture = &StandardResources::NoteOverlay,
                         .blendMode = BlendMode::Multiply,
                         .fillColor = col
-                });
-
-
-        this->onDraw(renderer);
+                }, objectTransform);
     }
 
     template<typename TemplateT>

@@ -9,7 +9,7 @@ set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
 set(TYPES_DIRECTORY ${ROOT_DIRECTORY}/types)
 set(UTIL_DIRECTORY ${ROOT_DIRECTORY}/util)
-
+set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
 set(OBJECT_DIRECTORY ${ROOT_DIRECTORY}/objects)
 set(BASES_DIRECTORY ${ROOT_DIRECTORY}/bases)
@@ -19,6 +19,7 @@ set(DIRECTORIES
         ${SYSTEM_DIRECTORY}
         ${TYPES_DIRECTORY}
         ${UTIL_DIRECTORY}
+        ${LOADER_DIRECTORY}
         ${GAMEMODE_DIRECTORY}
         ${OBJECT_DIRECTORY}
         ${BASES_DIRECTORY}
@@ -38,6 +39,9 @@ set(SOURCES
         ${SYSTEM_DIRECTORY}/Camera.cpp
         ${UTIL_DIRECTORY}/Math.cpp
         ${UTIL_DIRECTORY}/Util.cpp
+
+        ${LOADER_DIRECTORY}/OBJLoader.cpp
+        ${LOADER_DIRECTORY}/MAPLoader.cpp
 
         ${GAMEMODE_DIRECTORY}/CommonResourceLoaders.cpp
         ${GAMEMODE_DIRECTORY}/Standard.cpp

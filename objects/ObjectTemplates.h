@@ -1,5 +1,5 @@
 #pragma once
 
-#include "NoteTemplate.h"
-#include "SliderTemplate.h"
-#include "SpinnerTemplate.h"
+#include "NoteTemplate.hpp"
+#include "SliderTemplate.hpp"
+#include "SpinnerTemplate.hpp"

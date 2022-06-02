@@ -17,7 +17,7 @@ namespace GAME_TITLE {
 
         Standard std;
         MapInfo info;
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 1.0);
+        /*info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 1.0);
         info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 2.0);
         info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 3.0);
         info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 4.0);
@@ -27,7 +27,7 @@ namespace GAME_TITLE {
         info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 8.0);
         info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 9.0);
         info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 10.0);
-        /*info.addSlider(
+        info.addSlider(
                 {
                         {Random::Vec2<float>({-1, -1}, {1, 1}), false},
                         {Random::Vec2<float>({-1, -1}, {1, 1}), true},
@@ -61,17 +61,17 @@ namespace GAME_TITLE {
                 {
                         {Random::Vec2<float>({-1, -1}, {1, 1}), false},
                         {Random::Vec2<float>({-1, -1}, {1, 1}), true}},
-                true, 11.0, 15.0, SliderType::Straight);
+                true, 11.0, 15.0, SliderType::Straight);*/
 
-        info.addSpinner(50.0, 1.0, 20.0);*/
+        info.addSpinner(50.0, 1.0, 5.0, 8.0);
 
         std.setMap(&info);
 
         frect field = {
-                {0.5f, 0.5f},
-                {0.25, 0.25f}
+                {0.9f, 0.9f},
+                {0.0f, 0.0f}
         };
-        //std.setPlayField(field);
+        std.setPlayField(field);
 
         while (true) {
             double delta = timing.getDelta();
@@ -123,10 +123,12 @@ namespace GAME_TITLE {
             log::info("Adding search path: ", path.second.str());
             resources.addSearchPath(path.second.str());
         }
-        gfx.setResources(&resources);
+
         if (!gfx.create(gameSettings["gfx"])) {
             return 1;
         }
+        resources.loadPersistentAssets();
+        gfx.setResources(&resources);
 
         log::info("Loading gamemode resources");
         StandardResources::Populate(&resources);

@@ -2,7 +2,7 @@
 
 #include "define.hpp"
 #include "HitObject.tpp"
-#include "SpinnerTemplate.h"
+#include "SpinnerTemplate.hpp"
 
 namespace GAME_TITLE {
     class Spinner : public HitObject<ObjectTemplateSpinner> {
@@ -17,6 +17,11 @@ namespace GAME_TITLE {
         void onRaise() override;
         HitResult onFinish() override;
 
+        [[nodiscard]] bool needsApproachCircle() const override;
+
+        float RPM;
+        float rotation;
+        fvec2d lastVector;
     };
 
 }

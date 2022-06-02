@@ -27,8 +27,6 @@ namespace GAME_TITLE {
 
         void setTransform(Mat4<float>);
 
-        bool load(const std::string &fpath);
-
         void clear();
 
         void setAttributeDescriptors(std::vector<AttributeType> descriptors);
@@ -43,7 +41,7 @@ namespace GAME_TITLE {
 
         void insertIndice(unsigned int i);
 
-        void insertIndices(const std::vector<unsigned int> &is);
+        void insertIndices(const std::vector<unsigned int> &is, unsigned int offset = 0);
 
         unsigned int insertTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
 

@@ -2,7 +2,7 @@
 
 #include "define.hpp"
 #include "HitObject.tpp"
-#include "SliderTemplate.h"
+#include "SliderTemplate.hpp"
 
 #include <forward_list>
 
@@ -19,6 +19,8 @@ namespace GAME_TITLE {
         void onRaise() override;
         void onDraw(Renderer &renderer) override;
         void onPress() override;
+
+        Mesh body;
     };
 
 }

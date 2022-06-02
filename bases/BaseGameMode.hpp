@@ -36,7 +36,7 @@ namespace GAME_TITLE {
         void reset();
 
         [[nodiscard]] fvec2d getCursorPosition() const;
-        [[nodiscard]] Mat3f& getObjectTransform() const;
+        [[nodiscard]] const Mat3f& getObjectTransform() const;
 
     protected:
         virtual void onUpdate(double delta) = 0;

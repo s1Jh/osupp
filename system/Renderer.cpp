@@ -4,9 +4,6 @@
 #include "Util.hpp"
 #include "Math.hpp"
 
-#include "line.h"
-
-
 namespace GAME_TITLE {
 
     Renderer::Renderer() :
@@ -153,19 +150,15 @@ namespace GAME_TITLE {
     }
 
     void
-    Renderer::drawRect(const drect &rec, const VisualAppearance &appearance, const std::unique_ptr<Mat3f> transform) {
+    Renderer::drawRect(const drect &rec, const VisualAppearance &appearance, const Mat3f& transform) {
         static2DShader.use();
         static2DShader.set("fill", appearance.fillColor);
         static2DShader.set("outline", appearance.outlineColor);
         static2DShader.set("outline_width", appearance.outlineWidth);
         static2DShader.set("blendMode", (int) appearance.blendMode);
-        if (transform) {
-            static2DShader.set("transform", *transform);
-            static2DShader.set("camera", MAT3_NO_TRANSFORM<float>);
-        } else {
-            static2DShader.set("camera", camera.getMatrix());
-            static2DShader.set("transform", MAT3_NO_TRANSFORM<float>);
-        }
+
+        static2DShader.set("transform", transform);
+        static2DShader.set("camera", camera.getMatrix());
 
         Mat3f shape =
                 MakeScaleMatrix<float>(rec.size) *
@@ -185,27 +178,23 @@ namespace GAME_TITLE {
     }
 
     void Renderer::drawCircle(const dcircle &circ, const VisualAppearance &appearance,
-                              const std::unique_ptr<Mat3f> transform) {
+                              const Mat3f& transform) {
         static2DShader.use();
         static2DShader.set("fill", appearance.fillColor);
         static2DShader.set("outline", appearance.outlineColor);
         static2DShader.set("outline_width", appearance.outlineWidth);
         static2DShader.set("blendMode", (int) appearance.blendMode);
-        CheckGLh("Set shader appearance uniforms");
-        if (transform) {
-            static2DShader.set("transform", *transform);
-            static2DShader.set("camera", MAT3_NO_TRANSFORM<float>);
-        } else {
-            static2DShader.set("camera", camera.getMatrix());
-            static2DShader.set("transform", MAT3_NO_TRANSFORM<float>);
-        }
+
+        static2DShader.set("transform", transform);
+        static2DShader.set("camera", camera.getMatrix());
+        CheckGLh("Set shader matrices");
 
         Mat3f shape =
                 MakeScaleMatrix<float>(dvec2d{circ.radius, circ.radius}) *
                 MakeTranslationMatrix<float>(circ.position);
 
         static2DShader.set("shape", shape);
-        CheckGLh("Set shader matrices");
+        CheckGLh("Set shader shape matrix");
 
         if (appearance.texture) {
             appearance.texture->use(0);
@@ -228,7 +217,7 @@ namespace GAME_TITLE {
 
     void Renderer::drawMesh(
             const Mesh &mesh, const Shader &shader, const Shader::Uniforms &shaderUniforms,
-            const Shader::Textures &textures, std::unique_ptr<Mat3f> transform
+            const Shader::Textures &textures, const Mat3f& transform
     ) {
         shader.use();
         CheckGLh("Bound shader");
@@ -278,13 +267,8 @@ namespace GAME_TITLE {
         }
         CheckGLh("Set shader uniforms");
 
-        if (transform) {
-            shader.set("transform", *transform);
-            shader.set("camera", MAT3_NO_TRANSFORM<float>);
-        } else {
-            shader.set("camera", camera.getMatrix());
-            shader.set("transform", MAT3_NO_TRANSFORM<float>);
-        }
+        shader.set("transform", transform);
+        shader.set("camera", camera.getMatrix());
         DumpGlErrors();
 
         for (auto &texture: textures) {
@@ -306,21 +290,16 @@ namespace GAME_TITLE {
     }
 
     void Renderer::drawSegment(const GLLine &seg, const VisualAppearance &appearance,
-                               std::unique_ptr<Mat3f> transform) {
+                               const Mat3f& transform) {
         if (!seg.mesh.isValid())
             return;
 
         lineShader.use();
         lineShader.set("fill", appearance.fillColor);
-
         CheckGLh("Set shader appearance uniforms");
-        if (transform) {
-            lineShader.set("transform", *transform);
-            lineShader.set("camera", MAT3_NO_TRANSFORM<float>);
-        } else {
-            lineShader.set("camera", camera.getMatrix());
-            lineShader.set("transform", MAT3_NO_TRANSFORM<float>);
-        }
+
+        lineShader.set("camera", camera.getMatrix());
+        lineShader.set("transform", transform);
         CheckGLh("Set shader matrices");
 
         glBindVertexArray(seg.mesh.getVAO());
@@ -417,19 +396,10 @@ namespace GAME_TITLE {
         log::error("GLFW: [", code, "] ", msg);
     }
 
-    Transform2D::operator std::unique_ptr<Mat3f>() const {
-        return std::make_unique<Mat3f>(
-                MakeTranslationMatrix(translate) *
-                MakeRotationMatrix<float>(rotate) *
-                MakeScaleMatrix(scale) *
-                MakeShearMatrix(shear)
-        );
-    }
-
     Transform2D::operator Mat3f() const {
         return
                 MakeTranslationMatrix(translate) *
-                MakeRotationMatrix<float>(rotate) *
+                MakeRotationMatrix<float>(rotate, rotationCenter) *
                 MakeScaleMatrix(scale) *
                 MakeShearMatrix(shear);
     }

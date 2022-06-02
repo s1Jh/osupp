@@ -3,7 +3,7 @@
 #include "define.hpp"
 #include "bases/BaseObjectTemplate.hpp"
 #include "Vec2.hpp"
-#include "SliderTypes.h"
+#include "SliderTypes.hpp"
 
 #include <memory>
 #include <list>
@@ -14,8 +14,6 @@ namespace GAME_TITLE {
     class MapInfo {
     public:
         using StorageT = std::list<std::shared_ptr<BaseObjectTemplate>>;
-
-        bool loadMap(const std::filesystem::path &path, LoadLayers layers);
 
         [[nodiscard]] const StorageT &getObjectTemplates() const;
 
@@ -45,22 +43,42 @@ namespace GAME_TITLE {
 
         [[nodiscard]] float getFadeTime() const;
 
+        void setName(const std::string &name);
+
+        void setDescription(const std::string &description);
+
+        void setArtist(const std::string &artist);
+
+        void setDifficulty(const std::string &difficulty);
+
+        void setSongPath(const std::string &songPath);
+
+        void setCircleSize(float circleSize);
+
+        void setStartOffset(float startOffset);
+
+        void setMapDuration(double mapDuration);
+
+        void setHpDrain(float hpDrain);
+
+        void setApproachTime(float approachTime);
+
+        void setHitWindow(float hitWindow);
+
+        void setFadeTime(float fadeTime);
+
+        void setOverallDifficulty(float overallDifficulty);
+
+        void clear();
+
         void addNote(fvec2d position, bool comboEnd, float time);
 
         void addSlider(const SliderPathT &points, bool comboEnd, float time, float endTime, SliderType type);
 
-        void addSpinner(float spinRequired, float spinResistance, float time);
+        void addSpinner(float spinRequired, float spinResistance, float time, float endTime);
 
     private:
-        void readObject(float &elementTime, char type, std::stringstream &line);
-
-        void readMeta(char type, std::stringstream &line);
-
-        void readEvent(float &elementTime, char type, std::stringstream &line);
-
         void insertElement(std::shared_ptr<BaseObjectTemplate>);
-
-        static void readString(std::stringstream &from, std::string &to);
 
         // Song's name.
         std::string name;

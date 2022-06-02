@@ -1,10 +1,12 @@
 #include "Resources.hpp"
 
 #include "Util.hpp"
+#include "MeshLoaders.hpp"
+#include "MapLoaders.hpp"
 
 namespace GAME_TITLE {
     template<>
-    const std::vector<std::string> ResourcePile<Texture>::persistentAssets = {
+    const char* ResourcePile<Texture>::persistentAssets[] = {
             NOTE_BASE_SPRITE,
             NOTE_OVERLAY_SPRITE,
             APPROACH_CIRCLE_SPRITE,
@@ -18,16 +20,16 @@ namespace GAME_TITLE {
     };
 
     template<>
-    const std::vector<std::string> ResourcePile<Shader>::persistentAssets = {
+    const char* ResourcePile<Shader>::persistentAssets[]= {
             SLIDER_SHADER
     };
 
     template<>
-    const std::vector<std::string> ResourcePile<Mesh>::persistentAssets = {
+    const char* ResourcePile<Mesh>::persistentAssets[] = {
     };
 
     template<>
-    const std::vector<std::string> ResourcePile<MapInfo>::persistentAssets = {
+    const char* ResourcePile<MapInfo>::persistentAssets[] = {
     };
 
     int Resources::loadPersistentAssets() {
@@ -128,7 +130,7 @@ namespace GAME_TITLE {
     template<>
     bool ResourcePile<Mesh>::loadOne(const std::string &path) {
         Mesh mesh;
-        if (!mesh.load(resourceRef.findFile(path))) {
+        if (!LoadOBJ(resourceRef.findFile(path).string(), mesh)) {
             log::error("Failed to load mesh ", path);
             return false;
         }
@@ -150,7 +152,7 @@ namespace GAME_TITLE {
     template<>
     bool ResourcePile<MapInfo>::loadOne(const std::string &path) {
         MapInfo map;
-        if (!map.loadMap(resourceRef.findFile(path), MAP_LOAD_ALL)) {
+        if (!LoadMAP(resourceRef.findFile(path), map)) {
             log::error("Failed to load map ", path);
             return false;
         }

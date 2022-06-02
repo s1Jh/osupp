@@ -78,16 +78,17 @@ namespace GAME_TITLE {
         [[nodiscard]] bool isFadingIn() const;
         [[nodiscard]] bool isFadingOut() const;
         [[nodiscard]] bool isUpdating() const;
-
+        [[nodiscard]] bool isActive() const;
         [[nodiscard]] virtual float getAlpha() const = 0;
 
-        virtual void onDraw(Renderer&) = 0;
-        virtual void onUpdate(double delta) = 0;
-        virtual void onBegin() = 0;
-        virtual void onPress() = 0;
-        virtual void onRaise() = 0;
-
-        [[nodiscard]] virtual HitResult onFinish() = 0;
+        virtual void onDraw(Renderer&);
+        virtual void onUpdate(double delta);
+        virtual void onBegin();
+        virtual void onPress();
+        virtual void onRaise();
+        virtual void onReset();
+        [[nodiscard]] virtual bool needsApproachCircle() const;
+        [[nodiscard]] virtual HitResult onFinish();
 
         fcircle SOF;
         bool finished;

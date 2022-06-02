@@ -13,6 +13,7 @@ namespace GAME_TITLE {
         state = HitObjectState::Invisible;
         finished = false;
         timeFinished = 0.0;
+        this->onReset();
     }
 
     HitObjectState BaseHitObject::getState() const {
@@ -102,5 +103,29 @@ namespace GAME_TITLE {
             state == HitObjectState::Active ||
             state == HitObjectState::Inactive ||
             state == HitObjectState::Ready;
+    }
+
+    bool BaseHitObject::needsApproachCircle() const {
+        return true;
+    }
+
+    bool BaseHitObject::isActive() const {
+        return state == HitObjectState::Active;
+    }
+
+    void BaseHitObject::onDraw(Renderer &) {}
+
+    void BaseHitObject::onUpdate(double delta) {}
+
+    void BaseHitObject::onBegin() {}
+
+    void BaseHitObject::onPress() {}
+
+    void BaseHitObject::onRaise() {}
+
+    void BaseHitObject::onReset() {}
+
+    HitResult BaseHitObject::onFinish() {
+        return HitResult::Hit50;
     }
 }
