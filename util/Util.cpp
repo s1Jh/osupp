@@ -1,0 +1,80 @@
+#include "Util.hpp"
+
+#include <cstdlib>
+#include <fstream>
+
+namespace GAME_TITLE {
+
+    int __CheckGLFWErrors(const std::string &file, int line, const std::string &helper) {
+        LOG_ENTER("GLFW");
+        const char *buff[256];
+        int err = glfwGetError(buff);
+        if (err != GLFW_NO_ERROR)
+            log::error("@(", helper, ") Near line ", line, " In File: ", file, ": ", *buff);
+        return err;
+    }
+
+    int DumpGlErrors() {
+        return glGetError();
+    }
+
+    GLenum __CheckErrors(const std::string &file, int line, const std::string &helper) {
+        LOG_ENTER("GL");
+        GLenum error = glGetError();
+        const char *err_str;
+        if (error != 0) {
+            switch (error) {
+                case GL_INVALID_ENUM:
+                    err_str = "GL_INVALID_ENUM";
+                    break;
+                case GL_INVALID_VALUE:
+                    err_str = "GL_INVALID_VALUE";
+                    break;
+                case GL_INVALID_OPERATION:
+                    err_str = "GL_INVALID_OPERATION";
+                    break;
+                case GL_STACK_OVERFLOW:
+                    err_str = "GL_STACK_OVERFLOW";
+                    break;
+                case GL_STACK_UNDERFLOW:
+                    err_str = "GL_STACK_UNDERFLOW";
+                    break;
+                case GL_OUT_OF_MEMORY:
+                    err_str = "GL_OUT_OF_MEMORY";
+                    break;
+                case GL_INVALID_FRAMEBUFFER_OPERATION:
+                    err_str = "GL_INVALID_FRAMEBUFFER_OPERATION";
+                    break;
+                default:
+                    err_str = "!INVALID ERROR!";
+                    break;
+            }
+
+            log::error("@(", helper, ") Near line: ", line, " In File: ", file, ": ", err_str);
+        }
+        return error;
+    }
+
+
+    std::recursive_mutex log::coutMutex;
+#ifdef NDEBUG
+    bool log::enableDebug = false;
+#else
+    bool log::enableDebug = true;
+#endif
+    bool log::enabled = true;
+    std::vector<std::string> log::sections;
+
+
+    void log::setDebug(bool ns) {
+        enableDebug = ns;
+    }
+
+    void log::enable() {
+        enabled = true;
+    }
+
+    void log::disable() {
+        enabled = false;
+    }
+}
