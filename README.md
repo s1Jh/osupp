@@ -26,7 +26,7 @@ There are three types of gameplay objects.
 
 The simplest of these are the humble notes. They appear as circles on screen
 To hit a note, simply move your cursor over it and press either mouse buttons
-or the mouse keys ```X``` or ```Z```. You will know when to press by looking at
+or the keys ```X``` or ```Z```. You will know when to press by looking at
 the approach circle. This circle will appear around the note and will close down on it.
 
 If you manage to hit one successfully, a rating will appear telling you how close you were.
