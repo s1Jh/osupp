@@ -1,8 +1,9 @@
 // TODO: Make this readme better.
 # notOsu
-Another open source clone of the popular circle clicking rhythm game, Osu! 
-Written in C++ and designed to be expandable, it tries to offer high 
-performance thanks to hardware acceleration with OpenGL.  
+Another open source clone of the popular circle clicking rhythm game, Osu!
+Written in C++, it tries to offer high performance and all QOL features 
+you could think of. Written with hindsight in mind and designed to be expandable,
+notOsu is the perfect platform for not only playing, but experiments too.
 
 ## Building
 Simply build with CMake.
