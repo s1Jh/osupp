@@ -20,16 +20,16 @@ namespace GAME_TITLE {
         //for (int i = 0; i < 15; i++)
         //    info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, i);
 
-        info.addSlider(
+        /*info.addSlider(
                 {
                         {{0.8, 0.8}, true},
                         {{0.8, -0.8}, false},
                         {{-0.8, 0.8}, true},
                         {{-0.8, -0.8}, false},
                         },
-                true, 3, 10, SliderType::Straight);
+                true, 3, 10, SliderType::Straight);*/
 
-        //info.addSpinner(3, 1, 5, 10);
+        info.addSpinner(3, 1, 2, 10);
 
         std.setMap(&info);
 

@@ -64,13 +64,13 @@ namespace GAME_TITLE {
         t = Clamp(t, 0.0, 1.0);
         switch (parent.objectTemplate->sliderType) {
             case SliderType::Straight:
-                return _findPointStraight(t);
+                return findPointStraight(t);
             case SliderType::Bezier:
-                return _findPointBezier(t);
+                return findPointBezier(t);
             case SliderType::Catmull:
-                return _findPointCatmull(t);
+                return findPointCatmull(t);
             case SliderType::Circle:
-                return _findPointCircle(t);
+                return findPointCircle(t);
         }
     }
 
@@ -109,13 +109,13 @@ namespace GAME_TITLE {
         t = Clamp(t, 0.0, 1.0);
         switch (parent.objectTemplate->sliderType) {
             case SliderType::Straight:
-                return _findDirectionStraight(t);
+                return findDirectionStraight(t);
             case SliderType::Bezier:
-                return _findDirectionBezier(t);
+                return findDirectionBezier(t);
             case SliderType::Catmull:
-                return _findDirectionCatmull(t);
+                return findDirectionCatmull(t);
             case SliderType::Circle:
-                return _findDirectionCircle(t);
+                return findDirectionCircle(t);
         }
     }
 

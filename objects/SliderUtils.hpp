@@ -1,6 +1,7 @@
 #pragma once
 
 #include "define.hpp"
+#include "Vec2.hpp"
 
 namespace NotOSU {
     class Slider;

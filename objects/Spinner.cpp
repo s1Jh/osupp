@@ -32,7 +32,9 @@ namespace GAME_TITLE {
     }
 
     Spinner::Spinner(std::shared_ptr<ObjectTemplateSpinner> t, BaseGameMode *g)
-            : HitObject(std::move(t), g), rotation(0.0f), RPM(0.0) {}
+            : HitObject(std::move(t), g), rotation(0.0f), RPM(0.0) {
+        SOF = { 2.0f, {0.0f, 0.0f}};
+    }
 
     void Spinner::onPress() {
         lastVector = Normalize(session->getCursorPosition());
