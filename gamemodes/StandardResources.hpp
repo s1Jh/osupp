@@ -23,6 +23,8 @@ namespace GAME_TITLE {
         static Texture Spinner;
         static Texture SpinnerCenter;
         static Texture SpinnerMeter;
+        static Texture SliderBall;
+        static Texture PlayField;
 
         static Shader SliderShader;
     };

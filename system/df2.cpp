@@ -29,7 +29,7 @@ namespace GAME_TITLE {
             log::info("Failed to open file: ", path);
             return null;
         }
-        // Get the file size.
+        // get the file size.
         size_t file_size = (size_t) ifs.tellg();
         // Reset back to the start
         ifs.seekg(0, std::ios::beg);
@@ -228,7 +228,7 @@ namespace GAME_TITLE {
 
     bool df2::write(df2 &def, const std::string &path) {
         std::stringstream char_repr;
-        char_repr << "( This file was automaticall written by the program )\n\n";
+        char_repr << "( This file was automatically written by the program )\n\n";
 
         writeClump(char_repr, def);
 

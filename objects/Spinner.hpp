@@ -19,6 +19,7 @@ namespace GAME_TITLE {
 
         [[nodiscard]] bool needsApproachCircle() const override;
 
+    private:
         float RPM;
         float rotation;
         fvec2d lastVector;

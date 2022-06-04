@@ -17,53 +17,19 @@ namespace GAME_TITLE {
 
         Standard std;
         MapInfo info;
-        /*info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 1.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 2.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 3.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 4.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 5.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 6.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 7.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 8.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 9.0);
-        info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, 10.0);
-        info.addSlider(
-                {
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), false},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        },
-                true, 2.0, 3.0, SliderType::Straight);
-        info.addSlider(
-                {
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), false},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        },
-                true, 5.0, 6.0, SliderType::Bezier);
-        info.addSlider(
-                {
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), false},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true},
-                        },
-                true, 7.0, 10.0, SliderType::Straight);
-        info.addSlider(
-                {
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), false},
-                        {Random::Vec2<float>({-1, -1}, {1, 1}), true}},
-                true, 11.0, 15.0, SliderType::Straight);*/
+        //for (int i = 0; i < 15; i++)
+        //    info.addNote(Random::Vec2<float>({-1, -1}, {1, 1}), false, i);
 
-        info.addSpinner(50.0, 1.0, 5.0, 8.0);
+        info.addSlider(
+                {
+                        {{0.8, 0.8}, true},
+                        {{0.8, -0.8}, false},
+                        {{-0.8, 0.8}, true},
+                        {{-0.8, -0.8}, false},
+                        },
+                true, 3, 10, SliderType::Straight);
+
+        //info.addSpinner(3, 1, 5, 10);
 
         std.setMap(&info);
 

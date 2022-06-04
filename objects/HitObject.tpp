@@ -191,16 +191,7 @@ namespace GAME_TITLE {
 
         color col = WHITE;
         auto alpha = getAlpha();
-        auto circleSize = SOF.radius;
-
-        col.a = alpha;
-        renderer.drawRect(
-                { { circleSize, circleSize }, SOF.position },
-                {
-                        .texture = &StandardResources::NoteBase,
-                        .blendMode = BlendMode::Multiply,
-                         .fillColor = col
-                }, objectTransform);
+        auto circleSize = SOF.radius * 1.25;
 
         switch (getState()) {
             case HitObjectState::Approaching: col = MAGENTA; break;
@@ -211,11 +202,11 @@ namespace GAME_TITLE {
             case HitObjectState::Fading: col = GRAY; break;
             case HitObjectState::Invisible: col = PERSIAN_BLUE; break;
         }
-        col.a = alpha;
+
         renderer.drawRect(
                 { { circleSize, circleSize }, SOF.position },
                 {
-                        .texture = &StandardResources::NoteOverlay,
+                        .texture = &StandardResources::ApproachCircle,
                         .blendMode = BlendMode::Multiply,
                         .fillColor = col
                 }, objectTransform);

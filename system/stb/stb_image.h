@@ -6323,7 +6323,7 @@ static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, int req
     // Skip the reserved data.
     stbi__skip(s, stbi__get32be(s));
 
-    // Find out if the data is compressed.
+    // find out if the data is compressed.
     // Known values:
     //   0: no compression
     //   1: RLE compressed
@@ -7710,7 +7710,7 @@ static int stbi__pnm_info(stbi__context *s, int *x, int *y, int *comp) {
 
     stbi__rewind(s);
 
-    // Get identifier
+    // get identifier
     p = (char) stbi__get8(s);
     t = (char) stbi__get8(s);
     if (p != 'P' || (t != '5' && t != '6')) {

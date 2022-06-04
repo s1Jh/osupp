@@ -87,6 +87,9 @@ namespace GAME_TITLE {
         void drawSegment(const GLLine &seg, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
                          const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
 
+        void drawCross(const fvec2d &pos, float size = 0.1f, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
+                         const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
+
         void drawMesh(const Mesh &mesh, const Shader &shader, const Shader::Uniforms &shaderUniforms = {},
                       const Shader::Textures &textures = {}, const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
 
@@ -96,7 +99,7 @@ namespace GAME_TITLE {
 
         bool createStaticGeometry(int resolution);
 
-        Mesh rectShape, circleShape, cuboidShape, sphereShape, arrowTopShape;
+        Mesh rectShape, circleShape, cuboidShape, sphereShape, crossShape;
         Shader static2DShader, lineShader;
 
         Resources *resources;

@@ -11,10 +11,10 @@
 namespace GAME_TITLE {
 
     struct ButtonState {
-        bool released = true;
-        bool pressed = false;
-        bool releasing = false;
-        bool pressing = false;
+        bool released : 1 = true;
+        bool pressed : 1 = false;
+        bool releasing : 1 = false;
+        bool pressing : 1 = false;
     };
 
     class Mouse {

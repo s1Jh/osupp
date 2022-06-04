@@ -46,7 +46,7 @@ namespace GAME_TITLE {
                 .rotate = rotation
         } * objectTransform;
 
-        frect all = {{1.f, 1.f}, {0.f, 0.f}};
+        frect all = {{0.8f, 0.8f}, {0.f, 0.f}};
         renderer.drawRect(
             all, {.texture = &StandardResources::Spinner, .fillColor = tint},
             objectTransform

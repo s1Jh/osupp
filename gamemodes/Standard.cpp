@@ -89,7 +89,10 @@ namespace GAME_TITLE {
         // the "last" object should be the next visible object in line
         // we therefore onDraw every object until we hit one that is invisible
 
-        renderer.drawRect(getPlayField(), {.fillColor = RED_VIOLET});
+        renderer.drawRect(getPlayField(), {
+            .texture = &StandardResources::PlayField,
+            .fillColor = RED_VIOLET
+        });
 
         for (auto it = last;; it++) {
             if (it == activeObjects.end())

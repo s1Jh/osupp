@@ -128,10 +128,10 @@ namespace GAME_TITLE {
         Key code;
         char ascii;
 
-        bool released = true;
-        bool pressed = false;
-        bool releasing = false;
-        bool pressing = false;
+        bool released : 1 = true;
+        bool pressed : 1 = false;
+        bool releasing : 1 = false;
+        bool pressing : 1 = false;
     };
 
     class Keyboard {

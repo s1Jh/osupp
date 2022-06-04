@@ -208,7 +208,7 @@ namespace GAME_TITLE {
 
         glBindVertexArray(circleShape.getVAO());
         glDrawElements(GL_TRIANGLE_FAN, circleShape.getElementCount(), GL_UNSIGNED_INT, nullptr);
-        CheckGLh("Draw");
+        CheckGLh("draw");
 
         Shader::unbind();
         Texture::unbind(0);
@@ -219,6 +219,9 @@ namespace GAME_TITLE {
             const Mesh &mesh, const Shader &shader, const Shader::Uniforms &shaderUniforms,
             const Shader::Textures &textures, const Mat3f& transform
     ) {
+        if (!mesh.isValid())
+            return;
+
         shader.use();
         CheckGLh("Bound shader");
 
@@ -280,7 +283,7 @@ namespace GAME_TITLE {
         glDrawElements(
                 mesh.getRenderMode(), mesh.getElementCount(),
                 GL_UNSIGNED_INT, nullptr);
-        CheckGLh("Draw");
+        CheckGLh("draw");
 
         Shader::unbind();
         for (auto &texture: textures) {
@@ -300,11 +303,35 @@ namespace GAME_TITLE {
 
         lineShader.set("camera", camera.getMatrix());
         lineShader.set("transform", transform);
+        lineShader.set("shape", MAT3_NO_TRANSFORM<float>);
         CheckGLh("Set shader matrices");
 
         glBindVertexArray(seg.mesh.getVAO());
         glDrawElements(GL_LINES, seg.mesh.getElementCount(), GL_UNSIGNED_INT, nullptr);
-        CheckGLh("Draw");
+        CheckGLh("draw");
+
+        Shader::unbind();
+        Texture::unbind(0);
+        CheckGLh("Unbound");
+    }
+
+    void Renderer::drawCross(const fvec2d &pos, float size, const VisualAppearance &appearance, const Mat3f &transform) {
+        lineShader.use();
+        lineShader.set("fill", appearance.fillColor);
+        CheckGLh("Set shader appearance uniforms");
+
+        lineShader.set("camera", camera.getMatrix());
+        lineShader.set("transform", transform);
+
+        auto shape =
+                MakeScaleMatrix(fvec2d{size, size}) *
+                MakeTranslationMatrix(pos);
+        lineShader.set("shape", shape);
+        CheckGLh("Set shader matrices");
+
+        glBindVertexArray(crossShape.getVAO());
+        glDrawElements(GL_LINES, crossShape.getElementCount(), GL_UNSIGNED_INT, nullptr);
+        CheckGLh("draw");
 
         Shader::unbind();
         Texture::unbind(0);
@@ -334,7 +361,7 @@ namespace GAME_TITLE {
         int i = 0;
         for (; i < resolution; i++) {
             fvec2d vec = {circle_vec.x, circle_vec.y};
-            fvec2d uv = (vec + fvec2d{1.f, 1.f}) / fvec2d{2.f, 2.f};
+            fvec2d uv = (vec + 1.0f) / 2.0f;
             circleShape.insertVertex({vec.x, vec.y, uv.x, uv.y});
             circleShape.insertIndice(i);
             circle_vec = Rotate(circle_vec, circle_rotation);
@@ -362,27 +389,25 @@ namespace GAME_TITLE {
                 });
         success &= rectShape.upload();
 
-        arrowTopShape.setAttributeDescriptors(
+        crossShape.setAttributeDescriptors(
                 {
                         AttributeType::Vec2 // position
                 });
-        arrowTopShape.insertVertices(
+        float sqr2 = float(std::sqrt(2.0)) / 2.0f;
+        crossShape.insertVertices(
                 {
-                        {-0.8f, -0.5f},
-                        {-0.8f, -0.8f},
-                        {0.0f,  -0.2f},
-                        {0.0f,  0.1f},
-                        {0.8f,  -0.5f},
-                        {0.8f,  -0.8f}
+                        {sqr2, sqr2},
+                        {sqr2, -sqr2},
+                        {-sqr2, sqr2},
+                        {-sqr2, -sqr2},
                 });
 
-        arrowTopShape.insertIndices(
+        crossShape.insertIndices(
                 {
-                        0, 1, 2,
-                        0, 2, 3,
-                        3, 4, 2,
-                        2, 4, 5
+                    0, 3,
+                    1, 2
                 });
+        success &= crossShape.upload();
 
         return success;
     }

@@ -17,7 +17,11 @@ namespace GAME_TITLE {
     Texture StandardResources::Spinner;
     Texture StandardResources::SpinnerCenter;
     Texture StandardResources::SpinnerMeter;
+    Texture StandardResources::SliderBall;
+    Texture StandardResources::PlayField;
+
     Shader StandardResources::SliderShader;
+
 
     void StandardResources::Populate(Resources* pool) {
         StandardResources::NoteBase = pool->textures.get(NOTE_BASE_SPRITE);
@@ -32,6 +36,8 @@ namespace GAME_TITLE {
         StandardResources::Spinner = pool->textures.get(SPINNER_SPRITE);
         StandardResources::SpinnerCenter = pool->textures.get(SPINNER_CENTER_SPRITE);
         StandardResources::SpinnerMeter = pool->textures.get(SPINNER_METER_SPRITE);
+        StandardResources::SliderBall = pool->textures.get(SLIDER_BALL_SPRITE);
+        StandardResources::PlayField = pool->textures.get(PLAY_FIELD_SPRITE);
 
         StandardResources::SliderShader = pool->shaders.get(SLIDER_SHADER);
     }

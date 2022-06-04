@@ -44,7 +44,7 @@ namespace GAME_TITLE {
     ENABLE_BITMASK_OPERATORS(LoadLayers)
 
     enum class HitResult {
-        Missed, Hit300, Hit100, Hit50
+        Missed = 0, Hit50, Hit100, Hit300
     };
 
     /**

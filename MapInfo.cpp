@@ -26,11 +26,6 @@ namespace GAME_TITLE {
         object->path = points;
         object->endTime = endTime;
         object->sliderType = type;
-
-        for (auto it = object->path.begin(); it != std::prev(object->path.end()); it++) {
-            it->connectingLine = GLLine(it->position, std::next(it)->position);
-        }
-
         insertElement(object);
     }
 

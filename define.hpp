@@ -91,6 +91,8 @@ constexpr const char *SLIDER_HITPOINT_SPRITE = "slider_hitpoint";
 constexpr const char *SPINNER_SPRITE = "spinner";
 constexpr const char *SPINNER_CENTER_SPRITE = "spinner_center";
 constexpr const char *SPINNER_METER_SPRITE = "spinner_meter";
+constexpr const char *SLIDER_BALL_SPRITE = "slider_ball";
+constexpr const char *PLAY_FIELD_SPRITE = "play_field";
 
 constexpr const char *SLIDER_SHADER = "slider";
 

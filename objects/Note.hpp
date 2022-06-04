@@ -13,11 +13,10 @@ namespace GAME_TITLE {
 
     protected:
         void onDraw(Renderer &renderer) override;
-        void onUpdate(double delta) override;
         void onBegin() override;
-        void onPress() override;
         HitResult onFinish() override;
-        void onRaise() override;
+
+        bool wasHit = false;
     };
 
 }
