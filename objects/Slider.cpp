@@ -95,7 +95,7 @@ NS_BEGIN
 
             Circle mask;
             mask.AOI = {session->getMap()->getCircleSize(), thisPosition};
-            circleMask.push_back({session->getMap()->getCircleSize() - 0.01, thisPosition});
+            circleMask.emplace_back(session->getMap()->getCircleSize() - 0.01f, thisPosition);
 
             // Optimizations
             if (middleIt != interpolatedPath.end()) {
