@@ -8,26 +8,26 @@
 #include "Resources.hpp"
 #include "Standard.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    class Game {
-    public:
-        Game();
+class Game {
+public:
+    Game();
 
-        int start();
+    int start();
 
-        int initialize();
+    int initialize();
 
-        int close();
+    int close();
 
-    private:
-        df2 gameSettings;
-        df2 gameDefinition;
-        Resources resources;
-        Renderer gfx;
-        Keyboard keyboard;
-        Mouse mouse;
-        Timing timing;
-    };
+private:
+    df2 gameSettings;
+    df2 gameDefinition;
+    Resources resources;
+    Renderer gfx;
+    Keyboard keyboard;
+    Mouse mouse;
+    Timing timing;
+};
 
-}
+NS_END

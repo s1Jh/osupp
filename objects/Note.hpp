@@ -4,7 +4,7 @@
 #include "HitObject.tpp"
 #include "NoteTemplate.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     class Note : public HitObject<ObjectTemplateNote> {
     public:

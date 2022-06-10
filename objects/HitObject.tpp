@@ -13,7 +13,7 @@
 #include <string>
 #include <memory>
 
-namespace GAME_TITLE {
+NS_BEGIN
     template<typename TemplateT> requires IsTemplateV<TemplateT>
     class HitObject : public BaseHitObject {
     public:
@@ -146,6 +146,8 @@ namespace GAME_TITLE {
             transferToFading(session->getCurrentTime());
             return this->onFinish();
         }
+        log::error(this, " tried invalid state change (pickup->finish)");
+        return HitResult::Missed;
     }
 
     template<typename TemplateT>
@@ -172,10 +174,16 @@ namespace GAME_TITLE {
         const auto objectTransform = session->getObjectTransform();
 
         if (isApproachCircleDrawn() && this->needsApproachCircle()) {
-            auto acCircleScale = 1.5f;
+
+            auto scale = 1.5f;  // how big will the circle be at -ar
+            float offset = 1.0;      // how big the circle will be at 0
+
+            float slope = (scale - offset) / session->getMap()->getApproachTime();
+
             float x = session->getCurrentTime() - getStartTime();
-            float a = x > 0 ? session->getMap()->getHitWindow() : session->getMap()->getApproachTime();
-            float acSize = Lerp(session->getMap()->getCircleSize() * acCircleScale, 0, LinearES(x, a));
+            float y = x * -slope + offset;
+
+            float acSize = session->getMap()->getCircleSize() * y;
             acSize = Max(acSize, 0.0);
             renderer.drawRect(
                     { { acSize, acSize }, SOF.position },

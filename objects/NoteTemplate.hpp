@@ -4,7 +4,7 @@
 #include "BaseObjectTemplate.hpp"
 #include "Vec2.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     BEGIN_OBJECT_TEMPLATE(Note)
         GLLine connectingLine;

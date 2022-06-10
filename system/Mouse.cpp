@@ -2,69 +2,72 @@
 
 #include "Math.hpp"
 
-namespace GAME_TITLE {
+#define GLFW_DLL
+#include <GLFW/glfw3.h>
 
-    GLFWwindow *Mouse::parentViewport = nullptr;
-    ButtonState Mouse::buttons[3];
+NS_BEGIN
 
-    const ButtonState &Mouse::left() {
-        return buttons[0];
-    }
+GLFWwindow *Mouse::parentViewport = nullptr;
+ButtonState Mouse::buttons[3];
 
-    const ButtonState &Mouse::middle() {
-        return buttons[2];
-    }
+const ButtonState &Mouse::left() {
+    return buttons[0];
+}
 
-    const ButtonState &Mouse::right() {
-        return buttons[1];
-    }
+const ButtonState &Mouse::middle() {
+    return buttons[2];
+}
 
-    fvec2d Mouse::position() {
-        dvec2d ret;
-        glfwGetCursorPos(parentViewport, &ret.x, &ret.y);
+const ButtonState &Mouse::right() {
+    return buttons[1];
+}
 
-        isize size;
-        glfwGetWindowSize(parentViewport, &size.w, &size.h);
+fvec2d Mouse::position() {
+    dvec2d ret;
+    glfwGetCursorPos(parentViewport, &ret.x, &ret.y);
 
-        auto shorter = double(Min(size.w, size.h)) / 2.0;
+    isize size;
+    glfwGetWindowSize(parentViewport, &size.w, &size.h);
 
-        ret -= dvec2d(size / 2);
-        ret /= dvec2d{shorter, shorter};
-        ret.y *= -1.0f;
+    auto shorter = double(Min(size.w, size.h)) / 2.0;
 
-        return ret;
-    }
+    ret -= dvec2d(size / 2);
+    ret /= dvec2d{shorter, shorter};
+    ret.y *= -1.0f;
 
-    void Mouse::setViewport(GLFWwindow *n) {
-        parentViewport = n;
-    }
+    return ret;
+}
 
-    void Mouse::update() {
-        for (size_t i = 0; i < 3; i++) {
-            bool state = glfwGetMouseButton(parentViewport, GLFW_MOUSE_BUTTON_1 + i);
+void Mouse::setViewport(GLFWwindow *n) {
+    parentViewport = n;
+}
 
-            auto &button = buttons[i];
+void Mouse::update() {
+    for (size_t i = 0; i < 3; i++) {
+        bool state = glfwGetMouseButton(parentViewport, GLFW_MOUSE_BUTTON_1 + i);
 
-            // onFinish previous pressing/releasing ops
-            if (button.releasing) {
-                button.releasing = false;
-                button.released = true;
-            }
-            if (button.pressing) {
-                button.pressing = false;
-                button.pressed = true;
-            }
+        auto &button = buttons[i];
 
-            // queue the new ones
-            if (state && button.released) {
-                button.released = false;
-                button.pressing = true;
-            }
-            if (!state && button.pressed) {
-                button.pressed = false;
-                button.releasing = true;
-            }
+        // onFinish previous pressing/releasing ops
+        if (button.releasing) {
+            button.releasing = false;
+            button.released = true;
+        }
+        if (button.pressing) {
+            button.pressing = false;
+            button.pressed = true;
+        }
+
+        // queue the new ones
+        if (state && button.released) {
+            button.released = false;
+            button.pressing = true;
+        }
+        if (!state && button.pressed) {
+            button.pressed = false;
+            button.releasing = true;
         }
     }
-
 }
+
+NS_END

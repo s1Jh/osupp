@@ -3,7 +3,7 @@
 #include "define.hpp"
 #include "HitObject.tpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     BEGIN_OBJECT_TEMPLATE(Spinner)
 

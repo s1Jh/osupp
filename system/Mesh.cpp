@@ -4,231 +4,235 @@
 #include <utility>
 #include <sstream>
 
+#include <GL/glew.h>
+#define GLFW_DLL
+#include <GLFW/glfw3.h>
+
 #include "Math.hpp"
 #include "Vec3.hpp"
 #include "Line.hpp"
 #include "Util.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    Mesh::Mesh() {
-        clear();
+Mesh::Mesh() : renderMode(RenderMode::Triangles) {
+    clear();
+}
+
+void Mesh::clear() {
+    vertices.clear();
+    indices.clear();
+    dataDescriptors = {AttributeType::Vec3}; // just position
+    totalDataPerVertex = 3;
+};
+
+void Mesh::setAttributeDescriptors(std::vector<AttributeType> descriptors) {
+    clear();
+    dataDescriptors = std::move(descriptors);
+
+    totalDataPerVertex = 0;
+    for (const auto &desc: dataDescriptors) {
+        totalDataPerVertex += (int) desc;
+    }
+}
+
+void Mesh::addAttributeDescriptor(AttributeType desc) {
+    clear();
+    dataDescriptors.push_back(desc);
+
+    totalDataPerVertex = 0;
+    for (const auto &descriptor: dataDescriptors) {
+        totalDataPerVertex += (int) desc;
+    }
+}
+
+unsigned int Mesh::getAttributeCount() {
+    return dataDescriptors.size();
+}
+
+unsigned int Mesh::insertVertex(const Vertex &v) {
+    unsigned int index = vertices.size() / totalDataPerVertex;
+
+    int i = 0;
+    for (; i < Min((int) v.size(), totalDataPerVertex); i++) {
+        vertices.push_back(v[i]);
+    }
+    for (; i < totalDataPerVertex; i++) {
+        vertices.push_back(0.f);
     }
 
-    void Mesh::clear() {
-        vertices.clear();
-        indices.clear();
-        dataDescriptors = {AttributeType::Vec3}; // just position
-        totalDataPerVertex = 3;
-    };
+    vertexCount += totalDataPerVertex;
+    return index;
+}
 
-    void Mesh::setAttributeDescriptors(std::vector<AttributeType> descriptors) {
-        clear();
-        dataDescriptors = std::move(descriptors);
+unsigned int Mesh::insertVertices(const std::vector<Vertex> &vs) {
+    unsigned int index = vertices.size() / totalDataPerVertex;
 
-        totalDataPerVertex = 0;
-        for (const auto &desc: dataDescriptors) {
-            totalDataPerVertex += (int) desc;
-        }
-    }
+    for (auto &v: vs)
+        insertVertex(v);
 
-    void Mesh::addAttributeDescriptor(AttributeType desc) {
-        clear();
-        dataDescriptors.push_back(desc);
+    return index;
+}
 
-        totalDataPerVertex = 0;
-        for (const auto &descriptor: dataDescriptors) {
-            totalDataPerVertex += (int) desc;
-        }
-    }
+void Mesh::insertIndice(unsigned int i) {
+    indices.push_back(i);
+    elementCount++;
+}
 
-    unsigned int Mesh::getAttributeCount() {
-        return dataDescriptors.size();
-    }
+void Mesh::insertIndices(const std::vector<unsigned int> &is, unsigned int offset) {
+    auto current = elementCount;
+    for (auto &i: is)
+        insertIndice(i + offset);
+}
 
-    unsigned int Mesh::insertVertex(const Vertex &v) {
-        unsigned int index = vertices.size() / totalDataPerVertex;
+unsigned int Mesh::insertTriangle(
+        const Vertex &v1,
+        const Vertex &v2,
+        const Vertex &v3
+) {
+    unsigned int first = vertexCount / totalDataPerVertex;
 
-        int i = 0;
-        for (; i < Min((int) v.size(), totalDataPerVertex); i++) {
-            vertices.push_back(v[i]);
-        }
-        for (; i < totalDataPerVertex; i++) {
-            vertices.push_back(0.f);
-        }
+    insertIndice(insertVertex(v1));
+    insertIndice(insertVertex(v2));
+    insertIndice(insertVertex(v3));
 
-        vertexCount += totalDataPerVertex;
-        return index;
-    }
+    return first;
+}
 
-    unsigned int Mesh::insertVertices(const std::vector<Vertex> &vs) {
-        unsigned int index = vertices.size() / totalDataPerVertex;
+const Mat4<float> &Mesh::getTransform() const {
+    return meshTransform;
+}
 
-        for (auto &v: vs)
-            insertVertex(v);
+void Mesh::setTransform(Mat4<float> mat) {
+    meshTransform = mat;
+}
 
-        return index;
-    }
+bool Mesh::isValid() const {
+    if (data)
+        return data->VAO != 0 && data->VBO != 0 && data->EBO != 0;
+    return false;
+}
 
-    void Mesh::insertIndice(unsigned int i) {
-        indices.push_back(i);
-        elementCount++;
-    }
+void Mesh::deleteMesh() {
+    if (!data)
+        return;
 
-    void Mesh::insertIndices(const std::vector<unsigned int> &is, unsigned int offset) {
-        auto current = elementCount;
-        for (auto &i: is)
-            insertIndice(i + offset);
-    }
+    if (data->VAO != 0)
+        glDeleteVertexArrays(1, &data->VAO);
+    if (data->VBO != 0)
+        glDeleteBuffers(1, &data->VBO);
+    if (data->EBO != 0)
+        glDeleteBuffers(1, &data->EBO);
+    CheckGLh("Buffer deletion");
+}
 
-    unsigned int Mesh::insertTriangle(
-            const Vertex &v1,
-            const Vertex &v2,
-            const Vertex &v3
-    ) {
-        unsigned int first = vertexCount / totalDataPerVertex;
+bool Mesh::upload() {
+    data.reset(new GLObjs, GLObjDeleter);
+    deleteMesh();
 
-        insertIndice(insertVertex(v1));
-        insertIndice(insertVertex(v2));
-        insertIndice(insertVertex(v3));
-
-        return first;
-    }
-
-    const Mat4<float> &Mesh::getTransform() const {
-        return meshTransform;
-    }
-
-    void Mesh::setTransform(Mat4<float> mat) {
-        meshTransform = mat;
-    }
-
-    bool Mesh::isValid() const {
-        if (data)
-            return data->VAO != 0 && data->VBO != 0 && data->EBO != 0;
+    glGenVertexArrays(1, &data->VAO);
+    glGenBuffers(1, &data->EBO);
+    glGenBuffers(1, &data->VBO);
+    if (CheckGLh("Buffer creation") != 0) {
+        deleteMesh();
         return false;
     }
 
-    void Mesh::deleteMesh() {
-        if (!data)
-            return;
+    vertexCount = (int) vertices.size() / totalDataPerVertex;
+    elementCount = (int) indices.size();
 
-        if (data->VAO != 0)
-            glDeleteVertexArrays(1, &data->VAO);
-        if (data->VBO != 0)
-            glDeleteBuffers(1, &data->VBO);
-        if (data->EBO != 0)
-            glDeleteBuffers(1, &data->EBO);
-        CheckGLh("Buffer deletion");
-    }
-
-    bool Mesh::upload() {
-        data.reset(new GLObjs, GLObjDeleter);
+    glBindVertexArray(data->VAO);
+    if (CheckGLh("Bind") != 0) {
         deleteMesh();
-
-        glGenVertexArrays(1, &data->VAO);
-        glGenBuffers(1, &data->EBO);
-        glGenBuffers(1, &data->VBO);
-        if (CheckGLh("Buffer creation") != 0) {
-            deleteMesh();
-            return false;
-        }
-
-        vertexCount = (int) vertices.size() / totalDataPerVertex;
-        elementCount = (int) indices.size();
-
-        glBindVertexArray(data->VAO);
-        if (CheckGLh("Bind") != 0) {
-            deleteMesh();
-            return false;
-        }
-        glBindBuffer(GL_ARRAY_BUFFER, data->VBO);
-        glBufferData(
-                GL_ARRAY_BUFFER, (long) vertices.size() * sizeof(float),
-                vertices.data(), GL_STATIC_DRAW
-        );
-        if (CheckGLh("Vertex data upload") != 0) {
-            deleteMesh();
-            return false;
-        }
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data->EBO);
-        glBufferData(
-                GL_ELEMENT_ARRAY_BUFFER, (long) indices.size() * sizeof(unsigned int),
-                indices.data(), GL_STATIC_DRAW
-        );
-        if (CheckGLh("Element data upload") != 0) {
-            deleteMesh();
-            return false;
-        }
-
-        long offset = 0;
-
-        for (int i = 0; i < dataDescriptors.size(); i++) {
-            int elements = (int) dataDescriptors[i];
-            unsigned size = elements * sizeof(float);
-            glVertexAttribPointer(i, elements, GL_FLOAT, GL_FALSE, totalDataPerVertex * (int) sizeof(float),
-                                  (void *) offset);
-            glEnableVertexAttribArray(i);
-            offset += size;
-            CheckGLh("Setting attribute pointer " + std::to_string(i));
-        }
-
-        glBindVertexArray(0);
-        if (CheckGLh("Done") != 0) {
-            deleteMesh();
-            return false;
-        }
-
-        clear();
-
-        return true;
+        return false;
+    }
+    glBindBuffer(GL_ARRAY_BUFFER, data->VBO);
+    glBufferData(
+            GL_ARRAY_BUFFER, (long) vertices.size() * sizeof(float),
+            vertices.data(), GL_STATIC_DRAW
+    );
+    if (CheckGLh("Vertex data upload") != 0) {
+        deleteMesh();
+        return false;
     }
 
-    int Mesh::getVertexCount() const {
-        return vertexCount;
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data->EBO);
+    glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER, (long) indices.size() * sizeof(unsigned int),
+            indices.data(), GL_STATIC_DRAW
+    );
+    if (CheckGLh("Element data upload") != 0) {
+        deleteMesh();
+        return false;
     }
 
-    int Mesh::getElementCount() const {
-        return elementCount;
+    long offset = 0;
+
+    for (int i = 0; i < dataDescriptors.size(); i++) {
+        int elements = (int) dataDescriptors[i];
+        unsigned size = elements * sizeof(float);
+        glVertexAttribPointer(i, elements, GL_FLOAT, GL_FALSE, totalDataPerVertex * (int) sizeof(float),
+                              (void *) offset);
+        glEnableVertexAttribArray(i);
+        offset += size;
+        CheckGLh("Setting attribute pointer " + std::to_string(i));
     }
 
-    unsigned int Mesh::getVAO() const {
-        if (data) return data->VAO;
-        return 0;
+    glBindVertexArray(0);
+    if (CheckGLh("Done") != 0) {
+        deleteMesh();
+        return false;
     }
 
-    unsigned int Mesh::getVBO() const {
-        if (data) return data->VBO;
-        return 0;
-    }
+    clear();
 
-    unsigned int Mesh::getEBO() const {
-        if (data) return data->EBO;
-        return 0;
-    }
-
-    unsigned int Mesh::getRenderMode() const {
-        return renderMode;
-    }
-
-    void Mesh::setRenderMode(unsigned int renderModeIn) {
-        Mesh::renderMode = renderModeIn;
-    }
-
-    unsigned int Mesh::getAttributeDescriptorCount() const {
-        return dataDescriptors.size();
-    }
-
-    void Mesh::GLObjDeleter(Mesh::GLObjs *obj) {
-        log::debug("Deleting mesh ", obj->VAO);
-        if (obj->VAO != 0)
-            glDeleteVertexArrays(1, &obj->VAO);
-        if (obj->VBO != 0)
-            glDeleteBuffers(1, &obj->VBO);
-        if (obj->EBO != 0)
-            glDeleteBuffers(1, &obj->EBO);
-        CheckGLh("Buffer deletion");
-    }
-
+    return true;
 }
+
+int Mesh::getVertexCount() const {
+    return vertexCount;
+}
+
+int Mesh::getElementCount() const {
+    return elementCount;
+}
+
+unsigned int Mesh::getVAO() const {
+    if (data) return data->VAO;
+    return 0;
+}
+
+unsigned int Mesh::getVBO() const {
+    if (data) return data->VBO;
+    return 0;
+}
+
+unsigned int Mesh::getEBO() const {
+    if (data) return data->EBO;
+    return 0;
+}
+
+RenderMode Mesh::getRenderMode() const {
+    return renderMode;
+}
+
+void Mesh::setRenderMode(RenderMode renderModeIn) {
+    Mesh::renderMode = renderModeIn;
+}
+
+unsigned int Mesh::getAttributeDescriptorCount() const {
+    return dataDescriptors.size();
+}
+
+void Mesh::GLObjDeleter(Mesh::GLObjs *obj) {
+    log::debug("Deleting mesh ", obj->VAO, " (", obj, ')');
+    if (obj->VAO != 0)
+        glDeleteVertexArrays(1, &obj->VAO);
+    if (obj->VBO != 0)
+        glDeleteBuffers(1, &obj->VBO);
+    if (obj->EBO != 0)
+        glDeleteBuffers(1, &obj->EBO);
+    CheckGLh("Buffer deletion");
+}
+
+NS_END

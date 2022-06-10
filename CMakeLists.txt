@@ -46,6 +46,7 @@ set(SOURCES
 
         ${UTIL_DIRECTORY}/Math.cpp
         ${UTIL_DIRECTORY}/Util.cpp
+        ${UTIL_DIRECTORY}/Curve.cpp
 
         ${LOADER_DIRECTORY}/OBJLoader.cpp
         ${LOADER_DIRECTORY}/MAPLoader.cpp
@@ -55,7 +56,7 @@ set(SOURCES
 
         ${OBJECT_DIRECTORY}/Note.cpp
         ${OBJECT_DIRECTORY}/Slider.cpp
-        ${OBJECT_DIRECTORY}/SliderUtils.cpp
+        #${OBJECT_DIRECTORY}/SliderUtils.cpp
         ${OBJECT_DIRECTORY}/Spinner.cpp
 
         ${BASES_DIRECTORY}/BaseHitObject.cpp
@@ -84,5 +85,3 @@ add_executable(notOSU ${SOURCES})
 target_link_libraries(notOSU glfw OpenGL::GL ${GLEW_LIBRARIES})
 
 install(TARGETS notOSU RUNTIME DESTINATION bin)
-
-

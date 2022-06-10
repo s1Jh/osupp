@@ -3,27 +3,27 @@
 #include <chrono>
 #include "../define.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    class Timing {
-    public:
-        Timing();
+class Timing {
+public:
+    Timing();
 
-        void setFramerate(int new_fps);
+    void setFramerate(int new_fps);
 
-        void setTime(double frame_time);
+    void setTime(double frame_time);
 
-        void await();
+    void await();
 
-        double getDelta();
+    double getDelta();
 
-        double getTime();
+    double getTime();
 
-    private:
-        std::chrono::time_point<std::chrono::steady_clock> m_tNow;
-        std::chrono::time_point<std::chrono::steady_clock> m_tLast;
-        double m_dDelta;
-        double m_dFrameTime;
-    };
+private:
+    std::chrono::time_point<std::chrono::steady_clock> m_tNow;
+    std::chrono::time_point<std::chrono::steady_clock> m_tLast;
+    double m_dDelta;
+    double m_dFrameTime;
+};
 
-} // oe
+NS_END

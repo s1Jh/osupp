@@ -2,11 +2,12 @@
 
 #include "define.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    HitObjectType BaseObjectTemplate::getType() const {
-        return this->type;
-    }
-
-    BaseObjectTemplate::BaseObjectTemplate(HitObjectType type) : type(type) {}
+HitObjectType BaseObjectTemplate::getType() const {
+    return this->type;
 }
+
+BaseObjectTemplate::BaseObjectTemplate(HitObjectType type) : type(type) {}
+
+NS_END

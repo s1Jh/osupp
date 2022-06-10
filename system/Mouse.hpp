@@ -1,39 +1,36 @@
 #pragma once
 
-#include <GL/glew.h>
+#include "define.hpp"
+#include "Vec2.hpp"
 
-#define GLFW_DLL
+typedef struct GLFWwindow GLFWwindow;
 
-#include <GLFW/glfw3.h>
-#include "../define.hpp"
-#include "../types/Vec2.hpp"
+NS_BEGIN
 
-namespace GAME_TITLE {
+struct ButtonState {
+    bool released : 1 = true;
+    bool pressed : 1 = false;
+    bool releasing : 1 = false;
+    bool pressing : 1 = false;
+};
 
-    struct ButtonState {
-        bool released : 1 = true;
-        bool pressed : 1 = false;
-        bool releasing : 1 = false;
-        bool pressing : 1 = false;
-    };
+class Mouse {
+public:
+    static const ButtonState &left();
 
-    class Mouse {
-    public:
-        static const ButtonState &left();
+    static const ButtonState &middle();
 
-        static const ButtonState &middle();
+    static const ButtonState &right();
 
-        static const ButtonState &right();
+    static fvec2d position();
 
-        static fvec2d position();
+    static void setViewport(GLFWwindow *n);
 
-        static void setViewport(GLFWwindow *n);
+    static void update();
 
-        static void update();
+protected:
+    static GLFWwindow *parentViewport;
+    static ButtonState buttons[3];
+};
 
-    protected:
-        static GLFWwindow *parentViewport;
-        static ButtonState buttons[3];
-    };
-
-}
+NS_END

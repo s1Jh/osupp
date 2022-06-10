@@ -2,7 +2,7 @@
 
 #include <utility>
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     void Note::onBegin() {
         // notes are completed on the first click

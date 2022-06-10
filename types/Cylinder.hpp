@@ -4,7 +4,7 @@
 #include "Traits.hpp"
 #include "define.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     template<typename T> requires std::is_arithmetic_v<T>
     struct cylinder {

@@ -5,12 +5,12 @@
 #include "SliderTypes.hpp"
 #include "Vec2.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     BEGIN_OBJECT_TEMPLATE(Slider)
-
         SliderPathT path;
-        SliderType sliderType = SliderType::Straight;
+        CurveType sliderType = CurveType::Straight;
+        unsigned int repeats = 0;
     END_OBJECT_TEMPLATE()
 
 }

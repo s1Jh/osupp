@@ -4,14 +4,14 @@
 #include "BaseGameMode.hpp"
 #include "StandardResources.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    class Standard : public BaseGameMode {
-    protected:
-        void onUpdate(double delta) override;
+class Standard : public BaseGameMode {
+protected:
+    void onUpdate(double delta) override;
 
-        void onDraw(Renderer &renderer) override;
-    };
+    void onDraw(Renderer &renderer) override;
+};
 
-}
+NS_END
 

@@ -2,152 +2,129 @@
 
 #include "Slider.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     void SliderUtils::interpolatePath() {
-        parent.length = 0;
-        switch (parent.objectTemplate->sliderType) {
-            case SliderType::Straight:
-                interpolatePathStraight();
-                return;
-            case SliderType::Bezier:
-                interpolatePathBezier();
-                return;
-            case SliderType::Catmull:
-                interpolatePathCatmull();
-                return;
-            case SliderType::Circle:
-                interpolatePathCircle();
-                return;
-        }
-    }
+        auto& path = parent.objectTemplate->path;
+        Curve<SliderPathT::iterator> templateCurve(path.begin(), path.end());
+        length = 0;
+        interpolatedPath.clear();
 
-    void SliderUtils::interpolatePathStraight() {
-        for (auto it = parent.objectTemplate->path.begin(); it != parent.objectTemplate->path.end(); it++) {
-            auto &obj = *it;
-            auto start = obj.position;
+        auto lastIt = interpolatedPath.end();
+        for (int i = 0; i <= interpolationSteps; i++) {
+            auto t = double(i) / double(interpolationSteps);
 
-            float segmentLength = 0;
-            GLLine connector;
+            fvec2d thisPosition = templateCurve.get(parent.objectTemplate->sliderType, t);
 
-            if (it != parent.objectTemplate->path.begin()) {
-                // not at the start
+            if (lastIt != interpolatedPath.end()) {
+                auto segmentLength = Distance(lastIt->position, thisPosition);
+                length += segmentLength; // length was already reset to zero by the calling function
+                lastIt->length = segmentLength;
+                lastIt->connectingLine = GLLine(lastIt->position, thisPosition);
             }
-            if (it != std::prev(parent.objectTemplate->path.end())) {
-                // not at the end
-                auto nextIt = std::next(it);
-                auto &nextObj = *nextIt;
-                auto end = nextObj.position;
-                segmentLength = Distance(start, end);
-                connector = GLLine(start, end);
-                parent.length += segmentLength;
-            }
-            parent.path.push_back({&obj, segmentLength, connector});
+
+            interpolatedPath.push_back(ActiveSliderNode{thisPosition});
+            lastIt = std::prev(interpolatedPath.end());
         }
+
+        directionResumeInfo.resumePoint = interpolatedPath.begin();
+        pointResumeInfo.resumePoint = interpolatedPath.begin();
     }
 
-    void SliderUtils::interpolatePathBezier() {
-        for (auto it = parent.objectTemplate->path.begin(); it != parent.objectTemplate->path.end(); it++) {
-
-        }
-    }
-
-    void SliderUtils::interpolatePathCatmull() {
-
-    }
-
-    void SliderUtils::interpolatePathCircle() {
-
-    }
-
-    fvec2d SliderUtils::findPoint(double t) const {
+    fvec2d SliderUtils::findPoint(double t) {
         t = Clamp(t, 0.0, 1.0);
-        switch (parent.objectTemplate->sliderType) {
-            case SliderType::Straight:
-                return findPointStraight(t);
-            case SliderType::Bezier:
-                return findPointBezier(t);
-            case SliderType::Catmull:
-                return findPointCatmull(t);
-            case SliderType::Circle:
-                return findPointCircle(t);
-        }
-    }
 
-    fvec2d SliderUtils::findPointStraight(double t) const {
-        t /= 2.0;   // FIXME: t is on <0;0.5> for this algorithm for some reason
-        double coveredLength = 0.0;
-        for (auto it = parent.path.begin(); it != std::prev(parent.path.end()); it++) {
+        // first check if the t requested isn't lower than the last t
+        if (t <= pointResumeInfo.lastT) {
+            // if it is, we reset the resume search state
+            pointResumeInfo.resumePoint = interpolatedPath.begin();
+            pointResumeInfo.lastCoveredLength = 0.0;
+        }
+
+        double coveredLength = pointResumeInfo.lastCoveredLength;
+
+        auto lastIt = std::prev(interpolatedPath.end(), 2);
+        for (auto it = pointResumeInfo.resumePoint; it != std::prev(interpolatedPath.end()); it++) {
             const auto &node = *it;
             double nextCoveredLength = coveredLength + node.length;
-            if (t <= nextCoveredLength / parent.length) {
+            // also check if we're on the last node of the path, as floating point inaccuracies may
+            // cause this condition to fail
+            if (t <= nextCoveredLength / length || it == lastIt) {
                 // we found the right segment, now interpolate
                 // we interpolate between coveredLength and nextCoveredLength
-                double factorStart = coveredLength / parent.length;
-                double segmentFactor = node.length / parent.length;
+                double factorStart = coveredLength / length;
+                double segmentFactor = node.length / length;
+
+                pointResumeInfo.lastT = t;
+                pointResumeInfo.resumePoint = it;
+                pointResumeInfo.lastCoveredLength = coveredLength;
+
                 t -= factorStart;
                 t /= segmentFactor;
-                return BiLerp(node.info->position, std::next(it)->info->position, t);
+                return BiLerp(node.position, std::next(it)->position, t);
             }
             coveredLength = nextCoveredLength;
         }
+        // we should never get here
+        log::error("Curve calculation fell through");
+        return {0.0, 0.0};
     }
 
-    fvec2d SliderUtils::findPointBezier(double t) const {
-        return fvec2d();
-    }
-
-    fvec2d SliderUtils::findPointCatmull(double t) const {
-        return fvec2d();
-    }
-
-    fvec2d SliderUtils::findPointCircle(double t) const {
-        return fvec2d();
-    }
-
-    fvec2d SliderUtils::findDirection(double t) const {
+    fvec2d SliderUtils::findDirection(double t) {
         t = Clamp(t, 0.0, 1.0);
-        switch (parent.objectTemplate->sliderType) {
-            case SliderType::Straight:
-                return findDirectionStraight(t);
-            case SliderType::Bezier:
-                return findDirectionBezier(t);
-            case SliderType::Catmull:
-                return findDirectionCatmull(t);
-            case SliderType::Circle:
-                return findDirectionCircle(t);
-        }
-    }
 
-    fvec2d SliderUtils::findDirectionStraight(double t) const {
-        t /= 2.0;   // FIXME: t is on <0;0.5> for this algorithm for some reason
-        double coveredLength = 0.0;
-        for (auto it = parent.path.begin(); it != std::prev(parent.path.end()); it++) {
-            coveredLength += it->length / parent.length;
-            if (t <= coveredLength) {
+        // first check if the t requested isn't lower than the last t
+        if (t <= directionResumeInfo.lastT) {
+            // if it is, we reset the resume search state
+            directionResumeInfo.resumePoint = interpolatedPath.begin();
+            directionResumeInfo.lastCoveredLength = 0.0;
+        }
+
+        // length from the start of the curve to the current node <0;1>
+        double coveredLength = directionResumeInfo.lastCoveredLength;
+        // the last node we will iterate
+        auto lastIt = std::prev(interpolatedPath.end(), 2);
+
+        for (auto it = directionResumeInfo.resumePoint; it != std::prev(interpolatedPath.end()); it++) {
+            // add the covered length
+            double nextCoveredLength = coveredLength + it->length / length;
+
+            if (t <= nextCoveredLength) {
                 // we're in the right segment
+                // save the parameter t for which these resume values are valid
+                directionResumeInfo.lastT = t;
+                directionResumeInfo.resumePoint = it;
+                directionResumeInfo.lastCoveredLength = coveredLength;
+
                 auto next = std::next(it);
-                return Normalize(next->info->position - it->info->position);
+                return Normalize(next->position - it->position);
             }
+            // check if we're on the last iteration of this loop, since the last node technically doesn't have
+            // a direction vector, we use the vector between it and the previous node and invert the result
+            if (it == lastIt) {
+                auto prev = std::prev(it);
+                return Normalize(it->position - prev->position);
+            }
+            coveredLength = nextCoveredLength;
         }
+        // we should never get here
+        log::error("Direction calculation fell through");
+        return {0.0, 0.0};
     }
 
-    fvec2d SliderUtils::findDirectionBezier(double t) const {
-        return fvec2d();
-    }
-
-    fvec2d SliderUtils::findDirectionCatmull(double t) const {
-        return fvec2d();
-    }
-
-    fvec2d SliderUtils::findDirectionCircle(double t) const {
-        return fvec2d();
-    }
-
-    fvec2d SliderUtils::findNormal(double t) const {
+    fvec2d SliderUtils::findNormal(double t) {
         return Normal(findDirection(t));
     }
 
-    SliderUtils::SliderUtils(Slider &parent) : parent(parent) {}
+    SliderUtils::SliderUtils(Slider &parent) : parent(parent), interpolationSteps(100) {
+        interpolatePath();
+    }
 
+    float SliderUtils::getInterpolatedLength() const {
+        return length;
+    }
+
+    const ActiveSliderPathT &SliderUtils::getInterpolatedPath() const {
+        return interpolatedPath;
+    }
 }

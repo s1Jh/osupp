@@ -4,7 +4,7 @@
 #include "HitObject.tpp"
 #include "SpinnerTemplate.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
     class Spinner : public HitObject<ObjectTemplateSpinner> {
     public:
         explicit Spinner(std::shared_ptr<ObjectTemplateSpinner>, BaseGameMode *);

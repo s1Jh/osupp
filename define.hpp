@@ -1,7 +1,7 @@
 /*====================================================================================================================*/
 /*  define.h                                                                                                          */
 /*                                                                                                                    */
-/*  This file contains all compile startTime definitions that notOSU uses to determine it's namespace names,               */
+/*  This file contains all compile startTime definitions that notOSU uses to determine it's namespace names,          */
 /*  default settings, build info, paths, etc.                                                                         */
 /*                                                                                                                    */
 /*  Last edited: 29.4.2022                                                                                            */
@@ -9,9 +9,25 @@
 /*--------------------------------------------------------------------------------------------------------------------*/
 #pragma once
 /*====================================================================================================================*/
-/*  Build information                                                                                                 */
+/*  Build information & macros                                                                                        */
 /*--------------------------------------------------------------------------------------------------------------------*/
 #define GAME_TITLE NotOSU
+
+// use to prevent useless indentation
+#define NS_BEGIN namespace GAME_TITLE {
+#define NS_END } // GAME_TITLE
+
+/**
+ *  199711L -> (until C++11)
+ *  201103L -> (C++11)
+ *  201402L -> (C++14)
+ *  201703L -> (C++17)
+ *  202002L -> (C++20)
+ */
+
+#if __cplusplus < 202002L
+#error("C++ version too old")
+#endif
 
 #if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
 #define __PRETTY_FUNCTION__ __FUNCSIG__
@@ -50,8 +66,11 @@ constexpr const char *PLATFORM = "Linux";
 #error("No platform defined")
 #endif
 
+constexpr const char *BUILD_DATE = __DATE__;
+constexpr const char *BUILD_TIME = __TIME__;
+
 constexpr int VERSION_MAJOR = 0;
-constexpr int VERSION_MINOR = 6;
+constexpr int VERSION_MINOR = 1;
 constexpr int VERSION_PATCH = 0;
 
 constexpr const char *GL_VERSION_STR = "330 core";
@@ -73,8 +92,8 @@ constexpr const char *GL_DEFAULT_VERTEX_SHADER =
 /*====================================================================================================================*/
 /*  Default settings                                                                                                  */
 /*--------------------------------------------------------------------------------------------------------------------*/
-constexpr int SPRITE_ANIMATION_FPS = 20;
-constexpr int SOUND_CHANNEL_COUNT = 16;
+constexpr int DEFAULT_SPRITE_ANIMATION_FPS = 20;
+constexpr int DEFAULT_SOUND_CHANNEL_COUNT = 16;
 
 /*====================================================================================================================*/
 /*  Constant asset name definitions                                                                                   */

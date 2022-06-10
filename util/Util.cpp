@@ -1,11 +1,15 @@
 #include "Util.hpp"
 
+#include <GL/glew.h>
+#define GLFW_DLL
+#include <GLFW/glfw3.h>
+
 #include <cstdlib>
 #include <fstream>
 
-namespace GAME_TITLE {
-
-    int __CheckGLFWErrors(const std::string &file, int line, const std::string &helper) {
+NS_BEGIN
+namespace detail {
+    int CheckGLFWErrors(const std::string &file, int line, const std::string &helper) {
         LOG_ENTER("GLFW");
         const char *buff[256];
         int err = glfwGetError(buff);
@@ -14,11 +18,7 @@ namespace GAME_TITLE {
         return err;
     }
 
-    int DumpGlErrors() {
-        return glGetError();
-    }
-
-    GLenum __CheckErrors(const std::string &file, int line, const std::string &helper) {
+    unsigned int CheckErrors(const std::string &file, int line, const std::string &helper) {
         LOG_ENTER("GL");
         GLenum error = glGetError();
         const char *err_str;
@@ -55,26 +55,39 @@ namespace GAME_TITLE {
         return error;
     }
 
-
-    std::recursive_mutex log::coutMutex;
-#ifdef NDEBUG
-    bool log::enableDebug = false;
-#else
-    bool log::enableDebug = true;
-#endif
-    bool log::enabled = true;
-    std::vector<std::string> log::sections;
-
-
-    void log::setDebug(bool ns) {
-        enableDebug = ns;
+    SectionEntry::~SectionEntry() {
+        ::GAME_TITLE::log::sections.erase(::GAME_TITLE::log::sections.end() - 1);
     }
 
-    void log::enable() {
-        enabled = true;
-    }
-
-    void log::disable() {
-        enabled = false;
+    SectionEntry::SectionEntry(const std::string &section) {
+        ::GAME_TITLE::log::sections.push_back(section);
     }
 }
+
+unsigned int DumpGlErrors() {
+    return glGetError();
+}
+
+std::recursive_mutex log::coutMutex;
+#ifdef NDEBUG
+bool log::enableDebug = false;
+#else
+bool log::enableDebug = true;
+#endif
+bool log::enabled = true;
+std::vector<std::string> log::sections;
+
+
+[[maybe_unused]] void log::setDebug(bool ns) {
+    enableDebug = ns;
+}
+
+void log::enable() {
+    enabled = true;
+}
+
+void log::disable() {
+    enabled = false;
+}
+
+NS_END

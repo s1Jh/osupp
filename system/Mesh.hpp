@@ -5,88 +5,90 @@
 #include <vector>
 #include <memory>
 
-#include <GL/glew.h>
+NS_BEGIN
 
-#define GLFW_DLL
+enum class AttributeType {
+    Scalar = 1, Vec2, Vec3, Vec4, Color = Vec4
+};
 
-#include <GLFW/glfw3.h>
+// direct mapping to opengl render modes
+enum class RenderMode {
+    Points, Lines, LineLoop, LineStrip,
+    Triangles, TriangleStrip, TriangleFan,
+    Quads, QuadStrip, Polygon
+};
 
-namespace GAME_TITLE {
+class Mesh {
+public:
+    Mesh();
 
-    enum class AttributeType {
-        Scalar = 1, Vec2, Vec3, Vec4, Color = Vec4
+    using Vertex = std::vector<float>;
+
+    [[nodiscard]] const Mat4<float> &getTransform() const;
+
+    void setTransform(Mat4<float>);
+
+    void clear();
+
+    void setAttributeDescriptors(std::vector<AttributeType> descriptors);
+
+    void addAttributeDescriptor(AttributeType desc);
+
+    unsigned int getAttributeCount();
+
+    unsigned int insertVertex(const Vertex &v);
+
+    unsigned int insertVertices(const std::vector<Vertex> &vs);
+
+    void insertIndice(unsigned int i);
+
+    void insertIndices(const std::vector<unsigned int> &is, unsigned int offset = 0);
+
+    unsigned int insertTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
+
+    [[nodiscard]] bool isValid() const;
+
+    bool upload();
+
+    void deleteMesh();
+
+    [[nodiscard]] int getVertexCount() const;
+
+    [[nodiscard]] int getElementCount() const;
+
+    [[nodiscard]] unsigned int getVAO() const;
+
+    [[nodiscard]] unsigned int getVBO() const;
+
+    [[nodiscard]] unsigned int getEBO() const;
+
+    [[nodiscard]] RenderMode getRenderMode() const;
+
+    void setRenderMode(RenderMode renderMode);
+
+    [[nodiscard]] unsigned int getAttributeDescriptorCount() const;
+
+private:
+    struct GLObjs {
+        unsigned int VAO = 0;
+        unsigned int VBO = 0;
+        unsigned int EBO = 0;
     };
 
-    class Mesh {
-    public:
-        Mesh();
+    static void GLObjDeleter(GLObjs *obj);
 
-        using Vertex = std::vector<float>;
+    Mat4<float> meshTransform;
+    std::vector<AttributeType> dataDescriptors;
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
 
-        [[nodiscard]] const Mat4<float> &getTransform() const;
+    RenderMode renderMode;
 
-        void setTransform(Mat4<float>);
+    int totalDataPerVertex = 0;
+    int vertexCount = 0;
+    int elementCount = 0;
 
-        void clear();
+    std::shared_ptr<GLObjs> data;
+};
 
-        void setAttributeDescriptors(std::vector<AttributeType> descriptors);
-
-        void addAttributeDescriptor(AttributeType desc);
-
-        unsigned int getAttributeCount();
-
-        unsigned int insertVertex(const Vertex &v);
-
-        unsigned int insertVertices(const std::vector<Vertex> &vs);
-
-        void insertIndice(unsigned int i);
-
-        void insertIndices(const std::vector<unsigned int> &is, unsigned int offset = 0);
-
-        unsigned int insertTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
-
-        [[nodiscard]] bool isValid() const;
-
-        bool upload();
-
-        void deleteMesh();
-
-        [[nodiscard]] int getVertexCount() const;
-
-        [[nodiscard]] int getElementCount() const;
-
-        [[nodiscard]] unsigned int getVAO() const;
-
-        [[nodiscard]] unsigned int getVBO() const;
-
-        [[nodiscard]] unsigned int getEBO() const;
-
-        [[nodiscard]] unsigned int getRenderMode() const;
-
-        void setRenderMode(unsigned int renderMode);
-
-        [[nodiscard]] unsigned int getAttributeDescriptorCount() const;
-
-    private:
-        struct GLObjs {
-            unsigned int VAO = 0;
-            unsigned int VBO = 0;
-            unsigned int EBO = 0;
-        };
-
-        static void GLObjDeleter(GLObjs *obj);
-
-        Mat4<float> meshTransform;
-        std::vector<AttributeType> dataDescriptors;
-        std::vector<float> vertices;
-        std::vector<unsigned int> indices;
-
-        unsigned int renderMode = GL_TRIANGLES;
-
-        int totalDataPerVertex = 0;
-        int vertexCount = 0;
-        int elementCount = 0;
-
-        std::shared_ptr<GLObjs> data;
-    };
-}
+NS_END

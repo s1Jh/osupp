@@ -9,7 +9,7 @@
 
 #include <forward_list>
 
-namespace GAME_TITLE {
+NS_BEGIN
 
     class BaseGameMode {
     public:

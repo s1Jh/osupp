@@ -6,26 +6,27 @@
 #include "Shader.hpp"
 #include "Resources.hpp"
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    struct StandardResources {
-        static void Populate(Resources* pool);
+struct StandardResources {
+    static void Populate(Resources* pool);
 
-        static Texture NoteBase;
-        static Texture NoteOverlay;
-        static Texture ApproachCircle;
-        static Texture SliderHead;
-        static Texture SliderTail;
-        static Texture SliderHeadRepeat;
-        static Texture SliderTailRepeat;
-        static Texture SliderBody;
-        static Texture SliderHitPoint;
-        static Texture Spinner;
-        static Texture SpinnerCenter;
-        static Texture SpinnerMeter;
-        static Texture SliderBall;
-        static Texture PlayField;
+    static Texture NoteBase;
+    static Texture NoteOverlay;
+    static Texture ApproachCircle;
+    static Texture SliderHead;
+    static Texture SliderTail;
+    static Texture SliderHeadRepeat;
+    static Texture SliderTailRepeat;
+    static Texture SliderBody;
+    static Texture SliderHitPoint;
+    static Texture Spinner;
+    static Texture SpinnerCenter;
+    static Texture SpinnerMeter;
+    static Texture SliderBall;
+    static Texture PlayField;
 
-        static Shader SliderShader;
-    };
-}
+    static Shader SliderShader;
+};
+
+NS_END

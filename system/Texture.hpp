@@ -6,34 +6,35 @@
 
 #include <memory>
 
-namespace GAME_TITLE {
+NS_BEGIN
 
-    class Texture {
-    public:
-        Texture();
+class Texture {
+public:
+    Texture();
 
-        explicit Texture(const std::string &location);
+    explicit Texture(const std::string &location);
 
-        bool load(const std::string &location);
+    bool load(const std::string &location);
 
-        bool setImage(Image &img);
+    bool setImage(Image &img);
 
-        [[nodiscard]] int getWidth() const;
+    [[nodiscard]] int getWidth() const;
 
-        [[nodiscard]] int getHeight() const;
+    [[nodiscard]] int getHeight() const;
 
-        [[nodiscard]] uvec2d getResolution() const;
+    [[nodiscard]] uvec2d getResolution() const;
 
-        [[nodiscard]] int getChannels() const;
+    [[nodiscard]] int getChannels() const;
 
-        void use(unsigned int index) const;
+    void use(unsigned int index) const;
 
-        static void unbind(unsigned int index);
+    static void unbind(unsigned int index);
 
-    private:
-        static void GLTexDeleter(unsigned int *ptr);
+private:
+    static void GLTexDeleter(unsigned int *ptr);
 
-        std::shared_ptr<unsigned int> glTexture;
-        Image *img;
-    };
-}
+    std::shared_ptr<unsigned int> glTexture;
+    Image *img;
+};
+
+NS_END

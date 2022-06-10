@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace GAME_TITLE {
+NS_BEGIN
     void Spinner::onUpdate(double delta) {
         //
 
