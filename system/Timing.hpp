@@ -1,11 +1,12 @@
 #pragma once
 
-#include <chrono>
 #include "../define.hpp"
+#include <chrono>
 
 NS_BEGIN
 
-class Timing {
+class Timing
+{
 public:
     Timing();
 

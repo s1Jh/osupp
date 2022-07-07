@@ -1,29 +1,33 @@
 #include "Renderer.hpp"
 
 #include <GL/glew.h>
+
 #define GLFW_DLL
+
 #include <GLFW/glfw3.h>
 
-#include "Util.hpp"
 #include "Math.hpp"
+#include "Util.hpp"
 
 NS_BEGIN
 
-Renderer::Renderer() :
-        windowHandle(nullptr),
-        camera(), resources(nullptr) {
-}
+Renderer::Renderer()
+    : camera(), windowHandle(nullptr)
+{}
 
-Renderer::~Renderer() {
-    destroy();
-}
+Renderer::~Renderer()
+{ destroy(); }
 
-bool Renderer::setMode(int width, int height, bool fullscreen, int refreshRate) {
+bool Renderer::setMode(int width, int height, bool fullscreen,
+                       int refreshRate)
+{
     LOG_ENTER("GFX");
-    log::info("Setting mode ", width, "x", height, "@", refreshRate, "Hz fullscreen: ", fullscreen);
+    log::info("Setting mode ", width, "x", height, "@", refreshRate,
+              "Hz fullscreen: ", fullscreen);
 
     if (fullscreen)
-        glfwSetWindowMonitor(windowHandle, glfwGetPrimaryMonitor(), 0, 0, width, height, refreshRate);
+        glfwSetWindowMonitor(windowHandle, glfwGetPrimaryMonitor(), 0, 0, width,
+                             height, refreshRate);
     else
         glfwSetWindowSize(windowHandle, width, height);
 
@@ -37,41 +41,43 @@ bool Renderer::setMode(int width, int height, bool fullscreen, int refreshRate) 
     return true;
 }
 
-bool Renderer::runTasks(double delta) {
+bool Renderer::runTasks(double delta)
+{
     glfwPollEvents();
     camera.recalculateMatrix();
 
-    //if (resources)
-    //    resources->updateSprites(delta);
+    // if (resources)
+    //     resources->updateSprites(delta);
     return !glfwWindowShouldClose(windowHandle);
 }
 
-void Renderer::begin() {
+void Renderer::begin()
+{
     glfwMakeContextCurrent(windowHandle);
     glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::end() {
-    glfwSwapBuffers(windowHandle);
-}
+void Renderer::end()
+{ glfwSwapBuffers(windowHandle); }
 
-void Renderer::setResources(Resources *res) {
-    resources = res;
-}
-
-void Renderer::destroy() {
+void Renderer::destroy()
+{
     log::debug("Terminating renderer");
     glfwDestroyWindow(windowHandle);
+
+    // TODO: this probably shouldn't automatically de-initialize GLFW
     glfwTerminate();
 }
 
-void Renderer::onResize(GLFWwindow *window, int width, int height) {
+void Renderer::onResize(GLFWwindow *window, int width, int height)
+{
     glfwMakeContextCurrent(window);
     glViewport(0, 0, width, height);
 }
 
-bool Renderer::create(df2 &settings) {
+bool Renderer::create(df2 &settings)
+{
     glfwSetErrorCallback(Renderer::onError);
 
     if (glfwInit() != GLFW_TRUE) {
@@ -86,7 +92,7 @@ bool Renderer::create(df2 &settings) {
 #endif
 #ifdef DEBUG
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif //DEBUG
+#endif // DEBUG
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -109,7 +115,7 @@ bool Renderer::create(df2 &settings) {
         return false;
     }
 
-    //glEnable(GL_DEPTH_TEST);
+    // glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #ifdef DEBUG
@@ -121,18 +127,15 @@ bool Renderer::create(df2 &settings) {
     log::info("Renderer: ", glGetString(GL_RENDERER));
     log::info("Vendor: ", glGetString(GL_VENDOR));
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glfwSwapInterval(0);
     glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     CheckGLFW;
-    setMode(
-            settings["width"].integer(640),
-            settings["height"].integer(480),
+    setMode(settings["width"].integer(640), settings["height"].integer(480),
             settings["fullscreen"].integer(0),
-            settings["refresh_rate"].integer(60)
-    );
+            settings["refresh_rate"].integer(60));
 
     if (!createStaticGeometry(settings["resolution"].integer(64))) {
         log::error("Failed to create static shape geometry");
@@ -142,86 +145,21 @@ bool Renderer::create(df2 &settings) {
     return true;
 }
 
-GLFWwindow *Renderer::getWindowHandle() {
-    return windowHandle;
-}
+GLFWwindow *Renderer::getWindowHandle()
+{ return windowHandle; }
 
-isize Renderer::getSize() const {
+isize Renderer::getSize() const
+{
     isize ret;
     glfwGetWindowSize(windowHandle, &ret.w, &ret.h);
     return ret;
 }
 
-void
-Renderer::drawRect(const drect &rec, const VisualAppearance &appearance, const Mat3f& transform) {
-    static2DShader.use();
-    static2DShader.set("fill", appearance.fillColor);
-    static2DShader.set("outline", appearance.outlineColor);
-    static2DShader.set("outline_width", appearance.outlineWidth);
-    static2DShader.set("blendMode", (int) appearance.blendMode);
-
-    static2DShader.set("transform", transform);
-    static2DShader.set("camera", camera.getMatrix());
-
-    Mat3f shape =
-            MakeScaleMatrix<float>(rec.size) *
-            MakeTranslationMatrix<float>(rec.position);
-    static2DShader.set("shape", shape);
-
-    if (appearance.texture) {
-        appearance.texture->use(0);
-        static2DShader.set("useTexture", true);
-    } else
-        static2DShader.set("useTexture", false);
-
-    glBindVertexArray(rectShape.getVAO());
-    glDrawElements(GL_TRIANGLES, rectShape.getElementCount(), GL_UNSIGNED_INT, nullptr);
-    Shader::unbind();
-    Texture::unbind(0);
-}
-
-void Renderer::drawCircle(const dcircle &circ, const VisualAppearance &appearance,
-                          const Mat3f& transform) {
-    static2DShader.use();
-    static2DShader.set("fill", appearance.fillColor);
-    static2DShader.set("outline", appearance.outlineColor);
-    static2DShader.set("outline_width", appearance.outlineWidth);
-    static2DShader.set("blendMode", (int) appearance.blendMode);
-
-    static2DShader.set("transform", transform);
-    static2DShader.set("camera", camera.getMatrix());
-    CheckGLh("Set shader matrices");
-
-    Mat3f shape =
-            MakeScaleMatrix<float>(dvec2d{circ.radius, circ.radius}) *
-            MakeTranslationMatrix<float>(circ.position);
-
-    static2DShader.set("shape", shape);
-    CheckGLh("Set shader shape matrix");
-
-    if (appearance.texture) {
-        appearance.texture->use(0);
-        CheckGLh("Set texture sampler");
-        static2DShader.set("useTexture", true);
-        CheckGLh("Set texture uniform");
-    } else {
-        static2DShader.set("useTexture", false);
-        CheckGLh("Set texture uniform");
-    }
-
-    glBindVertexArray(circleShape.getVAO());
-    glDrawElements(GL_TRIANGLE_FAN, circleShape.getElementCount(), GL_UNSIGNED_INT, nullptr);
-    CheckGLh("draw");
-
-    Shader::unbind();
-    Texture::unbind(0);
-    CheckGLh("Unbound");
-}
-
-void Renderer::drawMesh(
-        const Mesh &mesh, const Shader &shader, const Shader::Uniforms &shaderUniforms,
-        const Shader::Textures &textures, const Mat3f& transform
-) {
+void Renderer::drawMesh(const Mesh &mesh, const Shader &shader,
+                        const Shader::Uniforms &shaderUniforms,
+                        const Shader::Textures &textures,
+                        const Mat3f &transform)
+{
     if (!mesh.isValid())
         return;
 
@@ -229,47 +167,27 @@ void Renderer::drawMesh(
     CheckGLh("Bound shader");
 
     for (auto &uniform: shaderUniforms) {
-#define MATCHF(type) if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, arg);
-#define MATCH(type) else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, arg);
-#define MATCHP(type) else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, *arg);
-#define END_MATCH() else log::warning("Unable to deduce type for shader uniform ", uniform.first);
-        std::visit([&](auto &&arg) {
-            using T = std::decay_t<decltype(arg)>;
-            MATCHF(float)
-            MATCH(int)
-            MATCH(unsigned int)
-            MATCH(double)
-            MATCH(fvec2d)
-            MATCH(ivec2d)
-            MATCH(uvec2d)
-            MATCH(dvec2d)
-            MATCH(fvec3d)
-            MATCH(ivec3d)
-            MATCH(uvec3d)
-            MATCH(dvec3d)
-            MATCH(fvec4d)
-            MATCH(ivec4d)
-            MATCH(uvec4d)
-            MATCH(dvec4d)
-            MATCH(color)
-            MATCHP(fvec2d*)
-            MATCHP(ivec2d*)
-            MATCHP(uvec2d*)
-            MATCHP(dvec2d*)
-            MATCHP(fvec3d*)
-            MATCHP(ivec3d*)
-            MATCHP(uvec3d*)
-            MATCHP(dvec3d*)
-            MATCHP(fvec4d*)
-            MATCHP(ivec4d*)
-            MATCHP(uvec4d*)
-            MATCHP(dvec4d*)
-            MATCHP(Mat2f*)
-            MATCHP(Mat3f*)
-            MATCHP(Mat4f*)
-            MATCHP(color*)
-            END_MATCH()
-        }, uniform.second);
+#define MATCHF(type)                                                           \
+  if constexpr (std::is_same_v<T, type>)                                       \
+    shader.set(uniform.first, arg);
+#define MATCH(type)                                                            \
+  else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, arg);
+#define MATCHP(type)                                                           \
+  else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, *arg);
+#define END_MATCH()                                                            \
+  else log::warning("Unable to deduce type for shader uniform ", uniform.first);
+        std::visit(
+            [&](auto &&arg)
+            {
+                using T = std::decay_t<decltype(arg)>;
+                MATCHF(float)
+                MATCH(int)MATCH(unsigned int) MATCH(double) MATCH(fvec2d) MATCH(ivec2d)MATCH(uvec2d) MATCH(dvec2d) MATCH(
+                    fvec3d) MATCH(ivec3d)MATCH(uvec3d) MATCH(dvec3d) MATCH(fvec4d) MATCH(ivec4d)MATCH(uvec4d) MATCH(
+                    dvec4d) MATCH(color) MATCHP(fvec2d *)MATCHP(ivec2d *) MATCHP(uvec2d *) MATCHP(dvec2d *)MATCHP(fvec3d *) MATCHP(
+                    ivec3d *) MATCHP(uvec3d *)MATCHP(dvec3d *) MATCHP(fvec4d *)MATCHP(ivec4d *) MATCHP(uvec4d *)MATCHP(
+                    dvec4d *) MATCHP(Mat2f *)MATCHP(Mat3f *) MATCHP(Mat4f *)MATCHP(color *) END_MATCH()
+            },
+            uniform.second);
 #undef MATCHF
 #undef MATCH
 #undef MATCHP
@@ -287,9 +205,8 @@ void Renderer::drawMesh(
     CheckGLh("Bound textures");
 
     glBindVertexArray(mesh.getVAO());
-    glDrawElements(
-            static_cast<unsigned int>(mesh.getRenderMode()), mesh.getElementCount(),
-            GL_UNSIGNED_INT, nullptr);
+    glDrawElements(static_cast<unsigned int>(mesh.getRenderMode()),
+                   mesh.getElementCount(), GL_UNSIGNED_INT, nullptr);
     CheckGLh("draw");
 
     Shader::unbind();
@@ -299,71 +216,82 @@ void Renderer::drawMesh(
     CheckGLh("Unbound");
 }
 
-void Renderer::drawSegment(const GLLine &seg, const VisualAppearance &appearance,
-                           const Mat3f& transform) {
+void Renderer::drawRect(const drect &rec, const VisualAppearance &appearance,
+                        const Mat3f &transform)
+{
+    Mat3f shape = MakeScaleMatrix<float>(rec.size) *
+        MakeTranslationMatrix<float>(rec.position);
+    drawGenericShape(static2DShader, rectShape, shape, appearance, transform,
+                     RenderMode::Triangles);
+}
+
+void Renderer::drawCircle(const dcircle &circ,
+                          const VisualAppearance &appearance,
+                          const Mat3f &transform)
+{
+    Mat3f shape = MakeScaleMatrix<float>(dvec2d{circ.radius, circ.radius}) *
+        MakeTranslationMatrix<float>(circ.position);
+    drawGenericShape(static2DShader, circleShape, shape, appearance, transform,
+                     RenderMode::TriangleFan);
+}
+
+void Renderer::drawSegment(const GLLine &seg,
+                           const VisualAppearance &appearance,
+                           const Mat3f &transform)
+{
     if (!seg.mesh.isValid())
         return;
 
-    lineShader.use();
-    lineShader.set("fill", appearance.fillColor);
-    CheckGLh("Set shader appearance uniforms");
-
-    lineShader.set("camera", camera.getMatrix());
-    lineShader.set("transform", transform);
-    lineShader.set("shape", MAT3_NO_TRANSFORM<float>);
-    CheckGLh("Set shader matrices");
-
-    glBindVertexArray(seg.mesh.getVAO());
-    glDrawElements(GL_LINES, seg.mesh.getElementCount(), GL_UNSIGNED_INT, nullptr);
-    CheckGLh("draw");
-
-    Shader::unbind();
-    Texture::unbind(0);
-    CheckGLh("Unbound");
+    drawGenericShape(lineShader, seg.mesh, MAT3_NO_TRANSFORM<float>, appearance,
+                     transform, RenderMode::Lines);
 }
 
-void Renderer::drawCross(const fvec2d &pos, float size, const VisualAppearance &appearance, const Mat3f &transform) {
-    lineShader.use();
-    lineShader.set("fill", appearance.fillColor);
-    CheckGLh("Set shader appearance uniforms");
+void Renderer::drawSprite(const Sprite &sprite, const Mat3f &transform)
+{
+    Mat3f shape =
+        MakeScaleMatrix<float>(sprite.getSize()) *
+            MakeRotationMatrix<float>(sprite.getRotation(), sprite.getPivotPoint()) *
+            MakeTranslationMatrix<float>(sprite.getPosition());
+    Mat3f texture = MakeScaleMatrix<float>(sprite.getClipRectSize()) *
+        MakeTranslationMatrix<float>(sprite.getClipRectPosition());
+    drawGenericShape(spriteShader, rectShape, shape,
+                     {.texture = sprite.getTexture().get(),
+                         .uvTransform = &texture,
+                         .fillColor = sprite.getTint()},
+                     transform);
 
-    lineShader.set("camera", camera.getMatrix());
-    lineShader.set("transform", transform);
+    spriteShader.use();
+}
 
-    auto shape =
-            MakeScaleMatrix(fvec2d{size, size}) *
-            MakeTranslationMatrix(pos);
-    lineShader.set("shape", shape);
-    CheckGLh("Set shader matrices");
-
-    glBindVertexArray(crossShape.getVAO());
-    glDrawElements(GL_LINES, crossShape.getElementCount(), GL_UNSIGNED_INT, nullptr);
-    CheckGLh("draw");
-
-    Shader::unbind();
-    Texture::unbind(0);
-    CheckGLh("Unbound");
+void Renderer::drawCross(const fvec2d &pos, float size,
+                         const VisualAppearance &appearance,
+                         const Mat3f &transform)
+{
+    auto shape = MakeScaleMatrix(fvec2d{size, size}) * MakeTranslationMatrix(pos);
+    drawGenericShape(lineShader, crossShape, shape, appearance, transform,
+                     RenderMode::Lines);
 }
 
 /*====================================================================================================================*/
-/*  Creates geometry used for simple shapes                                                                           */
+/*  Creates geometry used for simple shapes */
 /*--------------------------------------------------------------------------------------------------------------------*/
-bool Renderer::createStaticGeometry(int resolution) {
+bool Renderer::createStaticGeometry(int resolution)
+{
     bool success = true;
 
     // Load the generic shape shader
     success &= static2DShader.load("static_shape.shader");
+    success &= spriteShader.load("sprite.shader");
     success &= lineShader.load("line.shader");
 
     // Calculate circle geometry
     double circle_rotation = 2.0 * PI / (resolution - 1);
     fvec2d circle_vec = {1.f, 0.f};
 
-    circleShape.setAttributeDescriptors(
-            {
-                    AttributeType::Vec2, // position
-                    AttributeType::Vec2 // uv
-            });
+    circleShape.setAttributeDescriptors({
+                                            AttributeType::Vec2, // position
+                                            AttributeType::Vec2  // uv
+                                        });
     circleShape.insertVertex({0.0, 0.0, 0.5f, 0.5f});
     int i = 0;
     for (; i < resolution; i++) {
@@ -377,63 +305,98 @@ bool Renderer::createStaticGeometry(int resolution) {
     success &= circleShape.upload();
 
     // Create geometry for rectangular meshes
-    rectShape.setAttributeDescriptors(
-            {
-                    AttributeType::Vec2, // position
-                    AttributeType::Vec2  // uv
-            });
-    rectShape.insertVertices(
-            {
-                    {1.f,  1.f,  1.f, 1.f},
-                    {1.f,  -1.f, 1.f, 0.f},
-                    {-1.f, -1.f, 0.f, 0.f},
-                    {-1.f, 1.f,  0.f, 1.f}
-            });
-    rectShape.insertIndices(
-            {
-                    0, 1, 2,
-                    0, 3, 2
-            });
+    rectShape.setAttributeDescriptors({
+                                          AttributeType::Vec2, // position
+                                          AttributeType::Vec2  // uv
+                                      });
+    rectShape.insertVertices({{1.f, 1.f, 1.f, 1.f},
+                              {1.f, -1.f, 1.f, 0.f},
+                              {-1.f, -1.f, 0.f, 0.f},
+                              {-1.f, 1.f, 0.f, 1.f}});
+    rectShape.insertIndices({0, 1, 2, 0, 3, 2});
     success &= rectShape.upload();
 
-    crossShape.setAttributeDescriptors(
-            {
-                    AttributeType::Vec2 // position
-            });
+    crossShape.setAttributeDescriptors({
+                                           AttributeType::Vec2 // position
+                                       });
     float sqr2 = float(std::sqrt(2.0)) / 2.0f;
-    crossShape.insertVertices(
-            {
-                    {sqr2, sqr2},
-                    {sqr2, -sqr2},
-                    {-sqr2, sqr2},
-                    {-sqr2, -sqr2},
-            });
+    crossShape.insertVertices({
+                                  {sqr2, sqr2},
+                                  {sqr2, -sqr2},
+                                  {-sqr2, sqr2},
+                                  {-sqr2, -sqr2},
+                              });
 
-    crossShape.insertIndices(
-            {
-                0, 3,
-                1, 2
-            });
+    crossShape.insertIndices({0, 3, 1, 2});
     success &= crossShape.upload();
 
     return success;
 }
 
-void Renderer::drawClear(const color &color) {
+void Renderer::drawClear(const color &color)
+{
     glClearColor(DECOMPOSE_COLOR_RGBA(color));
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Renderer::onError(int code, const char *msg) {
+void Renderer::onError(int code, const char *msg)
+{
     log::error("GLFW: [", code, "] ", msg);
 }
 
-Transform2D::operator Mat3f() const {
-    return
-            MakeTranslationMatrix(translate) *
-            MakeRotationMatrix<float>(rotate, rotationCenter) *
-            MakeScaleMatrix(scale) *
-            MakeShearMatrix(shear);
+void Renderer::drawGenericShape(const Shader &shader, const Mesh &mesh,
+                                const Mat3f &shape,
+                                const VisualAppearance &appearance,
+                                const Mat3f &transform, RenderMode mode) const
+{
+    shader.use();
+    shader.set("fill", appearance.fillColor);
+    shader.set("outline", appearance.outlineColor);
+    shader.set("outline_width", appearance.outlineWidth);
+    shader.set("blendMode", (int) appearance.blendMode);
+
+    shader.set("transform", transform);
+    shader.set("camera", camera.getMatrix());
+    CheckGLh("Set shader matrices");
+
+    shader.set("shape", shape);
+    CheckGLh("Set shader shape matrix");
+
+    if (appearance.texture) {
+        appearance.texture->use(0);
+        shader.set("useTexture", true);
+    }
+    else {
+        shader.set("useTexture", false);
+    }
+    CheckGLh("set texture");
+
+    if (appearance.uvTransform) {
+        shader.set("textureTransform", *appearance.uvTransform);
+    }
+    else if (appearance.texture) {
+        shader.set("textureTransform", appearance.texture->getUVTransform());
+    }
+    else {
+        shader.set("textureTransform", MAT3_NO_TRANSFORM<float>);
+    }
+    CheckGLh("set texture UV transform");
+
+    glBindVertexArray(mesh.getVAO());
+    glDrawElements(static_cast<unsigned int>(mode), mesh.getElementCount(),
+                   GL_UNSIGNED_INT, nullptr);
+    CheckGLh("draw");
+
+    Shader::unbind();
+    Texture::unbind(0);
+    CheckGLh("Unbound");
+}
+
+Transform2D::operator Mat3f() const
+{
+    return MakeTranslationMatrix(translate) *
+        MakeRotationMatrix<float>(rotate, rotationCenter) *
+        MakeScaleMatrix(scale) * MakeShearMatrix(shear);
 }
 
 NS_END

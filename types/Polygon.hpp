@@ -3,15 +3,17 @@
 #include "Line.hpp"
 #include "Traits.hpp"
 
-#include <vector>
 #include "define.hpp"
+#include <vector>
 
 NS_BEGIN
 
 template<typename T>
-struct polygon {
+struct polygon
+{
     template<typename Ty>
-    struct _colliding_line : public line<Ty> {
+    struct _colliding_line: public line<Ty>
+    {
         bool solid;
     };
 
@@ -27,7 +29,8 @@ using ipolygon = polygon<int>;
 using upolygon = polygon<unsigned int>;
 
 template<typename T>
-inline polygon<T> Scale(const polygon<T> &poly, float amount) {
+inline polygon<T> Scale(const polygon<T> &poly, float amount)
+{
     polygon<T> n;
 
     for (auto i: poly) {
@@ -38,7 +41,8 @@ inline polygon<T> Scale(const polygon<T> &poly, float amount) {
 }
 
 template<typename T>
-inline polygon<T> Translate(const polygon<T> &poly, vec2d<float> amount) {
+inline polygon<T> Translate(const polygon<T> &poly, vec2d<float> amount)
+{
     polygon<T> n;
 
     for (auto i: poly) {
@@ -49,7 +53,8 @@ inline polygon<T> Translate(const polygon<T> &poly, vec2d<float> amount) {
 }
 
 template<typename T>
-struct IsShape<polygon<T>> {
+struct IsShape<polygon<T>>
+{
     static const bool enable = true;
     static const ShapeType type = ShapeType::Polygon;
 };

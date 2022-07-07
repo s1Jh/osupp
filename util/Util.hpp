@@ -2,23 +2,28 @@
 
 #include "define.hpp"
 
-#include <mutex>
 #include <iostream>
+#include <mutex>
 #include <vector>
 
 NS_BEGIN
 
-namespace detail {
-    int CheckGLFWErrors(const std::string &file, int line, const std::string &helper = "");
+namespace detail
+{
+int CheckGLFWErrors(const std::string &file, int line,
+                    const std::string &helper = "");
 
-    unsigned int CheckErrors(const std::string &file, int line, const std::string &helper = "");
+unsigned int CheckErrors(const std::string &file, int line,
+                         const std::string &helper = "");
 
-    class SectionEntry {
-    public:
-        explicit SectionEntry(const std::string &section);
-        ~SectionEntry();
-    };
-}
+class SectionEntry
+{
+public:
+    explicit SectionEntry(const std::string &section);
+
+    ~SectionEntry();
+};
+} // namespace detail
 
 unsigned int DumpGlErrors();
 
@@ -30,16 +35,20 @@ unsigned int DumpGlErrors();
 
 #define LOG_ENTER(_void) detail::SectionEntry __log_section(__PRETTY_FUNCTION__)
 
-class log {
+class log
+{
     friend class detail::SectionEntry;
+
 public:
-    template<typename First, typename ... Args>
-    inline static void info(First f, Args ... msgs) {
+    template<typename First, typename... Args>
+    inline static void info(First f, Args... msgs)
+    {
         custom("INFO", f, msgs...);
     }
 
-    template<typename First, typename ... Args>
-    inline static void debug(First f, Args ... msgs) {
+    template<typename First, typename... Args>
+    inline static void debug(First f, Args... msgs)
+    {
 #ifndef NDEBUG
         if (enableDebug) {
             custom("DEBUG", f, msgs...);
@@ -47,18 +56,21 @@ public:
 #endif
     }
 
-    template<typename First, typename ... Args>
-    inline static void warning(First f, Args ... msgs) {
+    template<typename First, typename... Args>
+    inline static void warning(First f, Args... msgs)
+    {
         custom("WARNING", f, msgs...);
     }
 
-    template<typename First, typename ... Args>
-    inline static void error(First f, Args ... msgs) {
+    template<typename First, typename... Args>
+    inline static void error(First f, Args... msgs)
+    {
         custom("ERROR", f, msgs...);
     }
 
-    template<typename First, typename ... Args>
-    inline static void custom(const std::string &type, First f, Args ... msgs) {
+    template<typename First, typename... Args>
+    inline static void custom(const std::string &type, First f, Args... msgs)
+    {
         if (enabled) {
             std::lock_guard<std::recursive_mutex> lock(coutMutex);
 
@@ -84,12 +96,14 @@ private:
     static bool enabled;
 
     template<typename T>
-    inline static void print(T t) {
+    inline static void print(T t)
+    {
         std::cout << t << std::endl;
     }
 
-    template<typename T, typename ...Args>
-    inline static void print(T t, Args ... args) {
+    template<typename T, typename... Args>
+    inline static void print(T t, Args... args)
+    {
         std::cout << t;
         print(args...);
     }

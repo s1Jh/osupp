@@ -1,15 +1,16 @@
 #pragma once
 
-#include "Vec2.hpp"
 #include "Traits.hpp"
+#include "Vec2.hpp"
 
-#include <type_traits>
 #include "define.hpp"
+#include <type_traits>
 
 NS_BEGIN
 
 template<typename T> requires std::is_arithmetic_v<T>
-struct triangle {
+struct triangle
+{
     vec2d <T> vrt[3];
 };
 
@@ -19,7 +20,8 @@ using ftriangle = triangle<float>;
 using dtriangle = triangle<double>;
 
 template<typename T>
-struct IsShape<triangle<T>> {
+struct IsShape<triangle<T>>
+{
     static const bool enable = true;
     static const ShapeType type = ShapeType::Triangle;
 };

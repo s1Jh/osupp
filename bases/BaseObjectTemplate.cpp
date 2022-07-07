@@ -4,10 +4,11 @@
 
 NS_BEGIN
 
-HitObjectType BaseObjectTemplate::getType() const {
-    return this->type;
-}
+HitObjectType BaseObjectTemplate::getType() const
+{ return this->type; }
 
-BaseObjectTemplate::BaseObjectTemplate(HitObjectType type) : type(type) {}
+BaseObjectTemplate::BaseObjectTemplate(HitObjectType type)
+    : type(type)
+{}
 
 NS_END

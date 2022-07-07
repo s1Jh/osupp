@@ -1,9 +1,9 @@
 #include "df2.hpp"
 
-#include <type_traits>
+#include <cmath>
 #include <fstream>
 #include <sstream>
-#include <cmath>
+#include <type_traits>
 #include <vector>
 
 #include "Util.hpp"
@@ -11,18 +11,20 @@
 NS_BEGIN
 
 bool df2::enableSpam;
+
 std::unordered_map<std::string, std::string> df2::aliases;
+
 df2 df2::null;
 
+void df2::reload()
+{ *this = read(path); }
 
-void df2::reload() {
-    *this = read(path);
-}
+df2::df2()
+    : type(df2::EntryType::Clump)
+{}
 
-df2::df2() :
-        type(df2::EntryType::Clump) {}
-
-df2 df2::read(const std::string &path) {
+df2 df2::read(const std::string &path)
+{
     std::ifstream ifs(path, std::ios::in | std::ios::ate);
     if (!ifs.is_open()) {
         // Check if it exists, if not, tell the user and return.
@@ -58,7 +60,9 @@ df2 df2::read(const std::string &path) {
     return root;
 }
 
-std::string df2::getToken(const std::string &string, size_t start, df2::SearchDirection dir) {
+std::string df2::getToken(const std::string &string, size_t start,
+                          df2::SearchDirection dir)
+{
     int traversal_rate = dir == SearchDirection::Forwards ? 1 : -1;
     bool found_first = false;
     std::vector<char> accum;
@@ -80,13 +84,16 @@ std::string df2::getToken(const std::string &string, size_t start, df2::SearchDi
             if (!found_first) {
                 found_first = true;
                 continue;
-            } else break;
+            }
+            else
+                break;
         if (found_first) {
             // Remove invalid characters
             if (filtered_chars.find(string.at(i)) == std::string::npos) {
                 if (dir == SearchDirection::Forwards) {
                     accum.push_back(string.at(i));
-                } else {
+                }
+                else {
                     accum.insert(accum.begin(), string.at(i));
                 }
             }
@@ -96,7 +103,9 @@ std::string df2::getToken(const std::string &string, size_t start, df2::SearchDi
     return std::string(accum.data(), accum.size());
 }
 
-void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, int debug_level) {
+void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
+                   int debug_level)
+{
     if (enableSpam)
         log::debug("[PARSE] Level ", debug_level, " starting at ", resume);
 
@@ -109,7 +118,8 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, i
             case '$': {
                 std::string token_name = getToken(chunk, i, SearchDirection::Forwards);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", i, " level ", debug_level, " found tag \"", token_name, '\"');
+                    log::debug("[PARSE] Character ", i, " level ", debug_level,
+                               " found tag \"", token_name, '\"');
                 parent[token_name].boolean() = true;
                 break;
             }
@@ -118,15 +128,16 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, i
                 token_name = getToken(chunk, i, SearchDirection::Backwards);
                 token_value = getToken(chunk, i, SearchDirection::Forwards);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", i, " level ", debug_level, " found value \"", token_name,
-                               "\" with value \"", token_value, '\"');
+                    log::debug("[PARSE] Character ", i, " level ", debug_level,
+                               " found value \"", token_name, "\" with value \"",
+                               token_value, '\"');
 
                 // all vector types are separated with a ";"
                 auto vec_delim = token_value.find(';');
                 if (vec_delim != std::string::npos) {
                     if (enableSpam)
-                        log::debug("[PARSE] Deduced key \"", token_name, "\" (\"", token_value,
-                                   "\") to be a vector type ");
+                        log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+                                   token_value, "\") to be a vector type ");
 
                     std::string x_part = token_value.substr(0, vec_delim);
                     std::string y_part = token_value.substr(vec_delim + 1);
@@ -137,25 +148,27 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, i
                     try {
                         x = std::stof(x_part);
                     }
-                    catch (std::invalid_argument e) {
-                        log::warning("[PARSE] Token \"", token_name, "\" has malformed vector x component: \"",
-                                     x_part, "\"");
-                    }
-                    catch (std::out_of_range e) {
+                    catch (std::invalid_argument &e) {
                         log::warning("[PARSE] Token \"", token_name,
-                                     "\" has x component which is out of range of a double precision floating point number");
+                                     "\" has malformed vector x component: \"", x_part, "\"");
+                    }
+                    catch (std::out_of_range &e) {
+                        log::warning("[PARSE] Token \"", token_name,
+                                     "\" has x component which is out of range of a double "
+                                     "precision floating point number");
                     }
 
                     try {
                         y = std::stof(y_part);
                     }
-                    catch (std::invalid_argument e) {
-                        log::warning("[PARSE] Token \"", token_name, "\" has malformed vector y component: \"",
-                                     y_part, "\"");
-                    }
-                    catch (std::out_of_range e) {
+                    catch (std::invalid_argument &e) {
                         log::warning("[PARSE] Token \"", token_name,
-                                     "\" has y component which is out of range of a double precision floating point number");
+                                     "\" has malformed vector y component: \"", y_part, "\"");
+                    }
+                    catch (std::out_of_range &e) {
+                        log::warning("[PARSE] Token \"", token_name,
+                                     "\" has y component which is out of range of a double "
+                                     "precision floating point number");
                     }
 
                     parent[token_name].vec() = {x, y};
@@ -164,29 +177,29 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, i
 
                 // try to convert to a numeric format
                 try {
-                    double result = std::stod(token_value.c_str());
+                    double result = std::stod(token_value);
 
                     double integral;
 
                     if (std::modf(result, &integral) == 0.0) {
                         if (enableSpam)
-                            log::debug("[PARSE] Deduced key \"", token_name, "\" (\"", token_value,
-                                       "\") to be a integer type ");
+                            log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+                                       token_value, "\") to be a integer type ");
 
                         parent[token_name].integer() = (int) result;
                         break;
                     }
                     if (enableSpam)
-                        log::debug("[PARSE] Deduced key \"", token_name, "\" (\"", token_value,
-                                   "\") to be a floating point type ");
+                        log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+                                   token_value, "\") to be a floating point type ");
 
                     parent[token_name].real() = result;
                     break;
                 }
-                catch (std::invalid_argument e) {
+                catch (std::invalid_argument &e) {
                     // unable to convert to a floating point number, probably a string
                 }
-                catch (std::out_of_range e) {
+                catch (std::out_of_range &e) {
                     log::warning("[PARSE] Numeric key \"", token_name,
                                  "\" has a value out of range of a double precision float");
                 }
@@ -202,14 +215,15 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, i
 
                 i = getEndOfClump(chunk, '(', ')', i);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", old_i, " level ", debug_level, " found comment going to ", i);
+                    log::debug("[PARSE] Character ", old_i, " level ", debug_level,
+                               " found comment going to ", i);
                 break;
             }
             case '{': {
                 std::string token_name = getToken(chunk, i, SearchDirection::Backwards);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", i, " level ", debug_level, " found clump \"", token_name,
-                               '\"');
+                    log::debug("[PARSE] Character ", i, " level ", debug_level,
+                               " found clump \"", token_name, '\"');
 
                 auto &next_clump = parent[token_name];
                 next_clump.name() = token_name;
@@ -226,7 +240,8 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume, i
     }
 }
 
-bool df2::write(df2 &def, const std::string &path) {
+bool df2::write(df2 &def, const std::string &path)
+{
     std::stringstream char_repr;
     char_repr << "( This file was automatically written by the program )\n\n";
 
@@ -245,7 +260,8 @@ bool df2::write(df2 &def, const std::string &path) {
     return true;
 }
 
-void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level) {
+void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level)
+{
     for (auto &entry: clump) {
         for (size_t i = 0; i < level; i++)
             accum << '\t';
@@ -254,28 +270,21 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level) {
             // "name" = "numvalue"
             case df2::EntryType::Integer: {
                 int val = entry.second.integer();
-                accum
-                        << '"' << entry.first << "\" = \""
-                        << std::to_string(val) << '"';
+                accum << '"' << entry.first << "\" = \"" << std::to_string(val) << '"';
                 break;
             }
             case df2::EntryType::Real: {
                 double val = entry.second.real();
-                accum
-                        << '"' << entry.first << "\" = \""
-                        << std::to_string(val) << '"';
+                accum << '"' << entry.first << "\" = \"" << std::to_string(val) << '"';
                 break;
             }
                 // "name" = "strvalue"
             case df2::EntryType::String:
-                accum
-                        << '"' << entry.first << "\" = \""
-                        << entry.second.str() << '"';
+                accum << '"' << entry.first << "\" = \"" << entry.second.str() << '"';
                 break;
                 // $"<name>"
             case df2::EntryType::Boolean:
-                accum
-                        << "$\"" << entry.first << '"';
+                accum << "$\"" << entry.first << '"';
                 break;
                 // "name" = { ... }
             case df2::EntryType::Clump:
@@ -295,7 +304,8 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level) {
                 // "name" = "x;y"
             case df2::EntryType::Vector:
                 accum << '"' << entry.first << "\" = \""
-                      << "\"" << entry.second.vec().x << ";" << entry.second.vec().y << "\"\n";
+                      << "\"" << entry.second.vec().x << ";" << entry.second.vec().y
+                      << "\"\n";
                 break;
             default:
                 break;
@@ -305,7 +315,9 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level) {
     }
 }
 
-int df2::getEndOfClump(const std::string &str, char left, char right, int start) {
+int df2::getEndOfClump(const std::string &str, char left, char right,
+                       int start)
+{
     int rb = 0;
     int lb = 0;
     unsigned int i = start;
@@ -328,132 +340,159 @@ int df2::getEndOfClump(const std::string &str, char left, char right, int start)
     return i;
 }
 
-std::string &df2::str(const std::string &fallback) {
+std::string &df2::str(const std::string &fallback)
+{
     auto val = std::get_if<std::string>(&data);
     if (val && type == df2::EntryType::String) {
         return *val;
-    } else {
+    }
+    else {
         type = df2::EntryType::String;
         data = DataType(fallback);
         return std::get<std::string>(data);
     }
 }
 
-std::string &df2::name(const std::string &fallback) {
+std::string &df2::name(const std::string &fallback)
+{
     type = df2::EntryType::Clump;
     if (auto val = std::get_if<std::string>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         data = DataType(fallback);
         return std::get<std::string>(data);
     }
 }
 
-double &df2::real(const double fallback) {
+double &df2::real(const double fallback)
+{
     if (auto val = std::get_if<double>(&data)) {
         return *val;
-    } else if (auto ival = std::get_if<int>(&data)) {
+    }
+    else if (auto ival = std::get_if<int>(&data)) {
         return *((double *) ival);
-    } else {
+    }
+    else {
         type = df2::EntryType::Real;
         data = DataType(fallback);
         return std::get<double>(data);
     }
 }
 
-int &df2::integer(const int fallback) {
+int &df2::integer(const int fallback)
+{
     if (auto val = std::get_if<int>(&data)) {
         return *val;
-    } else if (auto dval = std::get_if<int>(&data)) {
+    }
+    else if (auto dval = std::get_if<int>(&data)) {
         return *((int *) dval);
-    } else {
+    }
+    else {
         type = df2::EntryType::Integer;
         data = DataType(fallback);
         return std::get<int>(data);
     }
 }
 
-fvec2d &df2::vec(const fvec2d &fallback) {
+fvec2d &df2::vec(const fvec2d &fallback)
+{
     if (auto val = std::get_if<fvec2d>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         type = df2::EntryType::Vector;
         data = DataType(fallback);
         return std::get<fvec2d>(data);
     }
 }
 
-bool &df2::boolean(const bool fallback) {
+bool &df2::boolean(const bool fallback)
+{
     if (auto val = std::get_if<bool>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         type = df2::EntryType::Boolean;
         data = DataType(fallback);
         return std::get<bool>(data);
     }
 }
 
-const std::string &df2::str(const std::string &fallback) const {
+const std::string &df2::str(const std::string &fallback) const
+{
     if (const auto val = std::get_if<std::string>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         return fallback;
     }
 }
 
-const std::string &df2::name(const std::string &fallback) const {
+const std::string &df2::name(const std::string &fallback) const
+{
     if (auto val = std::get_if<std::string>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         return {fallback};
     }
 }
 
-const double &df2::real(const double &fallback) const {
+const double &df2::real(const double &fallback) const
+{
     if (auto val = std::get_if<double>(&data)) {
         return *val;
-    } else if (auto ival = std::get_if<int>(&data)) {
+    }
+    else if (auto ival = std::get_if<int>(&data)) {
         return *((double *) ival);
-    } else {
+    }
+    else {
         return fallback;
     }
 }
 
-const int &df2::integer(const int &fallback) const {
+const int &df2::integer(const int &fallback) const
+{
     if (auto val = std::get_if<int>(&data)) {
         return *val;
-    } else if (auto dval = std::get_if<double>(&data)) {
+    }
+    else if (auto dval = std::get_if<double>(&data)) {
         return *((int *) dval);
-    } else {
+    }
+    else {
         return fallback;
     }
 }
 
-const fvec2d &df2::vec(const fvec2d &fallback) const {
+const fvec2d &df2::vec(const fvec2d &fallback) const
+{
     if (auto val = std::get_if<fvec2d>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         return fallback;
     }
 }
 
-const bool &df2::boolean(const bool &fallback) const {
+const bool &df2::boolean(const bool &fallback) const
+{
     if (auto val = std::get_if<bool>(&data)) {
         return *val;
-    } else {
+    }
+    else {
         return fallback;
     }
 }
 
-df2::EntryType df2::getType() const {
-    return type;
-}
+df2::EntryType df2::getType() const
+{ return type; }
 
-df2 &df2::operator[](const std::string &key) {
-    return entries[key];
-}
+df2 &df2::operator[](const std::string &key)
+{ return entries[key]; }
 
-const df2 &df2::operator[](const std::string &key) const {
+const df2 &df2::operator[](const std::string &key) const
+{
     if (!isEmpty())
         if (entries.find(key) != entries.cend())
             return entries.at(key);
@@ -461,11 +500,11 @@ const df2 &df2::operator[](const std::string &key) const {
     return null;
 }
 
-df2 &df2::get(const std::string &key) {
-    return entries[key];
-}
+df2 &df2::get(const std::string &key)
+{ return entries[key]; }
 
-const df2 &df2::get(const std::string &key) const {
+const df2 &df2::get(const std::string &key) const
+{
     if (!isEmpty())
         if (entries.find(key) != entries.cend())
             return entries.at(key);
@@ -473,73 +512,81 @@ const df2 &df2::get(const std::string &key) const {
     return null;
 }
 
-std::map<const std::string, df2>::iterator df2::find(const std::string &key) {
+std::map<const std::string, df2>::iterator df2::find(const std::string &key)
+{
     return entries.find(key);
 }
 
-std::map<const std::string, df2>::const_iterator df2::find(const std::string &key) const {
+std::map<const std::string, df2>::const_iterator
+df2::find(const std::string &key) const
+{
     return entries.find(key);
 }
 
-std::map<const std::string, df2>::iterator df2::begin() {
+std::map<const std::string, df2>::iterator df2::begin()
+{
     return entries.begin();
 }
 
-std::map<const std::string, df2>::iterator df2::end() {
-    return entries.end();
-}
+std::map<const std::string, df2>::iterator df2::end()
+{ return entries.end(); }
 
-std::map<const std::string, df2>::reverse_iterator df2::rbegin() {
+std::map<const std::string, df2>::reverse_iterator df2::rbegin()
+{
     return entries.rbegin();
 }
 
-std::map<const std::string, df2>::reverse_iterator df2::rend() {
+std::map<const std::string, df2>::reverse_iterator df2::rend()
+{
     return entries.rend();
 }
 
-std::map<const std::string, df2>::const_iterator df2::begin() const {
+std::map<const std::string, df2>::const_iterator df2::begin() const
+{
     return entries.begin();
 }
 
-std::map<const std::string, df2>::const_iterator df2::end() const {
+std::map<const std::string, df2>::const_iterator df2::end() const
+{
     return entries.end();
 }
 
-std::map<const std::string, df2>::const_reverse_iterator df2::rbegin() const {
+std::map<const std::string, df2>::const_reverse_iterator df2::rbegin() const
+{
     return entries.rbegin();
 }
 
-std::map<const std::string, df2>::const_reverse_iterator df2::rend() const {
+std::map<const std::string, df2>::const_reverse_iterator df2::rend() const
+{
     return entries.rend();
 }
 
-size_t df2::getSize() const {
-    return entries.size();
-}
+size_t df2::getSize() const
+{ return entries.size(); }
 
-bool df2::isEmpty() const {
-    return entries.empty();
-}
+bool df2::isEmpty() const
+{ return entries.empty(); }
 
-void df2::enableLogging() {
-    enableSpam = true;
-}
+void df2::enableLogging()
+{ enableSpam = true; }
 
-void df2::disableLogging() {
-    enableSpam = false;
-}
+void df2::disableLogging()
+{ enableSpam = false; }
 
-void df2::addAlias(std::string target, std::string replacement) {
-    //Log::info("Added default alias ", target, "\t\t| ", replacement);
+void df2::addAlias(std::string target, std::string replacement)
+{
+    // Log::info("Added default alias ", target, "\t\t| ", replacement);
     aliases[target] = replacement;
 }
 
-void df2::removeAlias(std::string target) {
+void df2::removeAlias(std::string target)
+{
     for (auto it = aliases.begin(); it != aliases.end();) {
         if (it->first == target) {
             it = aliases.erase(it);
             return;
-        } else {
+        }
+        else {
             it++;
         }
     }

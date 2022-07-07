@@ -1,20 +1,22 @@
 #pragma once
 
-#include "define.hpp"
 #include "Vec2.hpp"
+#include "define.hpp"
 
 typedef struct GLFWwindow GLFWwindow;
 
 NS_BEGIN
 
-struct ButtonState {
-    bool released : 1 = true;
-    bool pressed : 1 = false;
-    bool releasing : 1 = false;
-    bool pressing : 1 = false;
+struct ButtonState
+{
+    bool released: 1 = true;
+    bool pressed: 1 = false;
+    bool releasing: 1 = false;
+    bool pressing: 1 = false;
 };
 
-class Mouse {
+class Mouse
+{
 public:
     static const ButtonState &left();
 

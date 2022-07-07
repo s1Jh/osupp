@@ -1,0 +1,37 @@
+#pragma once
+
+#include <filesystem>
+#include <unordered_map>
+#include <vector>
+
+#include "Resource.hpp"
+
+NS_BEGIN
+
+class Resources;
+
+template<typename T> requires IsResource<T>
+struct ResourcePile
+{
+    using StorageT = std::shared_ptr<T>;
+
+    explicit ResourcePile(Resources &res);
+
+    int loadPersistent();
+
+    bool loadOne(const std::string &path);
+
+    [[nodiscard]] StorageT get(const std::string &name) const;
+
+    [[nodiscard]] StorageT get(const std::string &name);
+
+    StorageT getDefault() const;
+
+private:
+    static const char *persistentAssets[];
+    Resources &resourceRef;
+    std::unordered_map<std::string, StorageT> loadedAssets;
+    StorageT null;
+};
+
+NS_END

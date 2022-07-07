@@ -1,32 +1,37 @@
 #include "Mesh.hpp"
 
 #include <fstream>
-#include <utility>
 #include <sstream>
+#include <utility>
 
 #include <GL/glew.h>
+
 #define GLFW_DLL
+
 #include <GLFW/glfw3.h>
 
-#include "Math.hpp"
-#include "Vec3.hpp"
 #include "Line.hpp"
+#include "Math.hpp"
+#include "MeshLoaders.hpp"
 #include "Util.hpp"
+#include "Vec3.hpp"
 
 NS_BEGIN
 
-Mesh::Mesh() : renderMode(RenderMode::Triangles) {
-    clear();
-}
+Mesh::Mesh()
+    : renderMode(RenderMode::Triangles)
+{ clear(); }
 
-void Mesh::clear() {
+void Mesh::clear()
+{
     vertices.clear();
     indices.clear();
     dataDescriptors = {AttributeType::Vec3}; // just position
     totalDataPerVertex = 3;
 };
 
-void Mesh::setAttributeDescriptors(std::vector<AttributeType> descriptors) {
+void Mesh::setAttributeDescriptors(std::vector<AttributeType> descriptors)
+{
     clear();
     dataDescriptors = std::move(descriptors);
 
@@ -36,21 +41,22 @@ void Mesh::setAttributeDescriptors(std::vector<AttributeType> descriptors) {
     }
 }
 
-void Mesh::addAttributeDescriptor(AttributeType desc) {
+void Mesh::addAttributeDescriptor(AttributeType desc)
+{
     clear();
     dataDescriptors.push_back(desc);
 
     totalDataPerVertex = 0;
     for (const auto &descriptor: dataDescriptors) {
-        totalDataPerVertex += (int) desc;
+        totalDataPerVertex += (int) descriptor;
     }
 }
 
-unsigned int Mesh::getAttributeCount() {
-    return dataDescriptors.size();
-}
+unsigned int Mesh::getAttributeCount()
+{ return dataDescriptors.size(); }
 
-unsigned int Mesh::insertVertex(const Vertex &v) {
+unsigned int Mesh::insertVertex(const Vertex &v)
+{
     unsigned int index = vertices.size() / totalDataPerVertex;
 
     int i = 0;
@@ -65,7 +71,8 @@ unsigned int Mesh::insertVertex(const Vertex &v) {
     return index;
 }
 
-unsigned int Mesh::insertVertices(const std::vector<Vertex> &vs) {
+unsigned int Mesh::insertVertices(const std::vector<Vertex> &vs)
+{
     unsigned int index = vertices.size() / totalDataPerVertex;
 
     for (auto &v: vs)
@@ -74,22 +81,22 @@ unsigned int Mesh::insertVertices(const std::vector<Vertex> &vs) {
     return index;
 }
 
-void Mesh::insertIndice(unsigned int i) {
+void Mesh::insertIndice(unsigned int i)
+{
     indices.push_back(i);
     elementCount++;
 }
 
-void Mesh::insertIndices(const std::vector<unsigned int> &is, unsigned int offset) {
-    auto current = elementCount;
+void Mesh::insertIndices(const std::vector<unsigned int> &is,
+                         unsigned int offset)
+{
     for (auto &i: is)
         insertIndice(i + offset);
 }
 
-unsigned int Mesh::insertTriangle(
-        const Vertex &v1,
-        const Vertex &v2,
-        const Vertex &v3
-) {
+unsigned int Mesh::insertTriangle(const Vertex &v1, const Vertex &v2,
+                                  const Vertex &v3)
+{
     unsigned int first = vertexCount / totalDataPerVertex;
 
     insertIndice(insertVertex(v1));
@@ -99,21 +106,21 @@ unsigned int Mesh::insertTriangle(
     return first;
 }
 
-const Mat4<float> &Mesh::getTransform() const {
-    return meshTransform;
-}
+const Mat4<float> &Mesh::getTransform() const
+{ return meshTransform; }
 
-void Mesh::setTransform(Mat4<float> mat) {
-    meshTransform = mat;
-}
+void Mesh::setTransform(Mat4<float> mat)
+{ meshTransform = mat; }
 
-bool Mesh::isValid() const {
+bool Mesh::isValid() const
+{
     if (data)
         return data->VAO != 0 && data->VBO != 0 && data->EBO != 0;
     return false;
 }
 
-void Mesh::deleteMesh() {
+void Mesh::deleteMesh()
+{
     if (!data)
         return;
 
@@ -126,7 +133,8 @@ void Mesh::deleteMesh() {
     CheckGLh("Buffer deletion");
 }
 
-bool Mesh::upload() {
+bool Mesh::upload()
+{
     data.reset(new GLObjs, GLObjDeleter);
     deleteMesh();
 
@@ -147,20 +155,17 @@ bool Mesh::upload() {
         return false;
     }
     glBindBuffer(GL_ARRAY_BUFFER, data->VBO);
-    glBufferData(
-            GL_ARRAY_BUFFER, (long) vertices.size() * sizeof(float),
-            vertices.data(), GL_STATIC_DRAW
-    );
+    glBufferData(GL_ARRAY_BUFFER, (long) vertices.size() * sizeof(float),
+                 vertices.data(), GL_STATIC_DRAW);
     if (CheckGLh("Vertex data upload") != 0) {
         deleteMesh();
         return false;
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data->EBO);
-    glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER, (long) indices.size() * sizeof(unsigned int),
-            indices.data(), GL_STATIC_DRAW
-    );
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 (long) indices.size() * sizeof(unsigned int), indices.data(),
+                 GL_STATIC_DRAW);
     if (CheckGLh("Element data upload") != 0) {
         deleteMesh();
         return false;
@@ -168,10 +173,11 @@ bool Mesh::upload() {
 
     long offset = 0;
 
-    for (int i = 0; i < dataDescriptors.size(); i++) {
+    for (unsigned int i = 0; i < dataDescriptors.size(); i++) {
         int elements = (int) dataDescriptors[i];
         unsigned size = elements * sizeof(float);
-        glVertexAttribPointer(i, elements, GL_FLOAT, GL_FALSE, totalDataPerVertex * (int) sizeof(float),
+        glVertexAttribPointer(i, elements, GL_FLOAT, GL_FALSE,
+                              totalDataPerVertex * (int) sizeof(float),
                               (void *) offset);
         glEnableVertexAttribArray(i);
         offset += size;
@@ -189,42 +195,48 @@ bool Mesh::upload() {
     return true;
 }
 
-int Mesh::getVertexCount() const {
-    return vertexCount;
-}
+int Mesh::getVertexCount() const
+{ return vertexCount; }
 
-int Mesh::getElementCount() const {
-    return elementCount;
-}
+int Mesh::getElementCount() const
+{ return elementCount; }
 
-unsigned int Mesh::getVAO() const {
-    if (data) return data->VAO;
+unsigned int Mesh::getVAO() const
+{
+    if (data)
+        return data->VAO;
     return 0;
 }
 
-unsigned int Mesh::getVBO() const {
-    if (data) return data->VBO;
+unsigned int Mesh::getVBO() const
+{
+    if (data)
+        return data->VBO;
     return 0;
 }
 
-unsigned int Mesh::getEBO() const {
-    if (data) return data->EBO;
+unsigned int Mesh::getEBO() const
+{
+    if (data)
+        return data->EBO;
     return 0;
 }
 
-RenderMode Mesh::getRenderMode() const {
-    return renderMode;
-}
+RenderMode Mesh::getRenderMode() const
+{ return renderMode; }
 
-void Mesh::setRenderMode(RenderMode renderModeIn) {
+void Mesh::setRenderMode(RenderMode renderModeIn)
+{
     Mesh::renderMode = renderModeIn;
 }
 
-unsigned int Mesh::getAttributeDescriptorCount() const {
+unsigned int Mesh::getAttributeDescriptorCount() const
+{
     return dataDescriptors.size();
 }
 
-void Mesh::GLObjDeleter(Mesh::GLObjs *obj) {
+void Mesh::GLObjDeleter(Mesh::GLObjs *obj)
+{
     log::debug("Deleting mesh ", obj->VAO, " (", obj, ')');
     if (obj->VAO != 0)
         glDeleteVertexArrays(1, &obj->VAO);
@@ -233,6 +245,20 @@ void Mesh::GLObjDeleter(Mesh::GLObjs *obj) {
     if (obj->EBO != 0)
         glDeleteBuffers(1, &obj->EBO);
     CheckGLh("Buffer deletion");
+}
+
+bool Mesh::load(const std::string &path, Resources *res)
+{
+    return LoadOBJ(path, *this);
+}
+
+bool Mesh::create(Resources *res)
+{
+    setAttributeDescriptors({AttributeType::Vec2});
+    insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
+    insertIndices({0, 1, 2});
+
+    return upload();
 }
 
 NS_END

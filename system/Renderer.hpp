@@ -2,24 +2,27 @@
 
 #include "define.hpp"
 
-#include "Types.hpp"
-#include "Resources.hpp"
-#include "df2.hpp"
-#include "Mesh.hpp"
-#include "Matrix.hpp"
-#include "Color.hpp"
 #include "Camera.hpp"
+#include "Color.hpp"
+#include "Matrix.hpp"
+#include "Mesh.hpp"
+#include "Renderable.hpp"
+#include "Resources.hpp"
+#include "Sprite.hpp"
+#include "Types.hpp"
+#include "df2.hpp"
 
 typedef struct GLFWwindow GLFWwindow;
 
 NS_BEGIN
 
-
-enum BlendMode {
+enum BlendMode
+{
     None, Multiply, Add, Subtract
 };
 
-struct Transform2D {
+struct Transform2D
+{
     operator Mat3f() const;
 
     fvec2d translate = {0.f, 0.f};
@@ -31,23 +34,25 @@ struct Transform2D {
     bool reflectY = false;
 };
 
-struct VisualAppearance {
-    Texture *texture = nullptr;
+struct VisualAppearance
+{
+    const Texture *texture = nullptr;
+    const Mat3f *uvTransform = nullptr;
     BlendMode blendMode = BlendMode::Multiply;
     color fillColor = WHITE;
     unsigned int outlineWidth = 0;
     color outlineColor = BLACK;
 };
 
-constexpr VisualAppearance DEFAULT_APPEARANCE = VisualAppearance{
-        .texture = nullptr,
+constexpr VisualAppearance DEFAULT_APPEARANCE =
+    VisualAppearance{.texture = nullptr,
         .blendMode = BlendMode::None,
         .fillColor = WHITE,
         .outlineWidth = 0,
-        .outlineColor = BLACK
-};
+        .outlineColor = BLACK};
 
-class Renderer {
+class Renderer
+{
 public:
     Camera2D camera;
 
@@ -67,39 +72,63 @@ public:
 
     void end();
 
-    virtual void setResources(Resources *res);
-
     [[nodiscard]] isize getSize() const;
 
     GLFWwindow *getWindowHandle();
 
+    template<typename T>
+    inline void draw(T &obj, typename T::DrawInfoClass &&info)
+    {
+        obj.draw(*this, info);
+    }
+
+    template<typename T>
+    inline void draw(T &obj, typename T::DrawInfoClass &info)
+    {
+        obj.draw(*this, info);
+    }
+
     void drawClear(const color &color);
 
-    void drawRect(const drect &rec, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                  const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
+    void drawRect(const drect &rec,
+                  const VisualAppearance &appearance = DEFAULT_APPEARANCE,
+                  const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 
-    void drawCircle(const dcircle &circ, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                    const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
+    void drawCircle(const dcircle &circ,
+                    const VisualAppearance &appearance = DEFAULT_APPEARANCE,
+                    const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 
-    void drawSegment(const GLLine &seg, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                     const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
+    void drawSegment(const GLLine &seg,
+                     const VisualAppearance &appearance = DEFAULT_APPEARANCE,
+                     const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 
-    void drawCross(const fvec2d &pos, float size = 0.1f, const VisualAppearance &appearance = DEFAULT_APPEARANCE,
-                     const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
+    void drawCross(const fvec2d &pos, float size = 0.1f,
+                   const VisualAppearance &appearance = DEFAULT_APPEARANCE,
+                   const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 
-    void drawMesh(const Mesh &mesh, const Shader &shader, const Shader::Uniforms &shaderUniforms = {},
-                  const Shader::Textures &textures = {}, const Mat3f& transform = MAT3_NO_TRANSFORM<float>);
+    void drawMesh(const Mesh &mesh, const Shader &shader,
+                  const Shader::Uniforms &shaderUniforms = {},
+                  const Shader::Textures &textures = {},
+                  const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
+
+    void drawSprite(const Sprite &sprite,
+                    const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 
 private:
-    static void onError(int code, const char* msg);
+    void drawGenericShape(const Shader &shader, const Mesh &mesh,
+                          const Mat3f &shape, const VisualAppearance &appearance,
+                          const Mat3f &transform,
+                          RenderMode mode = RenderMode::Triangles) const;
+
+    static void onError(int code, const char *msg);
+
     static void onResize(GLFWwindow *window, int width, int height);
 
     bool createStaticGeometry(int resolution);
 
     Mesh rectShape, circleShape, cuboidShape, sphereShape, crossShape;
-    Shader static2DShader, lineShader;
+    Shader static2DShader, lineShader, spriteShader;
 
-    Resources *resources;
     GLFWwindow *windowHandle;
 };
 

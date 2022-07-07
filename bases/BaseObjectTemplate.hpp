@@ -1,17 +1,21 @@
 #pragma once
 
-#include "define.hpp"
 #include "Enum.hpp"
+#include "define.hpp"
 
-#define BEGIN_OBJECT_TEMPLATE(TYPE)    \
-struct ObjectTemplate##TYPE : public BaseObjectTemplate {  \
-    inline explicit ObjectTemplate##TYPE() : BaseObjectTemplate(HitObjectType::TYPE) {}
+#define BEGIN_OBJECT_TEMPLATE(TYPE)                                            \
+  struct ObjectTemplate##TYPE : public BaseObjectTemplate {                    \
+    inline explicit ObjectTemplate##TYPE()                                     \
+        : BaseObjectTemplate(HitObjectType::TYPE) {}
 
-#define END_OBJECT_TEMPLATE() };
+#define END_OBJECT_TEMPLATE()                                                  \
+  }                                                                            \
+  ;
 
 NS_BEGIN
 
-struct BaseObjectTemplate {
+struct BaseObjectTemplate
+{
     explicit BaseObjectTemplate(HitObjectType type);
 
     [[nodiscard]] HitObjectType getType() const;
@@ -25,11 +29,11 @@ private:
 };
 
 template<typename T>
-struct IsTemplate {
+struct IsTemplate
+{
     static const bool value = std::is_base_of_v<BaseObjectTemplate, T>;
 };
 
-template<class T>
-inline constexpr bool IsTemplateV = IsTemplate<T>::value;
+template<class T> inline constexpr bool IsTemplateV = IsTemplate<T>::value;
 
 NS_END

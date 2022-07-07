@@ -1,38 +1,31 @@
 #include "Resources.hpp"
 
-#include "Util.hpp"
-#include "MeshLoaders.hpp"
 #include "MapLoaders.hpp"
+#include "MeshLoaders.hpp"
+#include "ResourcePile.hpp"
+#include "Util.hpp"
 
 NS_BEGIN
 template<>
-const char* ResourcePile<Texture>::persistentAssets[] = {
-        NOTE_BASE_SPRITE,
-        NOTE_OVERLAY_SPRITE,
-        APPROACH_CIRCLE_SPRITE,
-        SLIDER_HEAD_SPRITE,
-        SLIDER_TAIL_SPRITE,
-        SLIDER_HEAD_REPEAT_SPRITE,
-        SLIDER_TAIL_REPEAT_SPRITE,
-        SLIDER_BODY_SPRITE,
-        SPINNER_SPRITE,
-        SPINNER_CENTER_SPRITE
-};
+const char *ResourcePile<Texture>::persistentAssets[] = {
+    NOTE_BASE_SPRITE, NOTE_OVERLAY_SPRITE,
+    NOTE_UNDERLAY_SPRITE, APPROACH_CIRCLE_SPRITE,
+    SLIDER_HEAD_SPRITE, SLIDER_TAIL_SPRITE,
+    SLIDER_HEAD_REPEAT_SPRITE, SLIDER_TAIL_REPEAT_SPRITE,
+    SLIDER_BODY_SPRITE, SPINNER_SPRITE,
+    SPINNER_CENTER_SPRITE};
 
 template<>
-const char* ResourcePile<Shader>::persistentAssets[]= {
-        SLIDER_SHADER
-};
+const char *ResourcePile<Shader>::persistentAssets[] = {SLIDER_SHADER};
 
-template<>
-const char* ResourcePile<Mesh>::persistentAssets[] = {
-};
+template<> const char *ResourcePile<Mesh>::persistentAssets[] = {""};
 
-template<>
-const char* ResourcePile<MapInfo>::persistentAssets[] = {
-};
+template<> const char *ResourcePile<MapInfo>::persistentAssets[] = {""};
 
-int Resources::loadPersistentAssets() {
+template<> const char *ResourcePile<Skin>::persistentAssets[] = {"default"};
+
+int Resources::loadPersistentAssets()
+{
     int success = 0;
 
     success += textures.loadPersistent();
@@ -42,7 +35,8 @@ int Resources::loadPersistentAssets() {
     return success;
 }
 
-void Resources::addSearchPath(const std::filesystem::path &path) {
+void Resources::addSearchPath(const std::filesystem::path &path)
+{
     log::debug("Adding search path ", path.string());
 
     if (std::filesystem::exists(path)) {
@@ -52,15 +46,18 @@ void Resources::addSearchPath(const std::filesystem::path &path) {
     log::warning("Failed to add search path, path doesn't exist");
 }
 
-void Resources::clearSearchPaths() {
-    searchPaths.clear();
-}
+void Resources::clearSearchPaths()
+{ searchPaths.clear(); }
 
-std::filesystem::path Resources::findFile(std::filesystem::path pathIn) {
+std::filesystem::path
+Resources::findFile(const std::filesystem::path &pathIn,
+                    const std::filesystem::path &pathPrefix)
+{
     for (auto &path: searchPaths) {
-        auto concatPath = path / pathIn.parent_path();
+        auto concatPath = path / pathPrefix / pathIn.parent_path();
 
-        for (auto &fileInPath: std::filesystem::directory_iterator(concatPath)) {
+        for (auto &fileInPath:
+            std::filesystem::recursive_directory_iterator(concatPath)) {
             auto fileName = fileInPath.path().stem().string();
 
             if (fileName == pathIn.stem().string()) {
@@ -72,97 +69,9 @@ std::filesystem::path Resources::findFile(std::filesystem::path pathIn) {
     return pathIn;
 }
 
-Resources::Resources() :
-        textures(*this),
-        shaders(*this),
-        meshes(*this),
-        maps(*this) {}
-
-template<>
-bool ResourcePile<Texture>::loadOne(const std::string &path) {
-    Texture tex;
-    if (!tex.load(resourceRef.findFile(path))) {
-        log::error("Failed to load texture ", path);
-        return false;
-    }
-    loadedAssets[path] = std::move(tex);
-    return true;
-}
-
-template<>
-Texture ResourcePile<Texture>::makeDefault() {
-    Texture tex;
-    Image img;
-    img.resize(128, 128);
-    img.setRectArea({{64, 64},
-                     {0,  0}}, BLACK);
-    img.setRectArea({{64, 64},
-                     {0,  64}}, PINK);
-    img.setRectArea({{64, 64},
-                     {64, 0}}, PINK);
-    img.setRectArea({{64, 64},
-                     {64, 64}}, BLACK);
-    tex.setImage(img);
-    return tex;
-}
-
-template<>
-bool ResourcePile<Shader>::loadOne(const std::string &path) {
-    Shader shader;
-    if (!shader.load(resourceRef.findFile(path))) {
-        log::error("Failed to load shader ", path);
-        return false;
-    }
-    loadedAssets[path] = shader;
-    return true;
-}
-
-template<>
-Shader ResourcePile<Shader>::makeDefault() {
-    Shader shader;
-    shader.fromString(
-            std::string("#version ") + GL_VERSION_STR + '\n' + GL_DEFAULT_VERTEX_SHADER,
-            std::string("#version ") + GL_VERSION_STR + '\n' + GL_DEFAULT_FRAGMENT_SHADER
-    );
-    return shader;
-}
-
-template<>
-bool ResourcePile<Mesh>::loadOne(const std::string &path) {
-    Mesh mesh;
-    if (!LoadOBJ(resourceRef.findFile(path).string(), mesh)) {
-        log::error("Failed to load mesh ", path);
-        return false;
-    }
-    loadedAssets[path] = mesh;
-    return true;
-}
-
-template<>
-Mesh ResourcePile<Mesh>::makeDefault() {
-    Mesh mesh;
-    mesh.setAttributeDescriptors({AttributeType::Vec2});
-    mesh.insertVertices({{-1.f, -1.f},
-                         {0.f,  1.f},
-                         {1.f,  -1.f}});
-    mesh.insertIndices({0, 1, 2});
-    return mesh;
-}
-
-template<>
-bool ResourcePile<MapInfo>::loadOne(const std::string &path) {
-    MapInfo map;
-    if (!LoadMAP(resourceRef.findFile(path), map)) {
-        log::error("Failed to load map ", path);
-        return false;
-    }
-    loadedAssets[path] = map;
-    return true;
-}
-
-template<>
-MapInfo ResourcePile<MapInfo>::makeDefault() {
-    return MapInfo{};
-}
+Resources::Resources()
+    : textures(*this), shaders(*this), meshes(*this), maps(*this),
+      skins(*this)
+{}
 
 NS_END

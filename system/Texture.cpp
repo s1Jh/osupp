@@ -1,22 +1,17 @@
 #include "Texture.hpp"
 
-#include <GL/glew.h>
+#include "Math.hpp"
 #include "Util.hpp"
+#include <GL/glew.h>
 
 NS_BEGIN
 
-Texture::Texture() {
-    img = nullptr;
-    glTexture = nullptr;
-}
+Texture::Texture()
+    : glTexture(nullptr), img(nullptr), channels(4), pixelSize({-1, -1})
+{}
 
-Texture::Texture(const std::string &location) {
-    glTexture = nullptr;
-    img = nullptr;
-    load(location);
-}
-
-bool Texture::load(const std::string &location) {
+bool Texture::load(const std::string &location, Resources *res)
+{
     Image texImg;
     if (!texImg.load(location)) {
         return false;
@@ -24,7 +19,8 @@ bool Texture::load(const std::string &location) {
     return setImage(texImg);
 }
 
-void Texture::use(unsigned int index) const {
+void Texture::use(unsigned int index) const
+{
     if (index > 31) {
         log::warning("Tried to set texture beyond index");
         return;
@@ -35,7 +31,8 @@ void Texture::use(unsigned int index) const {
     }
 }
 
-void Texture::unbind(unsigned int index) {
+void Texture::unbind(unsigned int index)
+{
     if (index > 31) {
         log::warning("Tried to set texture beyond index");
         return;
@@ -45,34 +42,29 @@ void Texture::unbind(unsigned int index) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-int Texture::getWidth() const {
-    if (img) return img->getWidth();
-    return 0;
-}
+int Texture::getWidth() const
+{ return pixelSize.w; }
 
-int Texture::getHeight() const {
-    if (img) return img->getHeight();
-    return 0;
-}
+int Texture::getHeight() const
+{ return pixelSize.h; }
 
-uvec2d Texture::getResolution() const {
-    if (img) return img->getResolution();
-    return {0, 0};
-}
+int Texture::getChannels() const
+{ return channels; }
 
-int Texture::getChannels() const {
-    if (img) return img->getChannels();
-    return 0;
-}
-
-void Texture::GLTexDeleter(unsigned int *ptr) {
+void Texture::GLTexDeleter(unsigned int *ptr)
+{
     log::debug("Deleting ", *ptr);
     glDeleteTextures(1, ptr);
 }
 
-bool Texture::setImage(Image &imgIn) {
+bool Texture::setImage(Image &imgIn)
+{
     glTexture = std::shared_ptr<unsigned int>(new unsigned int, GLTexDeleter);
+
     auto pixels = imgIn.getPixels();
+
+    pixelSize = imgIn.getSize();
+    channels = imgIn.getChannels();
 
     glGenTextures(1, glTexture.get());
     CheckGLh("Generated texture");
@@ -81,16 +73,18 @@ bool Texture::setImage(Image &imgIn) {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_NEAREST_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     CheckGLh("Set texture params");
 
-    // you take GL_RGB and then add channels - 3 (those are the R, G and B channels)
-    glTexImage2D(GL_TEXTURE_2D, 0,
-                 GL_RGB + (imgIn.getChannels() - 3), imgIn.getWidth(),
-                 imgIn.getHeight(), 0, GL_RGB + (imgIn.getChannels() - 3),
-                 GL_UNSIGNED_BYTE, (uint8_t *) pixels
-    );
+    // you take GL_RGB and then add channels - 3 (those are the R, G and B
+    // channels)
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB + (imgIn.getChannels() - 3),
+                 imgIn.getWidth(), imgIn.getHeight(), 0,
+                 GL_RGB + (imgIn.getChannels() - 3), GL_UNSIGNED_BYTE,
+                 (uint8_t *) pixels);
     CheckGLh("Uploaded texture data");
     glGenerateMipmap(GL_TEXTURE_2D);
     CheckGLh("Generated mipmaps");
@@ -100,5 +94,28 @@ bool Texture::setImage(Image &imgIn) {
 
     return true;
 }
+
+isize Texture::getSize() const
+{ return pixelSize; }
+
+bool Texture::create(Resources *res)
+{
+    Image image;
+    image.resize(128, 128);
+    image.setRectArea({{64, 64}, {0, 0}}, BLACK);
+    image.setRectArea({{64, 64}, {0, 64}}, PINK);
+    image.setRectArea({{64, 64}, {64, 0}}, PINK);
+    image.setRectArea({{64, 64}, {64, 64}}, BLACK);
+    return setImage(image);
+}
+
+void Texture::setClipArea(const frect &rect)
+{
+    clip = MakeScaleMatrix<float>(rect.size) *
+        MakeTranslationMatrix<float>(rect.position);
+}
+
+const Mat3f &Texture::getUVTransform() const
+{ return clip; }
 
 NS_END

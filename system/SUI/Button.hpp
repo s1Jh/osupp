@@ -2,128 +2,122 @@
 
 #include "define.hpp"
 
-#include "SUI.hpp"
-#include "Sprite.hpp"
 #include "EnumOperators.hpp"
 #include "Font.hpp"
+#include "SUI.hpp"
+#include "Sprite.hpp"
 #include "df2.hpp"
 
+#include <functional>
 #include <string>
 #include <unordered_map>
-#include <functional>
 
 NS_BEGIN
 
-    enum class SUIButtonFlags : uint8_t {
-        // should this button display a icon
-        Icon = 1 << 0,
+enum class SUIButtonFlags: uint8_t
+{
+    // should this button display a icon
+    Icon = 1 << 0,
 
-        // controls whether the button reacts to input
-        Enabled = 1 << 1,
-        Disabled = 0 << 1,
+    // controls whether the button reacts to input
+    Enabled = 1 << 1,
+    Disabled = 0 << 1,
 
-        // controls whether the button should appear locked
-        // it will still call callbacks
-        Locked = 1 << 2,
-        Unlocked = 0 << 2,
+    // controls whether the button should appear locked
+    // it will still call callbacks
+    Locked = 1 << 2,
+    Unlocked = 0 << 2,
 
-        // controls the visibility
-        Visible = 1 << 3,
-        Hidden = 0 << 3,
+    // controls the visibility
+    Visible = 1 << 3,
+    Hidden = 0 << 3,
+};
+
+ENABLE_BITMASK_OPERATORS(SUIButtonFlags)
+
+constexpr SUIButtonFlags SUIBUTTON_DEFAULT_FLAGS = SUIButtonFlags::Enabled |
+    SUIButtonFlags::Unlocked |
+    SUIButtonFlags::Visible;
+
+enum class ButtonCallbacks
+{
+    OnReleased,
+    OnHover,
+    OnHovering,
+    OnPressing,
+    OnPressed,
+    OnReleasing
+};
+
+class SUIButton;
+
+MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnReleased, SUIButton &);
+MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnHover, SUIButton &);
+MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnHovering, SUIButton &);
+MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnPressing, SUIButton &);
+MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnPressed, SUIButton &);
+MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnReleasing, SUIButton &);
+
+class SUIButton: public SUI::Element<ButtonCallbacks>
+{
+public:
+    enum class State: uint8_t
+    {
+        // first we're ...
+        Released,
+        // then a mouse cursor starts ...
+        Hovering,
+        // then a button is ...
+        Pressing,
+        // then it's ...
+        Pressed,
+        // after that it's ...
+        Releasing
     };
 
-    ENABLE_BITMASK_OPERATORS (SUIButtonFlags)
+    SUIButton(const std::string &id, const drect &rect,
+              const std::string &label = "",
+              SUIButtonFlags flags = SUIBUTTON_DEFAULT_FLAGS);
 
-    constexpr SUIButtonFlags SUIBUTTON_DEFAULT_FLAGS =
-            SUIButtonFlags::Enabled | SUIButtonFlags::Unlocked | SUIButtonFlags::Visible;
+    SUIButton(const df2 &def);
 
-    enum class ButtonCallbacks {
-        OnReleased,
-        OnHover,
-        OnHovering,
-        OnPressing,
-        OnPressed,
-        OnReleasing
-    };
+    inline State GetState()
+    { return state; }
 
-    class SUIButton;
+    inline std::string GetLabel()
+    { return label; }
 
-    MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnReleased, SUIButton&);
-    MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnHover, SUIButton&);
-    MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnHovering, SUIButton&);
-    MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnPressing, SUIButton&);
-    MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnPressed, SUIButton&);
-    MAKE_CALLBACK(ButtonCallbacks, ButtonCallbacks::OnReleasing, SUIButton&);
+    inline Font &GetFont()
+    { return font; }
 
-    class SUIButton : public SUI::Element<ButtonCallbacks> {
-    public:
-        enum class State : uint8_t {
-            // first we're ...
-            Released,
-            // then a mouse cursor starts ...
-            Hovering,
-            // then a button is ...
-            Pressing,
-            // then it's ...
-            Pressed,
-            // after that it's ...
-            Releasing
-        };
+    inline void SetLabel(const std::string &label)
+    { label = label; }
 
-        SUIButton(
-                const std::string &id,
-                const drect &rect,
-                const std::string &label = "",
-                SUIButtonFlags flags = SUIBUTTON_DEFAULT_FLAGS
-        );
+    inline void SetReleasedSprite(Sprite spr)
+    { releasedShape = spr; }
 
-        SUIButton(const df2 &def);
+    inline void SetHoverSprite(Sprite spr)
+    { hoverShape = spr; }
 
-        inline State GetState() {
-            return state;
-        }
+    inline void SetPressedSprite(Sprite spr)
+    { pressedShape = spr; }
 
-        inline std::string GetLabel() {
-            return label;
-        }
+protected:
+    void update(float delta) override;
 
-        inline Font &GetFont() {
-            return font;
-        }
+    void draw(Renderer &renderer, const drect &space) override;
 
-        inline void SetLabel(const std::string &label) {
-            label = label;
-        }
+private:
+    std::string label;
 
-        inline void SetReleasedSprite(Sprite spr) {
-            releasedShape = spr;
-        }
+    Font font;
 
-        inline void SetHoverSprite(Sprite spr) {
-            hoverShape = spr;
-        }
+    Sprite icon;
+    Sprite releasedShape;
+    Sprite hoverShape;
+    Sprite pressedShape;
 
-        inline void SetPressedSprite(Sprite spr) {
-            pressedShape = spr;
-        }
-
-    protected:
-        void update(float delta) override;
-
-        void draw(Renderer& renderer, const drect &space) override;
-
-    private:
-        std::string label;
-
-        Font font;
-
-        Sprite icon;
-        Sprite releasedShape;
-        Sprite hoverShape;
-        Sprite pressedShape;
-
-        State state;
-        SUIButtonFlags flags;
-    };
-
+    State state;
+    SUIButtonFlags flags;
+};
 }

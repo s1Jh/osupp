@@ -3,15 +3,16 @@
 //
 #pragma once
 
-#include "define.hpp"
 #include "Color.hpp"
 #include "Rect.hpp"
+#include "define.hpp"
 
 #include <memory>
 
 NS_BEGIN
 
-class Image {
+class Image
+{
 public:
     Image();
 
@@ -31,7 +32,7 @@ public:
 
     [[nodiscard]] int getChannels() const;
 
-    [[nodiscard]] isize getResolution() const;
+    [[nodiscard]] isize getSize() const;
 
     [[nodiscard]] color8 *getPixels();
 

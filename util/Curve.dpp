@@ -1,138 +1,160 @@
 /*====================================================================================================================*/
-/*  Curve.dpp                                                                                                         */
+/*  Curve.dpp */
 /*                                                                                                                    */
-/*  Declarations of the parametric curve template library.                                                            */
+/*  Declarations of the parametric curve template library. */
 /*                                                                                                                    */
-/*  Last edited: 7.6.2022                                                                                             */
+/*  Last edited: 7.6.2022 */
 /*                                                                                                                    */
 /*--------------------------------------------------------------------------------------------------------------------*/
 #pragma once
 
 /*====================================================================================================================*/
-/*  Depends on project config, the types library and C++20+                                                           */
+/*  Depends on project config, the types library and C++20+ */
 /*--------------------------------------------------------------------------------------------------------------------*/
-#include "define.hpp"
 #include "Vec2.hpp"
+#include "define.hpp"
 
 #include <concepts>
 #include <type_traits>
 
 /*====================================================================================================================*/
-/*  Begin declarations                                                                                                */
+/*  Begin declarations */
 /*--------------------------------------------------------------------------------------------------------------------*/
 NS_BEGIN
 
-    enum class CurveType {
-        Bezier,
-        Straight,
-        Catmull,
-        SemiCircle,
-        Circle
-    };
+enum class CurveType
+{
+    Bezier, Straight, Catmull, SemiCircle, Circle
+};
 
 /*====================================================================================================================*/
-/*  The curve node type which will be used in calculations. A virtual getPosition() method is declared.               */
-/*  All types which the user wants to be recognized as valid curve points must implement this method.                 */
-/*  This is done instead of declaring a position variable to let the user decide how they wish to store               */
-/*  their node position.                                                                                              */
+/*  The curve node type which will be used in calculations. A virtual
+ * getPosition() method is declared.               */
+/*  All types which the user wants to be recognized as valid curve points must
+ * implement this method.                 */
+/*  This is done instead of declaring a position variable to let the user decide
+ * how they wish to store               */
+/*  their node position. */
 /*--------------------------------------------------------------------------------------------------------------------*/
-    struct BaseCurveNode {
-        [[nodiscard]] virtual fvec2d getPosition() const;
-    };
+struct BaseCurveNode
+{
+    [[nodiscard]] virtual fvec2d getPosition() const;
+};
 
 /*====================================================================================================================*/
-/*  Helper concept used to determine whether a type is inherited from BaseCurveNode, but is not BaseCurveNode itself. */
+/*  Helper concept used to determine whether a type is inherited from
+ * BaseCurveNode, but is not BaseCurveNode itself. */
 /*--------------------------------------------------------------------------------------------------------------------*/
-    template<typename T>
-    concept IsInheritedCurve =
-    std::is_base_of_v<BaseCurveNode, T> and not std::is_same_v<T, BaseCurveNode>;
+template<typename T>
+concept IsInheritedCurve = std::is_base_of_v<BaseCurveNode, T> and
+    not std::is_same_v<T, BaseCurveNode>;
 
-    template<typename T>
-    concept IsCurveIterator =
-    std::forward_iterator<T> and IsInheritedCurve<typename std::iterator_traits<T>::value_type>;
+template<typename T>
+concept IsCurveIterator = std::forward_iterator<T> and
+    IsInheritedCurve<typename std::iterator_traits<T>::value_type>;
 
-    struct CurveNode : public BaseCurveNode {
-        CurveNode(fvec2d _position);
+struct CurveNode: public BaseCurveNode
+{
+    CurveNode(fvec2d _position);
 
-        fvec2d position;
+    fvec2d position;
 
-        [[nodiscard]] fvec2d getPosition() const override;
-    };
+    [[nodiscard]] fvec2d getPosition() const override;
+};
 
-    template<CurveType CType>
-    struct CurveCalculationFunctor {
-    };
+template<CurveType CType>
+struct CurveCalculationFunctor
+{
+};
 
-    template<typename IteratorT, typename LengthT = double> requires
-    IsCurveIterator<IteratorT> and std::floating_point<LengthT>
-    struct Curve {
-        explicit Curve();
+template<typename IteratorT, typename LengthT = double> requires IsCurveIterator<IteratorT>
+    and std::floating_point<LengthT>
+struct Curve
+{
+    explicit Curve();
 
-        Curve(IteratorT _begin, IteratorT _end);
+    Curve(IteratorT _begin, IteratorT _end);
 
-        void setIteratorRange(IteratorT _begin, IteratorT _end);
+    void setIteratorRange(IteratorT _begin, IteratorT _end);
 
-        void update();
+    void update();
 
-        template<CurveType Type, typename TType>
-        requires std::floating_point<TType>
-        [[nodiscard]] vec2d <TType> get(TType t) const;
+    template<CurveType Type, typename TType>
+    requires std::floating_point<TType>
+    [[nodiscard]] vec2d<TType> get(TType t) const;
 
-        template<typename TType>
-        requires std::floating_point<TType>
-        [[nodiscard]] vec2d <TType> get(CurveType type, TType t) const;
+    template<typename TType>
+    requires std::floating_point<TType>
+    [[nodiscard]] vec2d<TType> get(CurveType type, TType t) const;
 
-        [[nodiscard]] IteratorT getBegin() const;
-        [[nodiscard]] IteratorT getEnd() const;
-        [[nodiscard]] LengthT getLength() const;
+    [[nodiscard]] IteratorT getBegin() const;
 
-    protected:
-        LengthT length;
-        IteratorT begin, end;
-    };
+    [[nodiscard]] IteratorT getEnd() const;
 
-    template<>
-    struct CurveCalculationFunctor<CurveType::Straight> {
-        template<typename TType, typename IteratorT, typename LengthT = double>
-        requires std::floating_point<TType> and IsCurveIterator<IteratorT> and std::floating_point<LengthT>
-        static vec2d <TType> calculate(const Curve<IteratorT, LengthT> &curve, TType t);
-    };
+    [[nodiscard]] LengthT getLength() const;
 
-    template<>
-    struct CurveCalculationFunctor<CurveType::Bezier> {
-        template<typename TType, typename IteratorT, typename LengthT = double>
-        requires std::floating_point<TType> and IsCurveIterator<IteratorT> and std::floating_point<LengthT>
-        static vec2d <TType> calculate(const Curve<IteratorT, LengthT> &curve, TType t);
+protected:
+    IteratorT begin, end;
+    LengthT length;
+};
 
-    protected:
-        template<typename IteratorT, typename TType>
-        requires IsCurveIterator<IteratorT> and std::floating_point<TType>
-        static vec2d <TType> bezierCalculate(IteratorT begin, IteratorT end, TType t);
-    };
+template<>
+struct CurveCalculationFunctor<CurveType::Straight>
+{
+    template<typename TType, typename IteratorT, typename LengthT = double>
+    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+        std::floating_point<LengthT>
+    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                  TType t);
+};
 
-    template<>
-    struct CurveCalculationFunctor<CurveType::Catmull> {
-        template<typename TType, typename IteratorT, typename LengthT = double>
-        requires std::floating_point<TType> and IsCurveIterator<IteratorT> and std::floating_point<LengthT>
-        static vec2d <TType> calculate(const Curve<IteratorT, LengthT> &curve, TType t);
-    };
+template<>
+struct CurveCalculationFunctor<CurveType::Bezier>
+{
+    template<typename TType, typename IteratorT, typename LengthT = double>
+    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+        std::floating_point<LengthT>
+    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                  TType t);
 
-    template<>
-    struct CurveCalculationFunctor<CurveType::Circle> {
-        template<typename TType, typename IteratorT, typename LengthT = double>
-        requires std::floating_point<TType> and IsCurveIterator<IteratorT> and std::floating_point<LengthT>
-        static vec2d <TType> calculate(const Curve<IteratorT, LengthT> &curve, TType t);
-    };
+protected:
+    template<typename IteratorT, typename TType>
+    requires IsCurveIterator<IteratorT> and std::floating_point<TType>
+    static vec2d<TType> bezierCalculate(IteratorT begin, IteratorT end, TType t);
+};
 
-    template<>
-    struct CurveCalculationFunctor<CurveType::SemiCircle> {
-        template<typename TType, typename IteratorT, typename LengthT = double>
-        requires std::floating_point<TType> and IsCurveIterator<IteratorT> and std::floating_point<LengthT>
-        static vec2d <TType> calculate(const Curve<IteratorT, LengthT> &curve, TType t);
-    };
+template<>
+struct CurveCalculationFunctor<CurveType::Catmull>
+{
+    template<typename TType, typename IteratorT, typename LengthT = double>
+    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+        std::floating_point<LengthT>
+    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                  TType t);
+};
+
+template<>
+struct CurveCalculationFunctor<CurveType::Circle>
+{
+    template<typename TType, typename IteratorT, typename LengthT = double>
+    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+        std::floating_point<LengthT>
+    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                  TType t);
+};
+
+template<>
+struct CurveCalculationFunctor<CurveType::SemiCircle>
+{
+    template<typename TType, typename IteratorT, typename LengthT = double>
+    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+        std::floating_point<LengthT>
+    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                  TType t);
+};
 
 /*====================================================================================================================*/
-/*  Specializations of the Curve struct.                                                                              */
+/*  Specializations of the Curve struct. */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
 NS_END

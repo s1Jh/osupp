@@ -1,17 +1,19 @@
 #pragma once
 
-#include "Vec2.hpp"
 #include "Matrix.hpp"
-#include "define.hpp"
+#include "Vec2.hpp"
 #include "Vec3.hpp"
+#include "define.hpp"
 
 NS_BEGIN
 
-class Camera2D {
+class Camera2D
+{
 public:
     Camera2D();
 
-    enum class Direction {
+    enum class Direction
+    {
         Up, Down, Left, Right, Out, In
     };
 

@@ -1,17 +1,22 @@
 #pragma once
 
-#include "define.hpp"
 #include "BaseGameMode.hpp"
-#include "StandardResources.hpp"
+#include "define.hpp"
 
 NS_BEGIN
 
-class Standard : public BaseGameMode {
+class Standard: public BaseGameMode
+{
+public:
+    explicit Standard(Game &instance);
+
 protected:
     void onUpdate(double delta) override;
 
     void onDraw(Renderer &renderer) override;
+
+private:
+    NotOSUObjectSprite playField;
 };
 
 NS_END
-

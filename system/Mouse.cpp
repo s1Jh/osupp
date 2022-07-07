@@ -3,26 +3,26 @@
 #include "Math.hpp"
 
 #define GLFW_DLL
+
 #include <GLFW/glfw3.h>
 
 NS_BEGIN
 
 GLFWwindow *Mouse::parentViewport = nullptr;
+
 ButtonState Mouse::buttons[3];
 
-const ButtonState &Mouse::left() {
-    return buttons[0];
-}
+const ButtonState &Mouse::left()
+{ return buttons[0]; }
 
-const ButtonState &Mouse::middle() {
-    return buttons[2];
-}
+const ButtonState &Mouse::middle()
+{ return buttons[2]; }
 
-const ButtonState &Mouse::right() {
-    return buttons[1];
-}
+const ButtonState &Mouse::right()
+{ return buttons[1]; }
 
-fvec2d Mouse::position() {
+fvec2d Mouse::position()
+{
     dvec2d ret;
     glfwGetCursorPos(parentViewport, &ret.x, &ret.y);
 
@@ -38,11 +38,11 @@ fvec2d Mouse::position() {
     return ret;
 }
 
-void Mouse::setViewport(GLFWwindow *n) {
-    parentViewport = n;
-}
+void Mouse::setViewport(GLFWwindow *n)
+{ parentViewport = n; }
 
-void Mouse::update() {
+void Mouse::update()
+{
     for (size_t i = 0; i < 3; i++) {
         bool state = glfwGetMouseButton(parentViewport, GLFW_MOUSE_BUTTON_1 + i);
 

@@ -1,19 +1,25 @@
 #pragma once
 
-#include "define.hpp"
-#include "bases/BaseObjectTemplate.hpp"
-#include "Vec2.hpp"
+#include "BaseObjectTemplate.hpp"
+#include "Resource.hpp"
 #include "SliderTypes.hpp"
+#include "Vec2.hpp"
+#include "define.hpp"
 
-#include <memory>
-#include <list>
 #include <filesystem>
+#include <list>
+#include <memory>
 
 NS_BEGIN
 
-class MapInfo {
+class MapInfo: public detail::Resource
+{
 public:
     using StorageT = std::list<std::shared_ptr<BaseObjectTemplate>>;
+
+    bool load(const std::string &path, Resources *res) override;
+
+    bool create(Resources *res) override;
 
     [[nodiscard]] const StorageT &getObjectTemplates() const;
 
@@ -71,12 +77,13 @@ public:
 
     void clear();
 
-    void addNote(fvec2d position, bool comboEnd, float time);
+    void addNote(fvec2d position, bool comboEnd, double time);
 
-    void addSlider(const SliderPathT &points, bool comboEnd, float time, float endTime, CurveType type,
-                   unsigned int repeats = 1);
+    void addSlider(const SliderPathT &points, bool comboEnd, double time,
+                   double endTime, CurveType type, unsigned int repeats = 1);
 
-    void addSpinner(float spinRequired, float spinResistance, float time, float endTime);
+    void addSpinner(float spinRequired, float spinResistance, double time,
+                    double endTime);
 
 private:
     void insertElement(std::shared_ptr<BaseObjectTemplate>);
@@ -95,7 +102,8 @@ private:
     float circleSize = 0.2f;
     // Audio file offset.
     float startOffset = 0.0f;
-    // Total length of the map, the map will end automatically after this amount of startTime has elapsed.
+    // Total length of the map, the map will end automatically after this amount
+    // of startTime has elapsed.
     double mapDuration = 120.0;
     // HP drainage per second.
     float HPDrain = 1.0f;
@@ -109,5 +117,7 @@ private:
     float overallDifficulty = 0.0f;
     StorageT objectTemplates;
 };
+
+using MapInfoP = std::shared_ptr<MapInfo>;
 
 NS_END

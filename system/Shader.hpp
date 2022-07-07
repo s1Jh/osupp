@@ -2,29 +2,31 @@
 
 #include <string>
 
+#include "Color.hpp"
+#include "Matrix.hpp"
+#include "Resource.hpp"
+#include "Texture.hpp"
 #include "Vec2.hpp"
 #include "Vec3.hpp"
 #include "Vec4.hpp"
-#include "Color.hpp"
-#include "Matrix.hpp"
 #include "define.hpp"
-#include "Texture.hpp"
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <variant>
 
 NS_BEGIN
 
-class Shader {
+class Shader: public detail::Resource
+{
 public:
     Shader();
 
-    explicit Shader(const std::string &path);
-
     bool fromString(const std::string &vert_src, const std::string &frag_src);
 
-    bool load(const std::string &path);
+    bool load(const std::string &path, Resources *res = nullptr) override;
+
+    bool create(Resources *res = nullptr) override;
 
     // Calls OpenGL's glUseProgram with it's id.
     void use() const;
@@ -35,68 +37,71 @@ public:
     // Returns it's ID.
     [[nodiscard]] unsigned int getID() const;
 
-    // Setters that set a value and handle any errors
-    // 1 Dimensional variables
-    void set(const std::string &name, int) const;
+#define SHADER_SETTER_METHODS                                                  \
+  GENERATE_SHADER_SET_FUNC(int, 1i, int)                                       \
+  GENERATE_SHADER_SET_FUNC(float, 1f, float)                                   \
+  GENERATE_SHADER_SET_FUNC(unsigned int, 1ui, unsigned int)                    \
+  GENERATE_SHADER_SET_FUNC(fvec2d, 2f, float)                                  \
+  GENERATE_SHADER_SET_FUNC(ivec2d, 2i, int)                                    \
+  GENERATE_SHADER_SET_FUNC(uvec2d, 2ui, unsigned int)                          \
+  GENERATE_SHADER_SET_FUNC(fvec3d, 3f, float)                                  \
+  GENERATE_SHADER_SET_FUNC(ivec3d, 3i, int)                                    \
+  GENERATE_SHADER_SET_FUNC(uvec3d, 3ui, unsigned int)                          \
+  GENERATE_SHADER_SET_FUNC(fvec4d, 4f, float)                                  \
+  GENERATE_SHADER_SET_FUNC(ivec4d, 4i, int)                                    \
+  GENERATE_SHADER_SET_FUNC(uvec4d, 4ui, unsigned int)                          \
+  GENERATE_SHADER_SET_FUNC(color, 4f, float)
 
-    void set(const std::string &name, float) const;
+#define SHADER_MATRIX_SETTER_METHODS                                           \
+  GENERATE_SHADER_SET_FUNC(Mat2f, Matrix2f, float)                             \
+  GENERATE_SHADER_SET_FUNC(Mat3f, Matrix3f, float)                             \
+  GENERATE_SHADER_SET_FUNC(Mat4f, Matrix4f, float)                             \
+  GENERATE_SHADER_SET_FUNC(Mat2x3f, Matrix2x3f, float)                         \
+  GENERATE_SHADER_SET_FUNC(Mat3x2f, Matrix3x2f, float)                         \
+  GENERATE_SHADER_SET_FUNC(Mat2x4f, Matrix2x4f, float)                         \
+  GENERATE_SHADER_SET_FUNC(Mat4x2f, Matrix4x2f, float)                         \
+  GENERATE_SHADER_SET_FUNC(Mat3x4f, Matrix3x4f, float)                         \
+  GENERATE_SHADER_SET_FUNC(Mat4x3f, Matrix4x3f, float)
 
-    void set(const std::string &name, unsigned int) const;
+#define SHADER_INTER_CAST_SETTER_METHODS                                       \
+  GENERATE_SHADER_SET_FUNC(double, 1f, float, float)                           \
+  GENERATE_SHADER_SET_FUNC(dvec2d, 2f, float, fvec2d)                          \
+  GENERATE_SHADER_SET_FUNC(dvec3d, 3f, float, fvec3d)                          \
+  GENERATE_SHADER_SET_FUNC(dvec4d, 4f, float, dvec4d)
 
-    void set(const std::string &name, double) const;
+#define GENERATE_SHADER_SET_FUNC(TYPE, ...)                                    \
+  bool set(const std::string &name, const TYPE &value) const noexcept;
 
-    // 2D vectors
-    void set(const std::string &name, const fvec2d &value) const;
+    SHADER_SETTER_METHODS
 
-    void set(const std::string &name, const ivec2d &value) const;
+    SHADER_MATRIX_SETTER_METHODS
 
-    void set(const std::string &name, const uvec2d &value) const;
+    SHADER_INTER_CAST_SETTER_METHODS
 
-    void set(const std::string &name, const dvec2d &value) const;
+#undef GENERATE_SHADER_SET_FUNC
 
-    // 3D vectors
-    void set(const std::string &name, const fvec3d &value) const;
-
-    void set(const std::string &name, const ivec3d &value) const;
-
-    void set(const std::string &name, const uvec3d &value) const;
-
-    void set(const std::string &name, const dvec3d &value) const;
-
-    // 4D vectors
-    void set(const std::string &name, const fvec4d &value) const;
-
-    void set(const std::string &name, const ivec4d &value) const;
-
-    void set(const std::string &name, const uvec4d &value) const;
-
-    void set(const std::string &name, const dvec4d &value) const;
-
-    // Matrices
-    void set(const std::string &name, const Mat2f &value) const;
-
-    void set(const std::string &name, const Mat3f &value) const;
-
-    void set(const std::string &name, const Mat4f &value) const;
-
-    // Misc.
-    void set(const std::string &name, const color &value) const;
+#ifndef INCLUDE_SHADER_METHOD_DEFINITIONS
+#undef SHADER_SETTER_METHODS
+#undef SHADER_MATRIX_SETTER_METHODS
+#undef SHADER_INTER_CAST_SETTER_METHODS
+#endif
 
     using Textures = std::unordered_map<int, Texture *>;
-    using Uniforms = std::unordered_map<std::string, std::variant<
-            int, float, unsigned int, double,
-            fvec2d, ivec2d, uvec2d, dvec2d,
-            fvec3d, ivec3d, uvec3d, dvec3d,
-            fvec4d, ivec4d, uvec4d, dvec4d,
-            fvec2d *, ivec2d *, uvec2d *, dvec2d *,
-            fvec3d *, ivec3d *, uvec3d *, dvec3d *,
-            fvec4d *, ivec4d *, uvec4d *, dvec4d *,
-            Mat2f *, Mat3f *, Mat4f *, color *, Texture *>>;
+    using Uniforms = std::unordered_map<
+        std::string,
+        std::variant<int, float, unsigned int, double, fvec2d, ivec2d, uvec2d,
+                     dvec2d, fvec3d, ivec3d, uvec3d, dvec3d, fvec4d, ivec4d,
+                     uvec4d, dvec4d, fvec2d *, ivec2d *, uvec2d *, dvec2d *,
+                     fvec3d *, ivec3d *, uvec3d *, dvec3d *, fvec4d *, ivec4d *,
+                     uvec4d *, dvec4d *, Mat2f *, Mat3f *, Mat4f *, color *,
+                     Texture *>>;
 
 private:
     static unsigned int compileShader(const std::string &file, unsigned int type);
 
     unsigned int id;
 };
+
+using ShaderP = std::shared_ptr<Shader>;
 
 NS_END

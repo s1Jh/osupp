@@ -1,132 +1,153 @@
 #include "BaseHitObject.hpp"
 
-#include "Util.hpp"
+#include "BaseGameMode.hpp"
 #include "Math.hpp"
+#include "Util.hpp"
 
 NS_BEGIN
 
-bool BaseHitObject::isFinished() const {
-    return finished;
-}
+bool BaseHitObject::isFinished() const
+{ return finished; }
 
-void BaseHitObject::reset() {
+void BaseHitObject::reset()
+{
     state = HitObjectState::Invisible;
     finished = false;
     timeFinished = 0.0;
     this->onReset();
 }
 
-HitObjectState BaseHitObject::getState() const {
-    return state;
+HitObjectState BaseHitObject::getState() const
+{ return state; }
+
+double BaseHitObject::getTimeFinished() const
+{ return timeFinished; }
+
+fcircle BaseHitObject::getSOF() const
+{ return SOF; }
+
+BaseHitObject::BaseHitObject(BaseGameMode *session)
+    : finished(false), timeFinished(0.0), session(session), state(HitObjectState::Invisible)
+{
+    reset();
 }
 
-double BaseHitObject::getTimeFinished() const {
-    return timeFinished;
-}
+BaseHitObject::BaseHitObject()
+    : finished(false), timeFinished(0.0), session(nullptr), state(HitObjectState::Invisible)
+{ reset(); }
 
-fcircle BaseHitObject::getSOF() const {
-    return SOF;
-}
-
-BaseHitObject::BaseHitObject(BaseGameMode *session) : session(session) { reset(); }
-
-BaseHitObject::BaseHitObject() { reset(); }
-
-void BaseHitObject::transferApproaching(double time) {
+void BaseHitObject::transferApproaching()
+{
     state = HitObjectState::Approaching;
     finished = false;
 }
 
-void BaseHitObject::transferReady(double time) {
+void BaseHitObject::transferReady()
+{
     state = HitObjectState::Ready;
     finished = false;
 }
 
-void BaseHitObject::transferActive(double time) {
+void BaseHitObject::transferActive()
+{
     state = HitObjectState::Active;
     finished = false;
 }
 
-void BaseHitObject::transferActiveInactive(double time) {
+void BaseHitObject::transferActiveInactive()
+{
     state = HitObjectState::Inactive;
     finished = false;
 }
 
-void BaseHitObject::transferInactiveActive(double time) {
+void BaseHitObject::transferInactiveActive()
+{
     state = HitObjectState::Active;
     finished = false;
 }
 
-void BaseHitObject::transferToPickup(double time) {
+void BaseHitObject::transferToPickup()
+{
     state = HitObjectState::Pickup;
     finished = true;
-    timeFinished = time;
+    timeFinished = session->getCurrentTime();
 }
 
-void BaseHitObject::transferToFading(double time) {
+void BaseHitObject::transferToFading()
+{
     state = HitObjectState::Fading;
     finished = true;
-    timeFinished = time;
 }
 
-void BaseHitObject::transferToInvisible(double time) {
+void BaseHitObject::transferToInvisible()
+{
     state = HitObjectState::Invisible;
     finished = false;
     timeFinished = 0.0;
 }
 
-void BaseHitObject::transferToInvisibleComplete(double time) {
+void BaseHitObject::transferToInvisibleComplete()
+{
     state = HitObjectState::Invisible;
     finished = true;
-    timeFinished = time;
+    timeFinished = session->getCurrentTime();
 }
 
-bool BaseHitObject::isApproachCircleDrawn() const {
-    return
-        state == HitObjectState::Approaching ||
+bool BaseHitObject::isApproachCircleDrawn() const
+{
+    return state == HitObjectState::Approaching || state == HitObjectState::Ready;
+}
+
+bool BaseHitObject::isFadingIn() const
+{
+    return state == HitObjectState::Approaching;
+}
+
+bool BaseHitObject::isFadingOut() const
+{
+    return state == HitObjectState::Pickup || state == HitObjectState::Fading;
+}
+
+bool BaseHitObject::isUpdating() const
+{
+    return state == HitObjectState::Active || state == HitObjectState::Inactive ||
         state == HitObjectState::Ready;
 }
 
-bool BaseHitObject::isFadingIn() const {
-    return
-        state == HitObjectState::Approaching;
-}
+bool BaseHitObject::needsApproachCircle() const
+{ return true; }
 
-bool BaseHitObject::isFadingOut() const {
-    return
-        state == HitObjectState::Pickup ||
-        state == HitObjectState::Fading;
-}
+bool BaseHitObject::isActive() const
+{ return state == HitObjectState::Active; }
 
-bool BaseHitObject::isUpdating() const {
-    return
-        state == HitObjectState::Active ||
-        state == HitObjectState::Inactive ||
-        state == HitObjectState::Ready;
-}
+void BaseHitObject::onDraw(Renderer &)
+{}
 
-bool BaseHitObject::needsApproachCircle() const {
-    return true;
-}
+void BaseHitObject::onLogicUpdate(double delta)
+{}
 
-bool BaseHitObject::isActive() const {
-    return state == HitObjectState::Active;
-}
+void BaseHitObject::onBegin()
+{}
 
-void BaseHitObject::onDraw(Renderer &) {}
+void BaseHitObject::onPress()
+{}
 
-void BaseHitObject::onUpdate(double delta) {}
+void BaseHitObject::onRaise()
+{}
 
-void BaseHitObject::onBegin() {}
+void BaseHitObject::onReset()
+{}
 
-void BaseHitObject::onPress() {}
+HitResult BaseHitObject::onFinish()
+{ return HitResult::Missed; }
 
-void BaseHitObject::onRaise() {}
+void BaseHitObject::onUpdate(double delta)
+{}
 
-void BaseHitObject::onReset() {}
+fvec2d BaseHitObject::getStartPosition() const
+{ return {0, 0}; }
 
-HitResult BaseHitObject::onFinish() {
-    return HitResult::Missed;
-}
+fvec2d BaseHitObject::getEndPosition() const
+{ return {0, 0}; }
 
 NS_END

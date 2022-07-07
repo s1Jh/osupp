@@ -2,37 +2,28 @@
 
 #include "AssetManager.hpp"
 
-Sprite & SUIImage::GetSprite()
+Sprite &SUIImage::GetSprite()
+{ return m_Sprite; }
+
+void SUIImage::Draw(const drect &bounds)
 {
-    return m_Sprite;
+    DrawSprite(m_Sprite, GetBounds().position, m_Sprite.getScale());
 }
 
-void SUIImage::Draw ( const drect& bounds )
+SUIImage::SUIImage(const std::string &name, const drect &rect,
+                   std::shared_ptr<Texture> tex)
+    : BaseElement(name, rect), m_Sprite(tex)
 {
-    DrawSprite ( m_Sprite, GetBounds().position, m_Sprite.GetScale() );
+    m_Sprite.setSize(rect.size);
 }
 
-SUIImage::SUIImage (
-    const std::string& name,
-    const drect& rect,
-    std::shared_ptr<Texture> tex
-) : BaseElement ( name, rect ),
-    m_Sprite ( tex )
+SUIImage::SUIImage(
+    const DefinitionFile &def,
+    std::unordered_map<std::string, SUI::CallbackFunction> function_map)
+    : BaseElement(def.Name(), {})
 {
-    m_Sprite.SetSize ( rect.size );
-}
+    m_Sprite.setTexture(AssetManager::GetAsset<Texture>(def["texture"].Str()));
 
-SUIImage::SUIImage (
-    const DefinitionFile& def,
-    std::unordered_map<std::string, SUI::CallbackFunction> function_map
-) : BaseElement ( def.Name(), {} )
-{
-    m_Sprite.SetTexture ( AssetManager::GetAsset<Texture> ( def["texture"].Str() ) );
-
-    drect bounds =
-    {
-        m_Sprite.GetSize(),
-        def["position"].Vec()
-    };
-    SetBounds ( bounds );
+    drect bounds = {m_Sprite.getSize(), def["position"].Vec()};
+    SetBounds(bounds);
 }

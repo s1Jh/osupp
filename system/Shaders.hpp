@@ -7,11 +7,52 @@
 
 NS_BEGIN
 
-static const char *CIRCLE_VERTEX_SHADER = "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 position;uniform vec2 resolution;uniform float radius;uniform float aratio;uniform vec4 fill;uniform vec4 outline;uniform uint outline_thickness;out vec2 oResolution;out vec2 oCenter;out vec4 oFill;out vec4 oOutline;flat out float oRadius;flat out uint oOutlineThickness;void main(){oResolution = resolution;oFill = fill;oOutline = outline;oCenter = position;oOutlineThickness = outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
-static const char *CIRCLE_FRAGMENT_SHADER = "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
-static const char *RECT_VERTEX_SHADER = "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 position;uniform vec2 resolution;uniform float radius;uniform float aratio;uniform vec4 fill;uniform vec4 outline;uniform uint outline_thickness;out vec2 oResolution;out vec2 oCenter;out vec4 oFill;out vec4 oOutline;flat out float oRadius;flat out uint oOutlineThickness;void main(){oResolution = resolution;oFill = fill;oOutline = outline;oCenter = position;oOutlineThickness = outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
-static const char *RECT_FRAGMENT_SHADER = "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
-static const char *CUBOID_VERTEX_SHADER = "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 position;uniform vec2 resolution;uniform float radius;uniform float aratio;uniform vec4 fill;uniform vec4 outline;uniform uint outline_thickness;out vec2 oResolution;out vec2 oCenter;out vec4 oFill;out vec4 oOutline;flat out float oRadius;flat out uint oOutlineThickness;void main(){oResolution = resolution;oFill = fill;oOutline = outline;oCenter = position;oOutlineThickness = outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
-static const char *CUBOID_FRAGMENT_SHADER = "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
+static const char *CIRCLE_VERTEX_SHADER =
+    "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
+    "position;uniform vec2 resolution;uniform float radius;uniform float "
+    "aratio;uniform vec4 fill;uniform vec4 outline;uniform uint "
+    "outline_thickness;out vec2 oResolution;out vec2 oCenter;out vec4 "
+    "oFill;out vec4 oOutline;flat out float oRadius;flat out uint "
+    "oOutlineThickness;void main(){oResolution = resolution;oFill = "
+    "fill;oOutline = outline;oCenter = position;oOutlineThickness = "
+    "outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    "
+    "pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
+
+static const char *CIRCLE_FRAGMENT_SHADER =
+    "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 "
+    "oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint "
+    "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
+
+static const char *RECT_VERTEX_SHADER =
+    "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
+    "position;uniform vec2 resolution;uniform float radius;uniform float "
+    "aratio;uniform vec4 fill;uniform vec4 outline;uniform uint "
+    "outline_thickness;out vec2 oResolution;out vec2 oCenter;out vec4 "
+    "oFill;out vec4 oOutline;flat out float oRadius;flat out uint "
+    "oOutlineThickness;void main(){oResolution = resolution;oFill = "
+    "fill;oOutline = outline;oCenter = position;oOutlineThickness = "
+    "outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    "
+    "pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
+
+static const char *RECT_FRAGMENT_SHADER =
+    "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 "
+    "oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint "
+    "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
+
+static const char *CUBOID_VERTEX_SHADER =
+    "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
+    "position;uniform vec2 resolution;uniform float radius;uniform float "
+    "aratio;uniform vec4 fill;uniform vec4 outline;uniform uint "
+    "outline_thickness;out vec2 oResolution;out vec2 oCenter;out vec4 "
+    "oFill;out vec4 oOutline;flat out float oRadius;flat out uint "
+    "oOutlineThickness;void main(){oResolution = resolution;oFill = "
+    "fill;oOutline = outline;oCenter = position;oOutlineThickness = "
+    "outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    "
+    "pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
+
+static const char *CUBOID_FRAGMENT_SHADER =
+    "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 "
+    "oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint "
+    "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
 
 NS_END

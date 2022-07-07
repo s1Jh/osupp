@@ -1,16 +1,18 @@
 #pragma once
 
-#include "define.hpp"
-#include "Mouse.hpp"
 #include "Keyboard.hpp"
+#include "Mouse.hpp"
 #include "Renderer.hpp"
-#include "Timing.hpp"
+#include "ResourcePile.hpp"
 #include "Resources.hpp"
-#include "Standard.hpp"
+#include "Skin.hpp"
+#include "Timing.hpp"
+#include "define.hpp"
 
 NS_BEGIN
 
-class Game {
+class Game
+{
 public:
     Game();
 
@@ -20,7 +22,12 @@ public:
 
     int close();
 
+    Resources &getResourcePool();
+
+    SkinP getActiveSkin();
+
 private:
+    SkinP activeSkin;
     df2 gameSettings;
     df2 gameDefinition;
     Resources resources;

@@ -1,23 +1,33 @@
 #pragma once
 
-#include "Vec2.hpp"
+#include "Rect.hpp"
 #include "Traits.hpp"
+#include "Vec2.hpp"
 
-#include <type_traits>
 #include "define.hpp"
+#include <type_traits>
 
 NS_BEGIN
 
 template<typename T> requires std::is_arithmetic_v<T>
-struct circle {
+struct circle
+{
     circle() = default;
 
-    circle(T _rad, vec2d <T> _pos = {0.f, 0.f}) :
-            radius(_rad), position(_pos) {}
+    circle(T _rad, vec2d <T> _pos = {0.f, 0.f})
+        : radius(_rad), position(_pos)
+    {}
 
     template<typename C>
-    inline operator circle<C>() {
+    inline operator circle<C>() const
+    {
         return circle<C>{(C) radius, (vec2d<C>) position};
+    }
+
+    template<typename C>
+    inline operator rect<C>() const
+    {
+        return rect<C>{{(C) radius, (C) radius}, (vec2d<C>) position};
     }
 
     T radius;
@@ -25,7 +35,8 @@ struct circle {
 };
 
 template<typename T>
-std::ostream &operator<<(std::ostream &os, const circle<T> &dt) {
+std::ostream &operator<<(std::ostream &os, const circle<T> &dt)
+{
     os << dt.radius << "@" << dt.position;
 
     return os;
@@ -33,16 +44,14 @@ std::ostream &operator<<(std::ostream &os, const circle<T> &dt) {
 
 template<typename T, typename C>
 requires std::is_arithmetic_v<C>
-inline circle<T> Scale(circle<T> circle, C amount) {
-    return
-            {
-                    circle.position,
-                    circle.size * amount
-            };
+inline circle<T> Scale(circle<T> circle, C amount)
+{
+    return {circle.position, circle.size * amount};
 }
 
 template<typename T>
-inline circle<T> Translate(circle<T> circle, vec2d <T> amount) {
+inline circle<T> Translate(circle<T> circle, vec2d <T> amount)
+{
     circle.position += amount;
     return circle;
 }
@@ -53,7 +62,8 @@ using ucircle = circle<unsigned int>;
 using dcircle = circle<double>;
 
 template<typename T>
-struct IsShape<circle<T>> {
+struct IsShape<circle<T>>
+{
     static const bool enable = true;
     static const ShapeType type = ShapeType::Circle;
 };

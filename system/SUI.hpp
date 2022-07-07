@@ -2,37 +2,41 @@
 
 #include "define.hpp"
 
-#include <vector>
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <unordered_map>
-#include <functional>
+#include <vector>
 
 #include "CallbackManager.hpp"
+#include "EnumOperators.hpp"
+#include "Keyboard.hpp"
+#include "Mouse.hpp"
 #include "Rect.hpp"
 #include "Renderer.hpp"
-#include "EnumOperators.hpp"
-#include "Mouse.hpp"
-#include "Keyboard.hpp"
 #include "df2.hpp"
 
 NS_BEGIN
 
-enum class SUIFlags : uint8_t {
+enum class SUIFlags: uint8_t
+{
     Visible = 1 << 0,
 };
 
-ENABLE_BITMASK_OPERATORS (SUIFlags)
+ENABLE_BITMASK_OPERATORS(SUIFlags)
 
 constexpr SUIFlags SUI_DEFAULT_FLAGS = SUIFlags::Visible;
 
-class SUI {
+class SUI
+{
 public:
     /*static SUI FromDefinitionFile(
             const df2 &definition
     );*/
-    class BaseElement {
+    class BaseElement
+    {
         friend class SUI;
+
     public:
         virtual ~BaseElement() = default;
 
@@ -53,7 +57,7 @@ public:
 
         virtual void update(float delta);
 
-        virtual void draw(Renderer&, const drect &bounds);
+        virtual void draw(Renderer &, const drect &bounds);
 
     private:
         drect m_Bounds;
@@ -61,33 +65,38 @@ public:
         SUIFlags m_eFlags;
     };
 
-    template <class CallbackGroup>
-    class Element : public BaseElement, public detail::Callbacks<CallbackGroup> {
+    template<class CallbackGroup>
+    class Element: public BaseElement, public detail::Callbacks<CallbackGroup>
+    {
         friend class SUI;
+
     protected:
         Element(const std::string &name, drect bounds);
     };
 
     template<class UIElement, class... Args>
-    UIElement &add(Args &&... args) {
-        static_assert(std::is_base_of_v<BaseElement, UIElement>,
-                      "Added object must be derived from the SUI::BaseElement class.");
+    UIElement &add(Args &&...args)
+    {
+        static_assert(
+            std::is_base_of_v<BaseElement, UIElement>,
+            "Added object must be derived from the SUI::BaseElement class.");
         m_Elements.push_back(std::make_shared<UIElement>(args...));
         return *std::reinterpret_pointer_cast<UIElement>(m_Elements.back());
     }
 
     void update(float delta);
 
-    void draw(Renderer& renderer);
+    void draw(Renderer &renderer);
 
     template<class T>
-    T &get(const std::string &name) {
-        auto it = std::find_if(
-                m_Elements.begin(), m_Elements.end(),
-                [&](const std::shared_ptr<BaseElement> &child) -> bool {
-                    return child->getName() == name;
-                }
-        );
+    T &get(const std::string &name)
+    {
+        auto it =
+            std::find_if(m_Elements.begin(), m_Elements.end(),
+                         [&](const std::shared_ptr<BaseElement> &child) -> bool
+                         {
+                             return child->getName() == name;
+                         });
 
         if (it != m_Elements.end())
             return *std::reinterpret_pointer_cast<T>(*it);
@@ -96,13 +105,14 @@ public:
     }
 
     template<class T>
-    const T &get(const std::string &name) const {
-        auto it = std::find_if(
-                m_Elements.begin(), m_Elements.end(),
-                [&](const std::shared_ptr<BaseElement> &child) -> bool {
-                    return child->getName() == name;
-                }
-        );
+    const T &get(const std::string &name) const
+    {
+        auto it =
+            std::find_if(m_Elements.begin(), m_Elements.end(),
+                         [&](const std::shared_ptr<BaseElement> &child) -> bool
+                         {
+                             return child->getName() == name;
+                         });
 
         if (it != m_Elements.end())
             return *std::reinterpret_pointer_cast<T>(*it);
@@ -110,13 +120,14 @@ public:
             return *std::dynamic_pointer_cast<T>(NullElement);
     }
 
-    [[nodiscard]] bool find(const std::string &name) const {
-        auto it = std::find_if(
-                m_Elements.begin(), m_Elements.end(),
-                [&](const std::shared_ptr<BaseElement> &child) -> bool {
-                    return child->getName() == name;
-                }
-        );
+    [[nodiscard]] bool find(const std::string &name) const
+    {
+        auto it =
+            std::find_if(m_Elements.begin(), m_Elements.end(),
+                         [&](const std::shared_ptr<BaseElement> &child) -> bool
+                         {
+                             return child->getName() == name;
+                         });
 
         return it != m_Elements.end();
     }
@@ -128,8 +139,7 @@ private:
 
 template<class CallbackGroup>
 SUI::Element<CallbackGroup>::Element(const std::string &name, drect bounds)
-    : BaseElement(name, bounds) {
-
-}
+    : BaseElement(name, bounds)
+{}
 
 NS_END

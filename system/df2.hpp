@@ -1,16 +1,16 @@
 #pragma once
 
-#include <string>
 #include <Vec2.hpp>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <variant>
 
 NS_BEGIN
 
-class df2 {
+class df2
+{
 public:
-
     df2();
 
     static df2 read(const std::string &path);
@@ -19,9 +19,9 @@ public:
 
     static bool write(df2 &def, const std::string &path);
 
-    enum class EntryType {
-        String, Real, Integer,
-        Vector, Boolean, Clump
+    enum class EntryType
+    {
+        String, Real, Integer, Vector, Boolean, Clump
     };
 
     std::string &str(const std::string & = "null");
@@ -61,7 +61,8 @@ public:
 
     std::map<const std::string, df2>::iterator find(const std::string &key);
 
-    std::map<const std::string, df2>::const_iterator find(const std::string &key) const;
+    std::map<const std::string, df2>::const_iterator
+    find(const std::string &key) const;
 
     std::map<const std::string, df2>::iterator begin();
 
@@ -94,17 +95,22 @@ public:
     static df2 null;
 
 private:
-    enum class SearchDirection {
+    enum class SearchDirection
+    {
         Forwards, Backwards
     };
 
-    static std::string getToken(const std::string &, size_t start, SearchDirection dir = SearchDirection::Forwards);
+    static std::string getToken(const std::string &, size_t start,
+                                SearchDirection dir = SearchDirection::Forwards);
 
-    static void getClump(const std::string &chunk, df2 &clump, int end = -1, int resume = 0, int debug_level = 0);
+    static void getClump(const std::string &chunk, df2 &clump, int end = -1,
+                         int resume = 0, int debug_level = 0);
 
-    static void writeClump(std::stringstream &accum, df2 &clump, size_t level = 0);
+    static void writeClump(std::stringstream &accum, df2 &clump,
+                           size_t level = 0);
 
-    static int getEndOfClump(const std::string &str, char left, char right, int start);
+    static int getEndOfClump(const std::string &str, char left, char right,
+                             int start);
 
     static bool enableSpam;
     static std::unordered_map<std::string, std::string> aliases;

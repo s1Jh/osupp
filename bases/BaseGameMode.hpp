@@ -1,58 +1,80 @@
 #pragma once
 
-#include "define.hpp"
-#include "Renderer.hpp"
-#include "MapInfo.hpp"
-#include "Keyboard.hpp"
-#include "Mouse.hpp"
 #include "BaseHitObject.hpp"
+#include "Game.hpp"
+#include "Keyboard.hpp"
+#include "MapInfo.hpp"
+#include "Mouse.hpp"
+#include "Renderer.hpp"
+#include "define.hpp"
 
 #include <forward_list>
 
 NS_BEGIN
 
-    class BaseGameMode {
-    public:
-        using StorageT = std::forward_list<std::shared_ptr<BaseHitObject>>;
+class BaseGameMode
+{
+public:
+    using StorageT = std::forward_list<std::shared_ptr<BaseHitObject>>;
 
-        explicit BaseGameMode();
+    explicit BaseGameMode(Game &instance);
 
-        virtual void update(double delta);
+    virtual void update(double delta);
 
-        virtual void draw(Renderer &);
+    virtual void draw(Renderer &);
 
-        [[nodiscard]] double getCurrentTime() const;
+    [[nodiscard]] double getCurrentTime() const;
 
-        void setCurrentTime(double newTime);
+    void setCurrentTime(double newTime);
 
-        [[nodiscard]] const frect &getPlayField() const;
+    [[nodiscard]] const frect &getPlayField() const;
 
-        void setPlayField(const frect &playField);
+    void setPlayField(const frect &playField);
 
-        [[nodiscard]] MapInfo *getMap() const;
+    [[nodiscard]] MapInfo *getMap() const;
 
-        void setMap(MapInfo *map);
+    void setMap(MapInfo *map);
 
-        void reset();
+    void reset();
 
-        [[nodiscard]] fvec2d getCursorPosition() const;
-        [[nodiscard]] const Mat3f& getObjectTransform() const;
+    [[nodiscard]] fvec2d getCursorPosition() const;
 
-    protected:
-        virtual void onUpdate(double delta) = 0;
+    [[nodiscard]] const Mat3f &getObjectTransform() const;
 
-        virtual void onDraw(Renderer &) = 0;
+    [[nodiscard]] const df2 &
+    getHitObjectVisuals(const std::string &objectType) const;
 
-        StorageT::iterator last;
-        StorageT activeObjects;
-        MapInfo *info;
-        Keyboard keyboard;
-        Mouse mouse;
+    [[nodiscard]] Game &getGame();
 
-    private:
-        Mat3f transform;
-        frect playField;
-        double currentTime;
-    };
+    [[nodiscard]] Resources &getResources();
 
-}
+    [[nodiscard]] float getCircleSize();
+
+    [[nodiscard]] float getApproachTime();
+
+    [[nodiscard]] float getFadeTime();
+
+    [[nodiscard]] float getHitWindow();
+
+    [[nodiscard]] SkinP getActiveSkin();
+
+protected:
+    virtual void onUpdate(double delta) = 0;
+
+    virtual void onDraw(Renderer &) = 0;
+
+    StorageT::iterator last;
+    StorageT activeObjects;
+    MapInfo *info;
+    Keyboard keyboard;
+    Mouse mouse;
+    Game &instance;
+
+private:
+    df2 settings;
+    Mat3f transform;
+    frect playField;
+    double currentTime;
+};
+
+NS_END

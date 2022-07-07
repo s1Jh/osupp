@@ -1,26 +1,42 @@
 #pragma once
 
-#include "define.hpp"
 #include "Matrix.hpp"
-#include <vector>
+#include "Resource.hpp"
+#include "define.hpp"
+
 #include <memory>
+#include <vector>
 
 NS_BEGIN
 
-enum class AttributeType {
+enum class AttributeType
+{
     Scalar = 1, Vec2, Vec3, Vec4, Color = Vec4
 };
 
 // direct mapping to opengl render modes
-enum class RenderMode {
-    Points, Lines, LineLoop, LineStrip,
-    Triangles, TriangleStrip, TriangleFan,
-    Quads, QuadStrip, Polygon
+enum class RenderMode
+{
+    Points,
+    Lines,
+    LineLoop,
+    LineStrip,
+    Triangles,
+    TriangleStrip,
+    TriangleFan,
+    Quads,
+    QuadStrip,
+    Polygon
 };
 
-class Mesh {
+class Mesh: public detail::Resource
+{
 public:
     Mesh();
+
+    bool load(const std::string &path, Resources *res) override;
+
+    bool create(Resources *res) override;
 
     using Vertex = std::vector<float>;
 
@@ -42,9 +58,11 @@ public:
 
     void insertIndice(unsigned int i);
 
-    void insertIndices(const std::vector<unsigned int> &is, unsigned int offset = 0);
+    void insertIndices(const std::vector<unsigned int> &is,
+                       unsigned int offset = 0);
 
-    unsigned int insertTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3);
+    unsigned int insertTriangle(const Vertex &v1, const Vertex &v2,
+                                const Vertex &v3);
 
     [[nodiscard]] bool isValid() const;
 
@@ -69,7 +87,8 @@ public:
     [[nodiscard]] unsigned int getAttributeDescriptorCount() const;
 
 private:
-    struct GLObjs {
+    struct GLObjs
+    {
         unsigned int VAO = 0;
         unsigned int VBO = 0;
         unsigned int EBO = 0;
@@ -90,5 +109,7 @@ private:
 
     std::shared_ptr<GLObjs> data;
 };
+
+using MeshP = std::shared_ptr<Mesh>;
 
 NS_END

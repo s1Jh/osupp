@@ -8,12 +8,17 @@
 
 NS_BEGIN
 
-void ReadObject(float &time, char type, std::stringstream &line, MapInfo& map);
-void ReadMeta(char type, std::stringstream &line, MapInfo& map);
-void ReadEvent(float &elementTime, char type, std::stringstream &line, MapInfo& map);
+void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map);
+
+void ReadMeta(char type, std::stringstream &line, MapInfo &map);
+
+void ReadEvent(float &elementTime, char type, std::stringstream &line,
+               MapInfo &map);
+
 void ReadString(std::stringstream &from, std::string &to);
 
-bool LoadMAP(const std::string &path, MapInfo &map) {
+bool LoadMAP(const std::string &path, MapInfo &map)
+{
     LOG_ENTER("MAP::LOADMAP");
     const std::string metaIdentifiers = "0123456789";
     const std::string objectIdentifiers = "NSPO";
@@ -54,7 +59,8 @@ bool LoadMAP(const std::string &path, MapInfo &map) {
     return true;
 }
 
-void ReadObject(float &time, char type, std::stringstream &line, MapInfo& map) {
+void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
+{
     // TODO: Change all this
     switch (type) {
         case 'N': {
@@ -83,7 +89,7 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo& map) {
             }
 
             points.reverse();
-            map.addSlider(points, streak, time, speed, CurveType::Straight, 1);
+            map.addSlider(points, false, time, speed, CurveType::Straight, 1);
             break;
         }
         case 'P': {
@@ -103,7 +109,8 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo& map) {
     }
 }
 
-void ReadMeta(char type, std::stringstream &line, MapInfo& map) {
+void ReadMeta(char type, std::stringstream &line, MapInfo &map)
+{
     std::string buffer;
     float fbuffer;
     switch (type) {
@@ -162,11 +169,12 @@ void ReadMeta(char type, std::stringstream &line, MapInfo& map) {
     }
 }
 
-void ReadEvent(float &elementTime, char type, std::stringstream &line, MapInfo& map) {
+void ReadEvent(float &elementTime, char type, std::stringstream &line,
+               MapInfo &map)
+{}
 
-}
-
-void ReadString(std::stringstream &from, std::string &to) {
+void ReadString(std::stringstream &from, std::string &to)
+{
     while (!from.eof()) {
         std::string chunk;
         from >> chunk;
