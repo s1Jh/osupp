@@ -33,7 +33,6 @@ struct ActiveSliderNode: public BaseCurveNode
     fvec2d position = {0.f, 0.f};
     bool bonus = false;
     float length = 0.0;
-    GLLine connectingLine;
 };
 
 using SliderPathT = std::list<SliderNode>;

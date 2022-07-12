@@ -3,7 +3,6 @@
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 #include "Renderer.hpp"
-#include "ResourcePile.hpp"
 #include "Resources.hpp"
 #include "Skin.hpp"
 #include "Timing.hpp"
@@ -14,7 +13,7 @@ NS_BEGIN
 class Game
 {
 public:
-    Game();
+    Game() = default;
 
     int start();
 

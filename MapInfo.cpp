@@ -15,6 +15,8 @@ const MapInfo::StorageT &MapInfo::getObjectTemplates() const
 
 void MapInfo::addNote(fvec2d position, bool comboEnd, double time)
 {
+    LOG_ENTER();
+
     auto object = std::make_shared<ObjectTemplateNote>();
     object->startTime = time;
     object->endTime = time;
@@ -26,6 +28,8 @@ void MapInfo::addNote(fvec2d position, bool comboEnd, double time)
 void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
                         double endTime, CurveType type, unsigned int repeats)
 {
+    LOG_ENTER();
+
     auto object = std::make_shared<ObjectTemplateSlider>();
     object->startTime = time;
     object->parameters |= comboEnd ? HitObjectParams::ComboEnd : HitObjectParams::None;
@@ -39,6 +43,8 @@ void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
 void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
                          double endTime)
 {
+    LOG_ENTER();
+
     auto object = std::make_shared<ObjectTemplateSpinner>();
     object->startTime = time;
     object->spinRequired = spinRequired;
@@ -49,6 +55,8 @@ void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
 
 void MapInfo::insertElement(std::shared_ptr<BaseObjectTemplate> obj)
 {
+    LOG_ENTER();
+
     auto insertPoint =
         std::find_if(objectTemplates.begin(), objectTemplates.end(),
                      [&obj](const std::shared_ptr<BaseObjectTemplate> &checked)
@@ -161,12 +169,65 @@ void MapInfo::setOverallDifficulty(float overallDifficulty)
     MapInfo::overallDifficulty = overallDifficulty;
 }
 
-bool MapInfo::load(const std::string &path, Resources *res)
+bool MapInfo::load(const std::filesystem::path &path)
 {
-    return LoadMAP(path, *this);
+    LOG_ENTER();
+
+    if (path.extension() == ".osu")
+        return LoadOSU(path, *this);
+    else if (path.extension() == ".map")
+        return LoadMAP(path, *this);
+    else {
+        log::error("Unrecognized file type");
+        return false;
+    }
+
 }
 
-bool MapInfo::create(Resources *res)
+bool MapInfo::create()
 { return true; }
+
+const std::string &MapInfo::getRomanisedName() const
+{
+    return romanisedName;
+}
+
+void MapInfo::setRomanisedName(const std::string &romanisedName)
+{
+    MapInfo::romanisedName = romanisedName;
+}
+
+const std::string &MapInfo::getRomanisedArtist() const
+{
+    return romanisedArtist;
+}
+void MapInfo::setRomanisedArtist(const std::string &romanisedArtist)
+{
+    MapInfo::romanisedArtist = romanisedArtist;
+}
+const std::string &MapInfo::getSource() const
+{
+    return source;
+}
+void MapInfo::setSource(const std::string &source)
+{
+    MapInfo::source = source;
+}
+const std::vector<std::string> &MapInfo::getTags() const
+{
+    return tags;
+}
+void MapInfo::setTags(const std::vector<std::string> &tags)
+{
+    MapInfo::tags = tags;
+}
+const std::string &MapInfo::getAuthor() const
+{
+    return author;
+}
+void MapInfo::setAuthor(const std::string &author)
+{
+    MapInfo::author = author;
+}
 
 NS_END

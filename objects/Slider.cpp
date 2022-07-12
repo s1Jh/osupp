@@ -7,8 +7,7 @@ NS_BEGIN
 void Slider::onUpdate(double delta)
 {
     // update texture animations
-
-    // bodyTexture.update(delta);
+    bodyTexture.update(delta);
     ball.update(delta);
     head.update(delta);
     headRepeat.update(delta);
@@ -21,7 +20,7 @@ void Slider::onLogicUpdate(double delta)
 {
     double timeLength = getEndTime() - getStartTime();
 
-    double timeRunning = session->getCurrentTime() - getStartTime();
+    double timeRunning = session.getCurrentTime() - getStartTime();
     timeRunning = Clamp(timeRunning, 0.0, timeLength);
 
     progression = timeRunning / timeLength;
@@ -69,16 +68,15 @@ void Slider::onRaise()
 void Slider::onPress()
 { currentDirection = TravelDirection::Forward; }
 
-Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
-    : HitObject(std::move(templ), g), stepsPerCurveUnit(10), epsilon(0.01),
-      currentDirection(TravelDirection::Forward), started(false), progression(0.0),
-      curvePosition(0.0)
+Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
+    : HitObject(std::move(templ), g), currentDirection(TravelDirection::Forward),
+      started(false), progression(0.0), curvePosition(0.0)
 {
 
-    auto &res = session->getResources();
-    bodyShader = res.shaders.get(SLIDER_SHADER);
+    auto &res = session.getResources();
+    bodyShader = res.get<Shader>(SLIDER_SHADER);
 
-    auto skin = session->getActiveSkin();
+    auto skin = session.getActiveSkin();
 
     bodyTexture = skin->createObjectSprite(SLIDER_BODY_SPRITE);
     ball = skin->createObjectSprite(SLIDER_BALL_SPRITE);
@@ -90,11 +88,9 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
 
     /*============================================================================================================*/
     // Initialize the variables to their defaults.
-    SOF = {session->getCircleSize(),
+    SOF = {session.getCircleSize(),
            {objectTemplate->path.front().position}};
     repeatsLeft = objectTemplate->repeats;
-    // we need to cover a distance of 1, simply use v=s/t
-    velocity = 1.0 / (this->getEndTime() - this->getStartTime());
 
     /*============================================================================================================*/
     // Create curve out of the template points for interpolating.
@@ -106,7 +102,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
     auto lastIt = interpolatedPath.end();
     auto middleIt = interpolatedPath.end();
     auto steps =
-        Max((unsigned int) (stepsPerCurveUnit * templateCurve.getLength()), 2);
+        Max((unsigned int) (SLIDER_STEPS_PER_CURVE_UNIT * templateCurve.getLength()), 2);
 
     struct Circle
     {
@@ -135,29 +131,30 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
         meshSpine.push_back(thisPosition);
 
         // Optimizations
-        if (middleIt != interpolatedPath.end()) {
-            if (lastIt != interpolatedPath.end()) {
-                // Optimization #1: If a triplet of sequential points has a small enough
-                // angle,
-                //                  remove the middle point of this triplet.
-                auto lastPosition = lastIt->position;
-                auto midPosition = middleIt->position;
+        if (i != steps)
+            if (middleIt != interpolatedPath.end()) {
+                if (lastIt != interpolatedPath.end()) {
+                    // Optimization #1: If a triplet of sequential points has a small enough
+                    // angle,
+                    //                  remove the middle point of this triplet.
+                    auto lastPosition = lastIt->position;
+                    auto midPosition = middleIt->position;
 
-                auto vec1 = Normalize(lastPosition - midPosition);
-                auto vec2 = Normalize(thisPosition - midPosition);
+                    auto vec1 = Normalize(lastPosition - midPosition);
+                    auto vec2 = Normalize(thisPosition - midPosition);
 
-                auto angle = Abs(Cross(vec1, vec2));
-                if (angle <= 0.005) {
-                    interpolatedPath.erase(middleIt);
+                    auto angle = Abs(Cross(vec1, vec2));
+                    if (angle <= SLIDER_ANGLE_OPT_THRESHOLD) {
+                        interpolatedPath.erase(middleIt);
+                    }
+                }
+
+                // Optimization #2: If the new point is too close to an existing point,
+                // don't add it.
+                if (Distance(thisPosition, middleIt->position) <= SLIDER_DISTANCE_OPT_THRESHOLD) {
+                    continue;
                 }
             }
-
-            // Optimization #2: If the new point is too close to an existing point,
-            // don't add it.
-            if (Distance(thisPosition, middleIt->position) <= 0.1) {
-                continue;
-            }
-        }
         interpolatedPath.push_back({thisPosition, false});
     }
 
@@ -177,7 +174,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
     for (unsigned int i = 0; i < steps; i++) {
         auto t = double(i) / double(steps);
         auto position = curve.get<CurveType::Straight>(t);
-        circleMask.emplace_back(float(session->getCircleSize()) -
+        circleMask.emplace_back(float(session.getCircleSize()) -
                                     std::numeric_limits<float>::epsilon(),
                                 position);
     }
@@ -189,7 +186,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
                                  });
 
     for (auto &mask: interpolatedPath) {
-        fvec2d vector = {0.0, session->getCircleSize()};
+        fvec2d vector = {0.0, session.getCircleSize()};
         auto iterations = 16;
         auto angle = 2 * PI / double(iterations);
 
@@ -235,7 +232,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
         auto normal = findNormal(t);
         fvec2d point = curve.get<CurveType::Straight>(t);
 
-        auto size = session->getCircleSize();
+        auto size = session.getCircleSize();
         fvec2d left = point + normal * size;
         fvec2d right = point + normal * -size;
 
@@ -282,24 +279,6 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode *g)
         lastCenterIndex = currentCenter;
     }
 
-    /*auto copy = meshOutline;
-
-    fvec2d point = copy.front();
-    copy.erase(copy.begin());
-    loops.push_back(point);
-
-    while (!copy.empty()) {
-        auto closest = copy.begin();
-        for (auto it = copy.begin(); it != copy.end(); it++) {
-            if (Distance(*closest, point) > Distance(*it, point)) {
-                closest = it;
-            }
-        }
-        loops.push_back(*closest);
-        point = *closest;
-        copy.erase(closest);
-    }*/
-
     body.upload();
 }
 
@@ -307,23 +286,20 @@ void Slider::onDraw(Renderer &renderer)
 {
     /*============================================================================================================*/
     // Prepare some constant variables.
-    const auto objectTransform = session->getObjectTransform();
+    const auto objectTransform = session.getObjectTransform();
     float alpha = getAlpha();
-    // NotOSUObjectDrawInfo info{ getAlpha(), objectTransform };
 
     /*============================================================================================================*/
     // Draw the body mesh behind everything else.
 
-    /*color tint = WHITE;
-    //bodyTexture.apply();
-    renderer.drawMesh(
-            body, *bodyShader,
-            {{"tint", &tint}},
-            {{0, bodyTexture.getTexture().get()}},
-            objectTransform
-    );
-    //bodyTexture.reset();
-    */
+//    color tint = WHITE;
+//    renderer.drawMesh(
+//            body, *bodyShader,
+//            {{"tint", &tint}},
+//            {{0, bodyTexture.getTexture().get()}},
+//            objectTransform
+//    );
+
 
     /*============================================================================================================*/
     // Draw the start decorations.
@@ -335,9 +311,10 @@ void Slider::onDraw(Renderer &renderer)
         (Mat3f) Transform2D{.rotate = startBumperAngle,
             .rotationCenter = startBumperPosition} *
             objectTransform};
+
     renderer.draw(head, headInfo);
 
-    if (repeatsLeft >= 2)
+    if (repeatsLeft >= 3)
         renderer.draw(headRepeat, headInfo);
 
     /*============================================================================================================*/
@@ -352,7 +329,8 @@ void Slider::onDraw(Renderer &renderer)
             objectTransform};
 
     renderer.draw(tail, tailInfo);
-    if (repeatsLeft >= 3)
+
+    if (repeatsLeft >= 2)
         renderer.draw(tailRepeat, tailInfo);
 
     /*============================================================================================================*/
@@ -367,56 +345,31 @@ void Slider::onDraw(Renderer &renderer)
 
     renderer.draw(ball, ballInfo);
 
+    /*============================================================================================================*/
+    // Draw curve decorations such as bonus points.
+
     NotOSUObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
     for (const auto &node: interpolatedPath) {
         /*========================================================================================================*/
         // Draw the interpolated path. (debug only)
         renderer.drawCross(node.position,
-                           float(session->getCircleSize() * 0.2),
+                           float(session.getCircleSize() * 0.2),
                            {.fillColor = ORANGE}, objectTransform);
 
         /*========================================================================================================*/
         // Draw the bonus point.
-        hitPointInfo.destination.position = node.position;
-        renderer.draw(hitPoint, hitPointInfo);
-    }
-
-    /*bodyTexture.apply();
-    renderer.drawMesh(
-            body, *bodyShader,
-            {{"tint", &tint}},
-            {{0, bodyTexture.getTexture().get()}},
-            objectTransform
-    );
-    bodyTexture.reset();*/
-
-    color maskColor = TEAL;
-    maskColor.a = 0.01;
-    for (auto &circle: circleMask) {
-        renderer.drawCircle(circle, {.fillColor = maskColor}, objectTransform);
-    }
-
-    int stop = int(curvePosition * (double) loops.size());
-
-    for (int i = 0; i < stop; i++) {
-        renderer.drawCross(loops[i],
-                           float(session->getCircleSize() * 0.2),
-                           {.fillColor = GREEN}, objectTransform);
-    }
-
-    for (auto &point: meshSpine) {
-        renderer.drawCross(point, float(session->getCircleSize() * 0.1),
-                           {.fillColor = GREEN}, objectTransform);
-    }
-
-    for (auto &point: meshOutline) {
-        renderer.drawCross(point, float(session->getCircleSize() * 0.1),
-                           {.fillColor = BLUE}, objectTransform);
+        if (node.bonus) {
+            hitPointInfo.destination.position = node.position;
+            renderer.draw(hitPoint, hitPointInfo);
+        }
     }
 }
 
 void Slider::onReset()
 {
+    currentDirection = TravelDirection::Forward;
+    started = false;
+    curvePosition = 0.0;
     progression = 0.0;
     SOF.position = getStartPosition();
 }
@@ -427,13 +380,13 @@ fvec2d Slider::findDirection(double t)
     // This is done so that if t=1, calling curve.get(t+ε) would yield the same
     // result as calling curve.get(t). because the value of t is clamped in the
     // calculation.
-    t = Clamp(t, 0.0, 1.0 - epsilon);
+    t = Clamp(t, 0.0, 1.0 - SLIDER_DIRECTION_EPSILON);
 
     // We find the direction vector by pointing a vector from the requested
     // parametric position t and another position equal to t + ε, with ε being a
     // small positive offset. We normalize this vector and return.
     auto targetPosition = curve.get<CurveType::Straight>(t);
-    auto offsetPosition = curve.get<CurveType::Straight>(t + epsilon);
+    auto offsetPosition = curve.get<CurveType::Straight>(t + SLIDER_DIRECTION_EPSILON);
     return Normalize(offsetPosition - targetPosition);
 }
 

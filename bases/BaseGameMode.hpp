@@ -15,7 +15,7 @@ NS_BEGIN
 class BaseGameMode
 {
 public:
-    using StorageT = std::forward_list<std::shared_ptr<BaseHitObject>>;
+    using StorageT = std::list<std::shared_ptr<BaseHitObject>>;
 
     explicit BaseGameMode(Game &instance);
 
@@ -40,9 +40,6 @@ public:
     [[nodiscard]] fvec2d getCursorPosition() const;
 
     [[nodiscard]] const Mat3f &getObjectTransform() const;
-
-    [[nodiscard]] const df2 &
-    getHitObjectVisuals(const std::string &objectType) const;
 
     [[nodiscard]] Game &getGame();
 
@@ -71,7 +68,6 @@ protected:
     Game &instance;
 
 private:
-    df2 settings;
     Mat3f transform;
     frect playField;
     double currentTime;

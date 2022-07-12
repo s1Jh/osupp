@@ -6,6 +6,7 @@
 #include "define.hpp"
 
 #include <memory>
+#include <filesystem>
 
 NS_BEGIN
 
@@ -14,9 +15,9 @@ class Texture: public detail::Resource
 public:
     Texture();
 
-    bool load(const std::string &location, Resources *res) override;
+    bool load(const std::filesystem::path &location) override;
 
-    bool create(Resources *res) override;
+    bool create() override;
 
     bool setImage(Image &img);
 

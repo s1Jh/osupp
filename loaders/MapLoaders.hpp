@@ -9,6 +9,6 @@ NS_BEGIN
 
 bool LoadMAP(const std::string &fpath, MapInfo &map);
 
-bool LoadOSU(std::filesystem::path pathIn, MapInfo &map);
+bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map);
 
 NS_END

@@ -8,62 +8,95 @@
 
 NS_BEGIN
 
-bool Skin::load(const std::string &path, Resources *res)
+bool Skin::load(const std::filesystem::path &path, Resources *res)
 {
-    create(res);
+    LOG_ENTER();
 
-    std::string dfPath = path + "/skin.df";
+    bool success = true;
+    success &= create();
 
+    if (!success) {
+        log::error("Failed to create skin objects (one or more was null)");
+        return false;
+    }
+
+    directory = path;
+
+    std::string dfPath = path / "skin.df";
     df2 settings = df2::read(dfPath);
 
     for (const auto &entry: settings["textures"]) {
-        if (textures.contains(entry.first)) {
-            // apply overrides
-            auto &existingObject = textures.at(entry.first);
-            const auto &fields = entry.second;
+        if (!textures.contains(entry.first)) {
+            log::warning("Attempted to style unknown element: \"", entry.first, '\"');
+            continue;
+        }
 
-            if (fields.find("texturePath") != fields.end()) {
-                auto texPath =
-                    std::filesystem::path(path) / fields["texturePath"].str();
-                existingObject.texture = res->textures.get(texPath.string());
-            }
+        auto &object = textures[entry.first];
+        // apply settings
+        const auto &fields = entry.second;
 
-            if (fields.find("fps") != fields.end())
-                existingObject.animationFPS = fields["fps"].integer();
+        std::filesystem::path texPath = std::filesystem::path(path);
+        if (fields.find("texturePath") != fields.end()) {
+            texPath /= fields["texturePath"].str(entry.first);
+            object.path = texPath.string();
+        }
 
-            if (fields.find("tints") != fields.end()) {
-                existingObject.tints.clear();
-                const auto &tints = fields["tints"];
-                for (const auto &tint: tints) {
-                    color8 col(tint.second.integer());
-                    existingObject.tints.push_back(col);
-                }
+        if (fields.find("fps") != fields.end())
+            object.animationFPS = fields["fps"].integer();
+
+        if (fields.find("tints") != fields.end()) {
+            object.tints.clear();
+            const auto &tints = fields["tints"];
+            for (const auto &tint: tints) {
+                object.tints.push_back(tint.second.col());
             }
         }
+
+        log::info("Added object texture override ", entry.first, " (texture: ", texPath, ", @",
+                  object.animationFPS, " FPS, ", object.tints.size(), " tint(s)).");
+    }
+
+    log::info("Loading skin assets...");
+
+    for (auto &texture: textures) {
+        texture.second.texture = res->load<Texture>(texture.second.path, directory);
+        success &= bool(texture.second.texture);
+    }
+    for (auto &shader: shaders) {
+        shader.second.shader = res->load<Shader>(shader.second.path, directory);
+        success &= bool(shader.second.shader);
     }
 
     log::info("Loaded skin ", dfPath);
-
-    return true;
+    return success;
 }
 
-bool Skin::create(Resources *res)
+bool Skin::create()
 {
+    LOG_ENTER();
+
     bool success = true;
 
+    // Try to load from the default skin, which should always be present.
+    // Always make sure to load to reload the texture.
     auto loadTexture = [&](const std::string &path) -> bool
     {
-        auto ptr = res->textures.get(path);
-        textures[path] = {ptr};
+        TextureP ptr = std::make_unique<Texture>();
+        ptr->create();
+        textures[path] = {path, ptr};
         return bool(ptr);
     };
 
     auto loadShader = [&](const std::string &path) -> bool
     {
-        auto ptr = res->shaders.get(path);
-        shaders[path] = {ptr};
+        ShaderP ptr = std::make_unique<Shader>();
+        ptr->create();
+        shaders[path] = {path, ptr};
         return bool(ptr);
     };
+
+    textures.clear();
+    shaders.clear();
 
     success &= loadTexture(NOTE_BASE_SPRITE);
     success &= loadTexture(NOTE_OVERLAY_SPRITE);
@@ -88,6 +121,8 @@ bool Skin::create(Resources *res)
 
 FPS_t Skin::getAnimationFramerate(const std::string &object) const
 {
+    LOG_ENTER();
+
     if (textures.contains(object))
         return textures.at(object).animationFPS;
 
@@ -96,6 +131,8 @@ FPS_t Skin::getAnimationFramerate(const std::string &object) const
 
 TextureP Skin::getTexture(const std::string &object) const
 {
+    LOG_ENTER();
+
     if (textures.contains(object))
         return textures.at(object).texture;
 
@@ -104,6 +141,8 @@ TextureP Skin::getTexture(const std::string &object) const
 
 color Skin::getTint(const std::string &object, unsigned int seed) const
 {
+    LOG_ENTER();
+
     if (!textures.contains(object))
         return WHITE;
 
@@ -113,15 +152,17 @@ color Skin::getTint(const std::string &object, unsigned int seed) const
         return WHITE;
 
     std::srand(seed);
-    auto i = std::rand() % tints.size();
+    auto i = static_cast<unsigned int>(std::rand()) % tints.size();
 
     return tints.at(i);
 }
 
 ShaderP Skin::getShader(const std::string &object) const
 {
+    LOG_ENTER();
+
     if (shaders.contains(object)) {
-        return shaders.at(object);
+        return shaders.at(object).shader;
     }
     return nullptr;
 }
@@ -131,6 +172,8 @@ NotOSUObjectSprite Skin::createObjectSprite(const std::string &object,
                                             unsigned int comboSeed,
                                             unsigned int mapSeed) const
 {
+    LOG_ENTER();
+
     NotOSUObjectSprite ret;
 
     if (textures.contains(object)) {
@@ -139,6 +182,19 @@ NotOSUObjectSprite Skin::createObjectSprite(const std::string &object,
         ret.setTint(getTint(object, objectSeed));
     }
     return ret;
+}
+
+// FIXME: a hack to pass Resources reference to the Skin class which is needed whilst loading skins
+template<>
+void detail::ResourcePile<Skin>::loadOne(const std::string &name, const std::filesystem::path &path)
+{
+    log::info("Custom loader called!");
+    StorageT object = std::make_shared<Skin>(*null);
+    loadedAssets[name] = object;
+
+    if (!object->load(path, &resourceRef)) {
+        log::error("Failed to load ", typeid(Skin).name(), ' ', path);
+    }
 }
 
 NS_END

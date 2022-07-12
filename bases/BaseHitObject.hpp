@@ -36,8 +36,6 @@ class BaseGameMode;
 class BaseHitObject
 {
 public:
-    BaseHitObject();
-
     virtual void update(double delta) = 0;
 
     virtual void begin() = 0;
@@ -69,7 +67,7 @@ public:
     [[nodiscard]] virtual fvec2d getEndPosition() const;
 
 protected:
-    explicit BaseHitObject(BaseGameMode *session);
+    explicit BaseHitObject(BaseGameMode &session);
 
     void transferToInvisible();
 
@@ -122,7 +120,7 @@ protected:
     fcircle SOF;
     bool finished;
     double timeFinished;
-    BaseGameMode *session;
+    BaseGameMode &session;
 
 private:
     HitObjectState state;

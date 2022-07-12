@@ -26,14 +26,12 @@ public:
     void setTexture(const TextureP &texture);
     void setFPS(FPS_t fps);
     void setFrameTime(float frameTime);
+    void setTint(const color &tint);
+
+    TextureP getTexture();
 
 private:
     color tint;
-
-public:
-    void setTint(const color &tint);
-
-private:
     TextureP texture;
     AnimationLayout layout = AnimationLayout::Horizontal;
     float frameTime = 0.0f;

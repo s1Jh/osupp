@@ -17,9 +17,9 @@ class MapInfo: public detail::Resource
 public:
     using StorageT = std::list<std::shared_ptr<BaseObjectTemplate>>;
 
-    bool load(const std::string &path, Resources *res) override;
+    bool load(const std::filesystem::path &path) override;
 
-    bool create(Resources *res) override;
+    bool create() override;
 
     [[nodiscard]] const StorageT &getObjectTemplates() const;
 
@@ -49,6 +49,16 @@ public:
 
     [[nodiscard]] float getFadeTime() const;
 
+    [[nodiscard]] const std::string &getRomanisedArtist() const;
+
+    [[nodiscard]] const std::string &getRomanisedName() const;
+
+    [[nodiscard]] const std::string &getSource() const;
+
+    [[nodiscard]] const std::vector<std::string> &getTags() const;
+
+    [[nodiscard]] const std::string &getAuthor() const;
+
     void setName(const std::string &name);
 
     void setDescription(const std::string &description);
@@ -67,6 +77,14 @@ public:
 
     void setHpDrain(float hpDrain);
 
+    void setRomanisedName(const std::string &romanisedName);
+
+    void setRomanisedArtist(const std::string &romanisedArtist);
+
+    void setSource(const std::string &source);
+
+    void setTags(const std::vector<std::string> &tags);
+
     void setApproachTime(float approachTime);
 
     void setHitWindow(float hitWindow);
@@ -74,6 +92,8 @@ public:
     void setFadeTime(float fadeTime);
 
     void setOverallDifficulty(float overallDifficulty);
+
+    void setAuthor(const std::string &author);
 
     void clear();
 
@@ -90,10 +110,21 @@ private:
 
     // Song's name.
     std::string name;
+    // Song's name written out in latin.
+    std::string romanisedName;
     // Description of the song.
     std::string description;
     // Artist's name.
     std::string artist;
+    // Artist's name written out in latin.
+    std::string romanisedArtist;
+    // The place in which the song was originally used.
+    std::string source;
+    // The place in which the song was originally used.
+    std::string author;
+
+    // Tags to be used for searching.
+    std::vector<std::string> tags;
     // This difficulty's name.
     std::string difficulty;
     // Path to the song's audio file.

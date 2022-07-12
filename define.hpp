@@ -48,15 +48,21 @@
 #define _STRINGIFY(x) #x
 #define TOSTRING(x) _STRINGIFY(x)
 
+#define WRAP_CONSTEXPR_ASSERTION(_Msg) []<bool flag = false>() { static_assert(flag, _Msg); }()
+
 NS_BEGIN // keep default constexprs in the project namespace
 
-#ifdef NDEBUG
+#ifdef RELEASE
 constexpr const char *BUILD_TYPE = "Release";
 #elif DEBUG
 
 constexpr const char *BUILD_TYPE = "Debug";
 
-#else
+#elif RELDEB
+constexpr const char *BUILD_TYPE = "ReleaseWithDebInfo";
+#elif MINREL
+constexpr const char *BUILD_TYPE = "MinSizeRel";
+#elif
 #error("No build type defined")
 #endif
 
@@ -90,7 +96,7 @@ constexpr const char *BUILD_TIME = __TIME__;
 
 constexpr int VERSION_MAJOR = 0;
 
-constexpr int VERSION_MINOR = 2;
+constexpr int VERSION_MINOR = 3;
 
 constexpr int VERSION_PATCH = 0;
 

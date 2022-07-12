@@ -10,7 +10,7 @@ Texture::Texture()
     : glTexture(nullptr), img(nullptr), channels(4), pixelSize({-1, -1})
 {}
 
-bool Texture::load(const std::string &location, Resources *res)
+bool Texture::load(const std::filesystem::path &location)
 {
     Image texImg;
     if (!texImg.load(location)) {
@@ -98,7 +98,7 @@ bool Texture::setImage(Image &imgIn)
 isize Texture::getSize() const
 { return pixelSize; }
 
-bool Texture::create(Resources *res)
+bool Texture::create()
 {
     Image image;
     image.resize(128, 128);

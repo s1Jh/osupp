@@ -50,10 +50,12 @@ double Perlin2D(double x, double y, unsigned int octaves, double persistence,
 
 double BiLerp(double a, double b, double c, double d, double x, double y);
 
-constexpr double DegreeToRad(double deg)
+template<typename T>
+constexpr T DegreeToRad(T deg)
 { return deg * (PI / 180.0); }
 
-constexpr double RadToDegree(double rad)
+template<typename T>
+constexpr T RadToDegree(T rad)
 { return rad * (180.0 / PI); }
 
 template<typename A, typename B, typename X>

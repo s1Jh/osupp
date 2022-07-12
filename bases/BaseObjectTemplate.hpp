@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Enum.hpp"
 #include "define.hpp"
+
+#include "Enum.hpp"
 
 #define BEGIN_OBJECT_TEMPLATE(TYPE)                                            \
   struct ObjectTemplate##TYPE : public BaseObjectTemplate {                    \

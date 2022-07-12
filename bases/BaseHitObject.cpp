@@ -26,15 +26,11 @@ double BaseHitObject::getTimeFinished() const
 fcircle BaseHitObject::getSOF() const
 { return SOF; }
 
-BaseHitObject::BaseHitObject(BaseGameMode *session)
+BaseHitObject::BaseHitObject(BaseGameMode &session)
     : finished(false), timeFinished(0.0), session(session), state(HitObjectState::Invisible)
 {
     reset();
 }
-
-BaseHitObject::BaseHitObject()
-    : finished(false), timeFinished(0.0), session(nullptr), state(HitObjectState::Invisible)
-{ reset(); }
 
 void BaseHitObject::transferApproaching()
 {
@@ -70,7 +66,7 @@ void BaseHitObject::transferToPickup()
 {
     state = HitObjectState::Pickup;
     finished = true;
-    timeFinished = session->getCurrentTime();
+    timeFinished = session.getCurrentTime();
 }
 
 void BaseHitObject::transferToFading()
@@ -90,7 +86,7 @@ void BaseHitObject::transferToInvisibleComplete()
 {
     state = HitObjectState::Invisible;
     finished = true;
-    timeFinished = session->getCurrentTime();
+    timeFinished = session.getCurrentTime();
 }
 
 bool BaseHitObject::isApproachCircleDrawn() const

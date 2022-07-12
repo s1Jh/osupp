@@ -6,8 +6,8 @@
 #include "Color.hpp"
 #include "Matrix.hpp"
 #include "Mesh.hpp"
+#include "Shader.hpp"
 #include "Renderable.hpp"
-#include "Resources.hpp"
 #include "Sprite.hpp"
 #include "Types.hpp"
 #include "df2.hpp"
@@ -40,8 +40,9 @@ struct VisualAppearance
     const Mat3f *uvTransform = nullptr;
     BlendMode blendMode = BlendMode::Multiply;
     color fillColor = WHITE;
-    unsigned int outlineWidth = 0;
+    float outlineWidth = 0.003f;
     color outlineColor = BLACK;
+    float zIndex = 0.0f;
 };
 
 constexpr VisualAppearance DEFAULT_APPEARANCE =
@@ -98,7 +99,7 @@ public:
                     const VisualAppearance &appearance = DEFAULT_APPEARANCE,
                     const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 
-    void drawSegment(const GLLine &seg,
+    void drawSegment(const dline &seg,
                      const VisualAppearance &appearance = DEFAULT_APPEARANCE,
                      const Mat3f &transform = MAT3_NO_TRANSFORM<float>);
 

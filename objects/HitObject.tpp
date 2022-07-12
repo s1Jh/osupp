@@ -18,7 +18,7 @@ template<typename TemplateT> requires IsTemplateV<TemplateT>
 class HitObject: public BaseHitObject
 {
 public:
-    explicit HitObject(std::shared_ptr<TemplateT>, BaseGameMode *);
+    explicit HitObject(std::shared_ptr<TemplateT>, BaseGameMode &);
 
     [[nodiscard]] double getStartTime() const override;
 
@@ -48,12 +48,12 @@ protected:
 template<typename TemplateT>
 requires IsTemplateV<TemplateT>
 HitObject<TemplateT>::HitObject(std::shared_ptr<TemplateT> trackedTemplate,
-                                BaseGameMode *activeSession)
+                                BaseGameMode &activeSession)
     : BaseHitObject(activeSession), objectTemplate(trackedTemplate)
 {
 
     approachCircle =
-        session->getActiveSkin()->createObjectSprite(APPROACH_CIRCLE_SPRITE);
+        session.getActiveSkin()->createObjectSprite(APPROACH_CIRCLE_SPRITE);
 }
 
 template<typename TemplateT>
@@ -103,12 +103,12 @@ void HitObject<TemplateT>::update(double delta)
 
     // gather transfer times
     auto state = getState();
-    auto currentTime = session->getCurrentTime();
+    auto currentTime = session.getCurrentTime();
 
-    auto alphaTime = getStartTime() - session->getApproachTime();
-    auto betaTime = getStartTime() - session->getHitWindow();
-    auto epsilonTime = getEndTime() + session->getHitWindow();
-    auto etaTime = timeFinished + session->getFadeTime();
+    auto alphaTime = getStartTime() - session.getApproachTime();
+    auto betaTime = getStartTime() - session.getHitWindow();
+    auto epsilonTime = getEndTime() + session.getHitWindow();
+    auto etaTime = timeFinished + session.getFadeTime();
 
     // update the object
     this->onUpdate(delta);
@@ -193,23 +193,23 @@ template<typename TemplateT>
 requires IsTemplateV<TemplateT>
 void HitObject<TemplateT>::draw(Renderer &renderer)
 {
-    const auto &objectTransform = session->getObjectTransform();
+    const auto &objectTransform = session.getObjectTransform();
 
     if (isApproachCircleDrawn() && this->needsApproachCircle()) {
 
-        auto scale = 1.5f;  // how big will the circle be at -ar
+        auto scale = 4.0f;  // how big will the circle be at -ar
         float offset = 1.0; // how big the circle will be at 0
 
-        float slope = (scale - offset) / session->getApproachTime();
+        float slope = (scale - offset) / session.getApproachTime();
 
-        float x = session->getCurrentTime() - getStartTime();
+        float x = session.getCurrentTime() - getStartTime();
         float y = x * -slope + offset;
 
-        float acSize = session->getCircleSize() * y;
+        float acSize = session.getCircleSize() * y;
         acSize = Max(acSize, 0.0);
 
         renderer.draw(approachCircle,
-                      {{{acSize, acSize}, SOF.position}, 1.0f, objectTransform});
+                      {{{acSize, acSize}, SOF.position}, getAlpha(), objectTransform});
     }
 
     this->onDraw(renderer);
@@ -220,14 +220,14 @@ requires IsTemplateV<TemplateT>
 float HitObject<TemplateT>::getAlpha() const
 {
     if (isFadingIn()) {
-        float x = session->getCurrentTime() - getStartTime();
-        float a = x > 0 ? session->getHitWindow()
-                        : session->getApproachTime();
+        float x = session.getCurrentTime() - getStartTime();
+        float a = x > 0 ? session.getHitWindow()
+                        : session.getApproachTime();
         return Lerp(0.0f, 1.0f, QuadRR(x, a));
     }
     else if (isFadingOut()) {
-        float x = session->getCurrentTime() - getTimeFinished();
-        float a = session->getFadeTime();
+        float x = session.getCurrentTime() - getTimeFinished();
+        float a = session.getFadeTime();
         return Lerp(0.0f, 1.0f, QuadRR(x, a));
     }
     else
@@ -238,7 +238,7 @@ template<typename TemplateT>
 requires IsTemplateV<TemplateT>
 void HitObject<TemplateT>::onReset()
 {
-    approachCircle.setTexture(session->getGame().getResourcePool().textures.get(
-        APPROACH_CIRCLE_SPRITE));
+    auto &pool = session.getGame().getResourcePool();
+    approachCircle.setTexture(pool.get<Texture>(APPROACH_CIRCLE_SPRITE));
 }
 NS_END

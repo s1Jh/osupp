@@ -7,6 +7,8 @@ NS_BEGIN
 
 void NotOSUObjectSprite::update(double delta)
 {
+    LOG_ENTER();
+
     frameTimer += float(delta);
 
     if (frameTimer >= frameTime) {
@@ -18,6 +20,8 @@ void NotOSUObjectSprite::update(double delta)
 
 void NotOSUObjectSprite::setTexture(const TextureP &textureIn)
 {
+    LOG_ENTER();
+
     if (textureIn) {
         texture = textureIn;
         frameTimer = 0;
@@ -46,6 +50,8 @@ void NotOSUObjectSprite::setFrameTime(float frameTimeIn)
 
 void NotOSUObjectSprite::draw(Renderer &renderer, NotOSUObjectDrawInfo &info)
 {
+    LOG_ENTER();
+
     if (!texture)
         return;
 
@@ -73,5 +79,10 @@ void NotOSUObjectSprite::draw(Renderer &renderer, NotOSUObjectDrawInfo &info)
 
 void NotOSUObjectSprite::setTint(const color &tintIn)
 { tint = tintIn; }
+
+TextureP NotOSUObjectSprite::getTexture()
+{
+    return texture;
+}
 
 NS_END

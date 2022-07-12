@@ -20,6 +20,7 @@ void ReadString(std::stringstream &from, std::string &to);
 bool LoadMAP(const std::string &path, MapInfo &map)
 {
     LOG_ENTER("MAP::LOADMAP");
+
     const std::string metaIdentifiers = "0123456789";
     const std::string objectIdentifiers = "NSPO";
     const std::string eventIdentifiers = "E";
@@ -61,6 +62,8 @@ bool LoadMAP(const std::string &path, MapInfo &map)
 
 void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
 {
+    LOG_ENTER();
+
     // TODO: Change all this
     switch (type) {
         case 'N': {
@@ -111,6 +114,8 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
 
 void ReadMeta(char type, std::stringstream &line, MapInfo &map)
 {
+    LOG_ENTER();
+
     std::string buffer;
     float fbuffer;
     switch (type) {
@@ -171,10 +176,14 @@ void ReadMeta(char type, std::stringstream &line, MapInfo &map)
 
 void ReadEvent(float &elementTime, char type, std::stringstream &line,
                MapInfo &map)
-{}
+{
+    LOG_ENTER();
+}
 
 void ReadString(std::stringstream &from, std::string &to)
 {
+    LOG_ENTER();
+
     while (!from.eof()) {
         std::string chunk;
         from >> chunk;

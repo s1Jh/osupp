@@ -6,12 +6,18 @@
 
 NS_BEGIN
 
+constexpr double SLIDER_DIRECTION_EPSILON = 0.01;
+
+constexpr double SLIDER_ANGLE_OPT_THRESHOLD = 0.005;
+
+constexpr double SLIDER_DISTANCE_OPT_THRESHOLD = 0.1;
+
+constexpr unsigned int SLIDER_STEPS_PER_CURVE_UNIT = 10;
+
 class Slider: public HitObject<ObjectTemplateSlider>
 {
-    friend class SliderUtils;
-
 public:
-    explicit Slider(std::shared_ptr<ObjectTemplateSlider>, BaseGameMode *);
+    explicit Slider(std::shared_ptr<ObjectTemplateSlider>, BaseGameMode &);
 
     [[nodiscard]] fvec2d getStartPosition() const override;
 
@@ -59,11 +65,10 @@ private:
     std::vector<fvec2d> meshSpine;
     std::vector<fvec2d> loops;
     std::vector<fcircle> circleMask;
-    unsigned int stepsPerCurveUnit;
+
     // the interpolated path
     SliderPathT interpolatedPath;
     Curve<SliderPathT::iterator> curve;
-    double epsilon;
 
     // cached variables
     float endBumperAngle;
@@ -75,6 +80,6 @@ private:
     unsigned int repeatsLeft;
     double progression;
     double curvePosition;
-    double velocity;
 };
-}
+
+NS_END

@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include "Color.hpp"
 
 NS_BEGIN
 
@@ -21,34 +22,38 @@ public:
 
     enum class EntryType
     {
-        String, Real, Integer, Vector, Boolean, Clump
+        String, Real, Integer, Vector, Boolean, Color, Clump
     };
 
     std::string &str(const std::string & = "null");
 
     std::string &name(const std::string & = "null");
 
-    double &real(const double = 0.0);
+    double &real(double = 0.0);
 
-    int &integer(const int = 0);
+    int &integer(int = 0);
 
     fvec2d &vec(const fvec2d & = {0.0, 0.0});
 
-    bool &boolean(const bool = false);
+    bool &boolean(bool = false);
 
-    const std::string &str(const std::string & = "null") const;
+    color &col(const color & = WHITE);
 
-    const std::string &name(const std::string & = "null") const;
+    [[nodiscard]] const std::string &str(const std::string & = "null") const;
 
-    const double &real(const double & = 0.0) const;
+    [[nodiscard]] const std::string &name(const std::string & = "null") const;
 
-    const int &integer(const int & = 0) const;
+    [[nodiscard]] const double &real(const double & = 0.0) const;
 
-    const fvec2d &vec(const fvec2d & = {0.0, 0.0}) const;
+    [[nodiscard]] const int &integer(const int & = 0) const;
 
-    const bool &boolean(const bool & = false) const;
+    [[nodiscard]] const fvec2d &vec(const fvec2d & = {0.0, 0.0}) const;
 
-    EntryType getType() const;
+    [[nodiscard]] const bool &boolean(const bool & = false) const;
+
+    [[nodiscard]] const color &col(const color & = WHITE) const;
+
+    [[nodiscard]] EntryType getType() const;
 
     // expose some of the underlying functions of std::map
     df2 &operator[](const std::string &key);
@@ -57,32 +62,31 @@ public:
 
     df2 &get(const std::string &key);
 
-    const df2 &get(const std::string &key) const;
+    [[nodiscard]] const df2 &get(const std::string &key) const;
 
-    std::map<const std::string, df2>::iterator find(const std::string &key);
+    [[nodiscard]] std::map<const std::string, df2>::iterator find(const std::string &key);
 
-    std::map<const std::string, df2>::const_iterator
-    find(const std::string &key) const;
+    [[nodiscard]] std::map<const std::string, df2>::const_iterator find(const std::string &key) const;
 
-    std::map<const std::string, df2>::iterator begin();
+    [[nodiscard]] std::map<const std::string, df2>::iterator begin();
 
-    std::map<const std::string, df2>::iterator end();
+    [[nodiscard]] std::map<const std::string, df2>::iterator end();
 
-    std::map<const std::string, df2>::reverse_iterator rbegin();
+    [[nodiscard]] std::map<const std::string, df2>::reverse_iterator rbegin();
 
-    std::map<const std::string, df2>::reverse_iterator rend();
+    [[nodiscard]] std::map<const std::string, df2>::reverse_iterator rend();
 
-    std::map<const std::string, df2>::const_iterator begin() const;
+    [[nodiscard]] std::map<const std::string, df2>::const_iterator begin() const;
 
-    std::map<const std::string, df2>::const_iterator end() const;
+    [[nodiscard]] std::map<const std::string, df2>::const_iterator end() const;
 
-    std::map<const std::string, df2>::const_reverse_iterator rbegin() const;
+    [[nodiscard]] std::map<const std::string, df2>::const_reverse_iterator rbegin() const;
 
-    std::map<const std::string, df2>::const_reverse_iterator rend() const;
+    [[nodiscard]] std::map<const std::string, df2>::const_reverse_iterator rend() const;
 
-    size_t getSize() const;
+    [[nodiscard]] size_t getSize() const;
 
-    bool isEmpty() const;
+    [[nodiscard]] bool isEmpty() const;
 
     static void enableLogging();
 
@@ -115,7 +119,7 @@ private:
     static bool enableSpam;
     static std::unordered_map<std::string, std::string> aliases;
 
-    using DataType = std::variant<std::string, double, int, fvec2d, bool>;
+    using DataType = std::variant<std::string, double, int, fvec2d, bool, color>;
 
     DataType data;
     std::string path;

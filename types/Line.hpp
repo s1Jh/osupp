@@ -25,36 +25,6 @@ using iline = line<int>;
 using uline = line<unsigned int>;
 using dline = line<double>;
 
-struct GLLine: public line<float>
-{
-    inline GLLine()
-    {
-        A = {0.0, 0.0};
-        B = {0.0, 0.0};
-    }
-
-    template<typename C>
-    explicit inline GLLine(const line<C> &other)
-        : line(other)
-    {
-        mesh.setAttributeDescriptors({
-                                         AttributeType::Vec2 // position
-                                     });
-        mesh.setRenderMode(RenderMode::Lines);
-        mesh.insertVertices({{A.x, A.y}, {B.x, B.y}});
-        mesh.insertIndices({0, 1});
-        if (!mesh.upload()) {
-            log::error("Failed uploading GLLine mesh");
-        }
-    }
-
-    explicit inline GLLine(fvec2d A, fvec2d B)
-        : GLLine(fline{A, B})
-    {}
-
-    Mesh mesh;
-};
-
 template<typename T>
 struct IsShape<line<T>>
 {

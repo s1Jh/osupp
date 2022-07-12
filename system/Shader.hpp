@@ -22,11 +22,15 @@ class Shader: public detail::Resource
 public:
     Shader();
 
-    bool fromString(const std::string &vert_src, const std::string &frag_src);
+    bool fromString(
+        const std::string &vert_src,
+        const std::string &frag_src,
+        const std::string &geom_src = ""
+    );
 
-    bool load(const std::string &path, Resources *res = nullptr) override;
+    bool load(const std::filesystem::path &path) override;
 
-    bool create(Resources *res = nullptr) override;
+    bool create() override;
 
     // Calls OpenGL's glUseProgram with it's id.
     void use() const;

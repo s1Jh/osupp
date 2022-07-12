@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <vector>
+#include <filesystem>
 
 NS_BEGIN
 
@@ -34,9 +35,9 @@ class Mesh: public detail::Resource
 public:
     Mesh();
 
-    bool load(const std::string &path, Resources *res) override;
+    bool load(const std::filesystem::path &path) override;
 
-    bool create(Resources *res) override;
+    bool create() override;
 
     using Vertex = std::vector<float>;
 

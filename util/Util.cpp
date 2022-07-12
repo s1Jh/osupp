@@ -80,6 +80,19 @@ SectionEntry::SectionEntry(const std::string &section)
 unsigned int DumpGlErrors()
 { return glGetError(); }
 
+std::vector<std::string> GetCharacterSeparatedValues(const std::string &in, char sep)
+{
+    std::vector<std::string> results;
+
+    std::stringstream ss(in);
+    std::string str;
+    while (getline(ss, str, sep)) {
+        results.push_back(str);
+    }
+
+    return results;
+}
+
 std::recursive_mutex log::coutMutex;
 
 #ifdef NDEBUG

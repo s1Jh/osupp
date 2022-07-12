@@ -175,6 +175,54 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                     break;
                 }
 
+                // all color types are prefixed with a #r,g,b,a
+
+                if (token_value.starts_with('#')) {
+                    auto data = token_value.substr(1);
+                    auto fields = GetCharacterSeparatedValues(data, ',');
+                    color &slot = parent[token_name].col();
+
+                    for (unsigned int c = 0; c < 4; c++) {
+                        uint8_t iValue;
+                        if (c >= fields.size()) {
+                            iValue = 255;
+                        }
+                        else {
+                            try {
+                                iValue = std::stoi(fields[c]);
+                            }
+                            catch (std::invalid_argument &e) {
+                                log::warning("[PARSE] Color value ", token_name, ", channel ", c, " has invalid form");
+                                iValue = 255;
+                            }
+                            catch (std::out_of_range &e) {
+                                log::warning("[PARSE] Color value ", token_name, ", channel ", c, " is out of range");
+                                iValue = 255;
+                            }
+                        }
+
+                        float value = float(iValue) / 255.0f;
+
+                        switch (c) {
+                            case 0:
+                                slot.r = value;
+                                break;
+                            case 1:
+                                slot.g = value;
+                                break;
+                            case 2:
+                                slot.b = value;
+                                break;
+                            case 3:
+                                slot.a = value;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                }
+
                 // try to convert to a numeric format
                 try {
                     double result = std::stod(token_value);
@@ -286,6 +334,13 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level)
             case df2::EntryType::Boolean:
                 accum << "$\"" << entry.first << '"';
                 break;
+                // "name" = "#R,G,B,A"
+            case df2::EntryType::Color: {
+                auto color = (color8) entry.second.col();
+                accum << '"' << entry.first << "\" = \"#" << color.r << ',' << color.g << ','
+                      << color.b << ',' << color.a << '"';
+                break;
+            }
                 // "name" = { ... }
             case df2::EntryType::Clump:
                 accum << '"' << entry.first << "\"\n";
@@ -419,6 +474,18 @@ bool &df2::boolean(const bool fallback)
     }
 }
 
+color &df2::col(const struct color &fallback)
+{
+    if (auto val = std::get_if<struct color>(&data)) {
+        return *val;
+    }
+    else {
+        type = df2::EntryType::Boolean;
+        data = DataType(fallback);
+        return std::get<struct color>(data);
+    }
+}
+
 const std::string &df2::str(const std::string &fallback) const
 {
     if (const auto val = std::get_if<std::string>(&data)) {
@@ -478,6 +545,16 @@ const fvec2d &df2::vec(const fvec2d &fallback) const
 const bool &df2::boolean(const bool &fallback) const
 {
     if (auto val = std::get_if<bool>(&data)) {
+        return *val;
+    }
+    else {
+        return fallback;
+    }
+}
+
+const color &df2::col(const struct color &fallback) const
+{
+    if (auto val = std::get_if<struct color>(&data)) {
         return *val;
     }
     else {

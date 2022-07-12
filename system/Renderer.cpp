@@ -45,9 +45,6 @@ bool Renderer::runTasks(double delta)
 {
     glfwPollEvents();
     camera.recalculateMatrix();
-
-    // if (resources)
-    //     resources->updateSprites(delta);
     return !glfwWindowShouldClose(windowHandle);
 }
 
@@ -115,7 +112,8 @@ bool Renderer::create(df2 &settings)
         return false;
     }
 
-    // glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_DEPTH_TEST);
+//    glDepthFunc(GL_LEQUAL);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #ifdef DEBUG
@@ -126,8 +124,6 @@ bool Renderer::create(df2 &settings)
     log::info("GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
     log::info("Renderer: ", glGetString(GL_RENDERER));
     log::info("Vendor: ", glGetString(GL_VENDOR));
-
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     glfwSwapInterval(0);
     glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -235,15 +231,55 @@ void Renderer::drawCircle(const dcircle &circ,
                      RenderMode::TriangleFan);
 }
 
-void Renderer::drawSegment(const GLLine &seg,
+void Renderer::drawSegment(const dline &seg,
                            const VisualAppearance &appearance,
                            const Mat3f &transform)
 {
-    if (!seg.mesh.isValid())
-        return;
+    lineShader.use();
+    CheckGLh("Set shader");
 
-    drawGenericShape(lineShader, seg.mesh, MAT3_NO_TRANSFORM<float>, appearance,
-                     transform, RenderMode::Lines);
+    lineShader.set("resolution", (fvec2d) getSize());
+    lineShader.set("transform", transform);
+    lineShader.set("camera", camera.getMatrix());
+    CheckGLh("Set shader matrices");
+
+    auto right = (float) Max(seg.A.x, seg.B.x);
+    auto left = (float) Min(seg.A.x, seg.B.x);
+    auto top = (float) Max(seg.A.y, seg.B.y);
+    auto bottom = (float) Min(seg.A.y, seg.B.y);
+
+    frect rect = {
+        {
+            left - right,
+            top - bottom
+        },
+        {
+            (left + right) / 2.0f,
+            (top + bottom) / 2.0f,
+        }
+    };
+
+    Mat3f shape = MakeScaleMatrix<float>(rect.size) *
+        MakeTranslationMatrix<float>(rect.position);
+
+    lineShader.set("z", appearance.zIndex);
+
+    lineShader.set("shape", shape);
+    CheckGLh("Set shader matrix");
+
+    lineShader.set("thickness", appearance.outlineWidth);
+    lineShader.set("fill", appearance.fillColor);
+    lineShader.set("A", seg.A);
+    lineShader.set("B", seg.B);
+    CheckGLh("Set shader params");
+
+    glBindVertexArray(rectShape.getVAO());
+    glDrawElements(static_cast<unsigned int>(GL_TRIANGLES), rectShape.getElementCount(), GL_UNSIGNED_INT, nullptr);
+    CheckGLh("draw");
+
+    Shader::unbind();
+    Texture::unbind(0);
+    CheckGLh("Unbound");
 }
 
 void Renderer::drawSprite(const Sprite &sprite, const Mat3f &transform)
@@ -267,9 +303,11 @@ void Renderer::drawCross(const fvec2d &pos, float size,
                          const VisualAppearance &appearance,
                          const Mat3f &transform)
 {
-    auto shape = MakeScaleMatrix(fvec2d{size, size}) * MakeTranslationMatrix(pos);
-    drawGenericShape(lineShader, crossShape, shape, appearance, transform,
-                     RenderMode::Lines);
+    size = size / 2.0f;
+    dline a = {pos + fvec2d{size, size}, pos + fvec2d{-size, -size}};
+    dline b = {pos + fvec2d{-size, size}, pos + fvec2d{size, -size}};
+    drawSegment(a, appearance, transform);
+    drawSegment(b, appearance, transform);
 }
 
 /*====================================================================================================================*/
@@ -354,6 +392,7 @@ void Renderer::drawGenericShape(const Shader &shader, const Mesh &mesh,
     shader.set("outline", appearance.outlineColor);
     shader.set("outline_width", appearance.outlineWidth);
     shader.set("blendMode", (int) appearance.blendMode);
+    lineShader.set("z", appearance.zIndex);
 
     shader.set("transform", transform);
     shader.set("camera", camera.getMatrix());

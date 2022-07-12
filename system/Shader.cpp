@@ -15,15 +15,17 @@
 
 NS_BEGIN
 
-bool Shader::load(const std::string &path, Resources *res)
+bool Shader::load(const std::filesystem::path &path)
 {
     log::info("Loading shader ", path);
-    std::string frag_src, vert_src;
+    std::string frag_src, vert_src, geom_src;
 
     vert_src = std::string("#version ") + GL_VERSION_STR + '\n' +
         GL_DEFAULT_VERTEX_SHADER;
     frag_src = std::string("#version ") + GL_VERSION_STR + '\n' +
         GL_DEFAULT_FRAGMENT_SHADER;
+    geom_src = "";
+
 
     std::ifstream ifs(path);
 
@@ -42,32 +44,58 @@ bool Shader::load(const std::string &path, Resources *res)
                     frag_src = "";
                     bin = 1;
                 }
+                if (line.find("geometry") != std::string::npos) {
+                    geom_src = "";
+                    bin = 2;
+                }
                 continue;
             }
 
-            if (bin == 0)
-                vert_src += line;
-            else
-                frag_src += line;
+            switch (bin) {
+                case 0:
+                    vert_src += line;
+                    break;
+                case 1:
+                    frag_src += line;
+                    break;
+                case 2:
+                    geom_src += line;
+                    break;
+                default:
+                    break;
+            }
         }
     }
     ifs.close();
-    return fromString(vert_src, frag_src);
+    return fromString(vert_src, frag_src, geom_src);
 }
 
 bool Shader::fromString(const std::string &vert_src,
-                        const std::string &frag_src)
+                        const std::string &frag_src,
+                        const std::string &geom_src)
 {
     log::info("Creating shader");
-    unsigned int vert = compileShader(vert_src, GL_VERTEX_SHADER);
-    unsigned int frag = compileShader(frag_src, GL_FRAGMENT_SHADER);
 
     id = glCreateProgram();
+
+    unsigned int vert = compileShader(vert_src, GL_VERTEX_SHADER);
     glAttachShader(id, vert);
+
+    unsigned int frag = compileShader(frag_src, GL_FRAGMENT_SHADER);
     glAttachShader(id, frag);
+
+    unsigned int geom = 0;
+    if (!geom_src.empty()) {
+        geom = compileShader(geom_src, GL_GEOMETRY_SHADER);
+        glAttachShader(id, geom);
+    }
+
     glLinkProgram(id);
     glDeleteShader(vert);
     glDeleteShader(frag);
+
+    if (geom != 0)
+        glDeleteShader(geom);
 
     int link_state;
     char info_log[512];
@@ -155,7 +183,7 @@ SHADER_MATRIX_SETTER_METHODS
 
 SHADER_INTER_CAST_SETTER_METHODS
 
-bool Shader::create(Resources *res)
+bool Shader::create()
 {
     return fromString(std::string("#version ") + GL_VERSION_STR + '\n' +
                           GL_DEFAULT_VERTEX_SHADER,

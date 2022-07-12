@@ -50,10 +50,10 @@ struct color8
 
     constexpr explicit color8(uint32_t rgba)
     {
-        r = rgba & (0xff << 0);
-        g = rgba & (0xff << 8);
-        b = rgba & (0xff << 16);
-        a = rgba & (0xff << 24);
+        r = (rgba & (0xff << 0)) >> 0;
+        g = (rgba & (0xff << 8)) >> 8;
+        b = (rgba & (0xff << 16)) >> 16;
+        a = (rgba & (0xff << 24)) >> 24;
     }
 
     uint8_t r, g, b, a;

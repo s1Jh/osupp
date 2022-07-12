@@ -19,6 +19,7 @@ set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
 set(OBJECT_DIRECTORY ${ROOT_DIRECTORY}/objects)
 set(BASES_DIRECTORY ${ROOT_DIRECTORY}/bases)
 set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
+set(ASSET_DIRECTORY ${ROOT_DIRECTORY}/assets)
 
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
@@ -31,6 +32,7 @@ set(DIRECTORIES
         ${BASES_DIRECTORY}
         ${SUI_DIRECTORY}
         ${ANIMATORS_DIRECTORY}
+        ${ASSET_DIRECTORY}
         )
 
 set(SOURCES
@@ -57,6 +59,7 @@ set(SOURCES
 
         ${LOADER_DIRECTORY}/OBJLoader.cpp
         ${LOADER_DIRECTORY}/MAPLoader.cpp
+        ${LOADER_DIRECTORY}/OSULoader.cpp
 
         ${GAMEMODE_DIRECTORY}/Standard.cpp
 
@@ -87,11 +90,14 @@ find_package(GLEW REQUIRED)
 include_directories(${DIRECTORIES})
 include_directories(${GLEW_INCLUDE_DIRS})
 
-add_compile_definitions(LINUX)
-add_compile_definitions(ARCH_AMD64)
-add_compile_definitions(DEBUG)
+set(PLATFORM LINUX)
+set(ARCHITECTURE ARCH_AMD64)
 
-add_executable(${TARGET_NAME} ${SOURCES})
+message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
+add_compile_definitions(${PLATFORM})
+add_compile_definitions(${ARCHITECTURE})
+
+add_executable(${TARGET_NAME} ${SOURCES} ${RES_SOURCES})
 
 # Set the proper warning levels
 if (MSVC)
@@ -99,6 +105,22 @@ if (MSVC)
 else ()
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()
+
+add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -P ${ROOT_DIRECTORY}/ConfigureFiles.cmake
+        )
+
+add_custom_target(CopyFiles
+        COMMAND ${CMAKE_COMMAND} -P ${ROOT_DIRECTORY}/ConfigureFiles.cmake
+        )
+
+# Set defines
+target_compile_definitions(${TARGET_NAME} PRIVATE
+        $<$<CONFIG:Debug>:DEBUG=1>
+        $<$<CONFIG:Release>:RELEASE=1>
+        $<$<CONFIG:RelWithDebInfo>:RELDEB=1>
+        $<$<CONFIG:MinSizeRel>:MINREL=1>
+        )
 
 target_link_libraries(${TARGET_NAME} glfw OpenGL::GL ${GLEW_LIBRARIES})
 

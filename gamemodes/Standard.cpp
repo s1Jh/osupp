@@ -21,14 +21,20 @@ void Standard::onUpdate(double delta)
                     // This object has already been passed and is invisible.
                     // We can assume it will not need to be checked anymore.
                     // Therefore, we will set the object after this as the next "last"
-                    // object. The onLogicUpdate loop will then start with that object,
+                    // object. The onUpdate loop will then start with that object,
                     // ignoring all objects before, who we've assumed to already be done.
                     auto nextIt = std::next(it);
-                    if (nextIt != activeObjects.end())
-                        if (last != nextIt &&
-                            (*last)->getEndTime() < (*nextIt)->getEndTime()) {
+                    if (last != nextIt) {
+                        if (nextIt == activeObjects.end()) {
+                            // first check if nextIt is the end, if it is so
+                            // just set it without checking for time as that would
+                            // cause access violation
+                            last = activeObjects.end();
+                        }
+                        else if ((*last)->getEndTime() < (*nextIt)->getEndTime()) {
                             last = nextIt;
                         }
+                    }
                     continue;
                 }
                 else {
@@ -91,29 +97,46 @@ void Standard::onUpdate(double delta)
     }
 
     // update the visuals
-    // playField->update(delta);
+    playField.update(delta);
 }
 
 void Standard::onDraw(NotOSU::Renderer &renderer)
 {
+    const auto &transform = getObjectTransform();
     // the "last" object should be the next visible object in line
     // we therefore onDraw every object until we hit one that is invisible
+    renderer.draw(playField, NotOSUObjectDrawInfo{.destination = getPlayField(), .transform = transform});
 
-    renderer.draw(playField, NotOSUObjectDrawInfo{});
+    if (last == activeObjects.end())
+        return;
 
-    for (auto it = last;; it++) {
-        if (it == activeObjects.end())
-            break;
+    // we need to reverse the order objects are drawn in, meaning that objects which will come next will be drawn last
+    // this is done so that the most relevant objects are always on top
 
-        const auto &obj = *it;
-        if (obj->getState() == HitObjectState::Invisible) {
-            if (!obj->isFinished())
-                break; // we are in not yet passed territory
-            else
-                continue; // skip drawing invisible object
+    // first find the last object that would be drawn
+    auto end = std::find_if(last, activeObjects.end(), [](const std::shared_ptr<BaseHitObject> &obj)
+    {
+        return (obj->getState() == HitObjectState::Invisible) && !obj->isFinished();
+    });
+
+    // render everything from the object before last to the current object
+    for (auto it = std::prev(end); it != std::prev(last); it--) {
+        auto ptr = *it;
+        ptr->draw(renderer);
+
+        renderer.drawCross(ptr->getEndPosition(), 0.1f, {.fillColor = RED, .zIndex = 1.0f}, transform);
+        renderer.drawCross(ptr->getStartPosition(), 0.1f, {.fillColor = GREEN, .zIndex = 1.0f}, transform);
+        if (it != last && it != std::prev(end)) {
+            fline connector{
+                (*it)->getEndPosition(),
+                (*std::next(it))->getStartPosition()
+            };
+            color tint = ORANGE;
+            tint.a = 0.5f;
+            renderer.drawSegment(connector, {.fillColor = tint}, transform);
         }
-        obj->draw(renderer);
     }
+
 }
 
 Standard::Standard(Game &instance)

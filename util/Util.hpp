@@ -5,6 +5,9 @@
 #include <iostream>
 #include <mutex>
 #include <vector>
+#include <algorithm>
+#include <cctype>
+#include <locale>
 
 NS_BEGIN
 
@@ -27,13 +30,63 @@ public:
 
 unsigned int DumpGlErrors();
 
+std::vector<std::string> GetCharacterSeparatedValues(const std::string &in, char sep);
+
 #define CheckGLFW detail::CheckGLFWErrors(__FILE__, __LINE__)
 #define CheckGL detail::CheckErrors(__FILE__, __LINE__)
 
 #define CheckGLFWh(_helper) detail::CheckGLFWErrors(__FILE__, __LINE__, _helper)
 #define CheckGLh(_helper) detail::CheckErrors(__FILE__, __LINE__, _helper)
 
-#define LOG_ENTER(_void) detail::SectionEntry __log_section(__PRETTY_FUNCTION__)
+#define LOG_ENTER(_void) detail::SectionEntry __log_section(__FUNCTION__)
+#define LOG_ENTERH(_custom) detail::SectionEntry __log_section(_custom)
+
+/**
+ * String trimming functions from https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring/217605#217605
+ */
+
+static inline void LTrim(std::string &s)
+{
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch)
+    {
+        return !std::isspace(ch);
+    }));
+}
+
+static inline void RTrim(std::string &s)
+{
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch)
+    {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+static inline void Trim(std::string &s)
+{
+    LTrim(s);
+    RTrim(s);
+}
+
+// trim from start (copying)
+static inline std::string LTrimCopy(std::string s)
+{
+    LTrim(s);
+    return s;
+}
+
+// trim from end (copying)
+static inline std::string RTrimCopy(std::string s)
+{
+    RTrim(s);
+    return s;
+}
+
+// trim from both ends (copying)
+static inline std::string TrimCopy(std::string s)
+{
+    Trim(s);
+    return s;
+}
 
 class log
 {
@@ -49,7 +102,7 @@ public:
     template<typename First, typename... Args>
     inline static void debug(First f, Args... msgs)
     {
-#ifndef NDEBUG
+#if(RELEASE != 1 || MINREL != 1)
         if (enableDebug) {
             custom("DEBUG", f, msgs...);
         }

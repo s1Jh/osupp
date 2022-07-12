@@ -4,12 +4,12 @@
 #include "Math.hpp"
 #include "Util.hpp"
 
-#define MAKE_CASE(TYPE)                                                        \
-  case HitObjectType::TYPE: {                                                  \
-    auto object = std::make_shared<TYPE>(                                      \
-        std::static_pointer_cast<ObjectTemplate##TYPE>(objectTemplate), this); \
-    activeObjects.push_front(object);                                          \
-    break;                                                                     \
+#define MAKE_CASE(TYPE)                                                         \
+  case HitObjectType::TYPE: {                                                   \
+    auto object = std::make_shared<TYPE>(                                       \
+        std::static_pointer_cast<ObjectTemplate##TYPE>(objectTemplate), *this); \
+    activeObjects.push_front(object);                                           \
+    break;                                                                      \
   }
 
 NS_BEGIN
@@ -34,13 +34,6 @@ void BaseGameMode::setCurrentTime(double newTime)
     }
 
     last = activeObjects.begin();
-
-    /*last = std::find_if(
-        activeObjects.begin(), activeObjects.end(),
-        [&](const std::shared_ptr<BaseHitObject>& object) -> bool {
-            return newTime <= object->getStartTime();
-        }
-    );*/
 }
 
 void BaseGameMode::update(double delta)
@@ -115,12 +108,6 @@ const Mat3f &BaseGameMode::getObjectTransform() const
 Game &BaseGameMode::getGame()
 { return instance; }
 
-const df2 &
-BaseGameMode::getHitObjectVisuals(const std::string &objectType) const
-{
-    return settings["objects"][objectType];
-}
-
 Resources &BaseGameMode::getResources()
 { return instance.getResourcePool(); }
 
@@ -136,10 +123,12 @@ float BaseGameMode::getApproachTime()
 {
     return info->getApproachTime(); /* * multiplier */
 }
+
 float BaseGameMode::getFadeTime()
 {
     return info->getFadeTime(); /* * multiplier */
 }
+
 float BaseGameMode::getHitWindow()
 {
     return info->getHitWindow(); /* * multiplier */

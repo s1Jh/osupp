@@ -1,6 +1,6 @@
 # ide stuff
-cmake-build-debug/
+cmake*/
 .idea/
 
 # default skin - only add once we all have custom assets
-assets/default
+assets/skins/default

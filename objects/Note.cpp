@@ -1,5 +1,7 @@
 #include "Note.hpp"
 
+#include "Random.hpp"
+
 #include <utility>
 
 NS_BEGIN
@@ -21,26 +23,27 @@ HitResult Note::onFinish()
     // negative if hit before the start time
     double hitDelta = getTimeFinished() - getStartTime();
     // should be in the interval < -hitWindow; +hitWindow >
-    int rank = 3 - Abs(int(3 * hitDelta / session->getHitWindow()));
+    int rank = 3 - Abs(int(3 * hitDelta / session.getHitWindow()));
     rank = Clamp(rank, 1, 3);
     return (HitResult) rank;
 }
 
-Note::Note(std::shared_ptr<ObjectTemplateNote> t, BaseGameMode *g)
+Note::Note(std::shared_ptr<ObjectTemplateNote> t, BaseGameMode &g)
     : HitObject(std::move(t), g)
 {
-    SOF = {session->getCircleSize(), objectTemplate->position};
+    SOF = {session.getCircleSize(), objectTemplate->position};
 
-    auto skin = session->getActiveSkin();
+    auto skin = session.getActiveSkin();
+    auto seed = Random::Scalar<unsigned int>();
 
-    noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE);
-    noteOverlay = skin->createObjectSprite(NOTE_OVERLAY_SPRITE);
-    noteUnderlay = skin->createObjectSprite(NOTE_UNDERLAY_SPRITE);
+    noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE, seed);
+    noteOverlay = skin->createObjectSprite(NOTE_OVERLAY_SPRITE, seed);
+    noteUnderlay = skin->createObjectSprite(NOTE_UNDERLAY_SPRITE, seed);
 }
 
 void Note::onDraw(Renderer &renderer)
 {
-    const auto &objectTransform = session->getObjectTransform();
+    const auto &objectTransform = session.getObjectTransform();
 
     NotOSUObjectDrawInfo info{SOF, getAlpha(), objectTransform};
 
@@ -74,4 +77,5 @@ double Note::getEndTime() const
 
 void Note::onReset()
 { wasHit = false; }
-}
+
+NS_END

@@ -8,7 +8,7 @@ NS_BEGIN
 class Spinner: public HitObject<ObjectTemplateSpinner>
 {
 public:
-    explicit Spinner(std::shared_ptr<ObjectTemplateSpinner>, BaseGameMode *);
+    explicit Spinner(std::shared_ptr<ObjectTemplateSpinner>, BaseGameMode &);
 
 protected:
     void onDraw(Renderer &renderer) override;
@@ -21,17 +21,17 @@ protected:
 
     void onPress() override;
 
-    void onRaise() override;
-
     HitResult onFinish() override;
 
     [[nodiscard]] bool needsApproachCircle() const override;
-
+    void onReset() override;
 private:
     NotOSUObjectSprite spinner;
     NotOSUObjectSprite spinnerCenter;
     NotOSUObjectSprite spinnerMeter;
     float RPM;
+    float rotationAccum;
+    unsigned int rotationsCompleted;
     float rotation;
     fvec2d lastVector;
 };

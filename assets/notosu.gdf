@@ -13,6 +13,5 @@ be added only by builds of that type.)
 
 "searchPaths"
 {
-	"0"="%GAMEDIR%/skins/default/textures"
-	"1"="%GAMEDIR%/skins/default/shaders"
+	"0"="%GAMEDIR%"
 }

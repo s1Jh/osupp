@@ -9,6 +9,7 @@
 #define GLFW_DLL
 
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
 #include "Line.hpp"
 #include "Math.hpp"
@@ -247,12 +248,12 @@ void Mesh::GLObjDeleter(Mesh::GLObjs *obj)
     CheckGLh("Buffer deletion");
 }
 
-bool Mesh::load(const std::string &path, Resources *res)
+bool Mesh::load(const std::filesystem::path &path)
 {
     return LoadOBJ(path, *this);
 }
 
-bool Mesh::create(Resources *res)
+bool Mesh::create()
 {
     setAttributeDescriptors({AttributeType::Vec2});
     insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
