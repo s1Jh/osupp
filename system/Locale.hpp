@@ -13,7 +13,9 @@ class Locale
 public:
     int loadFromFile(const std::filesystem::path &path);
 
-    inline const std::string &getTranslation(const std::string &key) const;
+    const std::string &getTranslation(const std::string &key) const;
+
+    const std::string &operator[](const std::string &key) const;
 
     const std::string &getTimeLocale() const;
 

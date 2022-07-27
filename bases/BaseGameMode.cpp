@@ -14,9 +14,8 @@
 
 NS_BEGIN
 
-BaseGameMode::BaseGameMode(Game &instance)
-    : info(nullptr), instance(instance), playField({1.0f, 1.0f}, {0.0f, 0.0f}),
-      currentTime(0.0)
+BaseGameMode::BaseGameMode()
+    : info(nullptr), playField(UNIT_RECT<float>), currentTime(0.0)
 {
     reset();
 }
@@ -45,11 +44,13 @@ void BaseGameMode::update(double delta)
 void BaseGameMode::draw(Renderer &gfx)
 { this->onDraw(gfx); }
 
-void BaseGameMode::setMap(MapInfo *newMap)
+void BaseGameMode::setMap(MapInfoP map)
 {
-    info = newMap;
+    info = map;
     activeObjects.clear();
 
+    int objectSeed = 0;
+    int comboSeed = 0;
     if (info) {
         auto templates = info->getObjectTemplates();
         for (const auto &objectTemplate: templates) {
@@ -61,6 +62,10 @@ void BaseGameMode::setMap(MapInfo *newMap)
                     log::warning("Corrupted map template: ", objectTemplate);
                     break;
             }
+
+            if (bool(objectTemplate->parameters & HitObjectParams::ComboEnd))
+                comboSeed++;
+            objectSeed++;
         }
     }
 
@@ -69,6 +74,7 @@ void BaseGameMode::setMap(MapInfo *newMap)
 
 void BaseGameMode::reset()
 {
+    log::debug("Resetting");
     if (info)
         currentTime = info->getStartOffset();
     else
@@ -79,6 +85,8 @@ void BaseGameMode::reset()
     }
 
     last = activeObjects.begin();
+
+    this->onReset();
 }
 
 const frect &BaseGameMode::getPlayField() const
@@ -87,7 +95,8 @@ const frect &BaseGameMode::getPlayField() const
 void BaseGameMode::setPlayField(const frect &field)
 {
     playField = field;
-    transform = MakeScaleMatrix(fvec2d(field.size)) *
+    auto smaller = Min(field.size.w, field.size.h);
+    transform = MakeScaleMatrix(fvec2d(smaller, smaller)) *
         MakeTranslationMatrix(field.position);
 }
 
@@ -95,29 +104,21 @@ fvec2d BaseGameMode::getCursorPosition() const
 {
     auto pos = Mouse::position();
     pos -= playField.position;
-    pos /= (fvec2d) playField.size;
+    auto smaller = Min(playField.size.w, playField.size.h);
+    pos /= fvec2d{smaller, smaller};
     return pos;
 }
 
-MapInfo *BaseGameMode::getMap() const
+MapInfoP BaseGameMode::getMap() const
 { return info; }
 
 const Mat3f &BaseGameMode::getObjectTransform() const
 { return transform; }
 
-Game &BaseGameMode::getGame()
-{ return instance; }
-
-Resources &BaseGameMode::getResources()
-{ return instance.getResourcePool(); }
-
 float BaseGameMode::getCircleSize()
 {
     return info->getCircleSize(); /* * multiplier */
 }
-
-SkinP BaseGameMode::getActiveSkin()
-{ return instance.getActiveSkin(); }
 
 float BaseGameMode::getApproachTime()
 {
@@ -133,5 +134,8 @@ float BaseGameMode::getHitWindow()
 {
     return info->getHitWindow(); /* * multiplier */
 }
+
+void BaseGameMode::onReset()
+{}
 
 NS_END

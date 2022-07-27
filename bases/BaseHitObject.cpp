@@ -46,6 +46,7 @@ void BaseHitObject::transferReady()
 
 void BaseHitObject::transferActive()
 {
+    timeStarted = session.getCurrentTime();
     state = HitObjectState::Active;
     finished = false;
 }
@@ -145,5 +146,10 @@ fvec2d BaseHitObject::getStartPosition() const
 
 fvec2d BaseHitObject::getEndPosition() const
 { return {0, 0}; }
+
+double BaseHitObject::getTimeStarted() const
+{
+    return timeStarted;
+}
 
 NS_END

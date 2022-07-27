@@ -33,6 +33,11 @@ enum class AnimationLayout: bool
     Horizontal, Vertical
 };
 
+enum BlendMode
+{
+    None, Multiply, Add, Subtract
+};
+
 namespace detail
 {
 

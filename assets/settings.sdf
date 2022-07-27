@@ -3,12 +3,16 @@
 "gfx"
 {
 	"fullscreen" = "0"
-	"height" = "1080"
+	"height" = "720"
 	"refresh_rate" = "60"
 	"resolution" = "64"
-	"width" = "1920"
+	"width" = "1280"
 }
 "user"
 {
 	"skin" = "default"
+}
+"paths"
+{
+	"0"="%GAMEDIR%"
 }

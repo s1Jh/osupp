@@ -2,7 +2,7 @@
 
 #include "Circle.hpp"
 #include "Enum.hpp"
-#include "Renderer.hpp"
+#include "Renderer.dpp"
 #include "define.hpp"
 
 NS_BEGIN
@@ -59,6 +59,8 @@ public:
     [[nodiscard]] HitObjectState getState() const;
 
     [[nodiscard]] double getTimeFinished() const;
+
+    [[nodiscard]] double getTimeStarted() const;
 
     void reset();
 
@@ -119,6 +121,7 @@ protected:
 
     fcircle SOF;
     bool finished;
+    double timeStarted;
     double timeFinished;
     BaseGameMode &session;
 

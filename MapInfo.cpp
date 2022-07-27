@@ -13,7 +13,7 @@ const MapInfo::StorageT &MapInfo::getObjectTemplates() const
     return objectTemplates;
 }
 
-void MapInfo::addNote(fvec2d position, bool comboEnd, double time)
+void MapInfo::addNote(const fvec2d &position, bool comboEnd, double time)
 {
     LOG_ENTER();
 
@@ -41,7 +41,7 @@ void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
 }
 
 void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
-                         double endTime)
+                         double endTime, const fvec2d &position)
 {
     LOG_ENTER();
 
@@ -50,6 +50,10 @@ void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
     object->spinRequired = spinRequired;
     object->spinResistance = spinResistance;
     object->endTime = endTime;
+    object->position = position;
+    if (position != fvec2d{0, 0}) {
+        object->free = true;
+    }
     insertElement(object);
 }
 

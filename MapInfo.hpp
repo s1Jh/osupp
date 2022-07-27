@@ -97,13 +97,13 @@ public:
 
     void clear();
 
-    void addNote(fvec2d position, bool comboEnd, double time);
+    void addNote(const fvec2d &position, bool comboEnd, double time);
 
     void addSlider(const SliderPathT &points, bool comboEnd, double time,
                    double endTime, CurveType type, unsigned int repeats = 1);
 
     void addSpinner(float spinRequired, float spinResistance, double time,
-                    double endTime);
+                    double endTime, const fvec2d &position = {0, 0});
 
 private:
     void insertElement(std::shared_ptr<BaseObjectTemplate>);

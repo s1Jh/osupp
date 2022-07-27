@@ -1,5 +1,7 @@
 #pragma once
 
+#include "define.hpp"
+
 #include "AnimateTexture.hpp"
 #include "BaseGameMode.hpp"
 #include "BaseHitObject.hpp"
@@ -8,7 +10,7 @@
 #include "Math.hpp"
 #include "Util.hpp"
 #include "Vec2.hpp"
-#include "define.hpp"
+#include "Context.hpp"
 
 #include <memory>
 #include <string>
@@ -41,7 +43,7 @@ protected:
 
     [[nodiscard]] float getAlpha() const override;
 
-    NotOSUObjectSprite approachCircle;
+    ObjectSprite approachCircle;
     std::shared_ptr<TemplateT> objectTemplate;
 };
 
@@ -53,7 +55,7 @@ HitObject<TemplateT>::HitObject(std::shared_ptr<TemplateT> trackedTemplate,
 {
 
     approachCircle =
-        session.getActiveSkin()->createObjectSprite(APPROACH_CIRCLE_SPRITE);
+        GetContext().activeSkin->createObjectSprite(APPROACH_CIRCLE_SPRITE);
 }
 
 template<typename TemplateT>
@@ -209,7 +211,7 @@ void HitObject<TemplateT>::draw(Renderer &renderer)
         acSize = Max(acSize, 0.0);
 
         renderer.draw(approachCircle,
-                      {{{acSize, acSize}, SOF.position}, getAlpha(), objectTransform});
+                      ObjectDrawInfo{{{acSize, acSize}, SOF.position}, getAlpha(), objectTransform});
     }
 
     this->onDraw(renderer);
@@ -238,7 +240,7 @@ template<typename TemplateT>
 requires IsTemplateV<TemplateT>
 void HitObject<TemplateT>::onReset()
 {
-    auto &pool = session.getGame().getResourcePool();
+    auto &pool = GetContext().resources;
     approachCircle.setTexture(pool.get<Texture>(APPROACH_CIRCLE_SPRITE));
 }
 NS_END

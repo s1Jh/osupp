@@ -19,11 +19,11 @@
 
 NS_BEGIN
 
-Mesh::Mesh()
+Mesh::Mesh() noexcept
     : renderMode(RenderMode::Triangles)
 { clear(); }
 
-void Mesh::clear()
+void Mesh::clear() noexcept
 {
     vertices.clear();
     indices.clear();
@@ -111,7 +111,7 @@ const Mat4<float> &Mesh::getTransform() const
 { return meshTransform; }
 
 void Mesh::setTransform(Mat4<float> mat)
-{ meshTransform = mat; }
+{ meshTransform = std::move(mat); }
 
 bool Mesh::isValid() const
 {
@@ -260,6 +260,69 @@ bool Mesh::create()
     insertIndices({0, 1, 2});
 
     return upload();
+}
+
+void detail::RenderFunctor<Mesh>::operator()(Renderer &renderer,
+                                             const Mesh &mesh,
+                                             const Shader &shader,
+                                             const Shader::Uniforms &uniforms,
+                                             const Shader::Textures &textures,
+                                             const Mat3f &transform)
+{
+    if (!mesh.isValid())
+        return;
+
+    shader.use();
+    CheckGLh("Bound shader");
+
+    for (auto &uniform: uniforms) {
+#define MATCHF(type)                                                           \
+  if constexpr (std::is_same_v<T, type>)                                       \
+    shader.set(uniform.first, arg);
+#define MATCH(type)                                                            \
+  else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, arg);
+#define MATCHP(type)                                                           \
+  else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, *arg);
+#define END_MATCH()                                                            \
+  else log::warning("Unable to deduce type for shader uniform ", uniform.first);
+        std::visit(
+            [&](auto &&arg)
+            {
+                using T = std::decay_t<decltype(arg)>;
+                MATCHF(float)
+                MATCH(int)MATCH(unsigned int) MATCH(double) MATCH(fvec2d) MATCH(ivec2d)MATCH(uvec2d) MATCH(dvec2d) MATCH(
+                    fvec3d) MATCH(ivec3d)MATCH(uvec3d) MATCH(dvec3d) MATCH(fvec4d) MATCH(ivec4d)MATCH(uvec4d) MATCH(
+                    dvec4d) MATCH(color) MATCHP(fvec2d *)MATCHP(ivec2d *) MATCHP(uvec2d *) MATCHP(dvec2d *)MATCHP(fvec3d *) MATCHP(
+                    ivec3d *) MATCHP(uvec3d *)MATCHP(dvec3d *) MATCHP(fvec4d *)MATCHP(ivec4d *) MATCHP(uvec4d *)MATCHP(
+                    dvec4d *) MATCHP(Mat2f *)MATCHP(Mat3f *) MATCHP(Mat4f *)MATCHP(color *) END_MATCH()
+            },
+            uniform.second);
+#undef MATCHF
+#undef MATCH
+#undef MATCHP
+#undef END_MATCH
+    }
+    CheckGLh("Set shader uniforms");
+
+    shader.set("transform", transform);
+    shader.set("camera", renderer.camera.getMatrix());
+    DumpGlErrors();
+
+    for (auto &texture: textures) {
+        texture.second->use(texture.first);
+    }
+    CheckGLh("Bound textures");
+
+    glBindVertexArray(mesh.getVAO());
+    glDrawElements(static_cast<unsigned int>(mesh.getRenderMode()),
+                   mesh.getElementCount(), GL_UNSIGNED_INT, nullptr);
+    CheckGLh("draw");
+
+    Shader::unbind();
+    for (auto &texture: textures) {
+        Texture::unbind(texture.first);
+    }
+    CheckGLh("Unbound");
 }
 
 NS_END

@@ -3,10 +3,11 @@
 #include "Math.hpp"
 
 NS_BEGIN
+
 void Spinner::onLogicUpdate(double delta)
 {
     if (isActive()) {
-        auto cursor = Normalize(session.getCursorPosition());
+        auto cursor = Normalize(session.getCursorPosition() - objectTemplate->position);
         auto alpha = (float) Cross(lastVector, cursor);
 
         RPM = float(double(Abs(alpha) / 2.0_pi) / delta * 60.0);
@@ -31,7 +32,7 @@ void Spinner::onUpdate(double delta)
 
 void Spinner::onBegin()
 {
-    lastVector = Normalize(session.getCursorPosition());
+    lastVector = Normalize(session.getCursorPosition() - objectTemplate->position);
 }
 
 HitResult Spinner::onFinish()
@@ -45,13 +46,13 @@ HitResult Spinner::onFinish()
 Spinner::Spinner(std::shared_ptr<ObjectTemplateSpinner> t, BaseGameMode &g)
     : HitObject(std::move(t), g), RPM(0.0), rotationAccum(0.0f), rotationsCompleted(0), rotation(0.0f)
 {
-    auto skin = session.getActiveSkin();
+    const auto &skin = GetContext().activeSkin;
 
     spinner = skin->createObjectSprite(SPINNER_SPRITE);
     spinnerCenter = skin->createObjectSprite(SPINNER_CENTER_SPRITE);
     spinnerMeter = skin->createObjectSprite(SPINNER_METER_SPRITE);
 
-    SOF = {2.0f, {0.0f, 0.0f}};
+    SOF = {objectTemplate->free ? session.getCircleSize() : 2.0f, objectTemplate->position};
 }
 
 void Spinner::onPress()
@@ -64,11 +65,14 @@ void Spinner::onDraw(Renderer &renderer)
     auto alpha = getAlpha();
     const auto &objectTransform = session.getObjectTransform();
 
-    frect all = {{0.8f, 0.8f}, {0.f, 0.f}};
+    auto size = objectTemplate->free ? session.getCircleSize() : 0.8f;
 
-    NotOSUObjectDrawInfo spinnerInfo{all, alpha, objectTransform};
-    NotOSUObjectDrawInfo spinnerCenterInfo{
-        all, alpha, (Mat3f) Transform2D{.rotate = rotation} * objectTransform};
+    frect all = {{size, size}, objectTemplate->position};
+
+    ObjectDrawInfo spinnerInfo{all, alpha, objectTransform};
+    ObjectDrawInfo spinnerCenterInfo{
+        all, alpha,
+        (Mat3f) Transform2D{.rotate = rotation, .rotationCenter = objectTemplate->position} * objectTransform};
 
     renderer.draw(spinner, spinnerInfo);
     renderer.draw(spinnerCenter, spinnerCenterInfo);
@@ -84,4 +88,4 @@ void Spinner::onReset()
     rotationsCompleted = 0;
 }
 
-}
+NS_END

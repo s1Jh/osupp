@@ -8,7 +8,7 @@ NS_BEGIN
 
 constexpr double SLIDER_DIRECTION_EPSILON = 0.01;
 
-constexpr double SLIDER_ANGLE_OPT_THRESHOLD = 0.005;
+constexpr double SLIDER_ANGLE_OPT_THRESHOLD = 0.05;
 
 constexpr double SLIDER_DISTANCE_OPT_THRESHOLD = 0.1;
 
@@ -53,13 +53,13 @@ private:
     ShaderP bodyShader;
     Mesh body;
 
-    NotOSUObjectSprite bodyTexture;
-    NotOSUObjectSprite ball;
-    NotOSUObjectSprite head;
-    NotOSUObjectSprite headRepeat;
-    NotOSUObjectSprite tail;
-    NotOSUObjectSprite tailRepeat;
-    NotOSUObjectSprite hitPoint;
+    ObjectSprite bodyTexture;
+    ObjectSprite ball;
+    ObjectSprite head;
+    ObjectSprite headRepeat;
+    ObjectSprite tail;
+    ObjectSprite tailRepeat;
+    ObjectSprite hitPoint;
 
     std::list<fvec2d> meshOutline;
     std::vector<fvec2d> meshSpine;
@@ -76,6 +76,8 @@ private:
 
     // state
     TravelDirection currentDirection;
+    bool active;
+    bool broken;
     bool started;
     unsigned int repeatsLeft;
     double progression;

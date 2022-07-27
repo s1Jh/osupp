@@ -4,6 +4,8 @@
 #include "Resource.hpp"
 
 #include <unordered_map>
+#include <vector>
+#include <string>
 
 NS_BEGIN
 
@@ -31,7 +33,9 @@ struct ResourcePile
 
     void loadOne(const std::string &name, const std::filesystem::path &pathPrefix = "");
 
-    static const char *persistentAssets[];
+    unsigned int purgeUnusedFiles();
+
+    static const std::vector<std::string> allowedFileExtensions;
     std::unordered_map<std::string, StorageT> loadedAssets;
     StorageT null;
     Resources &resourceRef;

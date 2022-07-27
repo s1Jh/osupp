@@ -11,19 +11,19 @@ namespace detail
 {
 // 15 spaces was good enough for NASA, good enough for us
 template<typename T> requires std::floating_point<T>
-constexpr T PI = 3.141592653589793;
+constexpr T implPI = 3.141592653589793;
 
 template<typename T> requires std::floating_point<T>
-constexpr T E = 2.7182818284590452;
+constexpr T implE = 2.7182818284590452;
 } // namespace detail
 
-constexpr auto PI = detail::PI<double>;
+constexpr auto PI = detail::implPI<double>;
 
-constexpr auto fPI = detail::PI<float>;
+constexpr auto fPI = detail::implPI<float>;
 
-constexpr auto E = detail::E<double>;
+constexpr auto E = detail::implE<double>;
 
-constexpr auto fE = detail::E<float>;
+constexpr auto fE = detail::implE<float>;
 
 constexpr double SIN45 = 0.707106781;
 
@@ -99,6 +99,22 @@ vec2d<T1> BiLerp(vec2d<T1> a, vec2d<T2> b, T3 x)
     v.y = Lerp(a.y, b.y, x);
 
     return v;
+}
+
+template<typename T>
+requires std::floating_point<T>
+T SmoothStep(T x, T min = 0, T max = 1)
+{
+    if (x < min)
+        return 0;
+
+    if (x >= max)
+        return 1;
+
+    // Scale/bias into [0..1] range
+    x = (x - min) / (max - min);
+
+    return x * x * (3.0 - 2.0 * x);
 }
 
 template<typename T, size_t I>

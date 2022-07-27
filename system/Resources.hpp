@@ -59,12 +59,26 @@ public:
     requires IsResource<T>
     std::shared_ptr<T> load(const std::string &name, const std::filesystem::path &path = "");
 
+    template<typename T>
+    requires IsResource<T>
+    void loadDirectory(const std::filesystem::path &path);
+
+    template<typename T>
+    requires IsResource<T>
+    void getDirectory(const std::filesystem::path &path, std::vector<std::shared_ptr<T>> &returnAssets);
+
     void addSearchPath(const std::filesystem::path &path);
 
     void clearSearchPaths();
 
     std::filesystem::path findFile(const std::filesystem::path &pathIn,
-                                   const std::filesystem::path &pathPrefix = "") const;
+                                   const std::filesystem::path &pathPrefix = "",
+                                   const std::vector<std::string> &allowedExts = {}) const;
+
+    std::vector<std::filesystem::path> findFiles(const std::filesystem::path &pathPrefix,
+                                                 const std::vector<std::string> &allowedExts = {}) const;
+
+    unsigned int purgeUnusedFiles();
 
 private:
 #define RESOURCE_POOL(_Type, _Name, ...) detail::ResourcePile<_Type> _Name;
@@ -82,10 +96,6 @@ requires IsResource<T>
 int ResourcePile<T>::loadPersistent()
 {
     null->create();
-
-//    for (unsigned int i = 0; i < ARRAY_SIZE(persistentAssets); i++) {
-//        load(persistentAssets[i]);
-//    }
     return 0;
 }
 
@@ -147,6 +157,14 @@ requires IsResource<T> ResourcePile<T>::ResourcePile(Resources &res)
     null = std::make_shared<T>();
 }
 
+template<typename T>
+requires IsResource<T>
+unsigned int ResourcePile<T>::purgeUnusedFiles()
+{
+    std::erase_if(loadedAssets, [](const auto &asset)
+    { return asset.second.use_count() <= 1; });
+}
+
 } // namespace detail
 
 template<typename T>
@@ -183,7 +201,7 @@ template<typename T>
 requires IsResource<T>
 std::shared_ptr<T> Resources::get(const std::string &name, const std::filesystem::path &path)
 {
-    auto fullPath = findFile(name, path);
+    auto fullPath = findFile(name, path, detail::ResourcePile<T>::allowedFileExtensions);
     if (fullPath.empty())
         return getDefault<T>();
 
@@ -202,7 +220,7 @@ template<typename T>
 requires IsResource<T>
 std::shared_ptr<T> Resources::load(const std::string &name, const std::filesystem::path &path)
 {
-    auto fullPath = findFile(name, path);
+    auto fullPath = findFile(name, path, detail::ResourcePile<T>::allowedFileExtensions);
     if (fullPath.empty())
         return getDefault<T>();
 
@@ -215,6 +233,24 @@ std::shared_ptr<T> Resources::load(const std::string &name, const std::filesyste
     else {
         WRAP_CONSTEXPR_ASSERTION("This type is not managed by the resource manager");
     }
+}
+template<typename T>
+requires IsResource<T>
+void Resources::loadDirectory(const std::filesystem::path &path)
+{
+    auto files = findFiles(path, detail::ResourcePile<T>::allowedFileExtensions);
+
+    for (const auto &file: files)
+        load<T>(file);
+}
+
+template<typename T>
+requires IsResource<T>
+void Resources::getDirectory(const std::filesystem::path &path, std::vector<std::shared_ptr<T>> &returnAssets)
+{
+    auto files = findFiles(path, detail::ResourcePile<T>::allowedFileExtensions);
+    for (const auto &file: files)
+        returnAssets.push_back(get<T>(file));
 }
 
 NS_END

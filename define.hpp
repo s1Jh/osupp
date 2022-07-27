@@ -21,7 +21,8 @@
 // use to prevent useless indentation
 #ifdef PROJECT_NAMESPACE
 #define NS_BEGIN namespace PROJECT_NAMESPACE {
-#define NS_END } // PROJECT_NAMESPACE
+#define NS_END }
+
 #else
 #define NS_BEGIN namespace GAME_TITLE {
 #define NS_END } // GAME_TITLE
@@ -90,6 +91,14 @@ constexpr const char *PLATFORM = "Linux";
 #error("No platform defined")
 #endif
 
+#ifndef CONFIG_FILE
+constexpr const char *CONFIG_PATH = "settings.sdf";
+#else
+
+constexpr const char *CONFIG_PATH = TOSTRING(CONFIG_FILE);
+
+#endif
+
 constexpr const char *BUILD_DATE = __DATE__;
 
 constexpr const char *BUILD_TIME = __TIME__;
@@ -101,6 +110,8 @@ constexpr int VERSION_MINOR = 3;
 constexpr int VERSION_PATCH = 0;
 
 constexpr const char *GL_VERSION_STR = "330 core";
+
+constexpr const char *GL_VERSION_PREPROCESSOR = "#version 330 core";
 
 constexpr const char *GL_DEFAULT_FRAGMENT_SHADER =
     "out vec4 fragColor;"

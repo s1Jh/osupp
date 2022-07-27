@@ -49,7 +49,8 @@ public:
         fvec2d coord = {(float) v.x / 512.f, (float) v.y / 384.f};
         coord *= 2.f;
         coord -= 1.0f;
-        coord.y *= -(384.f / 512.f);
+        coord.y *= -1;
+        coord.x *= (512.f / 384.f);
         return coord;
     }
 
@@ -68,12 +69,17 @@ public:
     }
 
     template<typename T>
-    static T GetParam(const std::vector<std::string> &params, unsigned int param, T backup = 0) noexcept
+    static T GetParam(const std::vector<std::string> &params, unsigned int param, T backup) noexcept
     {
         if (param >= params.size())
             return backup;
 
-        return static_cast<T>(std::strtod(params[param].c_str(), nullptr));
+        if constexpr (std::is_same_v<T, std::string>)
+            return params[param];
+        else if constexpr (std::is_arithmetic_v<T>)
+            return static_cast<T>(std::strtod(params[param].c_str(), nullptr));
+
+        return backup;
     }
 
     bool read(const std::filesystem::path &path)
@@ -81,19 +87,12 @@ public:
         std::ifstream ifs(path);
 
         if (!ifs.is_open()) {
+            log::error("Unable to open file");
             return false;
         }
 
-        std::string strLine, identifier;
-
-        std::getline(ifs, strLine);
+        std::string strLine;
         std::istringstream line(strLine);
-
-        line >> identifier;
-        if (identifier != "osu") {
-            ifs.close();
-            return false;
-        }
 
         Section section = DontCare;
 
@@ -217,6 +216,8 @@ public:
         if (meta.contains(name)) {
             if constexpr (std::is_same_v<T, std::string>)
                 return meta[name];
+            else if constexpr (std::is_same_v<T, const char *>)
+                return meta[name].c_str();
             else if constexpr (std::is_arithmetic_v<T>)
                 return static_cast<T>(std::strtod(meta[name].c_str(), nullptr));
             else
@@ -229,6 +230,8 @@ public:
     void operator()(MapInfo &map)
     {
         /*
+        https://osu.ppy.sh/wiki/en/Client/File_formats/Osu_(file_format)
+
         General:
             Option 	                    Value type 	Description
             ------------------------------------------------------------------------------------------------------------
@@ -327,7 +330,6 @@ public:
             if (object.type & 1 << 0) {
                 // note
                 map.addNote(object.position, comboEnd, object.time);
-
             }
             else if (object.type & 1 << 1) {
                 // slider
@@ -343,7 +345,7 @@ public:
 
                 int repeats = GetParam<int>(object.objectParams, 1, 0);
 
-                auto curveParams = GetCharacterSeparatedValues(object.objectParams[0], '|');
+                auto curveParams = GetCharacterSeparatedValues(GetParam<std::string>(object.objectParams, 0, ""), '|');
 
                 for (unsigned int i = 1; i < curveParams.size(); i++) {
                     const auto &param = curveParams[i];
@@ -357,7 +359,11 @@ public:
                 }
 
                 CurveType type;
-                switch (curveParams[0].front()) {
+
+                auto curveType = GetParam<std::string>(curveParams, 0, "");
+
+                // TODO: uncomment once all types of curve interpolation are finished
+                switch (curveType.front()) {
                     case 'B':
                         type = CurveType::Bezier;
                         break;
@@ -380,7 +386,9 @@ public:
             }
             else if (object.type & 1 << 3) {
                 // spinner
-
+                // x,y,time,type,hitSound,endTime,hitSample
+                map.addSpinner(0, 0, object.time,
+                               TimeConversion(GetParam<int>(object.objectParams, 0, int(object.time * 1000.0))));
             }
 
         }

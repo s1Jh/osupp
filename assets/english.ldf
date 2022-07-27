@@ -1,0 +1,38 @@
+
+"locale" {
+
+    "translations" {
+        "setting.gfx.width" = "Window width"
+        "setting.gfx.height" = "Window height"
+        "setting.gfx.fullscreen" = "Fullscreen?"
+        "setting.gfx.refresh_rate" = "Window refresh rate"
+        "setting.gfx.resolution" = "Rendering resolution"
+        "setting.user.skin" = "Skin"
+        "ui.main.settings.title" = "Settings"
+        "ui.main.title" = "Control panel"
+        "ui.main.about.title" = "About"
+        "ui.main.debug.title" = "Debug"
+        "ui.main.maps.title" = "Maps"
+        "ui.main.maps.caption" = "Map listing:"
+        "ui.main.maps.name" = "Name"
+        "ui.main.maps.length" = "Length"
+        "ui.main.maps.filter" = "Search maps:"
+        "ui.main.maps.reload" = "Reload maps"
+        "ui.main.maps.exit" = "Exit"
+        "ui.main.settings.read" = "Read"
+        "ui.main.settings.write" = "Write"
+        "ui.main.settings.filter" = "Search setting:"
+        "ui.main.settings.key" = "Key"
+        "ui.main.settings.value" = "Value"
+        "ui.main.debug.purge" = "Purge unused assets"
+        "ui.main.debug.theme" = "Set ImGui theme"
+        "ui.main.debug.theme.light" = "Light"
+        "ui.main.debug.theme.dark" = "Dark"
+        "ui.main.debug.theme.classic" = "Classic (Blue-ish)"
+        "ui.main.about.imgui_version" = "ImGui version"
+        "ui.main.about.game_version" = "Game version"
+        "ui.main.version.version" = "Version: %i.%i.%i (%s %s)"
+        "ui.main.version.build" = "Build: %s %s %s"
+        "ui.main.version.title" = "Game version"
+    }
+}

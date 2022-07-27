@@ -25,10 +25,11 @@ protected:
 
     [[nodiscard]] bool needsApproachCircle() const override;
     void onReset() override;
+
 private:
-    NotOSUObjectSprite spinner;
-    NotOSUObjectSprite spinnerCenter;
-    NotOSUObjectSprite spinnerMeter;
+    ObjectSprite spinner;
+    ObjectSprite spinnerCenter;
+    ObjectSprite spinnerMeter;
     float RPM;
     float rotationAccum;
     unsigned int rotationsCompleted;

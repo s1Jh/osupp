@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Mesh.hpp"
 #include "Traits.hpp"
 #include "Util.hpp"
 #include "Vec2.hpp"

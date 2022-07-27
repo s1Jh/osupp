@@ -6,29 +6,15 @@
 
 NS_BEGIN
 
-namespace detail
-{
+template<> const std::vector<std::string> detail::ResourcePile<Texture>::allowedFileExtensions = {".png", ".jpg"};
 
-template<>
-const char *ResourcePile<Texture>::persistentAssets[] = {
-    NOTE_BASE_SPRITE, NOTE_OVERLAY_SPRITE,
-    NOTE_UNDERLAY_SPRITE, APPROACH_CIRCLE_SPRITE,
-    SLIDER_HEAD_SPRITE, SLIDER_TAIL_SPRITE,
-    SLIDER_HEAD_REPEAT_SPRITE, SLIDER_TAIL_REPEAT_SPRITE,
-    SLIDER_BODY_SPRITE, SPINNER_SPRITE,
-    SPINNER_CENTER_SPRITE
-};
+template<> const std::vector<std::string> detail::ResourcePile<Shader>::allowedFileExtensions = {".shader"};
 
-template<>
-const char *ResourcePile<Shader>::persistentAssets[] = {SLIDER_SHADER};
+template<> const std::vector<std::string> detail::ResourcePile<Mesh>::allowedFileExtensions = {".obj"};
 
-template<> const char *ResourcePile<Mesh>::persistentAssets[] = {""};
+template<> const std::vector<std::string> detail::ResourcePile<MapInfo>::allowedFileExtensions = {".map", ".osu"};
 
-template<> const char *ResourcePile<MapInfo>::persistentAssets[] = {""};
-
-template<> const char *ResourcePile<Skin>::persistentAssets[] = {"default"};
-
-} // namespace detail
+template<> const std::vector<std::string> detail::ResourcePile<Skin>::allowedFileExtensions = {".skin"};
 
 int Resources::loadPersistentAssets()
 {
@@ -57,14 +43,25 @@ void Resources::clearSearchPaths()
 
 std::filesystem::path
 Resources::findFile(const std::filesystem::path &pathIn,
-                    const std::filesystem::path &pathPrefix) const
+                    const std::filesystem::path &pathPrefix,
+                    const std::vector<std::string> &allowedExts) const
 {
     for (auto &path: searchPaths) {
         auto concatPath = path / pathPrefix / pathIn.parent_path();
         if (std::filesystem::is_directory(concatPath))
             for (auto &fileInPath:
                 std::filesystem::recursive_directory_iterator(concatPath)) {
-                auto fileName = fileInPath.path().stem().string();
+                if (std::filesystem::is_directory(fileInPath)) {
+                    continue;
+                }
+                auto thisPath = fileInPath.path();
+                auto fileName = thisPath.stem().string();
+
+                if (!allowedExts.empty()) {
+                    auto ext = thisPath.extension().string();
+                    if (std::find(allowedExts.begin(), allowedExts.end(), ext) == allowedExts.end())
+                        continue;
+                }
 
                 if (fileName == pathIn.stem().string()) {
                     return fileInPath.path();
@@ -75,6 +72,35 @@ Resources::findFile(const std::filesystem::path &pathIn,
     return pathIn;
 }
 
+std::vector<std::filesystem::path>
+Resources::findFiles(const std::filesystem::path &pathPrefix,
+                     const std::vector<std::string> &allowedExts) const
+{
+    std::vector<std::filesystem::path> ret;
+
+    for (auto &path: searchPaths) {
+        auto concatPath = path / pathPrefix;
+        if (std::filesystem::is_directory(concatPath))
+            for (auto &fileInPath:
+                std::filesystem::recursive_directory_iterator(concatPath)) {
+                if (fileInPath.is_directory()) {
+                    continue;
+                }
+                auto thisPath = fileInPath.path();
+
+                if (!allowedExts.empty()) {
+                    auto ext = thisPath.extension().string();
+                    if (std::find(allowedExts.begin(), allowedExts.end(), ext) == allowedExts.end())
+                        continue;
+                }
+
+                ret.push_back(thisPath);
+            }
+    }
+
+    return ret;
+}
+
 Resources::Resources()
     :
 #define RESOURCE_POOL(_Type, _Name, ...) _Name(*this),
@@ -82,5 +108,16 @@ Resources::Resources()
 #undef RESOURCE_POOL
     searchPaths()
 {}
+
+unsigned int Resources::purgeUnusedFiles()
+{
+    unsigned int total = 0;
+
+#define RESOURCE_POOL(_Type, _Name, ...) total += _Name.purgeUnusedFiles();
+    RESOURCE_POOLS
+#undef RESOURCE_POOL
+
+    return total;
+}
 
 NS_END

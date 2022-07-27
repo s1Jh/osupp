@@ -12,7 +12,7 @@ NS_BEGIN
 class df2
 {
 public:
-    df2();
+    df2() noexcept;
 
     static df2 read(const std::string &path);
 

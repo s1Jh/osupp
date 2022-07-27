@@ -1,8 +1,10 @@
 #pragma once
 
+#include "define.hpp"
 #include "Matrix.hpp"
 #include "Resource.hpp"
-#include "define.hpp"
+#include "Renderer.dpp"
+#include "Shader.hpp"
 
 #include <memory>
 #include <vector>
@@ -33,7 +35,7 @@ enum class RenderMode
 class Mesh: public detail::Resource
 {
 public:
-    Mesh();
+    Mesh() noexcept;
 
     bool load(const std::filesystem::path &path) override;
 
@@ -45,7 +47,7 @@ public:
 
     void setTransform(Mat4<float>);
 
-    void clear();
+    void clear() noexcept;
 
     void setAttributeDescriptors(std::vector<AttributeType> descriptors);
 
@@ -112,5 +114,11 @@ private:
 };
 
 using MeshP = std::shared_ptr<Mesh>;
+
+BEGIN_RENDER_FUNCTOR_DECL(Mesh, const Shader &shader,
+                          const Shader::Uniforms &shaderUniforms = {},
+                          const Shader::Textures &textures = {},
+                          const Mat3f &transform = MAT3_NO_TRANSFORM<float>)
+END_RENDER_FUNCTOR_DECL()
 
 NS_END

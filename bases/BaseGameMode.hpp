@@ -1,14 +1,15 @@
 #pragma once
 
+#include "define.hpp"
+
 #include "BaseHitObject.hpp"
-#include "Game.hpp"
 #include "Keyboard.hpp"
 #include "MapInfo.hpp"
 #include "Mouse.hpp"
-#include "Renderer.hpp"
-#include "define.hpp"
+#include "Renderer.dpp"
+#include "Skin.hpp"
 
-#include <forward_list>
+#include <list>
 
 NS_BEGIN
 
@@ -17,7 +18,7 @@ class BaseGameMode
 public:
     using StorageT = std::list<std::shared_ptr<BaseHitObject>>;
 
-    explicit BaseGameMode(Game &instance);
+    explicit BaseGameMode();
 
     virtual void update(double delta);
 
@@ -31,19 +32,15 @@ public:
 
     void setPlayField(const frect &playField);
 
-    [[nodiscard]] MapInfo *getMap() const;
+    [[nodiscard]] MapInfoP getMap() const;
 
-    void setMap(MapInfo *map);
+    void setMap(MapInfoP map);
 
     void reset();
 
     [[nodiscard]] fvec2d getCursorPosition() const;
 
     [[nodiscard]] const Mat3f &getObjectTransform() const;
-
-    [[nodiscard]] Game &getGame();
-
-    [[nodiscard]] Resources &getResources();
 
     [[nodiscard]] float getCircleSize();
 
@@ -53,19 +50,18 @@ public:
 
     [[nodiscard]] float getHitWindow();
 
-    [[nodiscard]] SkinP getActiveSkin();
-
 protected:
     virtual void onUpdate(double delta) = 0;
 
     virtual void onDraw(Renderer &) = 0;
 
+    virtual void onReset();
+
     StorageT::iterator last;
     StorageT activeObjects;
-    MapInfo *info;
+    MapInfoP info;
     Keyboard keyboard;
     Mouse mouse;
-    Game &instance;
 
 private:
     Mat3f transform;

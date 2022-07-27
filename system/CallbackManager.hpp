@@ -10,8 +10,7 @@
 #include <memory>
 #include <type_traits>
 
-namespace GAME_TITLE
-{
+NS_BEGIN
 
 namespace detail
 {

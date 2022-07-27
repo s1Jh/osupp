@@ -21,7 +21,7 @@ HitResult Note::onFinish()
         return HitResult::Missed;
     }
     // negative if hit before the start time
-    double hitDelta = getTimeFinished() - getStartTime();
+    double hitDelta = getTimeStarted() - getStartTime();
     // should be in the interval < -hitWindow; +hitWindow >
     int rank = 3 - Abs(int(3 * hitDelta / session.getHitWindow()));
     rank = Clamp(rank, 1, 3);
@@ -33,7 +33,7 @@ Note::Note(std::shared_ptr<ObjectTemplateNote> t, BaseGameMode &g)
 {
     SOF = {session.getCircleSize(), objectTemplate->position};
 
-    auto skin = session.getActiveSkin();
+    const auto &skin = GetContext().activeSkin;
     auto seed = Random::Scalar<unsigned int>();
 
     noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE, seed);
@@ -45,7 +45,7 @@ void Note::onDraw(Renderer &renderer)
 {
     const auto &objectTransform = session.getObjectTransform();
 
-    NotOSUObjectDrawInfo info{SOF, getAlpha(), objectTransform};
+    ObjectDrawInfo info{SOF, getAlpha(), objectTransform};
 
     renderer.draw(noteUnderlay, info);
     renderer.draw(noteBase, info);

@@ -1,0 +1,58 @@
+#pragma once
+
+#include "define.hpp"
+
+#include "Camera.hpp"
+#include "Size.hpp"
+#include "df2.hpp"
+#include "Drawable.hpp"
+
+typedef struct GLFWwindow GLFWwindow;
+
+NS_BEGIN
+
+class Renderer
+{
+public:
+    Camera2D camera;
+
+    Renderer();
+
+    ~Renderer();
+
+    bool create();
+
+    void destroy();
+
+    bool setMode(int width, int height, bool fullscreen, int refreshRate = 60);
+
+    bool runTasks(double delta);
+
+    void begin();
+
+    void end();
+
+    [[nodiscard]] isize getSize() const;
+
+    GLFWwindow *getWindowHandle();
+
+    template<typename T, typename ... ArgT>
+    requires IsDrawable<T>
+    inline void draw(const T &obj, ArgT... vaArgs)
+    {
+        detail::RenderFunctor<T> functor;
+        functor(*this, obj, vaArgs...);
+    }
+
+    void clear(const color &color);
+
+private:
+
+    static void onError(int code, const char *msg);
+
+    static void onResize(GLFWwindow *window, int width, int height);
+
+    GLFWwindow *windowHandle;
+};
+
+NS_END

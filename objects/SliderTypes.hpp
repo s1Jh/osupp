@@ -37,4 +37,5 @@ struct ActiveSliderNode: public BaseCurveNode
 
 using SliderPathT = std::list<SliderNode>;
 using ActiveSliderPathT = std::list<ActiveSliderNode>;
-}
+
+NS_END

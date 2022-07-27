@@ -19,7 +19,7 @@ df2 df2::null;
 void df2::reload()
 { *this = read(path); }
 
-df2::df2()
+df2::df2() noexcept
     : type(df2::EntryType::Clump)
 {}
 
@@ -85,8 +85,9 @@ std::string df2::getToken(const std::string &string, size_t start,
                 found_first = true;
                 continue;
             }
-            else
+            else {
                 break;
+            }
         if (found_first) {
             // Remove invalid characters
             if (filtered_chars.find(string.at(i)) == std::string::npos) {
@@ -100,7 +101,7 @@ std::string df2::getToken(const std::string &string, size_t start,
         }
     }
 
-    return std::string(accum.data(), accum.size());
+    return {accum.data(), accum.size()};
 }
 
 void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
@@ -297,13 +298,27 @@ bool df2::write(df2 &def, const std::string &path)
 
     std::string str_repr(char_repr.str());
 
+    // replace all aliases back to their aliased form
+    for (auto &alias: aliases) {
+        size_t start_pos = 0;
+        std::stringstream replss;
+        replss << alias.second;
+        std::string repl = replss.str();
+
+        while ((start_pos = str_repr.find(repl)) != std::string::npos) {
+            str_repr.replace(start_pos, repl.length(), '%' + alias.first + '%');
+        }
+    }
+
     std::ofstream ofs(path, std::ios::out | std::ios::ate);
     if (!ofs.is_open()) {
         // Check if it exists, if not, tell the user and return.
         log::info("Failed to write file: ", path);
         return false;
     }
-    ofs.write(char_repr.str().c_str(), char_repr.str().size());
+
+    ofs.write(str_repr.c_str(), str_repr.size());
+
     ofs.close();
     return true;
 }

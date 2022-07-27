@@ -1,7 +1,7 @@
 #pragma once
 
 #include "HitObject.tpp"
-#include "NotOSUObjectSprite.hpp"
+#include "ObjectSprite.hpp"
 #include "NoteTemplate.hpp"
 #include "define.hpp"
 
@@ -33,9 +33,9 @@ protected:
 
 private:
     bool wasHit = false;
-    NotOSUObjectSprite noteBase;
-    NotOSUObjectSprite noteOverlay;
-    NotOSUObjectSprite noteUnderlay;
+    ObjectSprite noteBase;
+    ObjectSprite noteOverlay;
+    ObjectSprite noteUnderlay;
 };
 
 NS_END

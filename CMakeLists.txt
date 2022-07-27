@@ -12,13 +12,14 @@ set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
 set(SUI_DIRECTORY ${SYSTEM_DIRECTORY}/SUI)
+set(DRAWABLES_DIRECTORY ${SYSTEM_DIRECTORY}/drawables)
+set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
 set(TYPES_DIRECTORY ${ROOT_DIRECTORY}/types)
 set(UTIL_DIRECTORY ${ROOT_DIRECTORY}/util)
 set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
 set(OBJECT_DIRECTORY ${ROOT_DIRECTORY}/objects)
 set(BASES_DIRECTORY ${ROOT_DIRECTORY}/bases)
-set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
 set(ASSET_DIRECTORY ${ROOT_DIRECTORY}/assets)
 
 set(DIRECTORIES
@@ -32,6 +33,7 @@ set(DIRECTORIES
         ${BASES_DIRECTORY}
         ${SUI_DIRECTORY}
         ${ANIMATORS_DIRECTORY}
+        ${DRAWABLES_DIRECTORY}
         ${ASSET_DIRECTORY}
         )
 
@@ -48,7 +50,21 @@ set(SOURCES
         ${SYSTEM_DIRECTORY}/Resources.cpp
         ${SYSTEM_DIRECTORY}/Mesh.cpp
         ${SYSTEM_DIRECTORY}/Camera.cpp
-        #${SYSTEM_DIRECTORY}/SUI.cpp
+        ${SYSTEM_DIRECTORY}/Context.cpp
+        ${SYSTEM_DIRECTORY}/Locale.cpp
+        ${SYSTEM_DIRECTORY}/Main.cpp
+        ${SYSTEM_DIRECTORY}/State.cpp
+        ${SYSTEM_DIRECTORY}/StateHandler.cpp
+        # ${SYSTEM_DIRECTORY}/SUI.cpp
+
+
+        ${SYSTEM_DIRECTORY}/imgui/imgui.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_draw.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_demo.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_impl_glfw.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_impl_opengl3.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_tables.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_widgets.cpp
 
         #${SUI_DIRECTORY}/Button.cpp
         #${SUI_DIRECTORY}/Image.cpp
@@ -56,6 +72,13 @@ set(SOURCES
         ${UTIL_DIRECTORY}/Math.cpp
         ${UTIL_DIRECTORY}/Util.cpp
         ${UTIL_DIRECTORY}/Curve.cpp
+        ${UTIL_DIRECTORY}/Log.cpp
+
+        ${ANIMATORS_DIRECTORY}/AnimateTexture.cpp
+        ${ANIMATORS_DIRECTORY}/DisableAfter.cpp
+        ${ANIMATORS_DIRECTORY}/MoveLinear.cpp
+
+        ${DRAWABLES_DIRECTORY}/Drawables.cpp
 
         ${LOADER_DIRECTORY}/OBJLoader.cpp
         ${LOADER_DIRECTORY}/MAPLoader.cpp
@@ -71,12 +94,10 @@ set(SOURCES
         ${BASES_DIRECTORY}/BaseGameMode.cpp
         ${BASES_DIRECTORY}/BaseObjectTemplate.cpp
 
-        ${ANIMATORS_DIRECTORY}/AnimateTexture.cpp
-        ${ANIMATORS_DIRECTORY}/DisableAfter.cpp
-        ${ANIMATORS_DIRECTORY}/MoveLinear.cpp
-
-        NotOSUObjectSprite.cpp
-        Game.cpp
+        ObjectSprite.cpp
+        StateInGame.cpp
+        StateInit.cpp
+        StateMainMenu.cpp
         MapInfo.cpp
         Skin.cpp
         )

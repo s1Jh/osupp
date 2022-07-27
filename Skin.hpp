@@ -2,7 +2,7 @@
 
 #include "define.hpp"
 
-#include "NotOSUObjectSprite.hpp"
+#include "ObjectSprite.hpp"
 #include "Resource.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
@@ -17,6 +17,15 @@ NS_BEGIN
 class Skin: public detail::Resource
 {
 public:
+    enum class ColourAssignmentMode: uint8_t
+    {
+        Object = 0 << 0,        // bit 0 and 1
+        Combo = 1 << 0,
+        Map = 2 << 0,
+        Random = 0 << 2,        // bit 2
+        Sequential = 1 << 2,
+    };
+
     Skin() = default;
 
     bool load(const std::filesystem::path &path, Resources *res);
@@ -28,10 +37,10 @@ public:
 
     ShaderP getShader(const std::string &object) const;
 
-    NotOSUObjectSprite createObjectSprite(const std::string &object,
-                                          unsigned int objectSeed = 0,
-                                          unsigned int comboSeed = 0,
-                                          unsigned int mapSeed = 0) const;
+    ObjectSprite createObjectSprite(const std::string &object,
+                                    unsigned int objectSeed = 0,
+                                    unsigned int comboSeed = 0,
+                                    unsigned int mapSeed = 0) const;
 
 private:
     bool load([[maybe_unused]] const std::filesystem::path &path) override

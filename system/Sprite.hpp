@@ -4,6 +4,8 @@
 #include "Texture.hpp"
 #include "define.hpp"
 #include "df2.hpp"
+#include "Renderer.dpp"
+#include "Shader.hpp"
 
 #include <memory>
 #include <type_traits>
@@ -88,6 +90,8 @@ public:
 
     void setTint(const color &tint);
 
+    void setRect(const drect &tint);
+
     [[nodiscard]] dsize getClipRectSize() const;
 
     [[nodiscard]] dvec2d getClipRectPosition() const;
@@ -110,6 +114,8 @@ public:
 
     [[nodiscard]] const fvec2d &getPivotPoint() const;
 
+    [[nodiscard]] const drect &getRect() const;
+
 private:
     std::vector<std::shared_ptr<detail::BaseAnimator>> animators;
     color tint;
@@ -120,5 +126,9 @@ private:
     drect clippingRect;
     TextureP texture;
 };
+
+BEGIN_RENDER_FUNCTOR_DECL(Sprite, const Mat3f& = MAT3_NO_TRANSFORM<float>)
+        Shader shader;
+END_RENDER_FUNCTOR_DECL()
 
 NS_END

@@ -118,4 +118,9 @@ void Texture::setClipArea(const frect &rect)
 const Mat3f &Texture::getUVTransform() const
 { return clip; }
 
+unsigned int Texture::getID() const
+{
+    return *glTexture;
+}
+
 NS_END

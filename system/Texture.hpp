@@ -36,6 +36,8 @@ public:
 
     static void unbind(unsigned int index);
 
+    [[nodiscard]] unsigned int getID() const;
+
 private:
     static void GLTexDeleter(unsigned int *ptr);
 

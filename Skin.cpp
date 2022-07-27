@@ -20,10 +20,9 @@ bool Skin::load(const std::filesystem::path &path, Resources *res)
         return false;
     }
 
-    directory = path;
+    directory = path.parent_path();
 
-    std::string dfPath = path / "skin.df";
-    df2 settings = df2::read(dfPath);
+    df2 settings = df2::read(path);
 
     for (const auto &entry: settings["textures"]) {
         if (!textures.contains(entry.first)) {
@@ -35,7 +34,7 @@ bool Skin::load(const std::filesystem::path &path, Resources *res)
         // apply settings
         const auto &fields = entry.second;
 
-        std::filesystem::path texPath = std::filesystem::path(path);
+        std::filesystem::path texPath = directory;
         if (fields.find("texturePath") != fields.end()) {
             texPath /= fields["texturePath"].str(entry.first);
             object.path = texPath.string();
@@ -67,7 +66,7 @@ bool Skin::load(const std::filesystem::path &path, Resources *res)
         success &= bool(shader.second.shader);
     }
 
-    log::info("Loaded skin ", dfPath);
+    log::info("Loaded skin ", path);
     return success;
 }
 
@@ -167,14 +166,14 @@ ShaderP Skin::getShader(const std::string &object) const
     return nullptr;
 }
 
-NotOSUObjectSprite Skin::createObjectSprite(const std::string &object,
-                                            unsigned int objectSeed,
-                                            unsigned int comboSeed,
-                                            unsigned int mapSeed) const
+ObjectSprite Skin::createObjectSprite(const std::string &object,
+                                      unsigned int objectSeed,
+                                      unsigned int comboSeed,
+                                      unsigned int mapSeed) const
 {
     LOG_ENTER();
 
-    NotOSUObjectSprite ret;
+    ObjectSprite ret;
 
     if (textures.contains(object)) {
         ret.setFPS(textures.at(object).animationFPS);

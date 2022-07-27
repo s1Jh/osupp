@@ -2,12 +2,21 @@
 
 #include "Math.hpp"
 #include "Util.hpp"
+#include "Context.hpp"
+
+#include "imgui/imgui.h"
 
 NS_BEGIN
 
 void Standard::onUpdate(double delta)
 {
+    // update the visuals
+    playField.update(delta);
+
     // objects are sorted by order of appearance
+    int updates = 0;
+    printCounter++;
+    auto start = std::chrono::high_resolution_clock::now();
     for (auto it = last;; it++) {
         if (it == activeObjects.end())
             return;
@@ -15,6 +24,7 @@ void Standard::onUpdate(double delta)
         auto &obj = *it;
 
         obj->update(delta);
+        updates++;
         switch (obj->getState()) {
             case HitObjectState::Invisible:
                 if (obj->isFinished()) {
@@ -41,6 +51,21 @@ void Standard::onUpdate(double delta)
                     // The object is ahead of our field of vision, since objects are sorted
                     // by order of appearance, all objects ahead of this one will also be
                     // invisible. We therefore stop checking and return.
+
+                    rollingUPF += updates;
+                    auto duration = std::chrono::high_resolution_clock::now() - start;
+                    auto micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+                    rollingUT += micros;
+
+                    if (printCounter >= 60) {
+                        averageUPF = double(rollingUPF) / 60.0;
+                        averageUT = double(rollingUT) / 60.0;
+
+                        printCounter = 0;
+                        rollingUT = 0;
+                        rollingUPF = 0;
+                    }
+
                     return;
                 }
             case HitObjectState::Ready: {
@@ -87,7 +112,7 @@ void Standard::onUpdate(double delta)
                 // The object cannot be interacted with yet
             case HitObjectState::Pickup: {
                 auto score = obj->finish();
-                log::info("SCORE: ", (int) score);
+//                log::info("SCORE: ", (int) score);
             }
             case HitObjectState::Fading:
             case HitObjectState::Approaching:
@@ -95,17 +120,26 @@ void Standard::onUpdate(double delta)
                 break;
         }
     }
-
-    // update the visuals
-    playField.update(delta);
 }
 
-void Standard::onDraw(NotOSU::Renderer &renderer)
+void Standard::onDraw(Renderer &renderer)
 {
+    ImGui::SetNextWindowPos({0, 0});
+    ImGui::SetNextWindowCollapsed(false);
+
+    if (ImGui::Begin("Performance", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar)) {
+        ImGui::Text("UPF: %f, (%f us)", averageUPF, averageUT);
+        double UPS = 1000000.0 / averageUT;
+        ImGui::SameLine();
+        ImGui::Text("UPS: %f", UPS);
+        ImGui::End();
+    }
+
     const auto &transform = getObjectTransform();
     // the "last" object should be the next visible object in line
     // we therefore onDraw every object until we hit one that is invisible
-    renderer.draw(playField, NotOSUObjectDrawInfo{.destination = getPlayField(), .transform = transform});
+    renderer.draw(playField, ObjectDrawInfo{.destination = getPlayField()});
 
     if (last == activeObjects.end())
         return;
@@ -124,8 +158,8 @@ void Standard::onDraw(NotOSU::Renderer &renderer)
         auto ptr = *it;
         ptr->draw(renderer);
 
-        renderer.drawCross(ptr->getEndPosition(), 0.1f, {.fillColor = RED, .zIndex = 1.0f}, transform);
-        renderer.drawCross(ptr->getStartPosition(), 0.1f, {.fillColor = GREEN, .zIndex = 1.0f}, transform);
+        renderer.draw(ptr->getEndPosition(), 0.1f, VisualAppearance{.fillColor = RED, .zIndex = 1.0f}, transform);
+        renderer.draw(ptr->getStartPosition(), 0.1f, VisualAppearance{.fillColor = GREEN, .zIndex = 1.0f}, transform);
         if (it != last && it != std::prev(end)) {
             fline connector{
                 (*it)->getEndPosition(),
@@ -133,16 +167,20 @@ void Standard::onDraw(NotOSU::Renderer &renderer)
             };
             color tint = ORANGE;
             tint.a = 0.5f;
-            renderer.drawSegment(connector, {.fillColor = tint}, transform);
+            renderer.draw(connector, VisualAppearance{.fillColor = tint}, transform);
         }
-    }
 
+        color tint = PURPLE;
+        tint.a = 0.5f;
+        renderer.draw(ptr->getSOF(), VisualAppearance{.fillColor = tint}, transform);
+    }
 }
 
-Standard::Standard(Game &instance)
-    : BaseGameMode(instance)
+void Standard::onReset()
 {
-    playField = getActiveSkin()->createObjectSprite(PLAY_FIELD_SPRITE);
+    const auto skin = GetContext().activeSkin;
+    if (skin)
+        playField = skin->createObjectSprite(PLAY_FIELD_SPRITE);
 }
 
 NS_END

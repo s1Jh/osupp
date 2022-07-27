@@ -155,4 +155,37 @@ void Sprite::setPivotPoint(const fvec2d &pivotPointIn)
     pivotPoint = pivotPointIn;
 }
 
+void Sprite::setRect(const drect &newRect)
+{
+    position = newRect;
+}
+
+const drect &Sprite::getRect() const
+{
+    return position;
+}
+
+BEGIN_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(Sprite)
+{
+    shader.load("sprite.shader");
+}
+
+void detail::RenderFunctor<Sprite>::operator()(Renderer &renderer, const Sprite &sprite, const Mat3f &transform)
+{
+    const auto &spriteShader = getData().shader;
+
+    Mat3f shape =
+        MakeScaleMatrix<float>(sprite.getSize()) *
+            MakeRotationMatrix<float>(sprite.getRotation(), sprite.getPivotPoint()) *
+            MakeTranslationMatrix<float>(sprite.getPosition());
+    Mat3f texture = MakeScaleMatrix<float>(sprite.getClipRectSize()) *
+        MakeTranslationMatrix<float>(sprite.getClipRectPosition());
+
+    renderer.draw(sprite.getRect(), VisualAppearance{
+        .texture = sprite.getTexture().get(),
+        .uvTransform = &texture,
+        .fillColor = sprite.getTint()
+    }, transform);
+}
+
 NS_END

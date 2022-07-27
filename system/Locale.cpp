@@ -48,9 +48,15 @@ const std::string &Locale::getLocCredits() const
 const std::string &Locale::getTranslation(const std::string &key) const
 {
     if (translations.find(key) != translations.end())
-        return translations[key];
-    else
+        return translations.at(key);
+    else {
         return key;
+    }
+}
+
+const std::string &Locale::operator[](const std::string &key) const
+{
+    return getTranslation(key);
 }
 
 NS_END

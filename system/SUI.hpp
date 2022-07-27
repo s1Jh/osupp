@@ -13,7 +13,7 @@
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 #include "Rect.hpp"
-#include "Renderer.hpp"
+#include "Renderer.dpp"
 #include "df2.hpp"
 
 NS_BEGIN
