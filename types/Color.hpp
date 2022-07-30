@@ -35,6 +35,14 @@ struct color
         rval |= ((uint32_t) (a * 255.f)) << 24;
         return rval;
     }
+    inline explicit operator std::string() const
+    {
+        return std::string("(")
+            + std::to_string(r) + ' '
+            + std::to_string(g) + ' '
+            + std::to_string(b) + ' '
+            + std::to_string(a) + ')';
+    }
 };
 
 struct color8
@@ -69,6 +77,15 @@ struct color8
         rval |= ((uint32_t) (a)) << 24;
         return rval;
     }
+
+    inline explicit operator std::string() const
+    {
+        return std::string("(")
+            + std::to_string(r) + ' '
+            + std::to_string(g) + ' '
+            + std::to_string(b) + ' '
+            + std::to_string(a) + ')';
+    }
 };
 
 inline color::operator color8() const
@@ -79,8 +96,7 @@ inline color8::operator color() const
 
 inline std::ostream &operator<<(std::ostream &os, const color &dt)
 {
-    os << std::hex << "(" << dt.r << " " << dt.g << " " << dt.b << " " << dt.a
-       << ")";
+    os << "(" << dt.r << " " << dt.g << " " << dt.b << " " << dt.a << ")";
 
     return os;
 }

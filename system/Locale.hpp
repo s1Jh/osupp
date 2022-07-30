@@ -27,6 +27,8 @@ public:
 
     const std::string &getLocCredits() const;
 
+    void showDebugListings(bool *open = nullptr) const;
+
 private:
     std::string timeLocale;
     std::string dateLocale;

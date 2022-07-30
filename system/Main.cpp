@@ -22,11 +22,13 @@ int main()
 
     auto &ctx = GetContext();
 
-    ctx.locale.loadFromFile("english.ldf");
-
     df2::addAlias("GAMEDIR", std::filesystem::current_path());
+    ctx.resources.addSearchPath(std::filesystem::current_path());
 
-    ctx.settings = df2::read(CONFIG_PATH);
+    ctx.settings.read();
+
+    auto locale = ctx.settings.addSetting<std::string>("setting.user.locale", std::string("english.ldf"));
+    ctx.locale.loadFromFile(locale.get());
 
     if (!ctx.gfx.create()) {
         return 1;
@@ -49,6 +51,25 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(ctx.gfx.getWindowHandle(), true);
     ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
 
+    ctx.settings.addSetting<bool>("test.bool1", false, false);
+    ctx.settings.addSetting<bool>("test.bool2", true, false);
+    ctx.settings.addSetting<bool>("test.bool3", false, false);
+    ctx.settings.addSetting<bool>("test.bool4", true, false);
+    ctx.settings.addSetting<bool>("test.bool5", false, false);
+    ctx.settings.addSetting<bool>("test.bool6", false, false);
+
+    ctx.settings.addSetting<color>("test.color1", PURPLE, false);
+    ctx.settings.addSetting<color>("test.color2", GREEN, false);
+    ctx.settings.addSetting<color>("test.color3", GRAY, false);
+    ctx.settings.addSetting<color>("test.color4", BLUE, false);
+    ctx.settings.addSetting<color>("test.color5", MAGENTA, false);
+    ctx.settings.addSetting<color>("test.color6", TURQUOISE, false);
+
+    ctx.settings.addSetting<color>("test.pallette", PURPLE, false,
+                                   std::vector<color>{PURPLE, AZURE, BEIGE, COBALT_BLUE, BRONZE, GOLD, SILVER});
+
+    auto backFill = ctx.settings.addSetting<color>("debug.backfill", BLACK, false);
+
     ctx.state.setState(GameState::INITIAL_STATE);
 
     while (ctx.state.isRunning()) {
@@ -60,17 +81,18 @@ int main()
         if (ctx.keyboard[Key::Ctrl + Key::Q].releasing)
             ctx.state.setState(GameState::Exit);
 
-        ctx.state.update(delta);
-
-        ctx.gfx.begin();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ctx.state.update(delta);
+
+        ctx.gfx.begin(backFill.get());
         ctx.state.draw();
         ImGui::Render();
         auto data = ImGui::GetDrawData();
         if (data)
             ImGui_ImplOpenGL3_RenderDrawData(data);
+
         ctx.gfx.end();
 
         if (!ctx.gfx.runTasks(delta))
@@ -82,7 +104,7 @@ int main()
     }
 
     log::custom("GREETING", "Goodbye, world!");
-    df2::write(ctx.settings, CONFIG_PATH);
+    ctx.settings.write();
     ctx.gfx.destroy();
     std::exit(0);
 }

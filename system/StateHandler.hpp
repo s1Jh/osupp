@@ -22,6 +22,8 @@ public:
     void exit();
 
 private:
+
+    static std::string Stringify(const GameState &state);
     GameState currentState;
     GameState nextState;
     std::unique_ptr<detail::BaseState> currentStatePtr;

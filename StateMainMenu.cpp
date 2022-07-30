@@ -4,6 +4,7 @@
 #include "Texture.hpp"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
@@ -18,7 +19,11 @@ void State<GameState::MainMenu>::showDebugControl()
     static unsigned int purged = 0;
     static bool showVersion = false;
     static bool showAssetPurge = false;
+    static bool showLocalisations = false;
     static bool showImGuiVersion = false;
+    static bool showImGuiDebugger = false;
+    static bool showImGuiLogger = false;
+    static bool showImGuiStack = false;
 
     if (showVersion) {
         if (ImGui::Begin(ctx.locale["ui.main.version.title"].c_str(),
@@ -37,6 +42,12 @@ void State<GameState::MainMenu>::showDebugControl()
 
     if (showImGuiVersion)
         ImGui::ShowAboutWindow(&showImGuiVersion);
+    if (showImGuiLogger)
+        ImGui::ShowDebugLogWindow(&showImGuiLogger);
+    if (showImGuiDebugger)
+        ImGui::ShowMetricsWindow(&showImGuiDebugger);
+    if (showImGuiStack)
+        ImGui::ShowStackToolWindow(&showImGuiStack);
 
     if (showAssetPurge) {
         if (ImGui::Begin(ctx.locale["ui.main.purge.title"].c_str(),
@@ -45,6 +56,9 @@ void State<GameState::MainMenu>::showDebugControl()
             ImGui::Text(ctx.locale["ui.main.purge.message"].c_str(), purged);
             ImGui::End();
         }
+    }
+    if (showLocalisations) {
+        ctx.locale.showDebugListings(&showLocalisations);
     }
 
     auto size = (fsize) GetContext().gfx.getSize();
@@ -68,16 +82,31 @@ void State<GameState::MainMenu>::showDebugControl()
                 showAssetPurge = true;
                 purged = ctx.resources.purgeUnusedFiles();
             }
+            if (ImGui::MenuItem(ctx.locale["ui.main.debug.localisations"].c_str())) {
+                showLocalisations = true;
+            }
 
-            if (ImGui::BeginMenu(ctx.locale["ui.main.debug.theme"].c_str())) {
-                if (ImGui::MenuItem(ctx.locale["ui.main.debug.theme.light"].c_str())) {
-                    ImGui::StyleColorsLight();
+            if (ImGui::BeginMenu(ctx.locale["ui.main.debug.imgui"].c_str())) {
+                if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.debugger"].c_str())) {
+                    showImGuiDebugger = true;
                 }
-                if (ImGui::MenuItem(ctx.locale["ui.main.debug.theme.dark"].c_str())) {
-                    ImGui::StyleColorsDark();
+                if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.logger"].c_str())) {
+                    showImGuiLogger = true;
                 }
-                if (ImGui::MenuItem(ctx.locale["ui.main.debug.theme.classic"].c_str())) {
-                    ImGui::StyleColorsClassic();
+                if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.stack"].c_str())) {
+                    showImGuiStack = true;
+                }
+                if (ImGui::BeginMenu(ctx.locale["ui.main.debug.imgui.theme"].c_str())) {
+                    if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.theme.light"].c_str())) {
+                        ImGui::StyleColorsLight();
+                    }
+                    if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.theme.dark"].c_str())) {
+                        ImGui::StyleColorsDark();
+                    }
+                    if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.theme.classic"].c_str())) {
+                        ImGui::StyleColorsClassic();
+                    }
+                    ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
             }
@@ -144,25 +173,48 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
     static ImGuiTextFilter filter;
 
-    const float playButtonWidth = 40.f;
+    const float playButtonWidth = 60.f;
     auto size = (fsize) GetContext().gfx.getSize();
 
-    ImGui::Text("%s", ctx.locale["ui.main.maps.caption"].c_str());
+    if (ImGui::Button(ctx.locale["ui.main.maps.reload"].c_str())) {
+        ctx.maps.clear();
+        auto total = ctx.resources.purgeUnusedFiles();
+        ctx.resources.getDirectory("songs", ctx.maps);
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button(ctx.locale["ui.main.maps.exit"].c_str()))
+        ctx.state.exit();
+    ImGui::SameLine();
+    ImGui::Text("%s", ctx.locale["ui.main.maps.filter"].c_str());
+    ImGui::SameLine();
+    filter.Draw("##", -1);
+    ImGui::Separator();
 
     if (ImGui::BeginTable("##", 9,
                           ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY,
                           {0.0, size.h * 0.75f})) {
         ImGui::TableSetupColumn(" ", ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn("SR");
-        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.name"].c_str(), ImGuiTableColumnFlags_WidthStretch, 100.0f);
-        ImGui::TableSetupColumn("OD");
-        ImGui::TableSetupColumn("AR");
-        ImGui::TableSetupColumn("CS");
-        ImGui::TableSetupColumn("HW");
-        ImGui::TableSetupColumn("HP");
-        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.length"].c_str());
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.star_rating"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.name"].c_str(), ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.overall_difficulty"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.approach_rate"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.circle_size"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.hit_window"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.hp_drain"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
+        ImGui::TableSetupColumn(ctx.locale["ui.main.maps.length"].c_str(),
+                                ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
 
         ImGui::TableHeadersRow();
+
+        const float iconSize = 16;
+
         for (unsigned int i = 0; i < ctx.maps.size(); i++) {
             const auto &map = ctx.maps[i];
 
@@ -180,10 +232,10 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 }
                 // Song star rating
                 ImGui::TableNextColumn();
-                char starRating[8] = "#UND";
+                char starRating[8] = "???";
                 ImGui::Text("%s", starRating);
                 ImGui::SameLine();
-                ImGui::Image((ImTextureID) star->getID(), {10, 10}, {1, 1}, {0, 0}, {0.8, 0.8, 0, 1});
+                ImGui::Image((ImTextureID) star->getID(), {iconSize, iconSize}, {0, 1}, {1, 0}, {0.8, 0.8, 0, 1});
 
                 // Song name and selectable field
                 ImGui::TableNextColumn();
@@ -200,7 +252,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song overall difficulty
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) difficulty->getID(), {10, 10}, {1, 1}, {0, 0});
+                ImGui::Image((ImTextureID) difficulty->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char overallDiff[8];
                 sprintf(overallDiff, "%.1f", map->getOverallDifficulty());
@@ -208,7 +260,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song approach time
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) approach->getID(), {10, 10}, {1, 1}, {0, 0});
+                ImGui::Image((ImTextureID) approach->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char approachTime[8];
                 sprintf(approachTime, "%.1f", map->getApproachTime());
@@ -216,7 +268,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song circle size
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) circle->getID(), {10, 10}, {1, 1}, {0, 0});
+                ImGui::Image((ImTextureID) circle->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char circleSize[8];
                 sprintf(circleSize, "%.2f", map->getCircleSize());
@@ -224,7 +276,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song hit window time
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) window->getID(), {10, 10}, {1, 1}, {0, 0});
+                ImGui::Image((ImTextureID) window->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hitWindow[8];
                 sprintf(hitWindow, "%.1f", map->getHitWindow());
@@ -232,7 +284,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song HP drain
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) drain->getID(), {10, 10}, {1, 1}, {0, 0});
+                ImGui::Image((ImTextureID) drain->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hpDrain[8];
                 sprintf(hpDrain, "%.1f", map->getHpDrain());
@@ -240,7 +292,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song duration
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) duration->getID(), {10, 10}, {1, 1}, {0, 0});
+                ImGui::Image((ImTextureID) duration->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
 
                 auto secsTotal = (int) map->getMapDuration();
@@ -259,66 +311,6 @@ void State<GameState::MainMenu>::showMainMenuTab()
             }
         }
         ImGui::EndTable();
-        ImGui::Text("%s", ctx.locale["ui.main.maps.filter"].c_str());
-        ImGui::SameLine();
-        filter.Draw("##", -1);
-        ImGui::Separator();
-    }
-
-    if (ImGui::Button(ctx.locale["ui.main.maps.reload"].c_str())) {
-        ctx.maps.clear();
-        auto total = ctx.resources.purgeUnusedFiles();
-        ctx.resources.getDirectory("songs", ctx.maps);
-    }
-
-    ImGui::SameLine();
-    if (ImGui::Button(ctx.locale["ui.main.maps.exit"].c_str()))
-        ctx.state.exit();
-}
-
-void State<GameState::MainMenu>::iterateSettingsSearch(
-    std::unordered_map<std::string, std::string> &entries, const df2 &clump, const std::string &previousName)
-{
-    std::string thisName = previousName + clump.name();
-
-    for (const auto &setting: clump) {
-        const auto &value = setting.second;
-        auto push = [&](const std::string &value)
-        {
-            entries[thisName + '.' + setting.first] = value;
-        };
-
-        std::string strRepr;
-        switch (setting.second.getType()) {
-            case df2::EntryType::Clump:
-                iterateSettingsSearch(entries, setting.second, thisName);
-                break;
-            case df2::EntryType::Color:
-                push(std::string("#")
-                         + std::to_string(value.col().r) + ','
-                         + std::to_string(value.col().g) + ','
-                         + std::to_string(value.col().b) + ','
-                         + std::to_string(value.col().a));
-                break;
-            case df2::EntryType::Vector:
-                push(std::string("(") + std::to_string(value.vec().x) + ';' + std::to_string(value.vec().y) + ')');
-                break;
-
-            case df2::EntryType::Integer:
-                push(std::to_string(value.integer()));
-                break;
-            case df2::EntryType::Real:
-                push(std::to_string(value.real()));
-                break;
-            case df2::EntryType::Boolean:
-                push(value.boolean() ? "true" : "false");
-                break;
-            case df2::EntryType::String:
-                push(value.str());
-                break;
-            default:
-                break;
-        }
     }
 }
 
@@ -326,20 +318,21 @@ void State<GameState::MainMenu>::showSettingsTab()
 {
     static ImGuiTextFilter filter;
 
-    std::unordered_map<std::string, std::string> entries;
-    iterateSettingsSearch(entries, ctx.settings, "setting.");
-
     if (ImGui::Button(ctx.locale["ui.main.settings.read"].c_str())) {
-        ctx.settings = df2::read(CONFIG_PATH);
+        ctx.settings.read();
     }
     ImGui::SameLine();
     if (ImGui::Button(ctx.locale["ui.main.settings.write"].c_str())) {
-        df2::write(ctx.settings, CONFIG_PATH);
+        ctx.settings.write();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ctx.locale["ui.main.settings.apply"].c_str())) {
+        ctx.settings.apply();
     }
     ImGui::SameLine();
     ImGui::Text("%s", ctx.locale["ui.main.settings.filter"].c_str());
     ImGui::SameLine();
-    filter.Draw("##", -1);
+    filter.Draw("##_F", -1);
     ImGui::Separator();
 
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_ScrollY, {0.0f, -1.0f})) {
@@ -347,12 +340,94 @@ void State<GameState::MainMenu>::showSettingsTab()
         ImGui::TableSetupColumn(ctx.locale["ui.main.settings.value"].c_str());
 
         ImGui::TableHeadersRow();
-        for (const auto &entry: entries) {
-            if (filter.PassFilter(entry.first.c_str())) {
-                ImGui::TableNextColumn();
-                ImGui::Text("%s", ctx.locale[entry.first].c_str());
-                ImGui::TableNextColumn();
-                ImGui::Text("%s", entry.second.c_str());
+        for (const auto &setting: ctx.settings) {
+            auto localised = ctx.locale[setting.first];
+            if (!filter.PassFilter(localised.c_str())) {
+                continue;
+            }
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", localised.c_str());
+            ImGui::TableNextColumn();
+
+            auto &ptr = setting.second;
+            std::string id = "##" + setting.first;
+            switch (ptr->getType()) {
+                case SettingType::String: {
+                    auto cast = std::static_pointer_cast<Setting<std::string>>(ptr);
+                    if (cast->getMetadata().options.empty()) {
+                        ImGui::InputText(id.c_str(), cast->getPtr());
+                    }
+                    else {
+                        if (ImGui::BeginListBox(id.c_str())) {
+                            for (const auto &option: cast->getMetadata().options) {
+                                if (ImGui::Selectable(option.c_str(), option == cast->get())) {
+                                    cast->set(option);
+                                }
+                            }
+                            ImGui::EndListBox();
+                        }
+                    }
+                    break;
+                }
+                case SettingType::Float: {
+                    auto cast = std::static_pointer_cast<Setting<float>>(ptr);
+                    auto meta = cast->getMetadata();
+                    float val = cast->get();
+                    ImGui::SliderFloat(id.c_str(), &val, meta.min, meta.max);
+                    cast->set(val);
+                    break;
+                }
+                case SettingType::Integer: {
+                    auto cast = std::static_pointer_cast<Setting<int>>(ptr);
+                    auto meta = cast->getMetadata();
+                    int span = meta.max - meta.min;
+                    int val = cast->get();
+                    ImGui::InputInt(id.c_str(), &val, 1, span / 10);
+                    cast->set(val);
+                    break;
+                }
+                case SettingType::Color: {
+                    auto cast = std::static_pointer_cast<Setting<color>>(ptr);
+
+                    if (cast->getMetadata().palette.empty()) {
+                        color val = cast->get();
+                        ImGui::ColorEdit4(id.c_str(), (float *) &val);
+                        cast->set(val);
+                    }
+                    else {
+                        if (ImGui::BeginListBox(id.c_str())) {
+                            for (const color &option: cast->getMetadata().palette) {
+                                color8 truncated = option;
+                                std::string name = (std::string) truncated;
+
+                                ImVec4 color;
+                                color.x = option.r;
+                                color.y = option.g;
+                                color.z = option.b;
+                                color.w = option.a;
+
+                                if (ImGui::Selectable(("##" + name).c_str(), option == cast->get())) {
+                                    cast->set(option);
+                                }
+                                ImGui::SameLine();
+                                ImGui::TextColored(color, "%s", name.c_str());
+                            }
+                            ImGui::EndListBox();
+                        }
+                    }
+                    break;
+                }
+                case SettingType::Boolean: {
+                    auto cast = std::static_pointer_cast<Setting<bool>>(ptr);
+                    bool val = cast->get();
+                    ImGui::Checkbox(id.c_str(), &val);
+                    cast->set(val);
+                    break;
+                }
+                case SettingType::None:
+                default:
+                    ImGui::Text("null");
+                    break;
             }
         }
 

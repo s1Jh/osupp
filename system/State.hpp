@@ -6,15 +6,16 @@ NS_BEGIN
 
 class Renderer;
 
+#define ALL_STATES \
+    USER_STATE(None, = 0x100) \
+    USER_STATES \
+    USER_STATE(Exit, = 0xffffffff)
+
 enum class GameState: unsigned int
 {
-    None = 0x100,
-
-#define USER_STATE(Name) Name,
-    USER_STATES
+#define USER_STATE(Name, ...) Name __VA_ARGS__,
+    ALL_STATES
 #undef USER_STATE
-
-    Exit = 0xffffffff
 };
 
 namespace detail

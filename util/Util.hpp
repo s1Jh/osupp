@@ -29,6 +29,20 @@ unsigned int DumpGlErrors();
 
 std::vector<std::string> GetCharacterSeparatedValues(const std::string &in, char sep);
 
+template<typename T>
+static T GetParam(const std::vector<std::string> &params, unsigned int param, T backup) noexcept
+{
+    if (param >= params.size())
+        return backup;
+
+    if constexpr (std::is_same_v<T, std::string>)
+        return params[param];
+    else if constexpr (std::is_arithmetic_v<T>)
+        return static_cast<T>(std::strtod(params[param].c_str(), nullptr));
+
+    return backup;
+}
+
 /**
  * String trimming functions from https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring/217605#217605
  */

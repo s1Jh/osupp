@@ -78,7 +78,7 @@ struct MemberCallbackHandle: public VirtualCallbackHandle<CBGroup>
 
 typedef int ExternalHandle;
 
-template<class CBGroup>
+template<class CBGroup> requires std::is_enum_v<CBGroup>
 class Callbacks
 {
 public:
@@ -170,10 +170,8 @@ public:
         return registeredHandles.size() - 1;
     }
 
-    template<
-        typename std::enable_if<std::is_enum<CBGroup>::value, bool>::type = true>
-    Callbacks()
-    {}
+protected:
+    Callbacks() = default;
 
     template<CBGroup Type, typename... Params>
     void invokeCallback(Params... params)

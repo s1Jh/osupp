@@ -12,6 +12,7 @@
 #include "Mouse.hpp"
 #include "Timing.hpp"
 #include "Locale.hpp"
+#include "Settings.hpp"
 
 NS_BEGIN
 
@@ -23,7 +24,7 @@ struct Context
     Keyboard keyboard;
     Mouse mouse;
     Timing timing;
-    df2 settings;
+    Settings settings;
     Locale locale;
 
 #define CONTEXT_FIELD(Type, Name) Type Name;

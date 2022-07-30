@@ -2,17 +2,13 @@
 
 "gfx"
 {
-	"fullscreen" = "0"
-	"height" = "720"
+	"fullscreen" = "false"
 	"refresh_rate" = "60"
-	"resolution" = "64"
-	"width" = "1280"
+	"resolution" = "1280x720"
 }
 "user"
 {
 	"skin" = "default"
+	"locale" = "english.ldf"
 }
-"paths"
-{
-	"0"="%GAMEDIR%"
-}
+"paths" = "%GAMEDIR%,"

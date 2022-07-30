@@ -12,6 +12,18 @@
 
 NS_BEGIN
 
+const std::vector<std::string> Renderer::StandardResolutions = {
+    "720x480",
+    "960x540",
+    "1280x720",
+    "1366x768",
+    "1600x900",
+    "1920x1080",
+    "2560x1440",
+    "3200x1800",
+    "3840x2160",
+};
+
 Renderer::Renderer()
     : camera(), windowHandle(nullptr)
 {}
@@ -19,18 +31,15 @@ Renderer::Renderer()
 Renderer::~Renderer()
 { destroy(); }
 
-bool Renderer::setMode(int width, int height, bool fullscreen,
-                       int refreshRate)
+bool Renderer::setMode(int width, int height, bool fullscreenIn,
+                       int refreshRateIn)
 {
     LOG_ENTER("GFX");
-    log::info("Setting mode ", width, "x", height, "@", refreshRate,
-              "Hz fullscreen: ", fullscreen);
+    log::info("Setting mode ", width, "x", height, "@", refreshRateIn,
+              "Hz fullscreen: ", fullscreenIn);
 
-    if (fullscreen)
-        glfwSetWindowMonitor(windowHandle, glfwGetPrimaryMonitor(), 0, 0, width,
-                             height, refreshRate);
-    else
-        glfwSetWindowSize(windowHandle, width, height);
+    glfwSetWindowMonitor(windowHandle, fullscreenIn ? glfwGetPrimaryMonitor() : nullptr, 50, 50, width,
+                         height, refreshRateIn);
 
     camera.setAspectRatio(float(height) / float(width));
 
@@ -49,11 +58,15 @@ bool Renderer::runTasks(double delta)
     return !glfwWindowShouldClose(windowHandle);
 }
 
-void Renderer::begin()
+void Renderer::begin(const color &clearColor)
 {
     glfwMakeContextCurrent(windowHandle);
-    glClearColor(0.f, 0.f, 0.f, 1.f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glClearColor(DECOMPOSE_COLOR_RGBA(BLACK));
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::end()
@@ -80,7 +93,23 @@ void Renderer::onResize(GLFWwindow *window, int width, int height)
 
 bool Renderer::create()
 {
-    auto &settings = GetContext().settings["gfx"];
+    auto &settings = GetContext().settings;
+    resolution = settings.addSetting<std::string>("setting.gfx.resolution", "1920x1080", true, StandardResolutions);
+    fullscreen = settings.addSetting<bool>("setting.gfx.fullscreen", false, true);
+    refreshRate = settings.addSetting<int>("setting.gfx.refresh_rate", 60, true, 0, 120);
+
+    auto onSettingChange = [](Renderer *self, const std::string &) -> CallbackReturn
+    {
+        auto dimensions = GetCharacterSeparatedValues(self->resolution.get(), 'x');
+
+        auto width = GetParam(dimensions, 0, 1280);
+        auto height = GetParam(dimensions, 1, 720);
+        self->setMode(width, height, self->fullscreen.get(), self->refreshRate.get());
+        return CallbackReturn::Ok;
+    };
+
+    GetContext().settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap(onSettingChange), this);
+
     glfwSetErrorCallback(Renderer::onError);
 
     if (glfwInit() != GLFW_TRUE) {
@@ -135,9 +164,13 @@ bool Renderer::create()
     glfwSetInputMode(windowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     CheckGLFW;
-    setMode(settings["width"].integer(640), settings["height"].integer(480),
-            settings["fullscreen"].integer(0),
-            settings["refresh_rate"].integer(60));
+
+    auto dimensions = GetCharacterSeparatedValues(resolution.get(), 'x');
+
+    auto width = GetParam(dimensions, 0, 1280);
+    auto height = GetParam(dimensions, 1, 720);
+
+    setMode(width, height, fullscreen.get(), refreshRate.get());
 
     return true;
 }

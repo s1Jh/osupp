@@ -68,20 +68,6 @@ public:
         return text;
     }
 
-    template<typename T>
-    static T GetParam(const std::vector<std::string> &params, unsigned int param, T backup) noexcept
-    {
-        if (param >= params.size())
-            return backup;
-
-        if constexpr (std::is_same_v<T, std::string>)
-            return params[param];
-        else if constexpr (std::is_arithmetic_v<T>)
-            return static_cast<T>(std::strtod(params[param].c_str(), nullptr));
-
-        return backup;
-    }
-
     bool read(const std::filesystem::path &path)
     {
         std::ifstream ifs(path);

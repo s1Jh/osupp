@@ -62,7 +62,7 @@ Index of this file:
 
 // Visual Studio warnings
 #ifdef _MSC_VER
-                                                                                                                        #pragma warning (push)
+#pragma warning (push)
 #pragma warning (disable: 4251)     // class 'xxx' needs to have dll-interface to be used by clients of struct 'xxx' // when IMGUI_API is set to__declspec(dllexport)
 #pragma warning (disable: 26812)    // The enum type 'xxx' is unscoped. Prefer 'enum class' over 'enum' (Enum.3). [MSVC Static Analyzer)
 #pragma warning (disable: 26495)    // [Static Analyzer] Variable 'XXX' is uninitialized. Always initialize a member variable (type.6).
@@ -998,7 +998,6 @@ struct ImSpanAllocator
 // Basic keyed storage for contiguous instances, slow/amortized insertion, O(1) indexable, O(Log N) queries by ID over a dense/hot buffer,
 // Honor constructor/destructor. Add/remove invalidate all pointers. Indexes have the same lifetime as the associated object.
 typedef int ImPoolIdx;
-
 template<typename T>
 struct ImPool
 {
@@ -3122,7 +3121,6 @@ struct IMGUI_API ImGuiTabBar
 
 // Our current column maximum is 64 but we may raise that in the future.
 typedef ImS8 ImGuiTableColumnIdx;
-
 typedef ImU8 ImGuiTableDrawChannelIdx;
 
 // [Internal] sizeof() ~ 104

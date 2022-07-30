@@ -40,7 +40,7 @@ Index of this file:
 
 #include <stdio.h>      // vsnprintf, sscanf, printf
 #if !defined(alloca)
-                                                                                                                        #if defined(__GLIBC__) || defined(__sun) || defined(__APPLE__) || defined(__NEWLIB__)
+#if defined(__GLIBC__) || defined(__sun) || defined(__APPLE__) || defined(__NEWLIB__)
 #include <alloca.h>     // alloca (glibc uses <alloca.h>. Note that Cygwin may have _WIN32 defined, so the order matters here)
 #elif defined(_WIN32)
 #include <malloc.h>     // alloca
@@ -4447,11 +4447,8 @@ static unsigned int stb_decompress_length(const unsigned char *input)
 }
 
 static unsigned char *stb__barrier_out_e, *stb__barrier_out_b;
-
 static const unsigned char *stb__barrier_in_b;
-
 static unsigned char *stb__dout;
-
 static void stb__match(const unsigned char *data, unsigned int length)
 {
     // INVERSE of memmove... write each byte before copying the next...

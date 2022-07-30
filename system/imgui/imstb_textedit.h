@@ -370,7 +370,6 @@ typedef struct
     float ymin, ymax;         // height of row above and below baseline
     int num_chars;
 } StbTexteditRow;
-
 #endif //INCLUDE_STB_TEXTEDIT_H
 
 

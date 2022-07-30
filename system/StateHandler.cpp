@@ -42,7 +42,7 @@ void StateHandler::setState(GameState state)
 void StateHandler::process()
 {
     if (nextState != GameState::None && nextState != currentState) {
-        log::info("Setting state to ", (unsigned int) nextState);
+        log::info("Setting state to ", Stringify(nextState));
 
         if (currentStatePtr != nullptr)
             currentStatePtr->exit();
@@ -64,7 +64,7 @@ void StateHandler::process()
                 break;
         }
 
-        if (currentStatePtr)
+        if (currentStatePtr != nullptr)
             currentStatePtr->init(oldState);
     }
     nextState = GameState::None;
@@ -77,6 +77,15 @@ bool StateHandler::isRunning() const
 void StateHandler::exit()
 {
     setState(GameState::Exit);
+}
+
+std::string StateHandler::Stringify(const GameState &state)
+{
+    switch (state) {
+#define USER_STATE(State, ...) case GameState::State: return TOSTRING(State);
+        ALL_STATES
+#undef USER_STATE
+    }
 }
 
 NS_END

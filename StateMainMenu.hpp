@@ -20,9 +20,6 @@ private:
     void showMainMenuTab();
     void showSettingsTab();
 
-    void iterateSettingsSearch(
-        std::unordered_map<std::string, std::string> &entries, const df2 &clump, const std::string &previousName);
-
     Context &ctx;
 };
 

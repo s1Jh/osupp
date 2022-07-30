@@ -14,6 +14,10 @@ public:
     int draw() override;
     int exit() override;
     int init(GameState state) override;
+
+private:
+    int lastLoaded = 0;
+    std::vector<std::filesystem::path> filesToLoad;
 };
 
 NS_END

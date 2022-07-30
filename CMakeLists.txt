@@ -55,10 +55,13 @@ set(SOURCES
         ${SYSTEM_DIRECTORY}/Main.cpp
         ${SYSTEM_DIRECTORY}/State.cpp
         ${SYSTEM_DIRECTORY}/StateHandler.cpp
+        ${SYSTEM_DIRECTORY}/Settings.cpp
+        ${SYSTEM_DIRECTORY}/Setting.cpp
         # ${SYSTEM_DIRECTORY}/SUI.cpp
 
 
         ${SYSTEM_DIRECTORY}/imgui/imgui.cpp
+        ${SYSTEM_DIRECTORY}/imgui/imgui_stdlib.cpp
         ${SYSTEM_DIRECTORY}/imgui/imgui_draw.cpp
         ${SYSTEM_DIRECTORY}/imgui/imgui_demo.cpp
         ${SYSTEM_DIRECTORY}/imgui/imgui_impl_glfw.cpp

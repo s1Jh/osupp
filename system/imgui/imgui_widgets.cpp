@@ -54,7 +54,7 @@ Index of this file:
 
 // Visual Studio warnings
 #ifdef _MSC_VER
-                                                                                                                        #pragma warning (disable: 4127)     // condition expression is constant
+#pragma warning (disable: 4127)     // condition expression is constant
 #pragma warning (disable: 4996)     // 'This function or variable may be unsafe': strcpy, strdup, sprintf, vsnprintf, sscanf, fopen
 #if defined(_MSC_VER) && _MSC_VER >= 1922 // MSVC 2019 16.2 or later
 #pragma warning (disable: 5054)     // operator '|': deprecated between enumerations of different types
@@ -2068,7 +2068,6 @@ static const ImGuiDataTypeInfo GDataTypeInfo[] =
         {sizeof(float), "float", "%.3f", "%f"},  // ImGuiDataType_Float (float are promoted to double in va_arg)
         {sizeof(double), "double", "%f", "%lf"},  // ImGuiDataType_Double
     };
-
 IM_STATIC_ASSERT(IM_ARRAYSIZE(GDataTypeInfo) == ImGuiDataType_COUNT);
 
 // FIXME-LEGACY: Prior to 1.61 our DragInt() function internally used floats and because of this the compile-time default value for format was "%.0f".
