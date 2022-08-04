@@ -15,15 +15,20 @@ namespace detail
 int CheckGLFWErrors(const std::string &file, int line,
                     const std::string &helper = "");
 
-unsigned int CheckErrors(const std::string &file, int line,
+unsigned int CheckGLErrors(const std::string &file, int line,
                          const std::string &helper = "");
+
+unsigned int CheckALErrors(const std::string &file, int line,
+						   const std::string &helper = "");
 }
 
 #define CheckGLFW detail::CheckGLFWErrors(__FILE__, __LINE__)
-#define CheckGL detail::CheckErrors(__FILE__, __LINE__)
+#define CheckGL detail::CheckGLErrors(__FILE__, __LINE__)
+#define CheckAL detail::CheckALErrors(__FILE__, __LINE__)
 
 #define CheckGLFWh(_helper) detail::CheckGLFWErrors(__FILE__, __LINE__, _helper)
-#define CheckGLh(_helper) detail::CheckErrors(__FILE__, __LINE__, _helper)
+#define CheckGLh(_helper) detail::CheckGLErrors(__FILE__, __LINE__, _helper)
+#define CheckALh(_helper) detail::CheckALErrors(__FILE__, __LINE__, _helper)
 
 unsigned int DumpGlErrors();
 

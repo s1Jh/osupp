@@ -13,11 +13,13 @@
 #include "Timing.hpp"
 #include "Locale.hpp"
 #include "Settings.hpp"
+#include "AudioDevice.hpp"
 
 NS_BEGIN
 
 struct Context
 {
+	AudioDevice audio;
     StateHandler state;
     Resources resources;
     Renderer gfx;

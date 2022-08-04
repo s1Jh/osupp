@@ -9,6 +9,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <AL/al.h>
 
 NS_BEGIN
 namespace detail
@@ -26,7 +27,7 @@ int CheckGLFWErrors(const std::string &file, int line,
     return err;
 }
 
-unsigned int CheckErrors(const std::string &file, int line,
+unsigned int CheckGLErrors(const std::string &file, int line,
                          const std::string &helper)
 {
     LOG_ENTER("GL");
@@ -64,6 +65,38 @@ unsigned int CheckErrors(const std::string &file, int line,
                    err_str);
     }
     return error;
+}
+
+unsigned int CheckALErrors(const std::string& file, int line, const std::string& helper)
+{
+	ALenum error = alGetError();
+	std::string err_str;
+	if(error != AL_NO_ERROR)
+	{
+		switch(error)
+		{
+		case AL_INVALID_NAME:
+			err_str = "AL_INVALID_NAME: a bad name (ID) was passed to an OpenAL function";
+			break;
+		case AL_INVALID_ENUM:
+			err_str = "AL_INVALID_ENUM: an invalid enum value was passed to an OpenAL function";
+			break;
+		case AL_INVALID_VALUE:
+			err_str = "AL_INVALID_VALUE: an invalid value was passed to an OpenAL function";
+			break;
+		case AL_INVALID_OPERATION:
+			err_str = "AL_INVALID_OPERATION: the requested operation is not valid";
+			break;
+		case AL_OUT_OF_MEMORY:
+			err_str = "AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory";
+			break;
+		default:
+			err_str = "UNKNOWN AL ERROR: " + std::to_string(error);
+		}
+		log::error("@(", helper, ") Near line: ", line, " In File: ", file, ": ",
+				   err_str);
+	}
+	return error;
 }
 } // namespace detail
 

@@ -5,15 +5,44 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+#include <cstdio>
+
+#include <AL/alut.h>
+#include <AL/al.h>
+#include <AL/alc.h>
+
 using namespace PROJECT_NAMESPACE;
 
 #ifdef WIN32
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PWSTR pCmdLine, int nCmdShow)
 #elif LINUX
-int main()
+int main(int argc, char **argv)
 #endif
 {
+	ALuint helloBuffer, helloSource;
+
+	alutInitWithoutContext(&argc, argv);
+	auto device = GetAudioDevice("");
+
+	helloBuffer = alutCreateBufferFromFile("test.wav");
+	ALenum err = alutGetError();
+	if (err != ALUT_ERROR_NO_ERROR) {
+		log::error(alutGetErrorString(err));
+	}
+	alGenSources (1, &helloSource);
+	alSourcei (helloSource, AL_BUFFER, helloBuffer);
+	alSourcePlay (helloSource);
+
+//	int state = AL_PLAYING;
+//
+//	while (state == AL_PLAYING) {
+//		alGetSourcei(helloSource, AL_SOURCE_STATE, &state);
+//	}
+//
+//	alutExit ();
+//	return EXIT_SUCCESS;
+
     log::custom("GREETING", "Hello, world!");
 
     log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);
@@ -29,6 +58,9 @@ int main()
 
     auto locale = ctx.settings.addSetting<std::string>("setting.user.locale", std::string("english.ldf"));
     ctx.locale.loadFromFile(locale.get());
+
+	auto audioDev = ctx.settings.addSetting<std::string>("setting.audio.device", "");
+	ctx.audio = GetAudioDevice(audioDev.get());
 
     if (!ctx.gfx.create()) {
         return 1;

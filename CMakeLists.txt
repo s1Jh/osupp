@@ -9,65 +9,84 @@ project(${PROJECT_NAME})
 set(CMAKE_CXX_STANDARD 20)
 
 set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
-
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
 set(SUI_DIRECTORY ${SYSTEM_DIRECTORY}/SUI)
-set(DRAWABLES_DIRECTORY ${SYSTEM_DIRECTORY}/drawables)
+set(GFX_DIRECTORY ${SYSTEM_DIRECTORY}/gfx)
+set(INPUT_DIRECTORY ${SYSTEM_DIRECTORY}/input)
 set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
-set(TYPES_DIRECTORY ${ROOT_DIRECTORY}/types)
-set(UTIL_DIRECTORY ${ROOT_DIRECTORY}/util)
+set(TYPES_DIRECTORY ${SYSTEM_DIRECTORY}/types)
+set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
+set(AUDIO_DIRECTORY ${SYSTEM_DIRECTORY}/audio)
+set(CORE_DIRECTORY ${SYSTEM_DIRECTORY}/core)
+set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
+set(IMGUI_DIRECTORY ${ROOT_DIRECTORY}/imgui)
 set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
 set(OBJECT_DIRECTORY ${ROOT_DIRECTORY}/objects)
 set(BASES_DIRECTORY ${ROOT_DIRECTORY}/bases)
 set(ASSET_DIRECTORY ${ROOT_DIRECTORY}/assets)
+set(STATES_DIRECTORY ${ROOT_DIRECTORY}/states)
 
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
         ${SYSTEM_DIRECTORY}
+        ${SUI_DIRECTORY}
+        ${GFX_DIRECTORY}
+        ${INPUT_DIRECTORY}
+        ${ANIMATORS_DIRECTORY}
         ${TYPES_DIRECTORY}
         ${UTIL_DIRECTORY}
+        ${AUDIO_DIRECTORY}
+        ${CORE_DIRECTORY}
+        ${UTIL_DIRECTORY}
+        ${IMGUI_DIRECTORY}
         ${LOADER_DIRECTORY}
         ${GAMEMODE_DIRECTORY}
         ${OBJECT_DIRECTORY}
         ${BASES_DIRECTORY}
-        ${SUI_DIRECTORY}
-        ${ANIMATORS_DIRECTORY}
-        ${DRAWABLES_DIRECTORY}
         ${ASSET_DIRECTORY}
+        ${STATES_DIRECTORY}
         )
 
 set(SOURCES
         ${SYSTEM_DIRECTORY}/df2.cpp
-        ${SYSTEM_DIRECTORY}/Keyboard.cpp
-        ${SYSTEM_DIRECTORY}/Mouse.cpp
-        ${SYSTEM_DIRECTORY}/Renderer.cpp
-        ${SYSTEM_DIRECTORY}/Shader.cpp
-        ${SYSTEM_DIRECTORY}/Texture.cpp
-        ${SYSTEM_DIRECTORY}/Sprite.cpp
-        ${SYSTEM_DIRECTORY}/Image.cpp
-        ${SYSTEM_DIRECTORY}/Timing.cpp
         ${SYSTEM_DIRECTORY}/Resources.cpp
-        ${SYSTEM_DIRECTORY}/Mesh.cpp
-        ${SYSTEM_DIRECTORY}/Camera.cpp
-        ${SYSTEM_DIRECTORY}/Context.cpp
         ${SYSTEM_DIRECTORY}/Locale.cpp
         ${SYSTEM_DIRECTORY}/Main.cpp
-        ${SYSTEM_DIRECTORY}/State.cpp
-        ${SYSTEM_DIRECTORY}/StateHandler.cpp
         ${SYSTEM_DIRECTORY}/Settings.cpp
         ${SYSTEM_DIRECTORY}/Setting.cpp
         # ${SYSTEM_DIRECTORY}/SUI.cpp
 
+        ${CORE_DIRECTORY}/Context.cpp
+        ${CORE_DIRECTORY}/Timing.cpp
+        ${CORE_DIRECTORY}/State.cpp
+        ${CORE_DIRECTORY}/StateHandler.cpp
 
-        ${SYSTEM_DIRECTORY}/imgui/imgui.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_stdlib.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_draw.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_demo.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_impl_glfw.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_impl_opengl3.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_tables.cpp
-        ${SYSTEM_DIRECTORY}/imgui/imgui_widgets.cpp
+        ${INPUT_DIRECTORY}/Keyboard.cpp
+        ${INPUT_DIRECTORY}/Mouse.cpp
+
+        ${AUDIO_DIRECTORY}/Audio.cpp
+        ${AUDIO_DIRECTORY}/AudioDevice.cpp
+        ${AUDIO_DIRECTORY}/Channel.cpp
+        ${AUDIO_DIRECTORY}/Sound.cpp
+
+        ${GFX_DIRECTORY}/Renderer.cpp
+        ${GFX_DIRECTORY}/Shader.cpp
+        ${GFX_DIRECTORY}/Texture.cpp
+        ${GFX_DIRECTORY}/Drawables.cpp
+        ${GFX_DIRECTORY}/Sprite.cpp
+        ${GFX_DIRECTORY}/Image.cpp
+        ${GFX_DIRECTORY}/Mesh.cpp
+        ${GFX_DIRECTORY}/Camera.cpp
+
+        ${IMGUI_DIRECTORY}/imgui.cpp
+        ${IMGUI_DIRECTORY}/imgui_stdlib.cpp
+        ${IMGUI_DIRECTORY}/imgui_draw.cpp
+        ${IMGUI_DIRECTORY}/imgui_demo.cpp
+        ${IMGUI_DIRECTORY}/imgui_impl_glfw.cpp
+        ${IMGUI_DIRECTORY}/imgui_impl_opengl3.cpp
+        ${IMGUI_DIRECTORY}/imgui_tables.cpp
+        ${IMGUI_DIRECTORY}/imgui_widgets.cpp
 
         #${SUI_DIRECTORY}/Button.cpp
         #${SUI_DIRECTORY}/Image.cpp
@@ -80,8 +99,6 @@ set(SOURCES
         ${ANIMATORS_DIRECTORY}/AnimateTexture.cpp
         ${ANIMATORS_DIRECTORY}/DisableAfter.cpp
         ${ANIMATORS_DIRECTORY}/MoveLinear.cpp
-
-        ${DRAWABLES_DIRECTORY}/Drawables.cpp
 
         ${LOADER_DIRECTORY}/OBJLoader.cpp
         ${LOADER_DIRECTORY}/MAPLoader.cpp
@@ -97,10 +114,11 @@ set(SOURCES
         ${BASES_DIRECTORY}/BaseGameMode.cpp
         ${BASES_DIRECTORY}/BaseObjectTemplate.cpp
 
+        ${STATES_DIRECTORY}/StateInGame.cpp
+        ${STATES_DIRECTORY}/StateInit.cpp
+        ${STATES_DIRECTORY}/StateMainMenu.cpp
+
         ObjectSprite.cpp
-        StateInGame.cpp
-        StateInit.cpp
-        StateMainMenu.cpp
         MapInfo.cpp
         Skin.cpp
         )
@@ -109,6 +127,7 @@ set(OpenGL_GL_PREFERENCE GLVND)
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(OpenAL REQUIRED)
 find_package(GLEW REQUIRED)
 
 include_directories(${DIRECTORIES})
@@ -146,6 +165,6 @@ target_compile_definitions(${TARGET_NAME} PRIVATE
         $<$<CONFIG:MinSizeRel>:MINREL=1>
         )
 
-target_link_libraries(${TARGET_NAME} glfw OpenGL::GL ${GLEW_LIBRARIES})
+target_link_libraries(${TARGET_NAME} glfw OpenGL::GL alut ${OPENAL_LIBRARY} ${GLEW_LIBRARIES})
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION bin)

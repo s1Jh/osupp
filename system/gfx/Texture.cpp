@@ -1,0 +1,126 @@
+#include "Texture.hpp"
+
+#include "Math.hpp"
+#include "Util.hpp"
+#include <GL/glew.h>
+
+NS_BEGIN
+
+Texture::Texture()
+    : glTexture(nullptr), img(nullptr), channels(4), pixelSize({-1, -1})
+{}
+
+bool Texture::load(const std::filesystem::path &location)
+{
+    Image texImg;
+    if (!texImg.load(location)) {
+        return false;
+    }
+    return setImage(texImg);
+}
+
+void Texture::use(unsigned int index) const
+{
+    if (index > 31) {
+        log::warning("Tried to set texture beyond index");
+        return;
+    }
+    if (glTexture) {
+        glActiveTexture(GL_TEXTURE0 + index);
+        glBindTexture(GL_TEXTURE_2D, *glTexture);
+    }
+}
+
+void Texture::unbind(unsigned int index)
+{
+    if (index > 31) {
+        log::warning("Tried to set texture beyond index");
+        return;
+    }
+
+    glActiveTexture(GL_TEXTURE0 + index);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+int Texture::getWidth() const
+{ return pixelSize.w; }
+
+int Texture::getHeight() const
+{ return pixelSize.h; }
+
+int Texture::getChannels() const
+{ return channels; }
+
+void Texture::GLTexDeleter(unsigned int *ptr)
+{
+    log::debug("Deleting texture ", *ptr, " (", ptr, ')');
+    glDeleteTextures(1, ptr);
+}
+
+bool Texture::setImage(Image &imgIn)
+{
+    glTexture = std::shared_ptr<unsigned int>(new unsigned int, GLTexDeleter);
+
+    auto pixels = imgIn.getPixels();
+
+    pixelSize = imgIn.getSize();
+    channels = imgIn.getChannels();
+
+    glGenTextures(1, glTexture.get());
+    CheckGLh("Generated texture");
+    glBindTexture(GL_TEXTURE_2D, (*glTexture));
+    CheckGLh("Bound texture");
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_NEAREST_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    CheckGLh("Set texture params");
+
+    // you take GL_RGB and then add channels - 3 (those are the R, G and B
+    // channels)
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB + (imgIn.getChannels() - 3),
+                 imgIn.getWidth(), imgIn.getHeight(), 0,
+                 GL_RGB + (imgIn.getChannels() - 3), GL_UNSIGNED_BYTE,
+                 (uint8_t *) pixels);
+    CheckGLh("Uploaded texture data");
+    glGenerateMipmap(GL_TEXTURE_2D);
+    CheckGLh("Generated mipmaps");
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    img = &imgIn;
+
+    return true;
+}
+
+isize Texture::getSize() const
+{ return pixelSize; }
+
+bool Texture::create()
+{
+    Image image;
+    image.resize(128, 128);
+    image.setRectArea({{64, 64}, {0, 0}}, BLACK);
+    image.setRectArea({{64, 64}, {0, 64}}, PINK);
+    image.setRectArea({{64, 64}, {64, 0}}, PINK);
+    image.setRectArea({{64, 64}, {64, 64}}, BLACK);
+    return setImage(image);
+}
+
+void Texture::setClipArea(const frect &rect)
+{
+    clip = MakeScaleMatrix<float>(rect.size) *
+        MakeTranslationMatrix<float>(rect.position);
+}
+
+const Mat3f &Texture::getUVTransform() const
+{ return clip; }
+
+unsigned int Texture::getID() const
+{
+    return *glTexture;
+}
+
+NS_END
