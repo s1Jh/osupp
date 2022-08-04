@@ -1,5 +1,11 @@
 ( This file was automatically written by the program )
 
+"audio"
+{
+	"device" = "JACK sink (PulseAudio JACK Sink)"
+	"frequency" = "48000"
+}
+
 "gfx"
 {
 	"fullscreen" = "false"

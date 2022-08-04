@@ -22,8 +22,6 @@ public:
 	explicit AudioDevice(unsigned int sfxChannelsIn = DEFAULT_SFX_CHANNELS);
 	explicit AudioDevice(const AudioDeviceSpec&, unsigned int sfxChannelsIn = DEFAULT_SFX_CHANNELS);
 
-	~AudioDevice();
-
 	void process();
 
 	Channel& getMusicChannel();
@@ -32,8 +30,12 @@ public:
 	AudioDeviceSpec spec;
 
 private:
-	detail::ALCdevice *device;
-	detail::ALCcontext *context;
+	struct ALContainer {
+		detail::ALCdevice *device;
+		detail::ALCcontext *context;
+	};
+	static void ALContextDeleter(ALContainer*);
+	std::shared_ptr<ALContainer> held;
 	Channel musicChannel{};
 	std::vector<Channel> sfxChannels;
 };

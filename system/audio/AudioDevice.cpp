@@ -1,6 +1,7 @@
 #include "AudioDevice.hpp"
 
 #include "Math.hpp"
+#include "Context.hpp"
 
 #include <utility>
 #include <AL/al.h>
@@ -32,28 +33,31 @@ Channel &AudioDevice::getSFXChannel()
 
 AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannelsIn) : spec(specIn)
 {
+	held = std::shared_ptr<ALContainer>(new ALContainer{nullptr, nullptr}, ALContextDeleter);
 	sfxChannels.resize(Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
 
-	device = (detail::ALCdevice*) alcOpenDevice(nullptr);
+	held->device = (detail::ALCdevice*) alcOpenDevice(nullptr);
 
-	if (!device) {
+	if (!held->device) {
 		log::error("Failed to open device: ", specIn.name);
 		return;
 	}
 
-	const int params[] = {AL_FREQUENCY, 48000, 0};
+	auto freqSetting = GetContext().settings.addSetting<int>("setting.audio.frequency", 44100, true, 1000, 48000).get();
 
-	context = (detail::ALCcontext*) alcCreateContext((ALCdevice*)device, params);
+	const int params[] = {AL_FREQUENCY, freqSetting, ALC_SYNC, 1, 0};
 
-	if (!context) {
+	held->context = (detail::ALCcontext*) alcCreateContext((ALCdevice*)held->device, params);
+
+	if (!held->context) {
 		log::error("Failed to create context for device: ", specIn.name);
 		return;
 	}
-	if (!alcMakeContextCurrent((ALCcontext*) context)) {
+	if (!alcMakeContextCurrent((ALCcontext*) held->context)) {
 		log::error("Failed to make OpenAL context current");
 	}
 
-	log::info("Successfully initiated device ", specIn.name);
+	log::info("Successfully initiated device ", specIn.name, " @", freqSetting, "Hz");
 }
 
 AudioDevice::AudioDevice(unsigned int sfxChannelsIn)
@@ -69,10 +73,11 @@ void AudioDevice::process()
 		channel.update();
 }
 
-AudioDevice::~AudioDevice()
+void AudioDevice::ALContextDeleter(AudioDevice::ALContainer *container)
 {
-	alcDestroyContext((ALCcontext*) context);
-	alcCloseDevice((ALCdevice*) device);
+	log::debug("Closing audio device ", container);
+	alcDestroyContext((ALCcontext*) container->context);
+	alcCloseDevice((ALCdevice*) container->device);
 }
 
 NS_END

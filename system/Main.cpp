@@ -23,25 +23,6 @@ int main(int argc, char **argv)
 	ALuint helloBuffer, helloSource;
 
 	alutInitWithoutContext(&argc, argv);
-	auto device = GetAudioDevice("");
-
-	helloBuffer = alutCreateBufferFromFile("test.wav");
-	ALenum err = alutGetError();
-	if (err != ALUT_ERROR_NO_ERROR) {
-		log::error(alutGetErrorString(err));
-	}
-	alGenSources (1, &helloSource);
-	alSourcei (helloSource, AL_BUFFER, helloBuffer);
-	alSourcePlay (helloSource);
-
-//	int state = AL_PLAYING;
-//
-//	while (state == AL_PLAYING) {
-//		alGetSourcei(helloSource, AL_SOURCE_STATE, &state);
-//	}
-//
-//	alutExit ();
-//	return EXIT_SUCCESS;
 
     log::custom("GREETING", "Hello, world!");
 
@@ -59,8 +40,27 @@ int main(int argc, char **argv)
     auto locale = ctx.settings.addSetting<std::string>("setting.user.locale", std::string("english.ldf"));
     ctx.locale.loadFromFile(locale.get());
 
-	auto audioDev = ctx.settings.addSetting<std::string>("setting.audio.device", "");
+	auto devices =  GetAudioDevices();
+	std::vector<std::string> deviceNames;
+	for (const auto& dev : devices)
+		deviceNames.push_back(dev.name);
+
+	auto audioDev = ctx.settings.addSetting<std::string>("setting.audio.device", "", true, deviceNames);
 	ctx.audio = GetAudioDevice(audioDev.get());
+
+	helloBuffer = alutCreateBufferFromFile("test.wav");
+	ALenum err = alutGetError();
+	if (err != ALUT_ERROR_NO_ERROR) {
+		log::error(alutGetErrorString(err));
+	}
+	alGenSources (1, &helloSource);
+	alSourcei (helloSource, AL_BUFFER, helloBuffer);
+	alSourcePlay (helloSource);
+
+	ctx.settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap([&audioDev, &ctx](const std::string&) {
+		ctx.audio = GetAudioDevice(audioDev.get());
+		return CallbackReturn::Ok;
+	}));
 
     if (!ctx.gfx.create()) {
         return 1;

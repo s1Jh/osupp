@@ -48,35 +48,6 @@ void ObjectSprite::setFrameTime(float frameTimeIn)
     frameTime = frameTimeIn;
 }
 
-//void ObjectSprite::draw(Renderer &renderer, ObjectDrawInfo &info)
-//{
-//    LOG_ENTER();
-//
-//    if (!texture)
-//        return;
-//
-//    auto slice = 1.0f / float(frameCount);
-//    auto offset = slice * float(frameCounter);
-//
-//    frect clip = {{
-//                      layout == AnimationLayout::Horizontal ? slice : 1.0f,
-//                      layout == AnimationLayout::Horizontal ? 1.0f : slice,
-//                  },
-//                  {
-//                      layout == AnimationLayout::Horizontal ? offset : 0.0f,
-//                      layout == AnimationLayout::Horizontal ? 0.0f : offset,
-//                  }};
-//
-//    texture->setClipArea(clip);
-//
-//    tint.a = info.alpha;
-//    renderer.drawRect(
-//        info.destination,
-//        VisualAppearance{.texture = texture.get(), .fillColor = tint},
-//        info.transform);
-//    texture->setClipArea(UNIT_RECT<float>);
-//}
-
 void ObjectSprite::setTint(const color &tintIn)
 { tint = tintIn; }
 

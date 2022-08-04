@@ -16,7 +16,41 @@ void Settings::iterateSettingsSearch(
         const auto &value = setting.second;
         auto push = [&](const std::string &value)
         {
-            entries[thisName + '.' + setting.first] = value;
+			auto name = thisName + '.' + setting.first;
+            entries[name] = value;
+			if (activeValues.contains(name)) {
+				auto& existing = activeValues[name];
+				switch (existing->getType()) {
+				case SettingType::Float: {
+					auto cast = std::static_pointer_cast<Setting<float>>(existing);
+					cast->set(SettingMetadata<float>::fromString(value));
+				}
+					break;
+				case SettingType::Integer:{
+					auto cast = std::static_pointer_cast<Setting<int>>(existing);
+					cast->set(SettingMetadata<int>::fromString(value));
+				}
+					break;
+				case SettingType::String:{
+					auto cast = std::static_pointer_cast<Setting<std::string>>(existing);
+					cast->set(SettingMetadata<std::string>::fromString(value));
+				}
+					break;
+				case SettingType::Color:{
+					auto cast = std::static_pointer_cast<Setting<color>>(existing);
+					cast->set(SettingMetadata<color>::fromString(value));
+				}
+					break;
+				case SettingType::Boolean:{
+					auto cast = std::static_pointer_cast<Setting<bool>>(existing);
+					cast->set(SettingMetadata<bool>::fromString(value));
+				}
+					break;
+				case SettingType::None:
+				default:
+					break;
+				}
+			}
         };
 
         std::string strRepr;
