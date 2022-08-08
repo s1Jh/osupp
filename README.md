@@ -8,7 +8,13 @@ mind and designed to be expandable, notOsu is the perfect platform for not only 
 
 ## Building
 
-Simply build with CMake.
+Use the provided CMake script.
+
+### Included third party libraries:
+[Dear ImGui](https://github.com/ocornut/imgui/)
+
+[stb](https://github.com/nothings/stb)
+
 
 ### Commands:
 
@@ -23,6 +29,10 @@ cmake ..
 ```
 GLFW3
 OpenGL
+GLEW
+freetype
+ffmpeg
+OpenAL
 ```
 
 ## How to play

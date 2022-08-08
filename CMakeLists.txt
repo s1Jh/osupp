@@ -80,13 +80,14 @@ set(SOURCES
         ${GFX_DIRECTORY}/Camera.cpp
 
         ${IMGUI_DIRECTORY}/imgui.cpp
-        ${IMGUI_DIRECTORY}/imgui_stdlib.cpp
         ${IMGUI_DIRECTORY}/imgui_draw.cpp
         ${IMGUI_DIRECTORY}/imgui_demo.cpp
         ${IMGUI_DIRECTORY}/imgui_impl_glfw.cpp
         ${IMGUI_DIRECTORY}/imgui_impl_opengl3.cpp
         ${IMGUI_DIRECTORY}/imgui_tables.cpp
         ${IMGUI_DIRECTORY}/imgui_widgets.cpp
+        ${IMGUI_DIRECTORY}/misc/cpp/imgui_stdlib.cpp
+        ${IMGUI_DIRECTORY}/misc/freetype/imgui_freetype.cpp
 
         #${SUI_DIRECTORY}/Button.cpp
         #${SUI_DIRECTORY}/Image.cpp
@@ -129,9 +130,11 @@ find_package(glfw3 3.3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(Freetype REQUIRED)
 
 include_directories(${DIRECTORIES})
 include_directories(${GLEW_INCLUDE_DIRS})
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 set(PLATFORM LINUX)
 set(ARCHITECTURE ARCH_AMD64)
@@ -165,6 +168,6 @@ target_compile_definitions(${TARGET_NAME} PRIVATE
         $<$<CONFIG:MinSizeRel>:MINREL=1>
         )
 
-target_link_libraries(${TARGET_NAME} glfw OpenGL::GL alut ${OPENAL_LIBRARY} ${GLEW_LIBRARIES})
+target_link_libraries(${TARGET_NAME} glfw OpenGL::GL alut ${OPENAL_LIBRARY} ${GLEW_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION bin)

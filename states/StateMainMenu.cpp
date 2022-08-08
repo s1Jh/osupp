@@ -26,7 +26,7 @@
 #include "Texture.hpp"
 
 #include "imgui/imgui.h"
-#include "imgui/imgui_stdlib.h"
+#include "imgui/misc/cpp/imgui_stdlib.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
