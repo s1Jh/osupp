@@ -1,3 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 #include "Slider.hpp"
 
 #include <utility>
@@ -16,7 +38,7 @@ void Slider::onUpdate(double delta)
     hitPoint.update(delta);
 }
 
-void Slider::onLogicUpdate(double delta)
+void Slider::onLogicUpdate(double)
 {
     double timeLength = getEndTime() - getStartTime();
     double timeRunning = session.getCurrentTime() - getStartTime();
@@ -153,12 +175,11 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
 
         // Optimizations
         if (middleIt != interpolatedPath.end()) {
+			auto lastPosition = lastIt->position;
+			auto midPosition = middleIt->position;
             if (lastIt != interpolatedPath.end()) {
                 // Optimization #1: If a triplet of sequential points has a small enough
-                // angle,
-                //                  remove the middle point of this triplet.
-                auto lastPosition = lastIt->position;
-                auto midPosition = middleIt->position;
+                // angle, remove the middle point of this triplet.
 
                 auto vec1 = Normalize(lastPosition - midPosition);
                 auto vec2 = Normalize(thisPosition - midPosition);
@@ -171,7 +192,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
 
             // Optimization #2: If the new point is too close to an existing point,
             // don't add it.
-            if (Distance(thisPosition, middleIt->position) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
+            if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
                 continue;
             }
         }

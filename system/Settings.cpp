@@ -1,3 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 //
 // Created by sijh on 27.07.22.
 //
@@ -20,36 +42,7 @@ void Settings::iterateSettingsSearch(
             entries[name] = value;
 			if (activeValues.contains(name)) {
 				auto& existing = activeValues[name];
-				switch (existing->getType()) {
-				case SettingType::Float: {
-					auto cast = std::static_pointer_cast<Setting<float>>(existing);
-					cast->set(SettingMetadata<float>::fromString(value));
-				}
-					break;
-				case SettingType::Integer:{
-					auto cast = std::static_pointer_cast<Setting<int>>(existing);
-					cast->set(SettingMetadata<int>::fromString(value));
-				}
-					break;
-				case SettingType::String:{
-					auto cast = std::static_pointer_cast<Setting<std::string>>(existing);
-					cast->set(SettingMetadata<std::string>::fromString(value));
-				}
-					break;
-				case SettingType::Color:{
-					auto cast = std::static_pointer_cast<Setting<color>>(existing);
-					cast->set(SettingMetadata<color>::fromString(value));
-				}
-					break;
-				case SettingType::Boolean:{
-					auto cast = std::static_pointer_cast<Setting<bool>>(existing);
-					cast->set(SettingMetadata<bool>::fromString(value));
-				}
-					break;
-				case SettingType::None:
-				default:
-					break;
-				}
+				SetSettingFromString(existing, value);
 			}
         };
 
@@ -96,6 +89,7 @@ bool Settings::read(const std::filesystem::path &path)
 {
     auto read = df2::read(path);
     iterateSettingsSearch(savedValues, read, "setting.");
+	invokeCallback<SettingCallbacks::SettingChanged>("");
     return !read.isEmpty();
 }
 
@@ -142,44 +136,7 @@ df2 Settings::dump() const
         const auto &key = entry.first;
         const auto &value = entry.second;
 
-        std::string stringRepr;
-
-        switch (value->getType()) {
-            case SettingType::Boolean: {
-                auto cast = std::static_pointer_cast<Setting<bool>>(value);
-                if (cast->getMetadata().writeToConfig)
-                    stringRepr = SettingMetadata<bool>::toString(cast->get());
-                break;
-            }
-            case SettingType::Color: {
-                auto cast = std::static_pointer_cast<Setting<color>>(value);
-                if (cast->getMetadata().writeToConfig)
-                    stringRepr = SettingMetadata<color>::toString(cast->get());
-                break;
-            }
-            case SettingType::String: {
-                auto cast = std::static_pointer_cast<Setting<std::string>>(value);
-                if (cast->getMetadata().writeToConfig)
-                    stringRepr = SettingMetadata<std::string>::toString(cast->get());
-                break;
-            }
-            case SettingType::Integer: {
-                auto cast = std::static_pointer_cast<Setting<int>>(value);
-                if (cast->getMetadata().writeToConfig)
-                    stringRepr = SettingMetadata<int>::toString(cast->get());
-                break;
-
-            }
-            case SettingType::Float: {
-                auto cast = std::static_pointer_cast<Setting<float>>(value);
-                if (cast->getMetadata().writeToConfig)
-                    stringRepr = SettingMetadata<float>::toString(cast->get());
-                break;
-            }
-            case SettingType::None:
-            default:
-                break;
-        }
+        std::string stringRepr = GetStringFromSetting(value);
 
         if (stringRepr.empty())
             continue;
@@ -202,6 +159,46 @@ df2 &Settings::GetClumpRecursive(std::vector<std::string> &steps, df2 &clump)
     auto next = steps.front();
     steps.erase(steps.begin());
     return GetClumpRecursive(steps, clump[next]);
+}
+
+void SetSettingFromString(std::shared_ptr<detail::BaseSetting> &setting, const std::string &value)
+{
+	switch (setting->getType()) {
+
+#define SETTING_TYPE(Name, Storage ) \
+	case SettingType::Name: { \
+		auto cast = std::static_pointer_cast<Setting<Storage>>(setting); \
+		if (!bool(cast->getMetadata().flags & SettingFlags::Readonly)) \
+			cast->set(SettingMetadata<Storage>::fromString(value)); \
+		break; \
+	}
+
+	SETTING_TYPES
+#undef SETTING_TYPE
+	case SettingType::None:
+	default:
+		break;
+	}
+}
+
+std::string GetStringFromSetting(const std::shared_ptr<detail::BaseSetting> &value)
+{
+	switch (value->getType()) {
+
+#define SETTING_TYPE(Name, Storage ) \
+	case SettingType::Name: { \
+		auto cast = std::static_pointer_cast<Setting<Storage>>(value); \
+		if (bool(cast->getMetadata().flags & SettingFlags::WriteToFile)) \
+			return SettingMetadata<Storage>::toString(cast->get()); \
+		return ""; \
+	}
+
+	SETTING_TYPES
+#undef SETTING_TYPE
+	case SettingType::None:
+	default:
+		return "";
+	}
 }
 
 NS_END

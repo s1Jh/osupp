@@ -1,3 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 #include "StateMainMenu.hpp"
 
 #include "Log.hpp"
@@ -136,7 +158,7 @@ void State<GameState::MainMenu>::showDebugControl()
     ImGui::End();
 }
 
-int State<GameState::MainMenu>::update(double delta)
+int State<GameState::MainMenu>::update(double)
 {
     return 0;
 }
@@ -152,7 +174,7 @@ int State<GameState::MainMenu>::exit()
     return 0;
 }
 
-int State<GameState::MainMenu>::init(GameState state)
+int State<GameState::MainMenu>::init(GameState)
 {
     log::debug("Entering main menu");
     return 0;
@@ -178,7 +200,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
     if (ImGui::Button(ctx.locale["ui.main.maps.reload"].c_str())) {
         ctx.maps.clear();
-        auto total = ctx.resources.purgeUnusedFiles();
+        ctx.resources.purgeUnusedFiles();
         ctx.resources.getDirectory("songs", ctx.maps);
     }
 
@@ -235,7 +257,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 char starRating[8] = "???";
                 ImGui::Text("%s", starRating);
                 ImGui::SameLine();
-                ImGui::Image((ImTextureID) star->getID(), {iconSize, iconSize}, {0, 1}, {1, 0}, {0.8, 0.8, 0, 1});
+                ImGui::Image(star->getID(), {iconSize, iconSize}, {0, 1}, {1, 0}, {0.8, 0.8, 0, 1});
 
                 // Song name and selectable field
                 ImGui::TableNextColumn();
@@ -252,7 +274,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song overall difficulty
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) difficulty->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(difficulty->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char overallDiff[8];
                 sprintf(overallDiff, "%.1f", map->getOverallDifficulty());
@@ -260,7 +282,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song approach time
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) approach->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(approach->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char approachTime[8];
                 sprintf(approachTime, "%.1f", map->getApproachTime());
@@ -268,7 +290,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song circle size
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) circle->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(circle->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char circleSize[8];
                 sprintf(circleSize, "%.2f", map->getCircleSize());
@@ -276,7 +298,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song hit window time
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) window->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(window->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hitWindow[8];
                 sprintf(hitWindow, "%.1f", map->getHitWindow());
@@ -284,7 +306,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song HP drain
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) drain->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(drain->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hpDrain[8];
                 sprintf(hpDrain, "%.1f", map->getHpDrain());
@@ -292,7 +314,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song duration
                 ImGui::TableNextColumn();
-                ImGui::Image((ImTextureID) duration->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(duration->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
 
                 auto secsTotal = (int) map->getMapDuration();
@@ -340,7 +362,7 @@ void State<GameState::MainMenu>::showSettingsTab()
         ImGui::TableSetupColumn(ctx.locale["ui.main.settings.value"].c_str());
 
         ImGui::TableHeadersRow();
-        for (const auto &setting: ctx.settings) {
+        for (auto &setting: ctx.settings) {
             auto localised = ctx.locale[setting.first];
             if (!filter.PassFilter(localised.c_str())) {
                 continue;
@@ -351,84 +373,71 @@ void State<GameState::MainMenu>::showSettingsTab()
 
             auto &ptr = setting.second;
             std::string id = "##" + setting.first;
-            switch (ptr->getType()) {
-                case SettingType::String: {
-                    auto cast = std::static_pointer_cast<Setting<std::string>>(ptr);
-                    if (cast->getMetadata().options.empty()) {
-                        ImGui::InputText(id.c_str(), cast->getPtr());
-                    }
-                    else {
-                        if (ImGui::BeginListBox(id.c_str())) {
-                            for (const auto &option: cast->getMetadata().options) {
-                                if (ImGui::Selectable(option.c_str(), option == cast->get())) {
-                                    cast->set(option);
-                                }
-                            }
-                            ImGui::EndListBox();
-                        }
-                    }
-                    break;
-                }
-                case SettingType::Float: {
-                    auto cast = std::static_pointer_cast<Setting<float>>(ptr);
-                    auto meta = cast->getMetadata();
-                    float val = cast->get();
-                    ImGui::SliderFloat(id.c_str(), &val, meta.min, meta.max);
-                    cast->set(val);
-                    break;
-                }
-                case SettingType::Integer: {
-                    auto cast = std::static_pointer_cast<Setting<int>>(ptr);
-                    auto meta = cast->getMetadata();
-                    int span = meta.max - meta.min;
-                    int val = cast->get();
-                    ImGui::InputInt(id.c_str(), &val, 1, span / 10);
-                    cast->set(val);
-                    break;
-                }
-                case SettingType::Color: {
-                    auto cast = std::static_pointer_cast<Setting<color>>(ptr);
 
-                    if (cast->getMetadata().palette.empty()) {
-                        color val = cast->get();
-                        ImGui::ColorEdit4(id.c_str(), (float *) &val);
-                        cast->set(val);
-                    }
-                    else {
-                        if (ImGui::BeginListBox(id.c_str())) {
-                            for (const color &option: cast->getMetadata().palette) {
-                                color8 truncated = option;
-                                std::string name = (std::string) truncated;
+			if (VisitSetting<std::string>(ptr, wrap([&](Setting<std::string>& setting) {
+				if (setting.getMetadata().options.empty()) {
+					ImGui::InputText(id.c_str(), setting.getPtr());
+				}
+				else {
+					if (ImGui::BeginListBox(id.c_str())) {
+						for (const auto &option: setting.getMetadata().options) {
+							if (ImGui::Selectable(option.c_str(), option == setting.get())) {
+								setting.set(option);
+							}
+						}
+						ImGui::EndListBox();
+					}
+				}
+			}))) continue;
 
-                                ImVec4 color;
-                                color.x = option.r;
-                                color.y = option.g;
-                                color.z = option.b;
-                                color.w = option.a;
+			if (VisitSetting<float>(ptr, wrap([&](Setting<float>& setting) {
+				auto meta = setting.getMetadata();
+				float val = setting.get();
+				ImGui::SliderFloat(id.c_str(), &val, meta.min, meta.max);
+				setting.set(val);
+			}))) continue;
+			
+			if (VisitSetting<int>(ptr, wrap([&](Setting<int>& setting) {
+				auto meta = setting.getMetadata();
+				int span = meta.max - meta.min;
+				int val = setting.get();
+				ImGui::InputInt(id.c_str(), &val, 1, span / 10);
+				setting.set(val);
+			}))) continue;
 
-                                if (ImGui::Selectable(("##" + name).c_str(), option == cast->get())) {
-                                    cast->set(option);
-                                }
-                                ImGui::SameLine();
-                                ImGui::TextColored(color, "%s", name.c_str());
-                            }
-                            ImGui::EndListBox();
-                        }
-                    }
-                    break;
-                }
-                case SettingType::Boolean: {
-                    auto cast = std::static_pointer_cast<Setting<bool>>(ptr);
-                    bool val = cast->get();
-                    ImGui::Checkbox(id.c_str(), &val);
-                    cast->set(val);
-                    break;
-                }
-                case SettingType::None:
-                default:
-                    ImGui::Text("null");
-                    break;
-            }
+			if (VisitSetting<color>(ptr, wrap([&](Setting<color>& setting) {
+				if (setting.getMetadata().palette.empty()) {
+					color val = setting.get();
+					ImGui::ColorEdit4(id.c_str(), (float *) &val);
+					setting.set(val);
+				} else {
+					if (ImGui::BeginListBox(id.c_str())) {
+						for (const color &option: setting.getMetadata().palette) {
+							color8 truncated = option;
+							std::string name = (std::string) truncated;
+
+							ImVec4 color;
+							color.x = option.r;
+							color.y = option.g;
+							color.z = option.b;
+							color.w = option.a;
+
+							if (ImGui::Selectable(("##" + name).c_str(), option == setting.get())) {
+								setting.set(option);
+							}
+							ImGui::SameLine();
+							ImGui::TextColored(color, "%s", name.c_str());
+						}
+						ImGui::EndListBox();
+					}
+				}
+			}))) continue;
+
+			if (VisitSetting<bool>(ptr, wrap([&](Setting<bool>& setting) {
+				bool val = setting.get();
+				ImGui::Checkbox(id.c_str(), &val);
+				setting.set(val);
+			}))) continue;
         }
 
         ImGui::EndTable();

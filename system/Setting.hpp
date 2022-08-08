@@ -1,8 +1,31 @@
+/*******************************************************************************
+ * Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 #pragma once
 
 #include "define.hpp"
 
 #include "Color.hpp"
+#include "EnumOperators.hpp"
 
 #include <vector>
 #include <string>
@@ -12,15 +35,29 @@
 
 NS_BEGIN
 
+#define SETTING_TYPES \
+	SETTING_TYPE(Boolean, bool) \
+	SETTING_TYPE(Integer, int) \
+	SETTING_TYPE(Float, float) \
+	SETTING_TYPE(String, std::string) \
+	SETTING_TYPE(Color, color)
+
 enum class SettingType
 {
     None,
-    Boolean,      // will be shown as a checkbox
-    Integer,
-    Float,        // will be shown as a slider
-    String,       // will be shown as a tex box
-    Color,        // will be shown with a color picker
+#define SETTING_TYPE(Name, Storage) Name,
+	SETTING_TYPES
+#undef SETTING_TYPE
 };
+
+enum class SettingFlags {
+	None = 0,
+	WriteToFile = 1 << 0,
+	Readonly = 1 << 1,
+	Hidden = 1 << 2,
+};
+
+ENABLE_BITMASK_OPERATORS(SettingFlags);
 
 namespace detail
 {
@@ -60,7 +97,7 @@ struct SettingMetadataFields
     const static ConstraintFunction applyConstraints;
 
     U initial{};
-    bool writeToConfig{true};
+	SettingFlags flags{SettingFlags::WriteToFile | SettingFlags::Readonly};
 };
 
 }
@@ -104,6 +141,7 @@ public:
     explicit Setting();
     explicit Setting(SettingMetadata<T> meta);
     explicit Setting(T value, SettingMetadata<T> meta);
+	Setting(const Setting& right);
 
     explicit operator bool() const
     {
@@ -116,10 +154,10 @@ public:
     void set(T &&);
     void reset();
 
-    SettingMetadata<T> getMetadata();
+    SettingMetadata<T> getMetadata() const;
 
     Setting<T> &operator=(const T &right);
-    Setting<T> &operator=(const Setting<T> &right);
+    Setting<T> &operator=(Setting<T> &&right) noexcept ;
 
 private:
     template<typename U>
@@ -195,7 +233,7 @@ void Setting<T>::reset()
 
 template<typename T>
 requires std::is_default_constructible_v<T>
-SettingMetadata<T> Setting<T>::getMetadata()
+SettingMetadata<T> Setting<T>::getMetadata() const
 {
     std::scoped_lock<std::mutex> lock(held->mutex);
     return held->meta;
@@ -210,11 +248,24 @@ Setting<T> &Setting<T>::operator=(const T &right)
     return *this;
 }
 
+
 template<typename T>
 requires std::is_default_constructible_v<T>
-Setting<T> &Setting<T>::operator=(const Setting<T> &right)
+Setting<T>::Setting(const Setting &right) : BaseSetting(right.getType())
 {
-    std::scoped_lock<std::mutex> lock(right.held->mutex);
+	if (right.held)
+		std::scoped_lock<std::mutex> lock(right.held->mutex);
+
+	held = right.held;
+}
+
+template<typename T>
+requires std::is_default_constructible_v<T>
+Setting<T> &Setting<T>::operator=(Setting<T> &&right) noexcept
+{
+	if (right.held)
+    	std::scoped_lock<std::mutex> lock(right.held->mutex);
+
     if (this == &right)
         return *this;
 

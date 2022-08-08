@@ -2,8 +2,8 @@
 
 "audio"
 {
-	"device" = "JACK sink (PulseAudio JACK Sink)"
-	"frequency" = "48000"
+	"device" = "HyperX 7.1 Audio Analog Stereo"
+	"frequency" = "20000"
 }
 
 "gfx"

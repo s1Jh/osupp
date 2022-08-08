@@ -7,5 +7,6 @@ file(GLOB_RECURSE CLIENT_FILES "${ASSET_DIRECTORY}/*")
 
 foreach (CLIENT_FILE ${CLIENT_FILES})
     file(RELATIVE_PATH REL_PATH ${ASSET_DIRECTORY} ${CLIENT_FILE})
+    message("Configuring file ${REL_PATH}")
     configure_file(${CLIENT_FILE} ${REL_PATH} COPYONLY)
 endforeach (${CLIENT_FILE})

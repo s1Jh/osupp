@@ -1,6 +1,29 @@
+/*******************************************************************************
+ * Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 #include "df2.hpp"
 
 #include <cmath>
+#include <cerrno>
 #include <fstream>
 #include <sstream>
 #include <type_traits>
@@ -80,14 +103,15 @@ std::string df2::getToken(const std::string &string, size_t start,
     // It keeps doing that until it finds a second " character at which point
     // the loop breaks and we have the full token in the accumulator.
     for (size_t i = start; (i > 0 && i < string.size()); i += traversal_rate) {
-        if (string.at(i) == '\"')
-            if (!found_first) {
-                found_first = true;
-                continue;
-            }
-            else {
-                break;
-            }
+        if (string.at(i) == '\"') {
+			if (!found_first) {
+				found_first = true;
+				continue;
+			}
+			else {
+				break;
+			}
+		}
         if (found_first) {
             // Remove invalid characters
             if (filtered_chars.find(string.at(i)) == std::string::npos) {
@@ -225,36 +249,39 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                 }
 
                 // try to convert to a numeric format
-                try {
-                    double result = std::stod(token_value);
 
-                    double integral;
+				errno = 0;
+				char *last;
+				double result = std::strtod(token_value.c_str(), &last);
+				if (errno == 0 && last == &token_value.back() + sizeof(std::string::value_type)) {
+					double integral;
 
-                    if (std::modf(result, &integral) == 0.0) {
-                        if (enableSpam)
-                            log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
-                                       token_value, "\") to be a integer type ");
+					if (std::modf(result, &integral) == 0.0) {
+						if (enableSpam)
+							log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+									   token_value, "\") to be a integer type ");
 
-                        parent[token_name].integer() = (int) result;
-                        break;
-                    }
-                    if (enableSpam)
-                        log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
-                                   token_value, "\") to be a floating point type ");
+						parent[token_name].integer() = (int) result;
+						break;
+					}
+					if (enableSpam)
+						log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+								   token_value, "\") to be a floating point type ");
 
-                    parent[token_name].real() = result;
-                    break;
-                }
-                catch (std::invalid_argument &e) {
-                    // unable to convert to a floating point number, probably a string
-                }
-                catch (std::out_of_range &e) {
-                    log::warning("[PARSE] Numeric key \"", token_name,
-                                 "\" has a value out of range of a double precision float");
-                }
+					parent[token_name].real() = result;
+					break;
+
+				} else if (errno == ERANGE) {
+					log::warning("[PARSE] Numeric key \"", token_name,
+								 "\" has a value out of range of a double precision float");
+					parent[token_name].real() = 0;
+					break;
+				}
+
                 if (enableSpam)
                     log::debug("[PARSE] Deduced key \"", token_name, "\" (\"", token_value,
                                "\") to be a string type ");
+
                 parent[token_name].str() = token_value;
                 break;
             }

@@ -24,13 +24,25 @@
 
 #include "define.hpp"
 
-#include "MapInfo.hpp"
-#include <string>
+#include "Sound.hpp"
 
 NS_BEGIN
 
-bool LoadMAP(const std::string &fpath, MapInfo &map);
+class SoundSample : public detail::BaseSound
+{
+public:
+	~SoundSample() override = default;
+	bool load(const std::filesystem::path &path) override;
+	bool create() override;
+	[[nodiscard]] SoundType getType() const override;
 
-bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map);
+protected:
+	bool fillBuffer(BufferT &buffer) const override;
+	[[nodiscard]] bool isAtEOF() const override;
+	[[nodiscard]] SampleFormat getSampleFormat() const override;
+	[[nodiscard]] unsigned int getSampleRate() const override;
+
+private:
+};
 
 NS_END

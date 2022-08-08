@@ -1,3 +1,25 @@
+/*******************************************************************************
+ * Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ ******************************************************************************/
+
 #include "define.hpp"
 
 #include "Context.hpp"
@@ -20,8 +42,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 int main(int argc, char **argv)
 #endif
 {
-	ALuint helloBuffer, helloSource;
-
 	alutInitWithoutContext(&argc, argv);
 
     log::custom("GREETING", "Hello, world!");
@@ -32,75 +52,70 @@ int main(int argc, char **argv)
 
     auto &ctx = GetContext();
 
-    df2::addAlias("GAMEDIR", std::filesystem::current_path());
-    ctx.resources.addSearchPath(std::filesystem::current_path());
+	auto currentPath = std::filesystem::current_path();
+    df2::addAlias("GAMEDIR", currentPath);
+	ctx.settings.read();
+    ctx.resources.addSearchPath(currentPath);
 
-    ctx.settings.read();
+	auto locale = ctx.settings
+		.addSetting<std::string>("setting.user.locale", std::string("english.ldf"), SettingFlags::WriteToFile);
+	ctx.locale.loadFromFile(locale.get());
 
-    auto locale = ctx.settings.addSetting<std::string>("setting.user.locale", std::string("english.ldf"));
-    ctx.locale.loadFromFile(locale.get());
-
-	auto devices =  GetAudioDevices();
+	auto devices = GetAudioDevices();
 	std::vector<std::string> deviceNames;
-	for (const auto& dev : devices)
+	for (const auto &dev : devices)
 		deviceNames.push_back(dev.name);
 
-	auto audioDev = ctx.settings.addSetting<std::string>("setting.audio.device", "", true, deviceNames);
+	auto audioDev =
+		ctx.settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WriteToFile, deviceNames);
 	ctx.audio = GetAudioDevice(audioDev.get());
 
-	helloBuffer = alutCreateBufferFromFile("test.wav");
-	ALenum err = alutGetError();
-	if (err != ALUT_ERROR_NO_ERROR) {
-		log::error(alutGetErrorString(err));
+	ctx.settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap([&audioDev, &ctx](const std::string &)
+																		  {
+																			  ctx.audio =
+																				  GetAudioDevice(audioDev.get());
+																			  return CallbackReturn::Ok;
+																		  }));
+
+	if (!ctx.gfx.create()) {
+		return 1;
 	}
-	alGenSources (1, &helloSource);
-	alSourcei (helloSource, AL_BUFFER, helloBuffer);
-	alSourcePlay (helloSource);
+	ctx.resources.loadPersistentAssets();
 
-	ctx.settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap([&audioDev, &ctx](const std::string&) {
-		ctx.audio = GetAudioDevice(audioDev.get());
-		return CallbackReturn::Ok;
-	}));
+	Keyboard::setViewport(ctx.gfx.getWindowHandle());
+	Mouse::setViewport(ctx.gfx.getWindowHandle());
 
-    if (!ctx.gfx.create()) {
-        return 1;
-    }
-    ctx.resources.loadPersistentAssets();
+	IMGUI_CHECKVERSION();
 
-    Keyboard::setViewport(ctx.gfx.getWindowHandle());
-    Mouse::setViewport(ctx.gfx.getWindowHandle());
+	ImGui::CreateContext();
+	ImGuiIO &io = ImGui::GetIO();
+	(void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
-    IMGUI_CHECKVERSION();
+	ImGui::StyleColorsClassic();
 
-    ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
-    (void) io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	ImGui_ImplGlfw_InitForOpenGL(ctx.gfx.getWindowHandle(), true);
+	ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
 
-    ImGui::StyleColorsClassic();
+    ctx.settings.addSetting<bool>("setting.test.bool1", false, SettingFlags::None);
+    ctx.settings.addSetting<bool>("setting.test.bool2", false, SettingFlags::None);
+    ctx.settings.addSetting<bool>("setting.test.bool3", true, SettingFlags::None);
+    ctx.settings.addSetting<bool>("setting.test.bool4", false, SettingFlags::None);
+    ctx.settings.addSetting<bool>("setting.test.bool5", true, SettingFlags::None);
+    ctx.settings.addSetting<bool>("setting.test.bool6", true, SettingFlags::None);
 
-    ImGui_ImplGlfw_InitForOpenGL(ctx.gfx.getWindowHandle(), true);
-    ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
+    ctx.settings.addSetting<color>("test.color1", PURPLE, SettingFlags::None);
+    ctx.settings.addSetting<color>("test.color2", GREEN, SettingFlags::None);
+    ctx.settings.addSetting<color>("test.color3", GRAY, SettingFlags::None);
+    ctx.settings.addSetting<color>("test.color4", BLUE, SettingFlags::None);
+    ctx.settings.addSetting<color>("test.color5", MAGENTA, SettingFlags::None);
+    ctx.settings.addSetting<color>("test.color6", TURQUOISE, SettingFlags::None);
 
-    ctx.settings.addSetting<bool>("test.bool1", false, false);
-    ctx.settings.addSetting<bool>("test.bool2", true, false);
-    ctx.settings.addSetting<bool>("test.bool3", false, false);
-    ctx.settings.addSetting<bool>("test.bool4", true, false);
-    ctx.settings.addSetting<bool>("test.bool5", false, false);
-    ctx.settings.addSetting<bool>("test.bool6", false, false);
-
-    ctx.settings.addSetting<color>("test.color1", PURPLE, false);
-    ctx.settings.addSetting<color>("test.color2", GREEN, false);
-    ctx.settings.addSetting<color>("test.color3", GRAY, false);
-    ctx.settings.addSetting<color>("test.color4", BLUE, false);
-    ctx.settings.addSetting<color>("test.color5", MAGENTA, false);
-    ctx.settings.addSetting<color>("test.color6", TURQUOISE, false);
-
-    ctx.settings.addSetting<color>("test.pallette", PURPLE, false,
+    ctx.settings.addSetting<color>("test.pallette", PURPLE, SettingFlags::None,
                                    std::vector<color>{PURPLE, AZURE, BEIGE, COBALT_BLUE, BRONZE, GOLD, SILVER});
 
-    auto backFill = ctx.settings.addSetting<color>("debug.backfill", BLACK, false);
+    auto backFill = ctx.settings.addSetting<color>("debug.backfill", BLACK, SettingFlags::None);
 
     ctx.state.setState(GameState::INITIAL_STATE);
 
@@ -127,7 +142,7 @@ int main(int argc, char **argv)
 
         ctx.gfx.end();
 
-        if (!ctx.gfx.runTasks(delta))
+        if (!ctx.gfx.runTasks())
             ctx.state.exit();
 
         ctx.state.process();
@@ -137,6 +152,5 @@ int main(int argc, char **argv)
 
     log::custom("GREETING", "Goodbye, world!");
     ctx.settings.write();
-    ctx.gfx.destroy();
     std::exit(0);
 }

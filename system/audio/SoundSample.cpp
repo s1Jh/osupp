@@ -20,17 +20,45 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#pragma once
+#include "SoundSample.hpp"
 
-#include "define.hpp"
-
-#include "MapInfo.hpp"
-#include <string>
+#include <AL/alut.h>
 
 NS_BEGIN
 
-bool LoadMAP(const std::string &fpath, MapInfo &map);
+bool SoundSample::load(const std::filesystem::path &path)
+{
+	return false;
+}
 
-bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map);
+bool SoundSample::create()
+{
+	return false;
+}
+
+SoundType SoundSample::getType() const
+{
+	return SoundType::Sample;
+}
+
+bool SoundSample::fillBuffer(detail::BaseSound::BufferT &buffer) const
+{
+	return false;
+}
+
+bool SoundSample::isAtEOF() const
+{
+	return false;
+}
+
+SampleFormat SoundSample::getSampleFormat() const
+{
+	return SampleFormat::Stereo16;
+}
+
+unsigned int SoundSample::getSampleRate() const
+{
+	return 0;
+}
 
 NS_END
