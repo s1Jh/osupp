@@ -67,8 +67,11 @@ set(SOURCES
 
         ${AUDIO_DIRECTORY}/Audio.cpp
         ${AUDIO_DIRECTORY}/AudioDevice.cpp
+        ${AUDIO_DIRECTORY}/AudioUtil.cpp
         ${AUDIO_DIRECTORY}/Channel.cpp
         ${AUDIO_DIRECTORY}/Sound.cpp
+        ${AUDIO_DIRECTORY}/SoundSample.cpp
+        ${AUDIO_DIRECTORY}/SoundStream.cpp
 
         ${GFX_DIRECTORY}/Renderer.cpp
         ${GFX_DIRECTORY}/Shader.cpp
@@ -78,6 +81,7 @@ set(SOURCES
         ${GFX_DIRECTORY}/Image.cpp
         ${GFX_DIRECTORY}/Mesh.cpp
         ${GFX_DIRECTORY}/Camera.cpp
+        ${GFX_DIRECTORY}/GraphicsContext.cpp
 
         ${IMGUI_DIRECTORY}/imgui.cpp
         ${IMGUI_DIRECTORY}/imgui_draw.cpp
@@ -122,7 +126,7 @@ set(SOURCES
         ObjectSprite.cpp
         MapInfo.cpp
         Skin.cpp
-        )
+        system/audio/AudioUtil.hpp system/audio/AudioUtil.cpp)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
@@ -131,10 +135,17 @@ find_package(OpenGL REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(FFmpeg REQUIRED avcodec avformat avutil)
 
 include_directories(${DIRECTORIES})
 include_directories(${GLEW_INCLUDE_DIRS})
 include_directories(${FREETYPE_INCLUDE_DIRS})
+include_directories(${FFMPEG_INCLUDE_DIRS})
+
+set(LIBS
+        glfw OpenGL::GL alut ${OPENAL_LIBRARY}
+        ${GLEW_LIBRARIES} ${FREETYPE_LIBRARIES}
+        ${FFMPEG_LIBRARIES})
 
 set(PLATFORM LINUX)
 set(ARCHITECTURE ARCH_AMD64)
@@ -143,7 +154,7 @@ message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
 add_compile_definitions(${PLATFORM})
 add_compile_definitions(${ARCHITECTURE})
 
-add_executable(${TARGET_NAME} ${SOURCES} ${RES_SOURCES})
+add_executable(${TARGET_NAME} ${SOURCES})
 
 # Set the proper warning levels
 if (MSVC)
@@ -168,6 +179,6 @@ target_compile_definitions(${TARGET_NAME} PRIVATE
         $<$<CONFIG:MinSizeRel>:MINREL=1>
         )
 
-target_link_libraries(${TARGET_NAME} glfw OpenGL::GL alut ${OPENAL_LIBRARY} ${GLEW_LIBRARIES} ${FREETYPE_LIBRARIES})
+target_link_libraries(${TARGET_NAME} ${LIBS})
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION bin)

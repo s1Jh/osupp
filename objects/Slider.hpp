@@ -76,6 +76,7 @@ private:
     Mesh body;
 
     ObjectSprite bodyTexture;
+	ObjectSprite ballRing;
     ObjectSprite ball;
     ObjectSprite head;
     ObjectSprite headRepeat;

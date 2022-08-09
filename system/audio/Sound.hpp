@@ -35,42 +35,32 @@ NS_BEGIN
 constexpr unsigned int DEFAULT_SOUND_BUFFER_CHUNKS = 4;
 constexpr unsigned int DEFAULT_SOUND_BUFFER_SIZE = 1024;
 
+class Channel;
+
 namespace detail {
 
 class BaseSound : public detail::Resource {
+	friend class ::PROJECT_NAMESPACE::Channel;
 public:
-	using SampleT = uint8_t;
+	using SampleT = StereoSample16;
 	using BufferT = std::vector<SampleT>;
 
 	[[nodiscard]] virtual SoundType getType() const = 0;
+	[[nodiscard]] float getLength() const;
+	[[nodiscard]] unsigned int getSampleRate() const;
+	[[nodiscard]] SampleFormat getFormat() const;
 
 protected:
-	virtual bool fillBuffer(BufferT& buffer) const = 0;
+	bool configure(unsigned int size, int sampleRate, SampleFormat format);
+
+	virtual bool fillBuffer(BufferT& buffer) = 0;
 	[[nodiscard]] virtual bool isAtEOF() const = 0;
-	[[nodiscard]] virtual SampleFormat getSampleFormat() const = 0;
-	[[nodiscard]] virtual unsigned int getSampleRate() const = 0;
+	[[nodiscard]] virtual bool isStreaming() const = 0;
 
-	bool setupBuffers(unsigned int size, unsigned int number);
-
-	/**
-	 * This function will generate a specified number of OpenAL buffers
-	 * that contain subsequent parts of streamed audio.
-	 *
-	 * New buffers of the specified size will be generated until EOF is reached,
-	 * if no new buffers need to be generated, false is returned. This may occur
-	 * if only one buffer is used for the whole sample, only one buffer will ever
-	 * be generated during the first call, subsequent calls will return false and
-	 * no new buffers will be generated.
-	 *
-	 * @param number The number of OpenAL buffers to generate.
-	 * @return Whether new buffers have been generated.
-	 */
-	bool generateAdditionalBuffers(std::vector<unsigned int>& retBuffers);
 private:
-	unsigned int bufferLimit;
-	unsigned int bufferSize;
-	unsigned int activeBuffer{0};
-	std::list<BufferT> buffers;
+	float length;
+	unsigned int sampleRate;
+	SampleFormat format;
 };
 
 }

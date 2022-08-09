@@ -48,7 +48,7 @@ int State<GameState::InGame>::draw()
 
 int State<GameState::InGame>::exit()
 {
-    return 0;
+	ctx.activeGameMode->setMap(nullptr);
 }
 
 int State<GameState::InGame>::init(GameState)

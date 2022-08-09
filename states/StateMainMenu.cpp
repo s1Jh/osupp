@@ -177,6 +177,10 @@ int State<GameState::MainMenu>::exit()
 int State<GameState::MainMenu>::init(GameState)
 {
     log::debug("Entering main menu");
+
+	auto& channel = ctx.audio.getMusicChannel();
+	channel.setSound(ctx.resources.get<SoundStream>("test.mp3"), true);
+
     return 0;
 }
 
@@ -377,17 +381,18 @@ void State<GameState::MainMenu>::showSettingsTab()
 			if (VisitSetting<std::string>(ptr, wrap([&](Setting<std::string>& setting) {
 				if (setting.getMetadata().options.empty()) {
 					ImGui::InputText(id.c_str(), setting.getPtr());
+					return;
 				}
-				else {
-					if (ImGui::BeginListBox(id.c_str())) {
-						for (const auto &option: setting.getMetadata().options) {
-							if (ImGui::Selectable(option.c_str(), option == setting.get())) {
-								setting.set(option);
-							}
+
+				if (ImGui::BeginListBox(id.c_str())) {
+					for (const auto &option: setting.getMetadata().options) {
+						if (ImGui::Selectable(option.c_str(), option == setting.get())) {
+							setting.set(option);
 						}
-						ImGui::EndListBox();
 					}
+					ImGui::EndListBox();
 				}
+
 			}))) continue;
 
 			if (VisitSetting<float>(ptr, wrap([&](Setting<float>& setting) {
@@ -410,26 +415,26 @@ void State<GameState::MainMenu>::showSettingsTab()
 					color val = setting.get();
 					ImGui::ColorEdit4(id.c_str(), (float *) &val);
 					setting.set(val);
-				} else {
-					if (ImGui::BeginListBox(id.c_str())) {
-						for (const color &option: setting.getMetadata().palette) {
-							color8 truncated = option;
-							std::string name = (std::string) truncated;
+					return;
+				}
+				if (ImGui::BeginListBox(id.c_str())) {
+					for (const color &option: setting.getMetadata().palette) {
+						color8 truncated = option;
+						std::string name = (std::string) truncated;
 
-							ImVec4 color;
-							color.x = option.r;
-							color.y = option.g;
-							color.z = option.b;
-							color.w = option.a;
+						ImVec4 color;
+						color.x = option.r;
+						color.y = option.g;
+						color.z = option.b;
+						color.w = option.a;
 
-							if (ImGui::Selectable(("##" + name).c_str(), option == setting.get())) {
-								setting.set(option);
-							}
-							ImGui::SameLine();
-							ImGui::TextColored(color, "%s", name.c_str());
+						if (ImGui::Selectable(("##" + name).c_str(), option == setting.get())) {
+							setting.set(option);
 						}
-						ImGui::EndListBox();
+						ImGui::SameLine();
+						ImGui::TextColored(color, "%s", name.c_str());
 					}
+					ImGui::EndListBox();
 				}
 			}))) continue;
 
@@ -442,7 +447,6 @@ void State<GameState::MainMenu>::showSettingsTab()
 
         ImGui::EndTable();
     }
-
 }
 
 NS_END

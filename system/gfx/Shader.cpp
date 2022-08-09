@@ -96,8 +96,6 @@ bool Shader::fromString(const std::string &vert_src,
                         const std::string &frag_src,
                         const std::string &geom_src)
 {
-    log::info("Creating shader");
-
     id = glCreateProgram();
 
     unsigned int vert = compileShader(vert_src, GL_VERTEX_SHADER);

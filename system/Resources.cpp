@@ -38,6 +38,10 @@ template<> const std::vector<std::string> detail::ResourcePile<MapInfo>::allowed
 
 template<> const std::vector<std::string> detail::ResourcePile<Skin>::allowedFileExtensions = {".skin"};
 
+template<> const std::vector<std::string> detail::ResourcePile<SoundSample>::allowedFileExtensions = {".wav", ".mp3"};
+
+template<> const std::vector<std::string> detail::ResourcePile<SoundStream>::allowedFileExtensions = {".wav", ".mp3"};
+
 int Resources::loadPersistentAssets()
 {
     int success = 0;

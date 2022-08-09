@@ -29,8 +29,7 @@
 #include "df2.hpp"
 #include "Drawable.hpp"
 #include "Settings.hpp"
-
-typedef struct GLFWwindow GLFWwindow;
+#include "GraphicsContext.hpp"
 
 NS_BEGIN
 
@@ -45,8 +44,6 @@ public:
 
     bool create();
 
-    void destroy();
-
     bool setMode(int width, int height, bool fullscreen, int refreshRate = 60);
 
     bool runTasks();
@@ -57,7 +54,7 @@ public:
 
     [[nodiscard]] isize getSize() const;
 
-    GLFWwindow *getWindowHandle();
+	WindowHandle *getWindowHandle();
 
     template<typename T, typename ... ArgT>
     requires IsDrawable<T>
@@ -76,11 +73,7 @@ private:
     Setting<bool> fullscreen;
     Setting<int> refreshRate;
 
-    static void onError(int code, const char *msg);
-
-    static void onResize(GLFWwindow *window, int width, int height);
-
-    GLFWwindow *windowHandle;
+	WindowHandle *windowHandle;
 };
 
 NS_END

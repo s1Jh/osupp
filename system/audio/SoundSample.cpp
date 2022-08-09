@@ -21,19 +21,40 @@
  ******************************************************************************/
 
 #include "SoundSample.hpp"
+#include "Log.hpp"
+#include "Util.hpp"
 
-#include <AL/alut.h>
+#include "AudioUtil.hpp"
 
 NS_BEGIN
 
 bool SoundSample::load(const std::filesystem::path &path)
 {
-	return false;
+	auto ctx = OpenFFmpegContext(path);
+	if (!ctx.valid)
+		return false;
+
+	data.clear();
+
+	IterateFFmpegFrames(ctx, -1, [&](FFmpegCtx& ctx) {
+		ExtractFFmpegSamplesAppend<SampleT>(ctx, data);
+		return true;
+	});
+
+	FreeFFmpegContext(ctx);
+
+	return configure(data.size(), ctx.sampleRate, SampleInfo<SampleT>::format);
 }
 
 bool SoundSample::create()
 {
-	return false;
+	int secs = 1;
+	float sampleRate = 44100;
+	SampleFormat format = SampleFormat::Mono8;
+	int size = secs * (int)sampleRate;
+
+	data.resize(size);
+	return configure(size, sampleRate, format);
 }
 
 SoundType SoundSample::getType() const
@@ -41,24 +62,19 @@ SoundType SoundSample::getType() const
 	return SoundType::Sample;
 }
 
-bool SoundSample::fillBuffer(detail::BaseSound::BufferT &buffer) const
+bool SoundSample::fillBuffer(detail::BaseSound::BufferT &buffer)
 {
-	return false;
+	buffer = data;
 }
 
 bool SoundSample::isAtEOF() const
 {
+	return true;
+}
+
+bool SoundSample::isStreaming() const
+{
 	return false;
-}
-
-SampleFormat SoundSample::getSampleFormat() const
-{
-	return SampleFormat::Stereo16;
-}
-
-unsigned int SoundSample::getSampleRate() const
-{
-	return 0;
 }
 
 NS_END

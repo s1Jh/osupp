@@ -98,8 +98,10 @@ double HitObject<TemplateT>::getEndTime() const
  * Each object will circle through these states in the following order:
  *                                             Inactive -⟍
  *                                               𝛿 ↕      ↓
- *   Invisible -α-> Approaching -β-> Ready ⟍-γ-> Active -𝜀-> Pickup -𝜁-> Fading
- * -η-> Invisible (finished) ⟍______________________↗ States: Invisible = Object
+ *   Invisible -α-> Approaching -β-> Ready ⟍-γ-> Active -𝜀-> Pickup -𝜁-> Fading -η-> Invisible (finished)
+ *                                          ⟍______________________↗
+ *
+ * States: Invisible = Object
  * is not currently visible on the screen and thus cannot be interacted with.
  *               Overridden onLogicUpdate method is not called during this
  * state. Approaching = Object became visible, but cannot yet be interacted
@@ -236,7 +238,20 @@ void HitObject<TemplateT>::draw(Renderer &renderer)
                       ObjectDrawInfo{{{acSize, acSize}, SOF.position}, getAlpha(), objectTransform});
     }
 
+	color col;
+	switch (getState()) {
+	case HitObjectState::Invisible: col = RED; break;
+	case HitObjectState::Approaching: col = YELLOW; break;
+	case HitObjectState::Ready: col = GREEN; break;
+	case HitObjectState::Active: col = SPRING_GREEN; break;
+	case HitObjectState::Inactive: col = ORANGE; break;
+	case HitObjectState::Pickup: col = MAGENTA; break;
+	case HitObjectState::Fading: col = MAGENTA; break;
+	default: break;
+	}
+
     this->onDraw(renderer);
+	renderer.draw(SOF, VisualAppearance{.fillColor = col}, objectTransform);
 }
 
 template<typename TemplateT>
@@ -252,7 +267,7 @@ float HitObject<TemplateT>::getAlpha() const
     else if (isFadingOut()) {
         float x = session.getCurrentTime() - getTimeFinished();
         float a = session.getFadeTime();
-        return Lerp(0.0f, 1.0f, QuadRR(x, a));
+        return Lerp(0.0f, 1.0f, LinearUD(x, a));
     }
     else
         return 1.0f;

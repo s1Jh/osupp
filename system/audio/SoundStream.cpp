@@ -20,55 +20,54 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#pragma once
+#include "SoundStream.hpp"
 
-#include "define.hpp"
-
-#include "Sound.hpp"
-#include "Audio.hpp"
+#include <libavcodec/avcodec.h>
 
 NS_BEGIN
 
-// Forward decl, since we include Channel.hpp in AudioDevice.hpp
-class AudioDevice;
-
-class Channel
+bool SoundStream::load(const std::filesystem::path &path)
 {
-	friend class AudioDevice;
-public:
+	ctx = OpenFFmpegContext(path);
+	return ctx.valid && configure(0, ctx.sampleRate, SampleInfo<SampleT>::format);
+}
 
-	bool forceSetSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false);
-	bool setSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false,
-				  SoundPriority priority = SoundPriority::Medium);
+bool SoundStream::create()
+{
+	ctx.valid = false;
+	return true;
+}
 
-	[[nodiscard]] ChannelState getState() const;
-	[[nodiscard]] SoundPriority getSoundPriority() const;
+SoundType SoundStream::getType() const
+{
+	return SoundType::Stream;
+}
 
-	void play();
-	void pause();
-	void stop();
-	float seek(float position);
-	void setVolume(float fraction, float transitionTime = 0);
-	void setLooping(bool isLooping);
+bool SoundStream::fillBuffer(detail::BaseSound::BufferT &buffer)
+{
+	if (!ctx.valid)
+		return false;
 
-protected:
-	bool setup();
+	buffer.clear();
+	IterateFFmpegFrames(ctx, 200, [&](FFmpegCtx& context) {
+		ExtractFFmpegSamplesAppend<SampleT>(context, buffer);
+		return true;
+	});
+	return true;
+}
 
-private:
-	void setupBuffers(int count);
-	void update();
+bool SoundStream::isAtEOF() const
+{
+	return false;
+}
 
-	struct ALStructures {
-		std::vector<unsigned int> buffers;
-		unsigned int ALSource{0};
-	};
-
-	static void ALStructureDeleter(ALStructures* struc);
-
-	std::shared_ptr<ALStructures> held;
-	std::shared_ptr<detail::BaseSound> activeSound{nullptr};
-	SoundPriority currentPriority{SoundPriority::Medium};
-	ChannelState state{ChannelState::Free};
-};
+bool SoundStream::isStreaming() const
+{
+	return true;
+}
+SoundStream::~SoundStream()
+{
+	FreeFFmpegContext(ctx);
+}
 
 NS_END

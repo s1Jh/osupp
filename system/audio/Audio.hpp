@@ -23,6 +23,7 @@
 #pragma once
 
 #include "define.hpp"
+#include "EnumOperators.hpp"
 
 #include <string>
 #include <vector>
@@ -33,13 +34,63 @@ class AudioDevice;
 
 constexpr unsigned int MAX_SFX_CHANNELS = 64;
 constexpr unsigned int DEFAULT_SFX_CHANNELS = 16;
+constexpr unsigned int AUDIO_STREAMING_BUFFERS = 4;
 
 enum class SampleFormat {
-	Mono8,
-	Mono16,
-	Stereo8,
-	Stereo16
+	IsStereo = 0b001,
+	Type = 0b110,
+
+	Type8 = 0 << 1,
+	Type16 = 1 << 1,
+
+	Mono8 = Type8,
+	Mono16 = Type16,
+
+	Stereo8 = Type8 | IsStereo,
+	Stereo16 = Type16 | IsStereo,
 };
+
+ENABLE_BITMASK_OPERATORS(SampleFormat)
+
+template <typename SampleT>
+using MonoSample = SampleT;
+
+template <typename SampleT>
+struct StereoSample {
+	SampleT left, right;
+};
+
+using MonoSample8 = MonoSample<uint8_t>;
+using MonoSample16 = MonoSample<int16_t>;
+using StereoSample8 = StereoSample<uint8_t>;
+using StereoSample16 = StereoSample<int16_t>;
+
+template <typename T>
+struct SampleInfo {
+	const static bool enable = false;
+};
+
+#define DECLARE_MONO_SAMPLE_INFO(Type, EnumType) \
+template <> \
+struct SampleInfo<MonoSample<Type>> { \
+	const static bool enable = true; \
+	const static SampleFormat format = EnumType; \
+	const static size_t size = sizeof(MonoSample<Type>); \
+};
+
+#define DECLARE_STEREO_SAMPLE_INFO(Type, EnumType) \
+template <> \
+struct SampleInfo<StereoSample<Type>> { \
+	const static bool enable = true; \
+	const static SampleFormat format = EnumType; \
+	const static size_t size = sizeof(StereoSample<Type>); \
+};
+
+DECLARE_MONO_SAMPLE_INFO(uint8_t, SampleFormat::Mono8)
+DECLARE_MONO_SAMPLE_INFO(int16_t, SampleFormat::Mono16)
+
+DECLARE_STEREO_SAMPLE_INFO(uint8_t, SampleFormat::Stereo8)
+DECLARE_STEREO_SAMPLE_INFO(int16_t, SampleFormat::Stereo16)
 
 enum class SoundType {
 	Sample, Stream, Record

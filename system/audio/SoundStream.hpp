@@ -19,56 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
 #include "define.hpp"
 
-#include "Sound.hpp"
+#include <fstream>
+
 #include "Audio.hpp"
+#include "Sound.hpp"
+#include "AudioUtil.hpp"
 
 NS_BEGIN
 
-// Forward decl, since we include Channel.hpp in AudioDevice.hpp
-class AudioDevice;
-
-class Channel
+class SoundStream : public detail::BaseSound
 {
-	friend class AudioDevice;
 public:
+	bool load(const std::filesystem::path &path) override;
+	bool create() override;
+	[[nodiscard]] SoundType getType() const override;
 
-	bool forceSetSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false);
-	bool setSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false,
-				  SoundPriority priority = SoundPriority::Medium);
-
-	[[nodiscard]] ChannelState getState() const;
-	[[nodiscard]] SoundPriority getSoundPriority() const;
-
-	void play();
-	void pause();
-	void stop();
-	float seek(float position);
-	void setVolume(float fraction, float transitionTime = 0);
-	void setLooping(bool isLooping);
+	~SoundStream();
 
 protected:
-	bool setup();
+	bool fillBuffer(BufferT &buffer) override;
+	[[nodiscard]] bool isAtEOF() const override;
+	[[nodiscard]] bool isStreaming() const override;
 
 private:
-	void setupBuffers(int count);
-	void update();
-
-	struct ALStructures {
-		std::vector<unsigned int> buffers;
-		unsigned int ALSource{0};
-	};
-
-	static void ALStructureDeleter(ALStructures* struc);
-
-	std::shared_ptr<ALStructures> held;
-	std::shared_ptr<detail::BaseSound> activeSound{nullptr};
-	SoundPriority currentPriority{SoundPriority::Medium};
-	ChannelState state{ChannelState::Free};
+	FFmpegCtx ctx;
 };
+
+using SoundStreamP = std::shared_ptr<SoundStream>;
 
 NS_END

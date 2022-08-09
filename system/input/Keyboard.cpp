@@ -27,13 +27,6 @@
 #include <GLFW/glfw3.h>
 
 NS_BEGIN
-KeyState Keyboard::keys[KEY_COUNT];
-
-KeyState Keyboard::falseKey;
-
-KeyState *Keyboard::lastKey = nullptr;
-
-GLFWwindow *Keyboard::window = nullptr;
 
 // FIXME: two keys are bound to apostrophe
 const int Keyboard::GLFWConversionTable[KEY_COUNT] = {GLFW_KEY_LEFT_CONTROL,
@@ -163,7 +156,7 @@ void Keyboard::update()
     for (unsigned int i = 0; i < KEY_COUNT; i++) {
         int code = GLFWConversionTable[i]; // the GLFW code
 
-        bool state = code != -1 ? glfwGetKey(window, code) : false;
+        bool state = code != -1 ? glfwGetKey(TO_GLFW(window), code) : false;
 
         auto &current = keys[i];
 
@@ -213,7 +206,7 @@ void Keyboard::update()
     }
 }
 
-const KeyState &Keyboard::getLastKey()
+const KeyState &Keyboard::getLastKey() const
 {
     if (lastKey)
         return *lastKey;
@@ -221,7 +214,7 @@ const KeyState &Keyboard::getLastKey()
         return falseKey;
 }
 
-const KeyState &Keyboard::get(const Key key)
+const KeyState &Keyboard::get(const Key key) const
 {
     auto &k = keys[(int) key & 0xff];
 
@@ -244,10 +237,10 @@ const KeyState &Keyboard::get(const Key key)
     }
 }
 
-const KeyState &Keyboard::operator[](const Key key)
+const KeyState &Keyboard::operator[](const Key key) const
 { return get(key); }
 
-void Keyboard::setViewport(GLFWwindow *windowIn)
+void Keyboard::setViewport(WindowHandle *windowIn)
 { window = windowIn; }
 
 NS_END

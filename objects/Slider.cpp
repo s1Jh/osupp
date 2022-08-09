@@ -63,7 +63,7 @@ void Slider::onLogicUpdate(double)
     if (currentDirection == TravelDirection::Backward) {
         curvePosition = 1 - curvePosition;
     }
-    curvePosition = SmoothStep(curvePosition);
+//    curvePosition = SmoothStep(curvePosition);
 
     if (repeatsLeft == 0) [[unlikely]] {
         transferToPickup();
@@ -72,7 +72,7 @@ void Slider::onLogicUpdate(double)
     else {
         SOF.position = curve.get<CurveType::Straight>(curvePosition);
     }
-    if (active)
+    if (isActive())
         SOF.radius = session.getCircleSize() * 2;
     else
         SOF.radius = session.getCircleSize();
@@ -113,6 +113,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
     bodyShader = skin->getShader(SLIDER_SHADER);
     bodyTexture = skin->createObjectSprite(SLIDER_BODY_SPRITE);
     ball = skin->createObjectSprite(SLIDER_BALL_SPRITE);
+	ballRing = skin->createObjectSprite(SLIDER_BALL_RING_SPRITE);
     head = skin->createObjectSprite(SLIDER_HEAD_SPRITE);
     headRepeat = skin->createObjectSprite(SLIDER_HEAD_REPEAT_SPRITE);
     tail = skin->createObjectSprite(SLIDER_TAIL_SPRITE);
@@ -393,6 +394,12 @@ void Slider::onDraw(Renderer &renderer)
             objectTransform};
 
     renderer.draw(ball, ballInfo);
+
+	ObjectDrawInfo ringInfo = {
+		SOF, alpha,
+		(Mat3f) Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
+			objectTransform};
+	renderer.draw(ballRing, ringInfo);
 
     /*============================================================================================================*/
     // Draw curve decorations such as bonus points.

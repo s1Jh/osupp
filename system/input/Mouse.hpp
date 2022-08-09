@@ -22,10 +22,9 @@
 
 #pragma once
 
-#include "Vec2.hpp"
 #include "define.hpp"
-
-typedef struct GLFWwindow GLFWwindow;
+#include "Vec2.hpp"
+#include "GraphicsContext.hpp"
 
 NS_BEGIN
 
@@ -40,21 +39,21 @@ struct ButtonState
 class Mouse
 {
 public:
-    static const ButtonState &left();
+	[[nodiscard]] const ButtonState &left() const;
 
-    static const ButtonState &middle();
+    [[nodiscard]] const ButtonState &middle() const;
 
-    static const ButtonState &right();
+	[[nodiscard]] const ButtonState &right() const;
 
-    static fvec2d position();
+	[[nodiscard]] fvec2d position() const;
 
-    static void setViewport(GLFWwindow *n);
+    void setViewport(WindowHandle *n);
 
-    static void update();
+    void update();
 
 protected:
-    static GLFWwindow *parentViewport;
-    static ButtonState buttons[3];
+    WindowHandle *parentViewport{nullptr};
+    ButtonState buttons[3];
 };
 
 NS_END

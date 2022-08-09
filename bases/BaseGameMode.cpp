@@ -70,10 +70,14 @@ void BaseGameMode::setMap(MapInfoP map)
 {
     info = map;
     activeObjects.clear();
+	musicTrack = nullptr;
 
-    int objectSeed = 0;
-    int comboSeed = 0;
     if (info) {
+		int objectSeed = 0;
+		int comboSeed = 0;
+
+		musicTrack = GetContext().resources.get<SoundStream>(info->getSongPath(), info->getDirectory());
+
         auto templates = info->getObjectTemplates();
         for (const auto &objectTemplate: templates) {
             switch (objectTemplate->getType()) {
@@ -106,6 +110,9 @@ void BaseGameMode::reset()
         object->reset();
     }
 
+	auto& channel = GetContext().audio.getMusicChannel();
+	channel.setSound(musicTrack, true);
+
     last = activeObjects.begin();
 
     this->onReset();
@@ -124,7 +131,7 @@ void BaseGameMode::setPlayField(const frect &field)
 
 fvec2d BaseGameMode::getCursorPosition() const
 {
-    auto pos = Mouse::position();
+    auto pos = GetContext().mouse.position();
     pos -= playField.position;
     auto smaller = Min(playField.size.w, playField.size.h);
     pos /= fvec2d{smaller, smaller};

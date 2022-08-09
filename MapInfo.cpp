@@ -199,6 +199,8 @@ bool MapInfo::load(const std::filesystem::path &path)
 {
     LOG_ENTER();
 
+	directory = path.parent_path();
+
     if (path.extension() == ".osu")
         return LoadOSU(path, *this);
     else if (path.extension() == ".map")
@@ -254,6 +256,10 @@ const std::string &MapInfo::getAuthor() const
 void MapInfo::setAuthor(const std::string &author)
 {
     MapInfo::author = author;
+}
+const std::filesystem::path &MapInfo::getDirectory() const
+{
+	return directory;
 }
 
 NS_END

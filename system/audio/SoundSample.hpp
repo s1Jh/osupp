@@ -37,12 +37,14 @@ public:
 	[[nodiscard]] SoundType getType() const override;
 
 protected:
-	bool fillBuffer(BufferT &buffer) const override;
+	[[nodiscard]] bool isStreaming() const override;
 	[[nodiscard]] bool isAtEOF() const override;
-	[[nodiscard]] SampleFormat getSampleFormat() const override;
-	[[nodiscard]] unsigned int getSampleRate() const override;
+	bool fillBuffer(BufferT &buffer) override;
 
 private:
+	BufferT data;
 };
+
+using SoundSampleP = std::shared_ptr<SoundSample>;
 
 NS_END

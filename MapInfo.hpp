@@ -81,6 +81,8 @@ public:
 
     [[nodiscard]] const std::string &getAuthor() const;
 
+	[[nodiscard]] const std::filesystem::path &getDirectory() const;
+
     void setName(const std::string &name);
 
     void setDescription(const std::string &description);
@@ -165,9 +167,10 @@ private:
     // The window during which the object can be hit.
     float hitWindow = 0.3f;
     // How long the objects linger on the screen after they've been hit.
-    float fadeTime = 0.5f;
+    float fadeTime = 0.25f;
     // The star difficulty of the map, used for display purposes only.
     float overallDifficulty = 0.0f;
+	std::filesystem::path directory;
     StorageT objectTemplates;
 };
 

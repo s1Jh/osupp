@@ -34,6 +34,7 @@ void Standard::onUpdate(double delta)
 {
     // update the visuals
     playField.update(delta);
+	auto& keyboard = GetContext().keyboard;
 
     // objects are sorted by order of appearance
     int updates = 0;
@@ -101,6 +102,7 @@ void Standard::onUpdate(double delta)
                         // We are within the object's hit window and are pressing down on the
                         // right keys, start.
                         obj->begin();
+						return;
                     }
                 }
 
@@ -113,7 +115,8 @@ void Standard::onUpdate(double delta)
                 auto cursor = getCursorPosition();
 
                 if (Distance(SOF.position, cursor) > SOF.radius ||
-                    keyboard[Key::X].releasing || keyboard[Key::Z].releasing) {
+					!(keyboard[Key::X].pressed || keyboard[Key::Z].pressed))
+				{
                     obj->raise();
                 }
                 break;
@@ -133,8 +136,8 @@ void Standard::onUpdate(double delta)
             }
                 // The object cannot be interacted with yet
             case HitObjectState::Pickup: {
-//                auto score = obj->finish();
-//                log::info("SCORE: ", (int) score);
+                auto score = obj->finish();
+                log::info("SCORE: ", (int) score);
 				break;
             }
             case HitObjectState::Fading:
@@ -181,8 +184,8 @@ void Standard::onDraw(Renderer &renderer)
         auto ptr = *it;
         ptr->draw(renderer);
 
-        renderer.draw(ptr->getEndPosition(), 0.1f, VisualAppearance{.fillColor = RED, .zIndex = 1.0f}, transform);
-        renderer.draw(ptr->getStartPosition(), 0.1f, VisualAppearance{.fillColor = GREEN, .zIndex = 1.0f}, transform);
+//        renderer.draw(ptr->getEndPosition(), 0.1f, VisualAppearance{.fillColor = RED, .zIndex = 1.0f}, transform);
+//        renderer.draw(ptr->getStartPosition(), 0.1f, VisualAppearance{.fillColor = GREEN, .zIndex = 1.0f}, transform);
         if (it != last && it != std::prev(end)) {
             fline connector{
                 (*it)->getEndPosition(),
@@ -195,8 +198,10 @@ void Standard::onDraw(Renderer &renderer)
 
         color tint = PURPLE;
         tint.a = 0.5f;
-        renderer.draw(ptr->getSOF(), VisualAppearance{.fillColor = tint}, transform);
+//        renderer.draw(ptr->getSOF(), VisualAppearance{.fillColor = tint}, transform);
     }
+
+	renderer.draw(getCursorPosition(), 0.1f, VisualAppearance{.fillColor = RED}, transform);
 }
 
 void Standard::onReset()

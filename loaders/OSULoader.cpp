@@ -310,7 +310,6 @@ public:
         float approachTime =
             1.8f - Min(approachLevel, 5) * 0.12f - (approachLevel > 5 ? (approachLevel - 5) * 0.15f : 0);
         map.setApproachTime(approachTime);
-        map.setFadeTime(approachTime);
 
         sliderMultiplier = getField("SliderMultiplier", 1.0f);
 

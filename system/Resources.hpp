@@ -36,6 +36,8 @@
 #include "ResourcePile.hpp"
 #include "Shader.hpp"
 #include "Texture.hpp"
+#include "SoundSample.hpp"
+#include "SoundStream.hpp"
 
 #ifndef USER_RESOURCE_POOLS
 #define USER_RESOURCE_POOLS
@@ -46,6 +48,8 @@
 
 #define RESOURCE_POOL_CENTERS \
     RESOURCE_POOL(Shader, shaders) \
+    RESOURCE_POOL(SoundSample, soundSamples) \
+    RESOURCE_POOL(SoundStream, soundStreams) \
     USER_RESOURCE_POOLS
 
 #define RESOURCE_POOL_LAST  \

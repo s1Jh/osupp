@@ -26,6 +26,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "SoundSample.hpp"
 
 #include <cstdio>
 
@@ -82,8 +83,8 @@ int main(int argc, char **argv)
 	}
 	ctx.resources.loadPersistentAssets();
 
-	Keyboard::setViewport(ctx.gfx.getWindowHandle());
-	Mouse::setViewport(ctx.gfx.getWindowHandle());
+	ctx.keyboard.setViewport(ctx.gfx.getWindowHandle());
+	ctx.mouse.setViewport(ctx.gfx.getWindowHandle());
 
 	IMGUI_CHECKVERSION();
 
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
 
 	ImGui::StyleColorsClassic();
 
-	ImGui_ImplGlfw_InitForOpenGL(ctx.gfx.getWindowHandle(), true);
+	ImGui_ImplGlfw_InitForOpenGL(TO_GLFW(ctx.gfx.getWindowHandle()), true);
 	ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
 
     ctx.settings.addSetting<bool>("setting.test.bool1", false, SettingFlags::None);
@@ -122,8 +123,9 @@ int main(int argc, char **argv)
     while (ctx.state.isRunning()) {
         double delta = ctx.timing.getDelta();
 
-        Keyboard::update();
-        Mouse::update();
+		ctx.keyboard.update();
+		ctx.mouse.update();
+		ctx.audio.process();
 
         if (ctx.keyboard[Key::Ctrl + Key::Q].releasing)
             ctx.state.setState(GameState::Exit);

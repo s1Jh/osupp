@@ -30,26 +30,22 @@
 
 NS_BEGIN
 
-GLFWwindow *Mouse::parentViewport = nullptr;
-
-ButtonState Mouse::buttons[3];
-
-const ButtonState &Mouse::left()
+const ButtonState &Mouse::left() const
 { return buttons[0]; }
 
-const ButtonState &Mouse::middle()
+const ButtonState &Mouse::middle() const
 { return buttons[2]; }
 
-const ButtonState &Mouse::right()
+const ButtonState &Mouse::right() const
 { return buttons[1]; }
 
-fvec2d Mouse::position()
+fvec2d Mouse::position() const
 {
     dvec2d ret;
-    glfwGetCursorPos(parentViewport, &ret.x, &ret.y);
+    glfwGetCursorPos(TO_GLFW(parentViewport), &ret.x, &ret.y);
 
     isize size;
-    glfwGetWindowSize(parentViewport, &size.w, &size.h);
+    glfwGetWindowSize(TO_GLFW(parentViewport), &size.w, &size.h);
 
     auto shorter = double(Min(size.w, size.h)) / 2.0;
 
@@ -60,13 +56,13 @@ fvec2d Mouse::position()
     return ret;
 }
 
-void Mouse::setViewport(GLFWwindow *n)
+void Mouse::setViewport(WindowHandle *n)
 { parentViewport = n; }
 
 void Mouse::update()
 {
     for (size_t i = 0; i < 3; i++) {
-        bool state = glfwGetMouseButton(parentViewport, GLFW_MOUSE_BUTTON_1 + i);
+        bool state = glfwGetMouseButton(TO_GLFW(parentViewport), GLFW_MOUSE_BUTTON_1 + i);
 
         auto &button = buttons[i];
 

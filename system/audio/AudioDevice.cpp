@@ -56,7 +56,6 @@ Channel &AudioDevice::getSFXChannel()
 AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannelsIn) : spec(specIn)
 {
 	held = std::shared_ptr<ALContainer>(new ALContainer{nullptr, nullptr}, ALContextDeleter);
-	sfxChannels.resize(Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
 
 	held->device = (detail::ALCdevice*) alcOpenDevice(specIn.name.c_str());
 
@@ -79,6 +78,10 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 	if (!alcMakeContextCurrent((ALCcontext*) held->context)) {
 		log::error("Failed to make OpenAL context current");
 	}
+
+	sfxChannels.resize(Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
+	std::for_each(sfxChannels.begin(), sfxChannels.end(), [](Channel& channel) { channel.setup(); });
+	musicChannel.setup();
 
 	log::info("Successfully initiated device ", specIn.name, " @", freqSetting, "Hz");
 }

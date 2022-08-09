@@ -30,44 +30,26 @@ NS_BEGIN
 namespace detail
 {
 
-bool BaseSound::setupBuffers(unsigned int size, unsigned int number)
+float BaseSound::getLength() const
 {
-	bufferLimit = Max(number, 1);
-	bufferSize = Max(size, 0xff);
-
-	return true;
+	return length;
 }
 
-bool BaseSound::generateAdditionalBuffers(std::vector<unsigned int> &retBuffers)
+unsigned int BaseSound::getSampleRate() const
 {
-	retBuffers.clear();
-	for (unsigned int i = 0; i < bufferLimit; i++) {
-		// Return false only if we reach EOF and there have been no new buffers
-		if (isAtEOF())
-			return !retBuffers.empty();
+	return sampleRate;
+}
 
-		BufferT one;
-		one.resize(bufferSize, 0);
+SampleFormat BaseSound::getFormat() const
+{
+	return format;
+}
 
-		if (fillBuffer(one)) {
-			ALuint buffer;
-			alGenBuffers(1, &buffer);
-
-			auto fmt = getSampleFormat();
-			ALenum alFmt;
-			switch (fmt) {
-			case SampleFormat::Mono8: alFmt = AL_FORMAT_MONO8; break;
-			case SampleFormat::Mono16: alFmt = AL_FORMAT_MONO16; break;
-			case SampleFormat::Stereo8: alFmt = AL_FORMAT_STEREO8; break;
-			case SampleFormat::Stereo16: alFmt = AL_FORMAT_STEREO16; break;
-			default: alFmt = AL_FORMAT_STEREO8; break;
-			}
-			alBufferData(buffer, alFmt, one.data(), (int)one.size(), (int)getSampleRate());
-			retBuffers.push_back(buffer);
-		} else {
-			log::error("Failed to generate sound chunk!");
-		}
-	}
+bool BaseSound::configure(unsigned int size, int sampleRateIn, SampleFormat formatIn)
+{
+	length = float(size) / sampleRateIn;
+	sampleRate = sampleRateIn;
+	format = formatIn;
 	return true;
 }
 }

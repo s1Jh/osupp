@@ -129,6 +129,7 @@ bool Skin::create()
     success &= loadTexture(SLIDER_TAIL_REPEAT_SPRITE);
     success &= loadTexture(SLIDER_BODY_SPRITE);
     success &= loadTexture(SLIDER_HIT_POINT_SPRITE);
+	success &= loadTexture(SLIDER_BALL_RING_SPRITE);
     success &= loadTexture(SPINNER_SPRITE);
     success &= loadTexture(SPINNER_CENTER_SPRITE);
     success &= loadTexture(SPINNER_METER_SPRITE);

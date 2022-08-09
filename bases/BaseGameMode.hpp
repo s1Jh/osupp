@@ -28,8 +28,9 @@
 #include "Keyboard.hpp"
 #include "MapInfo.hpp"
 #include "Mouse.hpp"
-#include "Renderer.dpp"
+#include "Renderer.hpp"
 #include "Skin.hpp"
+#include "SoundStream.hpp"
 
 #include <list>
 
@@ -82,8 +83,7 @@ protected:
     StorageT::iterator last;
     StorageT activeObjects;
     MapInfoP info;
-    Keyboard keyboard;
-    Mouse mouse;
+	SoundStreamP musicTrack;
 
 private:
     Mat3f transform;

@@ -23,8 +23,7 @@
 #pragma once
 
 #include "define.hpp"
-
-typedef struct GLFWwindow GLFWwindow;
+#include "GraphicsContext.hpp"
 
 #include <iostream>
 
@@ -176,22 +175,22 @@ struct KeyState
 class Keyboard
 {
 public:
-    static void setViewport(GLFWwindow *window);
+    void setViewport(WindowHandle *window);
 
-    static void update();
+    void update();
 
-    static const KeyState &getLastKey();
+    const KeyState &getLastKey() const;
 
-    static const KeyState &get(Key key);
+    const KeyState &get(Key key) const;
 
-    const KeyState &operator[](Key key);
+    const KeyState &operator[](Key key) const;
 
 protected:
     static const int GLFWConversionTable[KEY_COUNT];
-    static GLFWwindow *window;
-    static KeyState *lastKey;
-    static KeyState falseKey;
-    static KeyState keys[KEY_COUNT];
+    WindowHandle *window;
+    KeyState *lastKey;
+    KeyState falseKey;
+    KeyState keys[KEY_COUNT];
 };
 
 NS_END
