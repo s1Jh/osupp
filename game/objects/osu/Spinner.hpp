@@ -22,48 +22,41 @@
 
 #pragma once
 
+#include "OsuHitObject.hpp"
+#include "SpinnerTemplate.hpp"
 #include "define.hpp"
 
-#include "Renderer.hpp"
-#include "Texture.hpp"
-#include "Types.hpp"
-
 NS_BEGIN
-
-struct ObjectDrawInfo
-{
-    frect destination = UNIT_RECT<float>;
-    float alpha = 1.0f;
-    const Mat3f &transform = MAT3_NO_TRANSFORM<float>;
-};
-
-class ObjectSprite
+class Spinner: public OsuHitObject<ObjectTemplateSpinner, OsuHitObjectFlags::NoApproachCircle>
 {
 public:
-    BEFRIEND_RENDER_FUNCTOR(ObjectSprite)
+    explicit Spinner(std::shared_ptr<ObjectTemplateSpinner>, const HitObjectArguments& args);
 
-    ObjectSprite() = default;
+	[[nodiscard]] HitObjectFunction getDeactivationFunction() const override;
+	[[nodiscard]] HitObjectFunction getActivationFunction() const override;
 
-    void update(double delta);
+protected:
+    void onDraw() override;
 
-    void setTexture(const TextureP &texture);
-    void setFPS(FPS_t fps);
-    void setFrameTime(float frameTime);
-    void setTint(const color &tint);
+    void onLogicUpdate(double delta) override;
 
-    [[nodiscard]] TextureP getTexture() const;
+    void onUpdate(double delta) override;
 
+    void onBegin() override;
+
+    void onPress() override;
+
+    HitResult onFinish() override;
+
+    void onReset() override;
 private:
-    color tint;
-    TextureP texture;
-    AnimationLayout layout = AnimationLayout::Horizontal;
-    float frameTime = 0.0f;
-    float frameTimer = 0.0f;
-    unsigned int frameCount = 1;
-    unsigned int frameCounter = 0;
+    ObjectSprite spinner;
+    ObjectSprite spinnerCenter;
+    ObjectSprite spinnerMeter;
+    float RPM;
+    float rotationAccum;
+    unsigned int rotationsCompleted;
+    float rotation;
+    fvec2d lastVector;
 };
-
-BEGIN_RENDER_FUNCTOR_DECL(ObjectSprite, const ObjectDrawInfo&)
-END_RENDER_FUNCTOR_DECL()
-
-NS_END
+}

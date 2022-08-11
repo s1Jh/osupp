@@ -75,15 +75,15 @@ public:
 
     template<typename T>
     requires IsResource<T>
-    std::shared_ptr<T> get(const std::string &name) const;
+    std::shared_ptr<T> get(const std::string &name, const std::filesystem::path &path = "") const;
 
     template<typename T>
     requires IsResource<T>
-    std::shared_ptr<T> get(const std::string &name, const std::filesystem::path &path = "");
+    std::shared_ptr<T> get(const std::string &name, const std::filesystem::path &path = "", bool caseSensitive = true);
 
     template<typename T>
     requires IsResource<T>
-    std::shared_ptr<T> load(const std::string &name, const std::filesystem::path &path = "");
+    std::shared_ptr<T> load(const std::string &name, const std::filesystem::path &path = "", bool caseSensitive = true);
 
     template<typename T>
     requires IsResource<T>
@@ -99,7 +99,8 @@ public:
 
     std::filesystem::path findFile(const std::filesystem::path &pathIn,
                                    const std::filesystem::path &pathPrefix = "",
-                                   const std::vector<std::string> &allowedExts = {}) const;
+                                   const std::vector<std::string> &allowedExts = {},
+								   bool caseSensitive = true) const;
 
     std::vector<std::filesystem::path> findFiles(const std::filesystem::path &pathPrefix,
                                                  const std::vector<std::string> &allowedExts = {}) const;
@@ -133,7 +134,7 @@ void ResourcePile<T>::loadOne(const std::string &name, const std::filesystem::pa
     StorageT object = std::make_shared<T>(*null);
     loadedAssets[name] = object;
     if (!object->load(path)) {
-        log::error("Failed to load ", typeid(T).name(), ' ', path);
+        log::error("Failed to load ", path);
     }
 }
 
@@ -221,12 +222,12 @@ std::shared_ptr<T> Resources::getDefault() const
 
 template<typename T>
 requires IsResource<T>
-std::shared_ptr<T> Resources::get(const std::string &name) const
+std::shared_ptr<T> Resources::get(const std::string &name, const std::filesystem::path &path) const
 {
-#define RESOURCE_POOL(_Type, _Name, ...) if constexpr (std::is_same_v<T, _Type>) return (_Name).get(name);
+#define RESOURCE_POOL(_Type, _Name, ...) if constexpr (std::is_same_v<T, _Type>) return (_Name).get(path/name);
     RESOURCE_POOL_FIRST
 #undef RESOURCE_POOL
-#define RESOURCE_POOL(_Type, _Name, ...) else if constexpr (std::is_same_v<T, _Type>) return (_Name).get(name);
+#define RESOURCE_POOL(_Type, _Name, ...) else if constexpr (std::is_same_v<T, _Type>) return (_Name).get(path/name);
     RESOURCE_POOL_CENTERS RESOURCE_POOL_LAST
 #undef RESOURCE_POOL
     else {
@@ -236,16 +237,16 @@ std::shared_ptr<T> Resources::get(const std::string &name) const
 
 template<typename T>
 requires IsResource<T>
-std::shared_ptr<T> Resources::get(const std::string &name, const std::filesystem::path &path)
+std::shared_ptr<T> Resources::get(const std::string &name, const std::filesystem::path &path, bool caseSensitive)
 {
-    auto fullPath = findFile(name, path, detail::ResourcePile<T>::allowedFileExtensions);
+    auto fullPath = findFile(name, path, detail::ResourcePile<T>::allowedFileExtensions, caseSensitive);
     if (fullPath.empty())
         return getDefault<T>();
 
-#define RESOURCE_POOL(_Type, _Name, ...) if constexpr (std::is_same_v<T, _Type>) return (_Name).get(name, fullPath);
+#define RESOURCE_POOL(_Type, _Name, ...) if constexpr (std::is_same_v<T, _Type>) return (_Name).get(path/name, fullPath);
     RESOURCE_POOL_FIRST
 #undef RESOURCE_POOL
-#define RESOURCE_POOL(_Type, _Name, ...) else if constexpr (std::is_same_v<T, _Type>) return (_Name).get(name, fullPath);
+#define RESOURCE_POOL(_Type, _Name, ...) else if constexpr (std::is_same_v<T, _Type>) return (_Name).get(path/name, fullPath);
     RESOURCE_POOL_CENTERS RESOURCE_POOL_LAST
 #undef RESOURCE_POOL
     else {
@@ -255,16 +256,16 @@ std::shared_ptr<T> Resources::get(const std::string &name, const std::filesystem
 
 template<typename T>
 requires IsResource<T>
-std::shared_ptr<T> Resources::load(const std::string &name, const std::filesystem::path &path)
+std::shared_ptr<T> Resources::load(const std::string &name, const std::filesystem::path &path, bool caseSensitive)
 {
-    auto fullPath = findFile(name, path, detail::ResourcePile<T>::allowedFileExtensions);
+    auto fullPath = findFile(name, path, detail::ResourcePile<T>::allowedFileExtensions, caseSensitive);
     if (fullPath.empty())
         return getDefault<T>();
 
-#define RESOURCE_POOL(_Type, _Name, ...) if constexpr (std::is_same_v<T, _Type>) return (_Name).load(name, fullPath);
+#define RESOURCE_POOL(_Type, _Name, ...) if constexpr (std::is_same_v<T, _Type>) return (_Name).load(path/name, fullPath);
     RESOURCE_POOL_FIRST
 #undef RESOURCE_POOL
-#define RESOURCE_POOL(_Type, _Name, ...) else if constexpr (std::is_same_v<T, _Type>) return (_Name).load(name, fullPath);
+#define RESOURCE_POOL(_Type, _Name, ...) else if constexpr (std::is_same_v<T, _Type>) return (_Name).load(path/name, fullPath);
     RESOURCE_POOL_CENTERS RESOURCE_POOL_LAST
 #undef RESOURCE_POOL
     else {

@@ -27,6 +27,8 @@ NS_BEGIN
 
 FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 {
+	av_log_set_level(AV_LOG_QUIET);
+
 	FFmpegCtx ctx;
 
 	int err = 0;
@@ -42,7 +44,7 @@ FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 		return ctx;
 	};
 
-	if ((err = avformat_open_input(&ctx.format, path.c_str(), nullptr, 0)) != 0) {
+	if ((err = avformat_open_input(&ctx.format, path.c_str(), nullptr, nullptr)) != 0) {
 		return invalidate("Error opening file.");
 	}
 
@@ -107,7 +109,11 @@ size_t IterateFFmpegFrames(FFmpegCtx &ctx, size_t number, const std::function<bo
 	int err;
 	size_t read = 0;
 
-	while ((err = av_read_frame(ctx.format, ctx.packet)) != AVERROR_EOF && read < number) {
+	while (read < number) {
+		if ((err = av_read_frame(ctx.format, ctx.packet)) == AVERROR_EOF) {
+			ctx.eof = true;
+			break;
+		}
 		if(err != 0) {
 			// Something went wrong.
 			break; // Don't return, so we can clean up nicely.
@@ -136,6 +142,7 @@ size_t IterateFFmpegFrames(FFmpegCtx &ctx, size_t number, const std::function<bo
 		while((err = avcodec_receive_frame(ctx.codecCtx, ctx.frame)) == 0) {
 			if (!func(ctx))
 				return read;
+			read++;
 
 			av_frame_unref(ctx.frame);
 		}
@@ -145,7 +152,6 @@ size_t IterateFFmpegFrames(FFmpegCtx &ctx, size_t number, const std::function<bo
 			break; // Don't return, so we can clean up nicely.
 		}
 
-		read++;
 	}
 	return read;
 }
@@ -156,7 +162,7 @@ bool IsPlanar(AVSampleFormat fmt)
 
 void FreeFFmpegContext(FFmpegCtx &ctx)
 {
-	log::debug("Destroying context ", &ctx);
+//	log::debug("Destroying context ", &ctx);
 	av_frame_free(&ctx.frame);
 	avformat_free_context(ctx.format);
 	avcodec_free_context(&ctx.codecCtx);

@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
+set(GAME_DIRECTORY ${ROOT_DIRECTORY}/game)
 set(SUI_DIRECTORY ${SYSTEM_DIRECTORY}/SUI)
 set(GFX_DIRECTORY ${SYSTEM_DIRECTORY}/gfx)
 set(INPUT_DIRECTORY ${SYSTEM_DIRECTORY}/input)
@@ -22,10 +23,10 @@ set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
 set(IMGUI_DIRECTORY ${ROOT_DIRECTORY}/imgui)
 set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
-set(OBJECT_DIRECTORY ${ROOT_DIRECTORY}/objects)
-set(BASES_DIRECTORY ${ROOT_DIRECTORY}/bases)
+set(OBJECT_DIRECTORY ${GAME_DIRECTORY}/objects)
+set(OSU_OBJECT_DIRECTORY ${OBJECT_DIRECTORY}/osu)
 set(ASSET_DIRECTORY ${ROOT_DIRECTORY}/assets)
-set(STATES_DIRECTORY ${ROOT_DIRECTORY}/states)
+set(STATES_DIRECTORY ${GAME_DIRECTORY}/states)
 
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
@@ -43,7 +44,8 @@ set(DIRECTORIES
         ${LOADER_DIRECTORY}
         ${GAMEMODE_DIRECTORY}
         ${OBJECT_DIRECTORY}
-        ${BASES_DIRECTORY}
+        ${OSU_OBJECT_DIRECTORY}
+        ${GAME_DIRECTORY}
         ${ASSET_DIRECTORY}
         ${STATES_DIRECTORY}
         )
@@ -55,6 +57,7 @@ set(SOURCES
         ${SYSTEM_DIRECTORY}/Main.cpp
         ${SYSTEM_DIRECTORY}/Settings.cpp
         ${SYSTEM_DIRECTORY}/Setting.cpp
+        ${SYSTEM_DIRECTORY}/Timer.cpp
         # ${SYSTEM_DIRECTORY}/SUI.cpp
 
         ${CORE_DIRECTORY}/Context.cpp
@@ -72,6 +75,7 @@ set(SOURCES
         ${AUDIO_DIRECTORY}/Sound.cpp
         ${AUDIO_DIRECTORY}/SoundSample.cpp
         ${AUDIO_DIRECTORY}/SoundStream.cpp
+        ${AUDIO_DIRECTORY}/AudioUtil.cpp
 
         ${GFX_DIRECTORY}/Renderer.cpp
         ${GFX_DIRECTORY}/Shader.cpp
@@ -82,6 +86,7 @@ set(SOURCES
         ${GFX_DIRECTORY}/Mesh.cpp
         ${GFX_DIRECTORY}/Camera.cpp
         ${GFX_DIRECTORY}/GraphicsContext.cpp
+        ${GFX_DIRECTORY}/Generics.cpp
 
         ${IMGUI_DIRECTORY}/imgui.cpp
         ${IMGUI_DIRECTORY}/imgui_draw.cpp
@@ -109,24 +114,24 @@ set(SOURCES
         ${LOADER_DIRECTORY}/MAPLoader.cpp
         ${LOADER_DIRECTORY}/OSULoader.cpp
 
-        ${GAMEMODE_DIRECTORY}/Standard.cpp
+        # ${GAMEMODE_DIRECTORY}/Standard.cpp
 
-        ${OBJECT_DIRECTORY}/Note.cpp
-        ${OBJECT_DIRECTORY}/Slider.cpp
-        ${OBJECT_DIRECTORY}/Spinner.cpp
+        ${OSU_OBJECT_DIRECTORY}/Note.cpp
+        ${OSU_OBJECT_DIRECTORY}/Slider.cpp
+        ${OSU_OBJECT_DIRECTORY}/Spinner.cpp
 
-        ${BASES_DIRECTORY}/BaseHitObject.cpp
-        ${BASES_DIRECTORY}/BaseGameMode.cpp
-        ${BASES_DIRECTORY}/BaseObjectTemplate.cpp
+        ${OBJECT_DIRECTORY}/BaseHitObject.cpp
+        ${OBJECT_DIRECTORY}/BaseObjectTemplate.cpp
 
         ${STATES_DIRECTORY}/StateInGame.cpp
         ${STATES_DIRECTORY}/StateInit.cpp
         ${STATES_DIRECTORY}/StateMainMenu.cpp
 
-        ObjectSprite.cpp
-        MapInfo.cpp
-        Skin.cpp
-        system/audio/AudioUtil.hpp system/audio/AudioUtil.cpp)
+        ${GAME_DIRECTORY}/GameManager.cpp
+        ${GAME_DIRECTORY}/ObjectSprite.cpp
+        ${GAME_DIRECTORY}/MapInfo.cpp
+        ${GAME_DIRECTORY}/Skin.cpp
+)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 

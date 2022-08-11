@@ -54,6 +54,7 @@ protected:
 	bool configure(unsigned int size, int sampleRate, SampleFormat format);
 
 	virtual bool fillBuffer(BufferT& buffer) = 0;
+	virtual void reset();
 	[[nodiscard]] virtual bool isAtEOF() const = 0;
 	[[nodiscard]] virtual bool isStreaming() const = 0;
 

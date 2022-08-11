@@ -160,7 +160,7 @@ void State<GameState::MainMenu>::showDebugControl()
 
 int State<GameState::MainMenu>::update(double)
 {
-    return 0;
+	return 0;
 }
 
 int State<GameState::MainMenu>::draw()
@@ -177,9 +177,6 @@ int State<GameState::MainMenu>::exit()
 int State<GameState::MainMenu>::init(GameState)
 {
     log::debug("Entering main menu");
-
-	auto& channel = ctx.audio.getMusicChannel();
-	channel.setSound(ctx.resources.get<SoundStream>("test.mp3"), true);
 
     return 0;
 }
@@ -252,7 +249,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::TableNextColumn();
                 if (i == selected) {
                     if (ImGui::Button("Play!", {playButtonWidth, 0})) {
-                        ctx.activeGameMode->setMap(map);
+                        ctx.game.setMap(map);
                         ctx.state.setState(GameState::InGame);
                     }
                 }
@@ -267,6 +264,11 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::TableNextColumn();
                 std::string itemID = "##" + std::to_string(i);
                 if (ImGui::Selectable(itemID.c_str(), false, ImGuiSelectableFlags_None)) {
+					selectedMap = map;
+					auto& channel = ctx.audio.getMusicChannel();
+					auto music = ctx.resources.get<SoundStream>(map->getSongPath(), map->getDirectory(), false);
+					channel.setSound(music, true);
+					log::debug("Setting music to ", music);
                     selected = i;
                 }
                 ImGui::SameLine();

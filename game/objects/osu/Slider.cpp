@@ -24,6 +24,8 @@
 
 #include <utility>
 
+#include <GL/glew.h>
+
 NS_BEGIN
 
 void Slider::onUpdate(double delta)
@@ -40,8 +42,13 @@ void Slider::onUpdate(double delta)
 
 void Slider::onLogicUpdate(double)
 {
+//	if (ctx.game.getCurrentTime() > getStartTime() && getState() == HitObjectState::Ready) {
+//		transferActive();
+//		onPress();
+//	}
+
     double timeLength = getEndTime() - getStartTime();
-    double timeRunning = session.getCurrentTime() - getStartTime();
+    double timeRunning = ctx.game.getCurrentTime() - startPoint;
 
     timeRunning = Clamp(timeRunning, 0.0, timeLength);
 
@@ -51,19 +58,17 @@ void Slider::onLogicUpdate(double)
     const auto currentRepeat = (unsigned int) (timeRunning * repeats / timeLength);
     repeatsLeft = repeats - currentRepeat;
 
-    if (currentRepeat % 2 == 1) {
-        currentDirection = TravelDirection::Backward;
-    }
-    else {
-        currentDirection = TravelDirection::Forward;
-    }
+	TravelDirection nextDirection = currentRepeat % 2 == 1 ? TravelDirection::Backward : TravelDirection::Forward;
+	if (currentDirection != nextDirection) {
+		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce);
+		currentDirection = nextDirection;
+	}
 
     curvePosition = std::fmod(progression * repeats, 1.0);
 
     if (currentDirection == TravelDirection::Backward) {
         curvePosition = 1 - curvePosition;
     }
-//    curvePosition = SmoothStep(curvePosition);
 
     if (repeatsLeft == 0) [[unlikely]] {
         transferToPickup();
@@ -73,57 +78,65 @@ void Slider::onLogicUpdate(double)
         SOF.position = curve.get<CurveType::Straight>(curvePosition);
     }
     if (isActive())
-        SOF.radius = session.getCircleSize() * 2;
+        SOF.radius = ctx.game.getCircleSize() * 3;
     else
-        SOF.radius = session.getCircleSize();
+        SOF.radius = ctx.game.getCircleSize();
 }
 
 void Slider::onBegin()
-{ started = true; }
+{
+	startPoint = Min(ctx.game.getCurrentTime(), getStartTime());
+
+	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit);
+	started = true;
+}
 
 HitResult Slider::onFinish()
 {
-    if (!started)
-        return HitResult::Missed;
-
-    if (broken)
-        return HitResult::Hit100;
+    if (!started) {
+		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss);
+		return HitResult::Missed;
+	}
+    if (broken) {
+		return HitResult::Hit100;
+	}
 
     return HitResult::Hit100;
 }
 
 void Slider::onRaise()
 {
+	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak);
     broken = true;
-    active = false;
 }
 
 void Slider::onPress()
 {
     started = true;
-    active = true;
 }
 
-Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
-    : HitObject(std::move(templ), g), currentDirection(TravelDirection::Forward),
-      active(false), broken(false), started(false), progression(0.0), curvePosition(0.0)
+Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObjectArguments& args)
+    : OsuHitObject(std::move(templateIn), args), currentDirection(TravelDirection::Forward),
+      broken(false), started(false), progression(0.0), curvePosition(0.0)
 {
-    const auto &skin = GetContext().activeSkin;
+    const auto &skin = ctx.activeSkin;
+
+	startPoint = getStartTime();
 
     bodyShader = skin->getShader(SLIDER_SHADER);
-    bodyTexture = skin->createObjectSprite(SLIDER_BODY_SPRITE);
-    ball = skin->createObjectSprite(SLIDER_BALL_SPRITE);
-	ballRing = skin->createObjectSprite(SLIDER_BALL_RING_SPRITE);
-    head = skin->createObjectSprite(SLIDER_HEAD_SPRITE);
-    headRepeat = skin->createObjectSprite(SLIDER_HEAD_REPEAT_SPRITE);
-    tail = skin->createObjectSprite(SLIDER_TAIL_SPRITE);
-    tailRepeat = skin->createObjectSprite(SLIDER_TAIL_REPEAT_SPRITE);
-    hitPoint = skin->createObjectSprite(SLIDER_HIT_POINT_SPRITE);
+    bodyTexture = skin->createObjectSprite(SLIDER_BODY_SPRITE, args);
+    ball = skin->createObjectSprite(SLIDER_BALL_SPRITE, args);
+	ballRing = skin->createObjectSprite(SLIDER_BALL_RING_SPRITE, args);
+    head = skin->createObjectSprite(SLIDER_HEAD_SPRITE, args);
+    headRepeat = skin->createObjectSprite(SLIDER_HEAD_REPEAT_SPRITE, args);
+    tail = skin->createObjectSprite(SLIDER_TAIL_SPRITE, args);
+    tailRepeat = skin->createObjectSprite(SLIDER_TAIL_REPEAT_SPRITE, args);
+    hitPoint = skin->createObjectSprite(SLIDER_HIT_POINT_SPRITE, args);
 
     /*============================================================================================================*/
     // Initialize the variables to their defaults.
     auto &path = objectTemplate->path;
-    SOF = {session.getCircleSize(),
+    SOF = {ctx.game.getCircleSize(),
            {path.front().position}};
     repeatsLeft = objectTemplate->repeats;
 
@@ -137,31 +150,6 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
     auto middleIt = interpolatedPath.end();
     auto steps =
         Max((unsigned int) (SLIDER_STEPS_PER_CURVE_UNIT * templateCurve.getLength()), 2);
-
-    /*struct Circle
-    {
-        dcircle AOI;
-        std::vector<fvec2d> points = {};
-    };
-    circleMask.reserve(steps);
-
-    auto intersects = [&](fvec2d position) -> bool
-    {
-        return std::any_of(
-            circleMask.begin(), circleMask.end(), [&](const auto &circle)
-            {
-                return Distance(position, circle.position) <= circle.radius;
-            });
-    };*/
-
-    body.clear();
-    body.setAttributeDescriptors({
-                                     AttributeType::Vec2, // position
-                                     AttributeType::Vec2, // starting point normal
-                                     AttributeType::Vec2, // ending point normal
-                                     AttributeType::Scalar // position along the curve [0;1]
-                                 });
-    body.setRenderMode(RenderMode::LineStrip);
 
     // Interpolate over n * length steps.
     for (unsigned int i = 0; i <= steps; i++) {
@@ -193,16 +181,12 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
 
             // Optimization #2: If the new point is too close to an existing point,
             // don't add it.
-            if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
-                continue;
-            }
+//            if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
+//                continue;
+//            }
         }
-
-        body.insertIndice(body.insertVertex({thisPosition.x, thisPosition.y, (float) t}));
         interpolatedPath.push_back({thisPosition, false});
     }
-
-    body.upload();
 
     /*============================================================================================================*/
     // Finish setup by setting up our interpolated curve and constant variables.
@@ -213,141 +197,84 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templ, BaseGameMode &g)
     auto endBumperDirection = findNormal(1.0);
     // Needs to be flipped, add π.
     endBumperAngle = std::atan2(endBumperDirection.y, endBumperDirection.x) + fPI;
-
-    /*============================================================================================================*/
-    // Generate the slider mesh.
-    /*for (unsigned int i = 0; i < steps; i++) {
-        auto t = double(i) / double(steps);
-        auto position = curve.get<CurveType::Straight>(t);
-        circleMask.emplace_back(float(session.getCircleSize()) -
-                                    std::numeric_limits<float>::epsilon(),
-                                position);
-    }
-
-    body.clear();
-    body.setAttributeDescriptors({
-                                     AttributeType::Vec2, // position
-                                     AttributeType::Vec2, // UV
-                                 });
-
-    for (auto &mask: interpolatedPath) {
-        fvec2d vector = {0.0, session.getCircleSize()};
-        auto iterations = 16;
-        auto angle = 2 * PI / double(iterations);
-
-        fvec2d lastPoint;
-        auto centerIndex = body.insertVertex({mask.position.x, mask.position.y});
-        bool first = true;
-        for (int j = 0; j <= iterations; j++) {
-            auto point = vector + mask.position;
-
-            if (!intersects(point)) {
-                meshOutline.push_back(point);
-                auto currentIndex = body.insertVertex({point.x, point.y});
-
-                if (!first) {
-                    body.insertIndices({centerIndex, currentIndex, currentIndex - 1});
-                }
-
-                first = false;
-                lastPoint = point;
-            }
-            else {
-                // we have broken a chain of triangles, start again
-                first = true;
-            }
-
-            vector = Rotate(vector, angle);
-        }
-    }
-
-    bool firstLeft = true;
-    bool firstRight = true;
-
-    fvec2d lastLeft;
-    unsigned lastLeftIndex;
-    fvec2d lastRight;
-    unsigned lastRightIndex;
-    fvec2d lastCenter;
-    unsigned lastCenterIndex;
-
-    for (unsigned int i = 0; i < steps; i++) {
-
-        double t = double(i) / double(steps);
-        auto normal = findNormal(t);
-        fvec2d point = curve.get<CurveType::Straight>(t);
-
-        auto size = session.getCircleSize();
-        fvec2d left = point + normal * size;
-        fvec2d right = point + normal * -size;
-
-        auto currentCenter = body.insertVertex({point.x, point.y});
-
-        if (!intersects(left)) {
-            meshOutline.push_back(left);
-
-            if (!firstLeft) {
-                auto current = body.insertVertex({left.x, left.y});
-
-                body.insertIndices({currentCenter, current, lastLeftIndex});
-                body.insertIndices({currentCenter, lastCenterIndex, lastLeftIndex});
-
-                lastLeftIndex = current;
-            }
-
-            firstLeft = false;
-            lastLeft = left;
-        }
-        else {
-            firstLeft = true;
-        }
-
-        if (!intersects(right)) {
-            meshOutline.push_back(right);
-
-            if (!firstRight) {
-                auto current = body.insertVertex({right.x, right.y});
-
-                body.insertIndices({currentCenter, current, lastRightIndex});
-                body.insertIndices({currentCenter, lastCenterIndex, lastRightIndex});
-
-                lastRightIndex = current;
-            }
-
-            firstRight = false;
-            lastRight = right;
-        }
-        else {
-            firstRight = true;
-        }
-
-        lastCenterIndex = currentCenter;
-    }
-
-    body.upload();*/
 }
 
-void Slider::onDraw(Renderer &renderer)
+void Slider::onDraw()
 {
     /*============================================================================================================*/
     // Prepare some constant variables.
-    const auto objectTransform = session.getObjectTransform();
-    const auto circleSize = session.getCircleSize();
+    const auto objectTransform = ctx.game.getTransform();
+    const auto circleSize = ctx.game.getCircleSize();
     const auto alpha = getAlpha();
 
-    /*============================================================================================================*/
-    // Draw the body mesh behind everything else.
+	/*============================================================================================================*/
+	// Draw the curve body.
 
-//    color tint = WHITE;
-//    renderer.draw(
-//            body, *bodyShader,
-//            // shader uniforms
-//            Shader::Uniforms{{"tint", &tint},
-//             {"pathWidth", session.getCircleSize()}},
-//            // textures
-//            Shader::Textures{{0, bodyTexture.getTexture().get()}},
-//            objectTransform
-//    );
+	for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
+		/*========================================================================================================*/
+		// Draw the bonus point.
+		const auto& node = *it;
+
+		if (it != std::prev(interpolatedPath.end())) {
+			fline seg{node.position, std::next(it)->position};
+
+			auto offset = circleSize;
+
+			auto right = (float) Max(seg.A.x, seg.B.x) + offset;
+			auto left = (float) Min(seg.A.x, seg.B.x) - offset;
+			auto top = (float) Max(seg.A.y, seg.B.y) + offset;
+			auto bottom = (float) Min(seg.A.y, seg.B.y) - offset;
+
+			frect rect = {
+				{
+					left - right,
+					top - bottom
+				},
+				{
+					(left + right) / 2.0f,
+					(top + bottom) / 2.0f,
+				}
+			};
+
+			Mat3f shape = MakeScaleMatrix<float>(rect.size) *
+				MakeTranslationMatrix<float>(rect.position);
+
+			auto tint = bodyTexture.getTint();
+			tint.a = alpha;
+			glDepthFunc(GL_LEQUAL);
+			glBlendFunc(GL_ONE, GL_ZERO);
+			ctx.gfx.draw(
+				GetGenericMeshes().rectMask, *bodyShader,
+				Shader::Uniforms{
+					{"resolution", (fvec2d) ctx.gfx.getSize()},
+					{"A", seg.A},
+					{"B", seg.B},
+					{"thickness", offset},
+					{"fill", &tint},
+					{"shape", &shape}
+				},
+				Shader::Textures{
+					{0, bodyTexture.getTexture().get()}
+				},
+				objectTransform
+			);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glDepthFunc(GL_ALWAYS);
+		}
+	}
+	glClearDepth(1.0f);
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	/*============================================================================================================*/
+	// Draw curve decorations such as bonus points.
+
+	ObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
+	for (const auto& node : interpolatedPath) {
+		if (node.bonus) {
+			hitPointInfo.destination.position = node.position;
+			ctx.gfx.draw(hitPoint, hitPointInfo);
+		}
+	}
 
     /*============================================================================================================*/
     // Draw the start decorations.
@@ -362,10 +289,11 @@ void Slider::onDraw(Renderer &renderer)
         } * objectTransform
     };
 
-    renderer.draw(head, headInfo);
+    ctx.gfx.draw(head, headInfo);
 
-    if (repeatsLeft >= 3)
-        renderer.draw(headRepeat, headInfo);
+    if (repeatsLeft >= 3) {
+		ctx.gfx.draw(headRepeat, headInfo);
+	}
 
     /*============================================================================================================*/
     // Draw the end decorations.
@@ -378,10 +306,16 @@ void Slider::onDraw(Renderer &renderer)
             .rotationCenter = endBumperPosition} *
             objectTransform};
 
-    renderer.draw(tail, tailInfo);
+    ctx.gfx.draw(tail, tailInfo);
 
-    if (repeatsLeft >= 2)
-        renderer.draw(tailRepeat, tailInfo);
+    if (repeatsLeft >= 2) {
+		ctx.gfx.draw(tailRepeat, tailInfo);
+	}
+
+	/*============================================================================================================*/
+	// Draw the approach circle underneath the ball which is our starting target
+
+	drawApproachCircle();
 
     /*============================================================================================================*/
     // Draw the ball moving across the slider.
@@ -393,35 +327,19 @@ void Slider::onDraw(Renderer &renderer)
         (Mat3f) Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
             objectTransform};
 
-    renderer.draw(ball, ballInfo);
+    ctx.gfx.draw(ball, ballInfo);
 
 	ObjectDrawInfo ringInfo = {
 		SOF, alpha,
 		(Mat3f) Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
 			objectTransform};
-	renderer.draw(ballRing, ringInfo);
-
-    /*============================================================================================================*/
-    // Draw curve decorations such as bonus points.
-
-    ObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
-    for (const auto &node: interpolatedPath) {
-        /*========================================================================================================*/
-        // Draw the bonus point.
-        if (node.bonus) {
-            hitPointInfo.destination.position = node.position;
-            renderer.draw(hitPoint, hitPointInfo);
-        }
-
-        renderer.draw(node.position, 0.1f, VisualAppearance{.fillColor = ORANGE}, objectTransform);
-    }
+	ctx.gfx.draw(ballRing, ringInfo);
 }
 
 void Slider::onReset()
 {
     currentDirection = TravelDirection::Forward;
     started = false;
-    active = false;
     broken = false;
     curvePosition = 0.0;
     progression = 0.0;
@@ -461,5 +379,13 @@ fvec2d Slider::getEndPosition() const
     else {
         return interpolatedPath.front().position;
     }
+}
+HitObjectFunction Slider::getActivationFunction() const
+{
+	if (getState() == HitObjectState::Ready && ctx.game.getCurrentTime() < getStartTime()) {
+		return HitObjectFunction::CursorEnter | HitObjectFunction::ButtonPressed;
+	} else {
+		return HitObjectFunction::CursorEnter | HitObjectFunction::ButtonHeld;
+	}
 }
 }

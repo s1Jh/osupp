@@ -13,7 +13,6 @@ void main()
 {
     UV = aUV;
     gl_Position = vec4(camera * transform * shape * vec3(aPos, 1.0f), 1.f);
-    gl_Position.z = z;
 }
 
     #shader fragment

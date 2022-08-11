@@ -32,7 +32,7 @@ constexpr unsigned int DEFAULT_FRAMERATE = 60;
 class Timing
 {
 public:
-    Timing();
+    Timing() noexcept;
 
     void setFramerate(int newFps);
 

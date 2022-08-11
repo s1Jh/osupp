@@ -38,9 +38,11 @@ template<> const std::vector<std::string> detail::ResourcePile<MapInfo>::allowed
 
 template<> const std::vector<std::string> detail::ResourcePile<Skin>::allowedFileExtensions = {".skin"};
 
-template<> const std::vector<std::string> detail::ResourcePile<SoundSample>::allowedFileExtensions = {".wav", ".mp3"};
+template<> const std::vector<std::string> detail::ResourcePile<SoundSample>::allowedFileExtensions =
+	{".wav", ".mp3", ".ogg"};
 
-template<> const std::vector<std::string> detail::ResourcePile<SoundStream>::allowedFileExtensions = {".wav", ".mp3"};
+template<> const std::vector<std::string> detail::ResourcePile<SoundStream>::allowedFileExtensions =
+	{".wav", ".mp3", ".ogg"};
 
 int Resources::loadPersistentAssets()
 {
@@ -70,8 +72,14 @@ void Resources::clearSearchPaths()
 std::filesystem::path
 Resources::findFile(const std::filesystem::path &pathIn,
                     const std::filesystem::path &pathPrefix,
-                    const std::vector<std::string> &allowedExts) const
+                    const std::vector<std::string> &allowedExts,
+					bool caseSensitive) const
 {
+	auto searchedFile = pathIn.stem().string();
+
+	if (!caseSensitive)
+		std::transform(searchedFile.begin(), searchedFile.end(), searchedFile.begin(), ::tolower);
+
     for (auto &path: searchPaths) {
         auto concatPath = path / pathPrefix / pathIn.parent_path();
         if (std::filesystem::is_directory(concatPath))
@@ -83,13 +91,16 @@ Resources::findFile(const std::filesystem::path &pathIn,
                 auto thisPath = fileInPath.path();
                 auto fileName = thisPath.stem().string();
 
+				if (!caseSensitive)
+					std::transform(fileName.begin(), fileName.end(), fileName.begin(), ::tolower);
+
                 if (!allowedExts.empty()) {
                     auto ext = thisPath.extension().string();
                     if (std::find(allowedExts.begin(), allowedExts.end(), ext) == allowedExts.end())
                         continue;
                 }
 
-                if (fileName == pathIn.stem().string()) {
+                if (fileName == searchedFile) {
                     return fileInPath.path();
                 }
             }

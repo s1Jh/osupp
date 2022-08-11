@@ -38,13 +38,13 @@
 #define USER_CONTEXT_FIELDS \
     CONTEXT_FIELD(std::vector<MapInfoP>, maps) \
     CONTEXT_FIELD(SkinP, activeSkin) \
-    CONTEXT_FIELD(std::unique_ptr<BaseGameMode>, activeGameMode)
+    CONTEXT_FIELD(GameManager, game)
 
 #ifdef USER_CONTEXT_INCLUDES
 #include "Skin.hpp"
 #include "MapInfo.hpp"
 #include "df2.hpp"
-#include "BaseGameMode.hpp"
+#include "GameManager.hpp"
 #include <memory>
 #include <vector>
 #endif

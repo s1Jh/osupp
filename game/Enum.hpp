@@ -116,4 +116,25 @@ enum class HitObjectState
  * 1) Transition happens on the first click.
  */
 
+enum class HitObjectFunction : uint8_t
+{
+	ButtonMask = 0b0111,		// 3 bits
+	ButtonIgnore = 0,			// buttons will not contribute to decision-making
+	ButtonPressed = 1,			// activated when a button is pressed down
+	ButtonHeld = 2,				// activated if a button is already held down
+	ButtonReleased = 3,			// activated when a button is released
+	ButtonLockMask = 0b100,
+	ButtonPressedNoLock = 4,	// ditto, no locking
+	ButtonHeldNoLock = 5,		//
+
+	CursorMask = 0b11000,		// 2 bits
+	CursorIgnore = 0 << 3,		// cursor position does not contribute to decision-making
+	CursorLeave = 1 << 3,		// true when cursor is not in the object's SOF
+	CursorEnter = 2 << 3,		// true when the cursor is inside the object's SOF
+
+	NoActivation = 0xff			// will always resolve to false
+};
+
+ENABLE_BITMASK_OPERATORS(HitObjectFunction)
+
 NS_END

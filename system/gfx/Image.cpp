@@ -54,8 +54,8 @@ bool Image::load(const std::string &path)
         return false;
     }
 
-    log::info("Loaded image ", path, " Dimensions: ", width, " x ",
-              std::to_string(height), " Channels: ", channels);
+//    log::info("Loaded image ", path, " Dimensions: ", width, " x ",
+//              std::to_string(height), " Channels: ", channels);
 
     return true;
 }

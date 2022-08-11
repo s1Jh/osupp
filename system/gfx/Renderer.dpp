@@ -67,7 +67,6 @@ public:
     void clear(const color &color);
 
 private:
-
     const static std::vector<std::string> StandardResolutions;
     Setting<std::string> resolution;
     Setting<bool> fullscreen;

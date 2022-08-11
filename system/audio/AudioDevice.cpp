@@ -67,7 +67,7 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 	auto freqSetting = GetContext().settings.addSetting<int>("setting.audio.frequency", 44100,
 															 SettingFlags::WriteToFile, 1000, 48000).get();
 
-	const int params[] = {AL_FREQUENCY, freqSetting, ALC_SYNC, 1, 0};
+	const int params[] = {AL_FREQUENCY, freqSetting, 0};
 
 	held->context = (detail::ALCcontext*) alcCreateContext((ALCdevice*)held->device, params);
 

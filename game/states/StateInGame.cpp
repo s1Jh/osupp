@@ -23,7 +23,6 @@
 #include "StateInGame.hpp"
 
 #include "Random.hpp"
-#include "Standard.hpp"
 #include "Util.hpp"
 
 #include "Context.hpp"
@@ -32,23 +31,44 @@ NS_BEGIN
 
 int State<GameState::InGame>::update(double delta)
 {
-    ctx.activeGameMode->update(delta);
+	if (timer.isDone()) {
+		log::debug("STARTING");
+		auto info = ctx.game.getMap();
+		auto musicTrack = ctx.resources.get<SoundStream>(info->getSongPath(), info->getDirectory(), false);
+		auto& channel = ctx.audio.getMusicChannel();
+		channel.setSound(musicTrack, true);
+		canRun = true;
+	}
 
-    if (ctx.keyboard[Key::Esc].releasing)
-        ctx.state.setState(GameState::MainMenu);
+	if (ctx.game.isFinished() && !endTimer.isRunning()) {
+		log::debug("ENDING");
+		endTimer.setTime(2.5);
+		endTimer.setMode(TimerMode::Single);
+		endTimer.start();
+		canRun = false;
+	}
+
+	if (canRun)
+		ctx.game.update(delta);
+
+    if (ctx.keyboard[Key::Esc].releasing || endTimer.isDone()) {
+		ctx.state.setState(GameState::MainMenu);
+	}
 
     return 0;
 }
 
 int State<GameState::InGame>::draw()
 {
-    ctx.activeGameMode->draw(ctx.gfx);
+    ctx.game.draw(ctx.gfx);
     return 0;
 }
 
 int State<GameState::InGame>::exit()
 {
-	ctx.activeGameMode->setMap(nullptr);
+	GetContext().audio.getMusicChannel().stop();
+	GetContext().game.setMap(nullptr);
+	return 0;
 }
 
 int State<GameState::InGame>::init(GameState)
@@ -57,7 +77,15 @@ int State<GameState::InGame>::init(GameState)
 
     float base = 0.8f;
     field = {{base * ratio, base}, {0.0f, 0.0f}};
-    ctx.activeGameMode->setPlayField(field);
+    ctx.game.setPlayField(field);
+
+	timer.setTime(0.0);
+	timer.setMode(TimerMode::Single);
+	timer.start();
+
+	ctx.game.reset();
+	ctx.audio.getMusicChannel().stop();
+
     return 0;
 }
 

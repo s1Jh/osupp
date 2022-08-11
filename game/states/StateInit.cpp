@@ -21,7 +21,6 @@
  ******************************************************************************/
 
 #include "StateInit.hpp"
-#include "Standard.hpp"
 #include "StateMainMenu.hpp"
 
 #include "imgui/imgui.h"
@@ -94,7 +93,6 @@ int State<GameState::Init>::init(GameState)
     filesToLoad = resources.findFiles("songs", detail::ResourcePile<MapInfo>::allowedFileExtensions);
 
     ctx.activeSkin = resources.get<Skin>(skin);
-    ctx.activeGameMode = std::make_unique<Standard>();
 
     return 0;
 }

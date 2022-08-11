@@ -22,16 +22,32 @@
 
 #pragma once
 
-#include "HitObject.tpp"
 #include "define.hpp"
+
+#include "Rect.hpp"
+#include "State.hpp"
+#include "Timer.hpp"
 
 NS_BEGIN
 
-BEGIN_OBJECT_TEMPLATE(Spinner)
-    fvec2d position = {0, 0};
-    bool free = false;
-    float spinResistance = 0.f;
-    float spinRequired = 1.f;
-END_OBJECT_TEMPLATE()
+class Context;
+
+DECLARE_STATE(GameState::InGame)
+{
+public:
+    explicit State();
+
+    int update(double delta) override;
+    int draw() override;
+    int exit() override;
+    int init(GameState state) override;
+
+private:
+	bool canRun{false};
+	Timer timer;
+	Timer endTimer;
+    frect field;
+    Context &ctx;
+};
 
 NS_END

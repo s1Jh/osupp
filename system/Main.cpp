@@ -27,6 +27,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "SoundSample.hpp"
+#include "Timer.hpp"
 
 #include <cstdio>
 
@@ -58,9 +59,15 @@ int main(int argc, char **argv)
 	ctx.settings.read();
     ctx.resources.addSearchPath(currentPath);
 
+	if (!StartTimerThread()) {
+		log::error("Failed to start timers");
+		return -1;
+	}
+
 	auto locale = ctx.settings
 		.addSetting<std::string>("setting.user.locale", std::string("english.ldf"), SettingFlags::WriteToFile);
 	ctx.locale.loadFromFile(locale.get());
+	log::info("Set locale ", ctx.locale.getLocName());
 
 	auto devices = GetAudioDevices();
 	std::vector<std::string> deviceNames;
@@ -70,6 +77,7 @@ int main(int argc, char **argv)
 	auto audioDev =
 		ctx.settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WriteToFile, deviceNames);
 	ctx.audio = GetAudioDevice(audioDev.get());
+	log::info("Configured audio");
 
 	ctx.settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap([&audioDev, &ctx](const std::string &)
 																		  {
@@ -79,7 +87,7 @@ int main(int argc, char **argv)
 																		  }));
 
 	if (!ctx.gfx.create()) {
-		return 1;
+		return -2;
 	}
 	ctx.resources.loadPersistentAssets();
 
@@ -99,25 +107,6 @@ int main(int argc, char **argv)
 	ImGui_ImplGlfw_InitForOpenGL(TO_GLFW(ctx.gfx.getWindowHandle()), true);
 	ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
 
-    ctx.settings.addSetting<bool>("setting.test.bool1", false, SettingFlags::None);
-    ctx.settings.addSetting<bool>("setting.test.bool2", false, SettingFlags::None);
-    ctx.settings.addSetting<bool>("setting.test.bool3", true, SettingFlags::None);
-    ctx.settings.addSetting<bool>("setting.test.bool4", false, SettingFlags::None);
-    ctx.settings.addSetting<bool>("setting.test.bool5", true, SettingFlags::None);
-    ctx.settings.addSetting<bool>("setting.test.bool6", true, SettingFlags::None);
-
-    ctx.settings.addSetting<color>("test.color1", PURPLE, SettingFlags::None);
-    ctx.settings.addSetting<color>("test.color2", GREEN, SettingFlags::None);
-    ctx.settings.addSetting<color>("test.color3", GRAY, SettingFlags::None);
-    ctx.settings.addSetting<color>("test.color4", BLUE, SettingFlags::None);
-    ctx.settings.addSetting<color>("test.color5", MAGENTA, SettingFlags::None);
-    ctx.settings.addSetting<color>("test.color6", TURQUOISE, SettingFlags::None);
-
-    ctx.settings.addSetting<color>("test.pallette", PURPLE, SettingFlags::None,
-                                   std::vector<color>{PURPLE, AZURE, BEIGE, COBALT_BLUE, BRONZE, GOLD, SILVER});
-
-    auto backFill = ctx.settings.addSetting<color>("debug.backfill", BLACK, SettingFlags::None);
-
     ctx.state.setState(GameState::INITIAL_STATE);
 
     while (ctx.state.isRunning()) {
@@ -135,7 +124,7 @@ int main(int argc, char **argv)
         ImGui::NewFrame();
         ctx.state.update(delta);
 
-        ctx.gfx.begin(backFill.get());
+        ctx.gfx.begin();
         ctx.state.draw();
         ImGui::Render();
         auto data = ImGui::GetDrawData();
@@ -154,5 +143,6 @@ int main(int argc, char **argv)
 
     log::custom("GREETING", "Goodbye, world!");
     ctx.settings.write();
+	StopTimerThread();
     std::exit(0);
 }

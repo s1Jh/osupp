@@ -19,60 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
+#pragma once
 
-#include "SoundStream.hpp"
-
-#include <libavcodec/avcodec.h>
+#include "define.hpp"
 
 NS_BEGIN
 
-bool SoundStream::load(const std::filesystem::path &path)
-{
-	ctx = OpenFFmpegContext(path);
-	return ctx.valid && configure(0, ctx.sampleRate, SampleInfo<SampleT>::format);
-}
-
-bool SoundStream::create()
-{
-	ctx.valid = false;
-	return true;
-}
-
-SoundType SoundStream::getType() const
-{
-	return SoundType::Stream;
-}
-
-bool SoundStream::fillBuffer(detail::BaseSound::BufferT &buffer)
-{
-	if (!ctx.valid)
-		return false;
-
-	buffer.clear();
-	IterateFFmpegFrames(ctx, 100, [&](FFmpegCtx& context) {
-		ExtractFFmpegSamplesAppend<SampleT>(context, buffer);
-		return true;
-	});
-	return true;
-}
-
-bool SoundStream::isAtEOF() const
-{
-	return ctx.eof;
-}
-
-bool SoundStream::isStreaming() const
-{
-	return true;
-}
-
-SoundStream::~SoundStream()
-{
-	FreeFFmpegContext(ctx);
-}
-void SoundStream::reset()
-{
-	av_seek_frame(ctx.format, ctx.audioStreamIndex, 0, 0);
-}
+struct HitObjectArguments {
+	unsigned int objectSeed{0};
+	unsigned int comboSeed{0};
+	unsigned int mapSeed{0};
+};
 
 NS_END

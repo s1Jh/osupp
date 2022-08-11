@@ -73,6 +73,11 @@ void ObjectSprite::setFrameTime(float frameTimeIn)
 void ObjectSprite::setTint(const color &tintIn)
 { tint = tintIn; }
 
+const color &ObjectSprite::getTint() const
+{
+	return tint;
+}
+
 TextureP ObjectSprite::getTexture() const
 {
     return texture;

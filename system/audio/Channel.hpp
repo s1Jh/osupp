@@ -41,6 +41,12 @@ public:
 	bool setSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false,
 				  SoundPriority priority = SoundPriority::Medium);
 
+	bool playSound(const std::shared_ptr<detail::BaseSound>& resource,
+				  SoundPriority priority = SoundPriority::Medium);
+
+	Channel& loopSound(const std::shared_ptr<detail::BaseSound>& resource,
+				   SoundPriority priority = SoundPriority::Medium);
+
 	[[nodiscard]] ChannelState getState() const;
 	[[nodiscard]] SoundPriority getSoundPriority() const;
 
@@ -55,6 +61,8 @@ protected:
 	bool setup();
 
 private:
+	void refillBuffer(unsigned int buffer);
+	void generateBuffer(unsigned int buffer, const detail::BaseSound::BufferT &data);
 	void setupBuffers(int count);
 	void update();
 

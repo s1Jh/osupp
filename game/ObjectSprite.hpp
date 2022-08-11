@@ -20,59 +20,52 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#include "SoundStream.hpp"
+#pragma once
 
-#include <libavcodec/avcodec.h>
+#include "define.hpp"
+
+#include "Renderer.hpp"
+#include "Texture.hpp"
+#include "Types.hpp"
 
 NS_BEGIN
 
-bool SoundStream::load(const std::filesystem::path &path)
+struct ObjectDrawInfo
 {
-	ctx = OpenFFmpegContext(path);
-	return ctx.valid && configure(0, ctx.sampleRate, SampleInfo<SampleT>::format);
-}
+    frect destination = UNIT_RECT<float>;
+    float alpha = 1.0f;
+    const Mat3f &transform = MAT3_NO_TRANSFORM<float>;
+};
 
-bool SoundStream::create()
+class ObjectSprite
 {
-	ctx.valid = false;
-	return true;
-}
+public:
+    BEFRIEND_RENDER_FUNCTOR(ObjectSprite)
 
-SoundType SoundStream::getType() const
-{
-	return SoundType::Stream;
-}
+    ObjectSprite() = default;
 
-bool SoundStream::fillBuffer(detail::BaseSound::BufferT &buffer)
-{
-	if (!ctx.valid)
-		return false;
+    void update(double delta);
 
-	buffer.clear();
-	IterateFFmpegFrames(ctx, 100, [&](FFmpegCtx& context) {
-		ExtractFFmpegSamplesAppend<SampleT>(context, buffer);
-		return true;
-	});
-	return true;
-}
+    void setTexture(const TextureP &texture);
+    void setFPS(FPS_t fps);
+    void setFrameTime(float frameTime);
+    void setTint(const color &tint);
 
-bool SoundStream::isAtEOF() const
-{
-	return ctx.eof;
-}
+	[[nodiscard]] const color &getTint() const;
 
-bool SoundStream::isStreaming() const
-{
-	return true;
-}
+    [[nodiscard]] TextureP getTexture() const;
 
-SoundStream::~SoundStream()
-{
-	FreeFFmpegContext(ctx);
-}
-void SoundStream::reset()
-{
-	av_seek_frame(ctx.format, ctx.audioStreamIndex, 0, 0);
-}
+private:
+    color tint{WHITE};
+	TextureP texture{nullptr};
+    AnimationLayout layout = AnimationLayout::Horizontal;
+    float frameTime = 0.0f;
+    float frameTimer = 0.0f;
+    unsigned int frameCount = 1;
+    unsigned int frameCounter = 0;
+};
+
+BEGIN_RENDER_FUNCTOR_DECL(ObjectSprite, const ObjectDrawInfo&)
+END_RENDER_FUNCTOR_DECL()
 
 NS_END

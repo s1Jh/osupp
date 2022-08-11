@@ -54,7 +54,7 @@ struct VisualAppearance
     const Mat3f *uvTransform = nullptr;
     BlendMode blendMode = BlendMode::Multiply;
     color fillColor = WHITE;
-    float outlineWidth = 0.003f;
+    float outlineWidth = 0.01f;
     color outlineColor = BLACK;
     float zIndex = 0.0f;
 };
@@ -65,7 +65,7 @@ constexpr VisualAppearance DEFAULT_APPEARANCE =
         .uvTransform = nullptr,
         .blendMode = BlendMode::None,
         .fillColor = WHITE,
-        .outlineWidth = 0,
+        .outlineWidth = 0.01f,
         .outlineColor = BLACK,
         .zIndex = 0.0f
     };

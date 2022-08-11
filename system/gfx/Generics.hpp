@@ -19,31 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
 #include "define.hpp"
-
-#include "Standard.hpp"
-#include "State.hpp"
+#include "Mesh.hpp"
 
 NS_BEGIN
 
-class Context;
-
-DECLARE_STATE(GameState::InGame)
+struct GenericMeshCollection
 {
-public:
-    explicit State();
+	explicit GenericMeshCollection();
 
-    int update(double delta) override;
-    int draw() override;
-    int exit() override;
-    int init(GameState state) override;
-
-private:
-    frect field;
-    Context &ctx;
+	Mesh rect;
+	Mesh circle;
+	Mesh rectMask;
+	// etc...
 };
+
+const GenericMeshCollection& GetGenericMeshes();
 
 NS_END

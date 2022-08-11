@@ -26,7 +26,7 @@
 
 NS_BEGIN
 
-Timing::Timing()
+Timing::Timing() noexcept
     : delta(0.0), phase(false)
 {
     now = last = std::chrono::steady_clock::now();

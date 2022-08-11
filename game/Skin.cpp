@@ -27,12 +27,15 @@
 #include "Random.hpp"
 #include "Resources.hpp"
 #include "Util.hpp"
+#include "Context.hpp"
 
 NS_BEGIN
 
-bool Skin::load(const std::filesystem::path &path, Resources *res)
+bool Skin::load(const std::filesystem::path &path)
 {
     LOG_ENTER();
+
+	auto& res = GetContext().resources;
 
     bool success = true;
     success &= create();
@@ -47,20 +50,15 @@ bool Skin::load(const std::filesystem::path &path, Resources *res)
     df2 settings = df2::read(path);
 
     for (const auto &entry: settings["textures"]) {
-        if (!textures.contains(entry.first)) {
-            log::warning("Attempted to style unknown element: \"", entry.first, '\"');
-            continue;
-        }
-
         auto &object = textures[entry.first];
         // apply settings
         const auto &fields = entry.second;
 
-        std::filesystem::path texPath = directory;
+        std::filesystem::path texPath = GetContext().resources.findFile(entry.first, directory);
         if (fields.find("texturePath") != fields.end()) {
-            texPath /= fields["texturePath"].str(entry.first);
-            object.path = texPath.string();
+            texPath = directory / fields["texturePath"].str(entry.first);
         }
+		object.path = texPath.string();
 
         if (fields.find("fps") != fields.end())
             object.animationFPS = fields["fps"].integer();
@@ -80,13 +78,17 @@ bool Skin::load(const std::filesystem::path &path, Resources *res)
     log::info("Loading skin assets...");
 
     for (auto &texture: textures) {
-        texture.second.texture = res->load<Texture>(texture.second.path, directory);
+        texture.second.texture = res.load<Texture>(texture.second.path, directory);
         success &= bool(texture.second.texture);
     }
     for (auto &shader: shaders) {
-        shader.second.shader = res->load<Shader>(shader.second.path, directory);
+        shader.second.shader = res.load<Shader>(shader.second.path, directory);
         success &= bool(shader.second.shader);
     }
+	for (auto &sound: sounds) {
+		sound.second.sound = res.load<SoundSample>(sound.second.path, directory);
+		success &= bool(sound.second.sound);
+	}
 
     log::info("Loaded skin ", path);
     return success;
@@ -98,45 +100,8 @@ bool Skin::create()
 
     bool success = true;
 
-    // Try to load from the default skin, which should always be present.
-    // Always make sure to load to reload the texture.
-    auto loadTexture = [&](const std::string &path) -> bool
-    {
-        TextureP ptr = std::make_unique<Texture>();
-        ptr->create();
-        textures[path] = {path, ptr};
-        return bool(ptr);
-    };
-
-    auto loadShader = [&](const std::string &path) -> bool
-    {
-        ShaderP ptr = std::make_unique<Shader>();
-        ptr->create();
-        shaders[path] = {path, ptr};
-        return bool(ptr);
-    };
-
     textures.clear();
     shaders.clear();
-
-    success &= loadTexture(NOTE_BASE_SPRITE);
-    success &= loadTexture(NOTE_OVERLAY_SPRITE);
-    success &= loadTexture(NOTE_UNDERLAY_SPRITE);
-    success &= loadTexture(APPROACH_CIRCLE_SPRITE);
-    success &= loadTexture(SLIDER_HEAD_SPRITE);
-    success &= loadTexture(SLIDER_TAIL_SPRITE);
-    success &= loadTexture(SLIDER_HEAD_REPEAT_SPRITE);
-    success &= loadTexture(SLIDER_TAIL_REPEAT_SPRITE);
-    success &= loadTexture(SLIDER_BODY_SPRITE);
-    success &= loadTexture(SLIDER_HIT_POINT_SPRITE);
-	success &= loadTexture(SLIDER_BALL_RING_SPRITE);
-    success &= loadTexture(SPINNER_SPRITE);
-    success &= loadTexture(SPINNER_CENTER_SPRITE);
-    success &= loadTexture(SPINNER_METER_SPRITE);
-    success &= loadTexture(SLIDER_BALL_SPRITE);
-    success &= loadTexture(PLAY_FIELD_SPRITE);
-
-    success &= loadShader(SLIDER_SHADER);
 
     return success;
 }
@@ -155,10 +120,11 @@ TextureP Skin::getTexture(const std::string &object) const
 {
     LOG_ENTER();
 
-    if (textures.contains(object))
-        return textures.at(object).texture;
+    if (textures.contains(object)) {
+		return textures.at(object).texture;
+	}
 
-    return nullptr;
+	return GetContext().resources.get<Texture>(object, directory, false);
 }
 
 color Skin::getTint(const std::string &object, unsigned int seed) const
@@ -186,37 +152,29 @@ ShaderP Skin::getShader(const std::string &object) const
     if (shaders.contains(object)) {
         return shaders.at(object).shader;
     }
-    return nullptr;
+	return GetContext().resources.get<Shader>(object, directory, false);
 }
 
 ObjectSprite Skin::createObjectSprite(const std::string &object,
-                                      unsigned int objectSeed,
-                                      unsigned int comboSeed,
-                                      unsigned int mapSeed) const
+									  const HitObjectArguments& args) const
 {
     LOG_ENTER();
 
     ObjectSprite ret;
 
-    if (textures.contains(object)) {
-        ret.setFPS(textures.at(object).animationFPS);
-        ret.setTexture(textures.at(object).texture);
-        ret.setTint(getTint(object, objectSeed));
-    }
+	ret.setTexture(getTexture(object));
+	ret.setFPS(getAnimationFramerate(object));
+	ret.setTint(getTint(object, args.objectSeed));
+
     return ret;
 }
 
-// FIXME: a hack to pass Resources reference to the Skin class which is needed whilst loading skins
-template<>
-void detail::ResourcePile<Skin>::loadOne(const std::string &name, const std::filesystem::path &path)
+SoundSampleP Skin::getSound(const std::string &object)
 {
-    log::info("Custom loader called!");
-    StorageT object = std::make_shared<Skin>(*null);
-    loadedAssets[name] = object;
-
-    if (!object->load(path, &resourceRef)) {
-        log::error("Failed to load ", typeid(Skin).name(), ' ', path);
-    }
+	if (sounds.contains(object)) {
+		return sounds.at(object).sound;
+	}
+	return GetContext().resources.get<SoundSample>(object, directory, false);
 }
 
 NS_END

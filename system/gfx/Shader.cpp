@@ -152,7 +152,7 @@ unsigned int Shader::compileShader(const std::string &file, unsigned int type)
     return shader;
 }
 
-Shader::Shader()
+Shader::Shader() noexcept
 { id = -1; }
 
 void Shader::use() const

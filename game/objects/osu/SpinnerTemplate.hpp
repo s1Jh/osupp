@@ -22,27 +22,16 @@
 
 #pragma once
 
+#include "HitObject.hpp"
 #include "define.hpp"
-#include "State.hpp"
-#include "Context.hpp"
 
 NS_BEGIN
 
-DECLARE_STATE(GameState::MainMenu)
-{
-public:
-    explicit State();
-    int update(double delta) override;
-    int draw() override;
-    int exit() override;
-    int init(GameState state) override;
-
-private:
-    void showDebugControl();
-    void showMainMenuTab();
-    void showSettingsTab();
-
-    Context &ctx;
-};
+BEGIN_OBJECT_TEMPLATE(Spinner)
+    fvec2d position = {0, 0};
+    bool free = false;
+    float spinResistance = 0.f;
+    float spinRequired = 1.f;
+END_OBJECT_TEMPLATE()
 
 NS_END

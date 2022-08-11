@@ -260,7 +260,7 @@ unsigned int Mesh::getAttributeDescriptorCount() const
 
 void Mesh::GLObjDeleter(Mesh::GLObjs *obj)
 {
-    log::debug("Deleting mesh ", obj->VAO, " (", obj, ')');
+//    log::debug("Deleting mesh ", obj->VAO, " (", obj, ')');
     if (obj->VAO != 0)
         glDeleteVertexArrays(1, &obj->VAO);
     if (obj->VBO != 0)
@@ -307,6 +307,8 @@ void detail::RenderFunctor<Mesh>::operator()(Renderer &renderer,
   else if constexpr (std::is_same_v<T, type>) shader.set(uniform.first, *arg);
 #define END_MATCH()                                                            \
   else log::warning("Unable to deduce type for shader uniform ", uniform.first);
+
+
         std::visit(
             [&](auto &&arg)
             {
@@ -323,8 +325,8 @@ void detail::RenderFunctor<Mesh>::operator()(Renderer &renderer,
 #undef MATCH
 #undef MATCHP
 #undef END_MATCH
+		CheckGLh("Set shader uniform " + uniform.first);
     }
-    CheckGLh("Set shader uniforms");
 
     shader.set("transform", transform);
     shader.set("camera", renderer.camera.getMatrix());

@@ -22,13 +22,13 @@
 
 #pragma once
 
+#include "define.hpp"
 #include "Circle.hpp"
 #include "Enum.hpp"
 #include "Renderer.dpp"
-#include "define.hpp"
+#include "Context.hpp"
 
 NS_BEGIN
-class BaseGameMode;
 
 /**
  * The following class encompasses all logic surrounding hit objects.
@@ -55,43 +55,50 @@ class BaseGameMode;
  * Once the object enters the fading state, the finish() method will be called.
  * This method will return how well the object has been hit.
  **/
+
 class BaseHitObject
 {
 public:
-    virtual void update(double delta) = 0;
+    void update(double delta);
 
-    virtual void begin() = 0;
+    void begin();
 
-    virtual void press() = 0;
+    void press();
 
-    virtual void raise() = 0;
+    void raise();
 
-    virtual void draw(Renderer &) = 0;
+    void draw();
 
+	[[nodiscard]] HitResult finish();
+
+	[[nodiscard]] fcircle getSOF() const;
+
+	[[nodiscard]] bool isFinished() const;
+
+	[[nodiscard]] HitObjectState getState() const;
+
+	[[nodiscard]] double getTimeFinished() const;
+
+	[[nodiscard]] double getTimeStarted() const;
+
+	void reset();
+
+	// implemented by HitObject
     [[nodiscard]] virtual double getStartTime() const = 0;
 
+	// implemented by HitObject
     [[nodiscard]] virtual double getEndTime() const = 0;
-
-    [[nodiscard]] virtual HitResult finish() = 0;
-
-    [[nodiscard]] fcircle getSOF() const;
-
-    [[nodiscard]] bool isFinished() const;
-
-    [[nodiscard]] HitObjectState getState() const;
-
-    [[nodiscard]] double getTimeFinished() const;
-
-    [[nodiscard]] double getTimeStarted() const;
-
-    void reset();
 
     [[nodiscard]] virtual fvec2d getStartPosition() const;
 
     [[nodiscard]] virtual fvec2d getEndPosition() const;
 
+	[[nodiscard]] virtual HitObjectFunction getActivationFunction() const;
+
+	[[nodiscard]] virtual HitObjectFunction getDeactivationFunction() const;
+
 protected:
-    explicit BaseHitObject(BaseGameMode &session);
+    explicit BaseHitObject();
 
     void transferToInvisible();
 
@@ -121,9 +128,9 @@ protected:
 
     [[nodiscard]] bool isActive() const;
 
-    [[nodiscard]] virtual float getAlpha() const = 0;
+    [[nodiscard]] float getAlpha() const;
 
-    virtual void onDraw(Renderer &);
+    virtual void onDraw();
 
     virtual void onUpdate(double delta);
 
@@ -137,17 +144,21 @@ protected:
 
     virtual void onReset();
 
-    [[nodiscard]] virtual bool needsApproachCircle() const;
-
     [[nodiscard]] virtual HitResult onFinish();
 
-    fcircle SOF;
-    bool finished;
-    double timeStarted;
-    double timeFinished;
-    BaseGameMode &session;
+	// implemented by HitObject derivatives for different gamemodes
+	[[nodiscard]] virtual Mat3f calculateObjectTransform() const = 0;
+
+	[[nodiscard]] const Mat3f& getObjectTransform() const;
+
+	Context& ctx;
+	fcircle SOF;
 
 private:
+	bool finished;
+	double timeStarted;
+	double timeFinished;
+	Mat3f objectTransform;
     HitObjectState state;
 };
 

@@ -30,6 +30,7 @@
 #include "Matrix.hpp"
 #include "Shader.hpp"
 #include "Math.hpp"
+#include "Generics.hpp"
 
 NS_BEGIN
 
@@ -57,8 +58,8 @@ MAKE_1D_PRIMITIVE_RENDER_FUNCTOR(vec2d, float)
                                                         const VisualAppearance &appearance, \
                                                         const Mat3f& transform) { \
             const auto& shader = getData().shader; \
-            const auto& mesh = getData().mesh; \
-            Mat3f shape = ShapeExpression;\
+            Mat3f shape = ShapeExpression;                                        \
+            const auto& mesh = GetGenericMeshes().Type;                             \
             DrawGeneric2DShape(renderer, shader, mesh, shape, appearance, transform, RenderType); \
         }
 
@@ -66,43 +67,11 @@ MAKE_1D_PRIMITIVE_RENDER_FUNCTOR(vec2d, float)
 BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(rect)
 {
     shader.load("static_shape.shader");
-    // Create geometry for rectangular meshes
-    mesh.setAttributeDescriptors({
-                                     AttributeType::Vec2, // position
-                                     AttributeType::Vec2  // uv
-                                 });
-    mesh.insertVertices({{1.f, 1.f, 1.f, 1.f},
-                         {1.f, -1.f, 1.f, 0.f},
-                         {-1.f, -1.f, 0.f, 0.f},
-                         {-1.f, 1.f, 0.f, 1.f}});
-    mesh.insertIndices({0, 1, 2, 0, 3, 2});
-    mesh.upload();
 }
 
 BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(circle)
 {
     shader.load("static_shape.shader");
-
-    const unsigned int resolution = 32;
-
-    double circle_rotation = 2.0 * PI / (resolution - 1);
-    fvec2d circle_vec = {1.f, 0.f};
-
-    mesh.setAttributeDescriptors({
-                                     AttributeType::Vec2, // position
-                                     AttributeType::Vec2  // uv
-                                 });
-    mesh.insertVertex({0.0, 0.0, 0.5f, 0.5f});
-
-    for (unsigned int i = 0; i < resolution; i++) {
-        fvec2d vec = {circle_vec.x, circle_vec.y};
-        fvec2d uv = (vec + 1.0f) / 2.0f;
-        mesh.insertVertex({vec.x, vec.y, uv.x, uv.y});
-        mesh.insertIndice(i);
-        circle_vec = Rotate(circle_vec, circle_rotation);
-    }
-    mesh.insertIndice(1);
-    mesh.upload();
 }
 
 BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(line)

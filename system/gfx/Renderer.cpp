@@ -86,7 +86,7 @@ void Renderer::begin(const color &clearColor)
 {
     glfwMakeContextCurrent((GLFWwindow*)windowHandle);
 
-    glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
+	glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glClearColor(DECOMPOSE_COLOR_RGBA(BLACK));

@@ -75,7 +75,7 @@ int Texture::getChannels() const
 
 void Texture::GLTexDeleter(unsigned int *ptr)
 {
-    log::debug("Deleting texture ", *ptr, " (", ptr, ')');
+//    log::debug("Deleting texture ", *ptr, " (", ptr, ')');
     glDeleteTextures(1, ptr);
 }
 

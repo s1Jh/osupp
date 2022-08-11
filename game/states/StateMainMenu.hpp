@@ -22,27 +22,29 @@
 
 #pragma once
 
-#include "BaseGameMode.hpp"
 #include "define.hpp"
-
+#include "State.hpp"
+#include "Context.hpp"
 
 NS_BEGIN
 
-class Standard: public BaseGameMode
+DECLARE_STATE(GameState::MainMenu)
 {
-protected:
-    void onUpdate(double delta) override;
+public:
+    explicit State();
+    int update(double delta) override;
+    int draw() override;
+    int exit() override;
+    int init(GameState state) override;
 
-    void onDraw(Renderer &renderer) override;
-    void onReset() override;
 private:
-    unsigned long rollingUT = 0.0;
-    unsigned long rollingUPF = 0;
-    double averageUPF = 1.0f;
-    double averageUT = 1.0f;
+    void showDebugControl();
+    void showMainMenuTab();
+    void showSettingsTab();
 
-    unsigned int printCounter = 60;
-    ObjectSprite playField;
+	MapInfoP selectedMap{nullptr};
+
+    Context &ctx;
 };
 
 NS_END

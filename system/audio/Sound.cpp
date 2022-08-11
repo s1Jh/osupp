@@ -52,6 +52,11 @@ bool BaseSound::configure(unsigned int size, int sampleRateIn, SampleFormat form
 	format = formatIn;
 	return true;
 }
+
+void BaseSound::reset()
+{
+
+}
 }
 
 NS_END

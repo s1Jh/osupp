@@ -41,6 +41,7 @@ NS_BEGIN
 
 struct FFmpegCtx {
 	bool valid{true};
+	bool eof{false};
 
 	int audioStreamIndex{-1};
 	const AVCodec* codec{nullptr};
@@ -65,6 +66,7 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 	const SampleFormat fmt = SampleInfo<SampleT>::format;
 
 	auto extractDataFromStream = [&](size_t channel, size_t offset) -> float {
+		channel--;
 		auto avFormat = (AVSampleFormat)ctx.frame->format;
 		auto **data = ctx.frame->extended_data;
 
@@ -127,10 +129,19 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 	auto crushData = [&](float dataIn) -> auto {
 		if constexpr ((fmt & SampleFormat::Type) == SampleFormat::Type8) {
 			// Crush data to uint8_t
-			return uint8_t(std::ceil((dataIn + 1.0f) / 2.0f * std::numeric_limits<uint8_t>::max()));
+			dataIn = (dataIn + 1.0f) / 2.0f;
+			dataIn = Clamp(dataIn, 0.0f + std::numeric_limits<float>::epsilon(),
+						   1.0f - std::numeric_limits<float>::epsilon());
+
+			return uint8_t(std::ceil(dataIn * std::numeric_limits<uint8_t>::max()));
+
 		} else if constexpr ((fmt & SampleFormat::Type) == SampleFormat::Type16) {
 			// Crush data to int16_t
+			dataIn = Clamp(dataIn, -1.0f + std::numeric_limits<float>::epsilon(),
+						   1.0f - std::numeric_limits<float>::epsilon());
+
 			return int16_t(dataIn * std::numeric_limits<int16_t>::max());
+
 		} else {
 			WRAP_CONSTEXPR_ASSERTION("Incorrect sample format type");
 		}
@@ -138,8 +149,8 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 
 	for (int i = 1; i < ctx.frame->nb_samples; i++) {
 		if constexpr(bool(fmt & SampleFormat::IsStereo)) {
-			const size_t leftId = Min(1, ctx.frame->channels);
 			const size_t rightId = Min(2, ctx.frame->channels);
+			const size_t leftId = Min(1, ctx.frame->channels);
 
 			float left = extractDataFromStream(leftId, i);
 			float right = extractDataFromStream(rightId, i);

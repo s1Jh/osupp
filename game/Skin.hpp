@@ -30,6 +30,8 @@
 #include "Texture.hpp"
 #include "df2.hpp"
 #include "ResourcePile.hpp"
+#include "SoundSample.hpp"
+#include "HitObjectArguments.hpp"
 
 #include <unordered_map>
 #include <filesystem>
@@ -50,8 +52,8 @@ public:
 
     Skin() = default;
 
-    bool load(const std::filesystem::path &path, Resources *res);
-    bool create();
+	bool load(const std::filesystem::path &path) override;
+    bool create() override;
 
     FPS_t getAnimationFramerate(const std::string &object) const;
     TextureP getTexture(const std::string &object) const;
@@ -59,16 +61,14 @@ public:
 
     ShaderP getShader(const std::string &object) const;
 
+	SoundSampleP getSound(const std::string &object);
+
     ObjectSprite createObjectSprite(const std::string &object,
-                                    unsigned int objectSeed = 0,
-                                    unsigned int comboSeed = 0,
-                                    unsigned int mapSeed = 0) const;
+                                    const HitObjectArguments& args) const;
 
 private:
-    bool load([[maybe_unused]] const std::filesystem::path &path) override
-    { return false; }
 
-    std::string directory;
+    std::filesystem::path directory;
     struct TextureInfo
     {
         std::string path;
@@ -81,13 +81,16 @@ private:
         std::string path;
         ShaderP shader;
     };
+	struct SoundInfo
+	{
+		std::string path;
+		SoundSampleP sound;
+	};
 
     std::unordered_map<std::string, TextureInfo> textures;
     std::unordered_map<std::string, ShaderInfo> shaders;
+	std::unordered_map<std::string, SoundInfo> sounds;
 };
-
-template<>
-void detail::ResourcePile<Skin>::loadOne(const std::string &name, const std::filesystem::path &path);
 
 using SkinP = std::shared_ptr<Skin>;
 

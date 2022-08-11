@@ -127,7 +127,7 @@ constexpr const char *BUILD_TIME = __TIME__;
 
 constexpr int VERSION_MAJOR = 0;
 
-constexpr int VERSION_MINOR = 5;
+constexpr int VERSION_MINOR = 7;
 
 constexpr int VERSION_PATCH = 0;
 
@@ -193,7 +193,19 @@ constexpr const char *PLAY_FIELD_SPRITE = "play_field";
 
 constexpr const char *SLIDER_SHADER = "slider";
 
-constexpr const char *HIT_SOUND = "hitsound";
+constexpr const char *HIT_SOUND = "hit_sound";
+
+constexpr const char *MISS_SOUND = "miss_sound";
+
+constexpr const char *SLIDER_BOUNCE_SOUND = "slider_bounce";
+
+constexpr const char *SLIDER_SLIDE_SOUND = "slider_slide";
+
+constexpr const char *SLIDER_BREAK_SOUND = "slider_break";
+
+constexpr const char *SPINNER_SWOOSH_SOUND = "spinner_swoosh";
+
+constexpr const char *SPINNER_DING_SOUND = "spinner_ding";
 
 NS_END
 /*====================================================================================================================*/

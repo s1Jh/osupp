@@ -38,9 +38,10 @@ public:
 	bool create() override;
 	[[nodiscard]] SoundType getType() const override;
 
-	~SoundStream();
+	~SoundStream() override;
 
 protected:
+	void reset() override;
 	bool fillBuffer(BufferT &buffer) override;
 	[[nodiscard]] bool isAtEOF() const override;
 	[[nodiscard]] bool isStreaming() const override;

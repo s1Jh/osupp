@@ -42,7 +42,7 @@ NS_BEGIN
 class Shader: public detail::Resource
 {
 public:
-    Shader();
+    Shader() noexcept;
 
     bool fromString(
         const std::string &vert_src,

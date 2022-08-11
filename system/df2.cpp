@@ -56,7 +56,7 @@ df2 df2::read(const std::string &path)
     }
     // get the file size.
     size_t file_size = (size_t) ifs.tellg();
-    // Reset back to the start
+    // reset back to the start
     ifs.seekg(0, std::ios::beg);
     // Create a vector to read the data into.
     std::vector<char> byte_data(file_size);
@@ -77,7 +77,7 @@ df2 df2::read(const std::string &path)
             str_repr.replace(start_pos, repl.length(), alias.second);
         }
     }
-    // Start the recursive read.
+    // start the recursive read.
     df2 root;
     getClump(str_repr, root);
     return root;
@@ -113,7 +113,7 @@ std::string df2::getToken(const std::string &string, size_t start,
 			}
 		}
         if (found_first) {
-            // Remove invalid characters
+            // remove invalid characters
             if (filtered_chars.find(string.at(i)) == std::string::npos) {
                 if (dir == SearchDirection::Forwards) {
                     accum.push_back(string.at(i));

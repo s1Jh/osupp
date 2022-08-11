@@ -19,45 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
-#include "HitObject.tpp"
-#include "ObjectSprite.hpp"
-#include "NoteTemplate.hpp"
 #include "define.hpp"
+
+#define TO_GLFW(V) ((::GLFWwindow*)(V))
+#define FROM_GLFW(V) ((WindowHandle*)(V))
 
 NS_BEGIN
 
-class Note: public HitObject<ObjectTemplateNote>
-{
-public:
-    explicit Note(std::shared_ptr<ObjectTemplateNote>, BaseGameMode &);
+typedef struct WindowHandle WindowHandle;
 
-    [[nodiscard]] fvec2d getStartPosition() const override;
+namespace detail {
 
-    [[nodiscard]] fvec2d getEndPosition() const override;
+WindowHandle* EnsureGraphicalContext();
 
-    [[nodiscard]] double getStartTime() const override;
+bool FreeGraphicalContext(WindowHandle*);
 
-    [[nodiscard]] double getEndTime() const override;
-
-protected:
-    void onReset() override;
-
-    void onUpdate(double delta) override;
-
-    void onDraw(Renderer &renderer) override;
-
-    void onBegin() override;
-
-    HitResult onFinish() override;
-
-private:
-    bool wasHit = false;
-    ObjectSprite noteBase;
-    ObjectSprite noteOverlay;
-    ObjectSprite noteUnderlay;
-};
+}
 
 NS_END

@@ -26,6 +26,7 @@
 
 #include "Math.hpp"
 #include "Renderer.dpp"
+#include "Generics.hpp"
 
 #include <GL/glew.h>
 
@@ -93,8 +94,6 @@ void detail::DrawGeneric2DShape(const Renderer &renderer, const Shader &shader,
 //        and use the geometry shader to fill in the rest.
 static bool wasInit = false;
 
-static Mesh rectShape;
-
 static Shader lineShader;
 
 void detail::DrawLineSegment(const Renderer &renderer, const dline &seg,
@@ -102,18 +101,10 @@ void detail::DrawLineSegment(const Renderer &renderer, const dline &seg,
 {
     if (!wasInit) {
         lineShader.load("line.shader");
-        rectShape.setAttributeDescriptors({
-                                              AttributeType::Vec2 // position
-                                          });
-        rectShape.insertVertices({{1.f, 1.f},
-                                  {1.f, -1.f},
-                                  {-1.f, -1.f},
-                                  {-1.f, 1.f}});
-        rectShape.insertIndices({0, 1, 2, 0, 3, 2});
-        rectShape.upload();
-
         wasInit = true;
     }
+
+	const auto& rectShape = GetGenericMeshes().rectMask;
 
     lineShader.use();
     CheckGLh("Set shader");
@@ -123,10 +114,12 @@ void detail::DrawLineSegment(const Renderer &renderer, const dline &seg,
     lineShader.set("camera", renderer.camera.getMatrix());
     CheckGLh("Set shader matrices");
 
-    auto right = (float) Max(seg.A.x, seg.B.x);
-    auto left = (float) Min(seg.A.x, seg.B.x);
-    auto top = (float) Max(seg.A.y, seg.B.y);
-    auto bottom = (float) Min(seg.A.y, seg.B.y);
+	auto offset = appearance.outlineWidth;
+
+    auto right = (float) Max(seg.A.x, seg.B.x) + offset;
+    auto left = (float) Min(seg.A.x, seg.B.x) - offset;
+    auto top = (float) Max(seg.A.y, seg.B.y) + offset;
+    auto bottom = (float) Min(seg.A.y, seg.B.y) - offset;
 
     frect rect = {
         {

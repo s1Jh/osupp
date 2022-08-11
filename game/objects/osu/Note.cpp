@@ -40,38 +40,41 @@ HitResult Note::onFinish()
 {
     if (!wasHit) {
         // object wasn't hit, return miss
+		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss);
         return HitResult::Missed;
     }
+	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit);
     // negative if hit before the start time
     double hitDelta = getTimeStarted() - getStartTime();
     // should be in the interval < -hitWindow; +hitWindow >
-    int rank = 3 - Abs(int(3 * hitDelta / session.getHitWindow()));
+    int rank = 3 - Abs(int(3 * hitDelta / ctx.game.getHitWindow()));
     rank = Clamp(rank, 1, 3);
     return (HitResult) rank;
 }
 
-Note::Note(std::shared_ptr<ObjectTemplateNote> t, BaseGameMode &g)
-    : HitObject(std::move(t), g)
+Note::Note(std::shared_ptr<ObjectTemplateNote> t, const HitObjectArguments& args) :
+	OsuHitObject(std::move(t), args)
 {
-    SOF = {session.getCircleSize(), objectTemplate->position};
+    SOF = {ctx.game.getCircleSize(), objectTemplate->position};
 
-    const auto &skin = GetContext().activeSkin;
-    auto seed = Random::Scalar<unsigned int>();
+    const auto &skin = ctx.activeSkin;
 
-    noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE, seed);
-    noteOverlay = skin->createObjectSprite(NOTE_OVERLAY_SPRITE, seed);
-    noteUnderlay = skin->createObjectSprite(NOTE_UNDERLAY_SPRITE, seed);
+    noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE, args);
+    noteOverlay = skin->createObjectSprite(NOTE_OVERLAY_SPRITE, args);
+    noteUnderlay = skin->createObjectSprite(NOTE_UNDERLAY_SPRITE, args);
 }
 
-void Note::onDraw(Renderer &renderer)
+void Note::onDraw()
 {
-    const auto &objectTransform = session.getObjectTransform();
+    const auto &objectTransform = ctx.game.getTransform();
+
+	drawApproachCircle();
 
     ObjectDrawInfo info{SOF, getAlpha(), objectTransform};
 
-    renderer.draw(noteUnderlay, info);
-    renderer.draw(noteBase, info);
-    renderer.draw(noteOverlay, info);
+    ctx.gfx.draw(noteUnderlay, info);
+    ctx.gfx.draw(noteBase, info);
+	ctx.gfx.draw(noteOverlay, info);
 }
 
 void Note::onUpdate(double delta)
@@ -81,23 +84,16 @@ void Note::onUpdate(double delta)
     noteUnderlay.update(delta);
 }
 
+// getEndPosition will automatically return the start position since it's not been overridden
 fvec2d Note::getStartPosition() const
 { return objectTemplate->position; }
 
-fvec2d Note::getEndPosition() const
-{ return objectTemplate->position; }
-
-double Note::getStartTime() const
-{
-    return (objectTemplate->startTime + objectTemplate->endTime) / 2.0f;
-}
-
-double Note::getEndTime() const
-{
-    return (objectTemplate->startTime + objectTemplate->endTime) / 2.0f;
-}
-
 void Note::onReset()
 { wasHit = false; }
+
+HitObjectFunction Note::getActivationFunction() const
+{
+	return HitObjectFunction::ButtonPressed | HitObjectFunction::CursorEnter;
+}
 
 NS_END

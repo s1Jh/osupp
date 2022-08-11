@@ -65,6 +65,7 @@ SoundType SoundSample::getType() const
 bool SoundSample::fillBuffer(detail::BaseSound::BufferT &buffer)
 {
 	buffer = data;
+	return true;
 }
 
 bool SoundSample::isAtEOF() const
