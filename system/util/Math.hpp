@@ -183,8 +183,11 @@ bool Intersects(rect<R1> left, rect <R2> right)
 template<typename XT, typename MinT, typename MaxT>
 XT Clamp(XT x, MinT min, MaxT max)
 {
-    x = Max(x, min);
-    x = Min(x, max);
+	auto realMin = Min(min, max);
+	auto realMax = Max(min, max);
+
+    x = Max(x, realMin);
+    x = Min(x, realMax);
     return x;
 }
 
@@ -505,9 +508,13 @@ inline Mat3<T> MakeRotationMatrix(float rotation,
 }
 
 template<typename T>
-inline Mat3<T> MakeScaleMatrix(const vec2d<T> &scale)
+inline Mat3<T> MakeScaleMatrix(const vec2d<T> &scale,
+							   fvec2d center = {0.0f, 0.0f})
 {
-    return Mat3<T>({scale.x, 0.f, 0.f, 0.f, scale.y, 0.f, 0.f, 0.f, 1.f});
+    auto scaleMat = Mat3<T>({scale.x, 0.f, 0.f, 0.f, scale.y, 0.f, 0.f, 0.f, 1.f});
+
+	return MakeTranslationMatrix(center * -1) * scaleMat *
+		MakeTranslationMatrix(center);
 }
 
 /**********************

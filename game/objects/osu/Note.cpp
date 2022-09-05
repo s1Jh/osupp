@@ -66,7 +66,7 @@ Note::Note(std::shared_ptr<ObjectTemplateNote> t, const HitObjectArguments& args
 
 void Note::onDraw()
 {
-    const auto &objectTransform = ctx.game.getTransform();
+	const auto& objectTransform = getObjectTransform();
 
 	drawApproachCircle();
 

@@ -26,6 +26,9 @@
 #include "Util.hpp"
 
 #include "Context.hpp"
+#include "HumanInput.hpp"
+#include "TestInput.hpp"
+#include "AutoPilot.hpp"
 
 NS_BEGIN
 
@@ -37,7 +40,11 @@ int State<GameState::InGame>::update(double delta)
 		auto musicTrack = ctx.resources.get<SoundStream>(info->getSongPath(), info->getDirectory(), false);
 		auto& channel = ctx.audio.getMusicChannel();
 		channel.setSound(musicTrack, true);
-		canRun = true;
+		if (!ctx.game.start()) {
+			log::error("Failed to start the game simulation");
+			ctx.state.setState(GameState::MainMenu);
+			return 0;
+		}
 	}
 
 	if (ctx.game.isFinished() && !endTimer.isRunning()) {
@@ -45,11 +52,9 @@ int State<GameState::InGame>::update(double delta)
 		endTimer.setTime(2.5);
 		endTimer.setMode(TimerMode::Single);
 		endTimer.start();
-		canRun = false;
 	}
 
-	if (canRun)
-		ctx.game.update(delta);
+	ctx.game.update(delta);
 
     if (ctx.keyboard[Key::Esc].releasing || endTimer.isDone()) {
 		ctx.state.setState(GameState::MainMenu);
@@ -66,8 +71,9 @@ int State<GameState::InGame>::draw()
 
 int State<GameState::InGame>::exit()
 {
-	GetContext().audio.getMusicChannel().stop();
-	GetContext().game.setMap(nullptr);
+	ctx.audio.getMusicChannel().stop();
+	ctx.game.setMap(nullptr);
+	ctx.game.stop();
 	return 0;
 }
 
@@ -83,6 +89,7 @@ int State<GameState::InGame>::init(GameState)
 	timer.setMode(TimerMode::Single);
 	timer.start();
 
+	ctx.game.setInputMapper(std::make_unique<AutoPilot>());
 	ctx.game.reset();
 	ctx.audio.getMusicChannel().stop();
 

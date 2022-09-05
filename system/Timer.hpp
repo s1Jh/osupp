@@ -60,7 +60,7 @@ public:
     Timer(Timer&);
     Timer(Timer&&) noexcept;
 
-    Timer& operator=(Timer&);
+    Timer& operator=(const Timer&);
     Timer& operator=(Timer&&) noexcept;
 
     void pause();
@@ -84,12 +84,12 @@ public:
 protected:
     bool increment(double delta);
 
-    std::recursive_mutex timerMutex;
-    double time;
-    double timer;
-    bool running;
-    TimerMode mode;
-    bool wasDone;
+//    std::recursive_mutex timerMutex;
+    std::atomic<double> time;
+	std::atomic<double> timer;
+	std::atomic<bool> running;
+	std::atomic<TimerMode> mode;
+	std::atomic<bool> wasDone;
 };
 
 MAKE_CALLBACK(TimerCallbacks, TimerCallbacks::TimerDone, Timer*)

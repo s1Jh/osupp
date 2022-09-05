@@ -203,7 +203,7 @@ void Slider::onDraw()
 {
     /*============================================================================================================*/
     // Prepare some constant variables.
-    const auto objectTransform = ctx.game.getTransform();
+    const auto& objectTransform = getObjectTransform();
     const auto circleSize = ctx.game.getCircleSize();
     const auto alpha = getAlpha();
 
@@ -242,7 +242,7 @@ void Slider::onDraw()
 			auto tint = bodyTexture.getTint();
 			tint.a = alpha;
 			glDepthFunc(GL_LEQUAL);
-			glBlendFunc(GL_ONE, GL_ZERO);
+			glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
 			ctx.gfx.draw(
 				GetGenericMeshes().rectMask, *bodyShader,
 				Shader::Uniforms{
@@ -314,7 +314,6 @@ void Slider::onDraw()
 
 	/*============================================================================================================*/
 	// Draw the approach circle underneath the ball which is our starting target
-
 	drawApproachCircle();
 
     /*============================================================================================================*/

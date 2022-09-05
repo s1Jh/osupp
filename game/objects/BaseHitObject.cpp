@@ -180,7 +180,7 @@ HitObjectFunction BaseHitObject::getActivationFunction() const
 
 HitObjectFunction BaseHitObject::getDeactivationFunction() const
 {
-	return HitObjectFunction::CursorLeave | HitObjectFunction::ButtonReleased;
+	return HitObjectFunction::CursorLeave | HitObjectFunction::Or | HitObjectFunction::ButtonReleased;
 }
 
 
@@ -212,7 +212,7 @@ HitObjectFunction BaseHitObject::getDeactivationFunction() const
  */
 void BaseHitObject::update(double delta)
 {
-	objectTransform = ctx.game.getTransform() * this->calculateObjectTransform();
+	objectTransform = this->calculateObjectTransform() * ctx.game.getTransform();
 
 	// gather transfer times
 	auto currentTime = ctx.game.getCurrentTime();

@@ -118,7 +118,7 @@ enum class HitObjectState
 
 enum class HitObjectFunction : uint8_t
 {
-	ButtonMask = 0b0111,		// 3 bits
+	ButtonMask = 0b0111,		// 3 bits - 3
 	ButtonIgnore = 0,			// buttons will not contribute to decision-making
 	ButtonPressed = 1,			// activated when a button is pressed down
 	ButtonHeld = 2,				// activated if a button is already held down
@@ -127,10 +127,15 @@ enum class HitObjectFunction : uint8_t
 	ButtonPressedNoLock = 4,	// ditto, no locking
 	ButtonHeldNoLock = 5,		//
 
-	CursorMask = 0b11000,		// 2 bits
+	CursorMask = 0b11000,		// 2 bits - 5
 	CursorIgnore = 0 << 3,		// cursor position does not contribute to decision-making
 	CursorLeave = 1 << 3,		// true when cursor is not in the object's SOF
 	CursorEnter = 2 << 3,		// true when the cursor is inside the object's SOF
+
+	MergeMask = 0b1100000,		// 2 bits - 7
+	And = 0 << 5,			// button and cursor values will be AND-ed together
+	Or = 1 << 5,			// button and cursor values will be OR-ed together
+	Xor = 2 << 5,			// button and cursor values will be XOR-ed together
 
 	NoActivation = 0xff			// will always resolve to false
 };

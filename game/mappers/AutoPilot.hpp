@@ -19,54 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
 #include "define.hpp"
 
-#include "Renderer.hpp"
-#include "Texture.hpp"
-#include "Types.hpp"
+#include "InputMapper.hpp"
+#include "Context.hpp"
 
 NS_BEGIN
 
-struct ObjectDrawInfo
-{
-    frect destination = UNIT_RECT<float>;
-    float alpha = 1.0f;
-    const Mat3f &transform = MAT3_NO_TRANSFORM<float>;
-};
-
-class ObjectSprite
+class AutoPilot : public InputMapper
 {
 public:
-    BEFRIEND_RENDER_FUNCTOR(ObjectSprite)
+	AutoPilot();
 
-    ObjectSprite() = default;
-
-    void update(double delta);
-
-    void setTexture(const TextureP &texture);
-    void setFPS(FPS_t fps);
-	void setTotalFrames(int frames);
-    void setFrameTime(float frameTime);
-    void setTint(const color &tint);
-
-	[[nodiscard]] const color &getTint() const;
-
-    [[nodiscard]] TextureP getTexture() const;
+	[[nodiscard]] bool isKeyPressed(BlockMode mode) const override;
+	[[nodiscard]] bool isKeyReleased() const override;
+	[[nodiscard]] bool isKeyPressing(BlockMode mode) const override;
+	[[nodiscard]] fvec2d getCursor() const override;
+	void update() override;
 
 private:
-    color tint{WHITE};
-	TextureP texture{nullptr};
-    AnimationLayout layout = AnimationLayout::Horizontal;
-    float frameTime = 0.0f;
-    float frameTimer = 0.0f;
-    unsigned int frameCount = 1;
-    unsigned int frameCounter = 0;
-};
+	std::weak_ptr<BaseHitObject> previous;
 
-BEGIN_RENDER_FUNCTOR_DECL(ObjectSprite, const ObjectDrawInfo&)
-END_RENDER_FUNCTOR_DECL()
+
+	float velocity{20.0f};
+
+	fvec2d target;
+	fvec2d position;
+	bool held;
+	bool lastHeld;
+
+	Context &ctx;
+};
 
 NS_END

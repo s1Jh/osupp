@@ -151,12 +151,47 @@ const int Keyboard::GLFWConversionTable[KEY_COUNT] = {GLFW_KEY_LEFT_CONTROL,
                                                       GLFW_KEY_KP_8,
                                                       GLFW_KEY_KP_9};
 
+std::ostream &operator<<(std::ostream &os, const Key &key) {
+	if ((unsigned int)key & (unsigned int)Key::Ctrl)
+		os << "Ctrl + ";
+	if ((unsigned int)key & (unsigned int)Key::RCtrl)
+		os << "RCtrl + ";
+	if ((unsigned int)key & (unsigned int)Key::Alt)
+		os << "Alt + ";
+	if ((unsigned int)key & (unsigned int)Key::RAlt)
+		os << "RAlt + ";
+	if ((unsigned int)key & (unsigned int)Key::Shift)
+		os << "Shift + ";
+	if ((unsigned int)key & (unsigned int)Key::RShift)
+		os << "RShift + ";
+	if ((unsigned int)key & (unsigned int)Key::Meta)
+		os << "Meta + ";
+	if ((unsigned int)key & (unsigned int)Key::RMeta)
+		os << "RMeta + ";
+
+	Key code = Key((int)key & 0xff);
+	switch (code) {
+#define KEY(name)                                                              \
+  case Key::name:                                                              \
+    os << #name;                                                               \
+    break;
+	KEY_LIST
+#undef KEY
+	default:
+		os << "Unknown (" << std::to_string((int)code) << ')';
+		break;
+	}
+	return os;
+}
+
 void Keyboard::update()
 {
     for (unsigned int i = 0; i < KEY_COUNT; i++) {
         int code = GLFWConversionTable[i]; // the GLFW code
 
-        bool state = code != -1 ? glfwGetKey(TO_GLFW(window), code) : false;
+        bool state = false;
+		if (code != -1)
+			state = glfwGetKey(TO_GLFW(window), code);
 
         auto &current = keys[i];
 

@@ -40,11 +40,6 @@
 
 NS_BEGIN
 
-GameManager::GameManager()
-    : info(nullptr), playField(UNIT_RECT<float>), currentTime(0.0)
-{
-}
-
 double GameManager::getCurrentTime() const
 { return currentTime; }
 
@@ -62,9 +57,13 @@ void GameManager::setCurrentTime(double newTime)
 
 void GameManager::update(double delta)
 {
+	if (!simulationRunning)
+		return;
+
     currentTime += delta;
 
-	auto& keyboard = GetContext().keyboard;
+	cursor.update(delta);
+
 	// objects are sorted by order of appearance
 	int updates = 0;
 	printCounter++;
@@ -92,6 +91,8 @@ void GameManager::update(double delta)
 						// just set it without checking for time as that would
 						// cause access violation
 						last = activeObjects.end();
+						// we also stop the simulation
+						simulationRunning = false;
 					}
 					else if ((*last)->getEndTime() < (*nextIt)->getEndTime()) {
 						last = nextIt;
@@ -114,12 +115,19 @@ void GameManager::update(double delta)
 					averageUPF = double(rollingUPF) / 60.0;
 					averageUT = double(rollingUT) / 60.0;
 
+					history[historyInsertSpot] = averageUT;
+					historyInsertSpot++;
+					historyInsertSpot %= history.size();
+
+					minUT = Min(minUT, averageUT);
+					maxUT = Max(maxUT, averageUT);
+
 					printCounter = 0;
 					rollingUT = 0;
 					rollingUPF = 0;
 				}
 
-				return;
+				goto breakout;
 			}
 		case HitObjectState::Ready: {
 			// The object can now be interacted with, check for user inputs and then
@@ -131,7 +139,7 @@ void GameManager::update(double delta)
 				// We are within the object's hit window and are pressing down on the
 				// right keys, start.
 				obj->begin();
-				return;
+				goto breakout;
 			}
 
 			break;
@@ -144,6 +152,7 @@ void GameManager::update(double delta)
 
 			if (resolveFunction(func, *obj))
 			{
+				log::debug("Raising");
 				obj->raise();
 			}
 			break;
@@ -155,6 +164,7 @@ void GameManager::update(double delta)
 
 			if (resolveFunction(func, *obj))
 			{
+				log::debug("Pressing");
 				obj->press();
 			}
 			break;
@@ -171,6 +181,9 @@ void GameManager::update(double delta)
 			break;
 		}
 	}
+
+breakout:
+	input->update();
 }
 
 void GameManager::draw(Renderer &renderer)
@@ -184,6 +197,9 @@ void GameManager::draw(Renderer &renderer)
 		double UPS = 1000000.0 / averageUT;
 		ImGui::SameLine();
 		ImGui::Text("UPS: %f", UPS);
+
+		ImGui::PlotLines("History (UT)", history.data(), history.size(), 0, nullptr, minUT, maxUT);
+
 		ImGui::End();
 	}
 
@@ -223,11 +239,19 @@ void GameManager::draw(Renderer &renderer)
 //        renderer.draw(ptr->getSOF(), VisualAppearance{.fillColor = tint}, transform);
 	}
 
-	renderer.draw(getCursorPosition(), 0.1f, VisualAppearance{.fillColor = RED}, transform);
+	if (input) {
+		//							V Cursor size here!
+		const float cursorSize = getCircleSize();
+		ObjectDrawInfo cursorInfo{{{cursorSize, cursorSize}, input->getCursor()}, 1.0f, transform};
+		renderer.draw(cursor, cursorInfo);
+	}
 }
 
-void GameManager::setMap(MapInfoP map)
+bool GameManager::setMap(MapInfoP map)
 {
+	if (simulationRunning)
+		return false;
+
     info = std::move(map);
     activeObjects.clear();
 
@@ -242,8 +266,9 @@ void GameManager::setMap(MapInfoP map)
                 MAKE_CASE(Slider)
                 MAKE_CASE(Note)
                 default:
+					info.reset();
                     log::warning("Corrupted map template: ", objectTemplate);
-                    break;
+					return false;
             }
 
             if (bool(objectTemplate->parameters & HitObjectParams::ComboEnd))
@@ -251,11 +276,13 @@ void GameManager::setMap(MapInfoP map)
 			args.objectSeed++;
         }
     }
+	return true;
 }
 
 void GameManager::reset()
 {
-    log::debug("Resetting");
+//    log::debug("Resetting the game state");
+
     if (info)
         currentTime = info->getStartOffset();
     else
@@ -276,6 +303,8 @@ void GameManager::reset()
 	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
 	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
 	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
+
+	cursor = skin->createObjectSprite(CURSOR_SPRITE, HitObjectArguments{});
 }
 
 const frect &GameManager::getPlayField() const
@@ -289,15 +318,6 @@ void GameManager::setPlayField(const frect &field)
         MakeTranslationMatrix(field.position);
 }
 
-fvec2d GameManager::getCursorPosition() const
-{
-    auto pos = GetContext().mouse.position();
-    pos -= playField.position;
-    auto smaller = Min(playField.size.w, playField.size.h);
-    pos /= fvec2d{smaller, smaller};
-    return pos;
-}
-
 MapInfoP GameManager::getMap() const
 { return info; }
 
@@ -306,22 +326,37 @@ const Mat3f &GameManager::getTransform() const
 
 float GameManager::getCircleSize()
 {
-    return info->getCircleSize(); /* * multiplier */
+	if (info)
+    	return info->getCircleSize() * csMultiplier;
+	return 0.0f;
 }
 
 float GameManager::getApproachTime()
 {
-    return info->getApproachTime(); /* * multiplier */
+	if (info)
+    	return info->getApproachTime() * arMultiplier;
+	return 0.0f;
 }
 
 float GameManager::getFadeTime()
 {
-    return info->getFadeTime(); /* * multiplier */
+	if (info)
+    	return info->getFadeTime() * ftMultiplier;
+	return 0.0f;
 }
 
 float GameManager::getHitWindow()
 {
-    return info->getHitWindow(); /* * multiplier */
+	if (info)
+    	return info->getHitWindow() * hwMultiplier;
+	return 0.0f;
+}
+
+float GameManager::getHpDrain()
+{
+	if (info)
+		return info->getHpDrain() * hpMultiplier;
+	return 0.0f;
 }
 
 const SampleSet &GameManager::getSamples() const
@@ -331,40 +366,41 @@ const SampleSet &GameManager::getSamples() const
 
 bool GameManager::isFinished() const
 {
-	return last == activeObjects.end();
+	return last == activeObjects.end() && !simulationRunning;
 }
 
 bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& object) const
 {
+	if (!input)
+		return false;
+
 	if (func == HitObjectFunction::NoActivation)
 		return false;
 
 	HitObjectFunction buttonRules = func & HitObjectFunction::ButtonMask;
 	HitObjectFunction cursorRules = func & HitObjectFunction::CursorMask;
+	HitObjectFunction mergeRules = func & HitObjectFunction::MergeMask;
 
 	bool buttonValid = true;
 	bool cursorValid = true;
-
-	auto& keyboard = GetContext().keyboard;
 
 	auto SOF = object.getSOF();
 
 	switch (buttonRules) {
 	case HitObjectFunction::ButtonPressed:
-		buttonValid = (keyboard[Key::Z].pressing && !keyboard[Key::X].pressed) ||
-			          (keyboard[Key::X].pressing && !keyboard[Key::Z].pressed);
+		buttonValid = input->isKeyPressing(InputMapper::BLOCKING);
 		break;
 	case HitObjectFunction::ButtonHeld:
-		buttonValid = (keyboard[Key::Z].pressed != keyboard[Key::X].pressed);
+		buttonValid = input->isKeyPressed(InputMapper::BLOCKING);
 		break;
 	case HitObjectFunction::ButtonReleased:
-		buttonValid = (keyboard[Key::Z].released && keyboard[Key::X].released);
+		buttonValid = input->isKeyReleased();
 		break;
 	case HitObjectFunction::ButtonPressedNoLock:
-		buttonValid = (keyboard[Key::Z].pressing || keyboard[Key::X].pressing);
+		buttonValid = input->isKeyPressing(InputMapper::NO_BLOCKING);
 		break;
 	case HitObjectFunction::ButtonHeldNoLock:
-		buttonValid = (keyboard[Key::Z].pressed || keyboard[Key::X].pressed);
+		buttonValid = input->isKeyPressed(InputMapper::NO_BLOCKING);
 		break;
 	case HitObjectFunction::ButtonIgnore:
 	default:
@@ -373,17 +409,90 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 
 	switch (cursorRules) {
 	case HitObjectFunction::CursorEnter:
-		cursorValid = Distance(SOF.position, getCursorPosition()) <= SOF.radius;
+		cursorValid = Distance(SOF.position, input->getCursor()) <= SOF.radius;
 		break;
 	case HitObjectFunction::CursorLeave:
-		cursorValid = Distance(SOF.position, getCursorPosition()) > SOF.radius;
+		cursorValid = Distance(SOF.position, input->getCursor()) > SOF.radius;
 		break;
 	case HitObjectFunction::CursorIgnore:
 	default:
 		break;
 	}
 
-	return buttonValid && cursorValid;
+	switch (mergeRules) {
+	case HitObjectFunction::And:
+		return buttonValid && cursorValid;
+	case HitObjectFunction::Or:
+		return buttonValid || cursorValid;
+	case HitObjectFunction::Xor:
+		return buttonValid + cursorValid;
+	default:
+		return false;
+	}
+}
+
+void GameManager::stop()
+{
+	simulationRunning = false;
+}
+
+bool GameManager::start()
+{
+	simulationRunning = true;
+
+	if (!info) {
+		simulationRunning = false;
+	}
+
+	if (activeObjects.empty()) {
+		simulationRunning = false;
+	}
+
+	return simulationRunning;
+}
+float GameManager::getStartOffset()
+{
+	if (info)
+		return info->getStartOffset();
+	return 0.0f;
+}
+
+void GameManager::setInputMapper(std::unique_ptr<InputMapper> &&mapper)
+{
+	input = std::move(mapper);
+}
+
+std::weak_ptr<BaseHitObject> GameManager::getCurrentObject() const
+{
+	if (last != activeObjects.end()) {
+		return *last;
+	}
+	return {};
+}
+
+std::weak_ptr<BaseHitObject> GameManager::getNextObject() const
+{
+	if ((last != activeObjects.end()) && (std::next(last) != activeObjects.end())) {
+		return *std::next(last);
+	}
+	return {};
+}
+
+const GameManager::StorageT &GameManager::getStoredObjects() const
+{
+	return activeObjects;
+}
+
+fvec2d GameManager::getCursorPosition() const
+{
+	if (input)
+		return input->getCursor();
+	return {0, 0};
+}
+
+GameManager::GameManager()
+{
+	last = activeObjects.begin();
 }
 
 NS_END

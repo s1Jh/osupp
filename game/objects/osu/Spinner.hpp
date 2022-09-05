@@ -27,7 +27,9 @@
 #include "define.hpp"
 
 NS_BEGIN
-class Spinner: public OsuHitObject<ObjectTemplateSpinner, OsuHitObjectFlags::NoApproachCircle>
+class Spinner: public OsuHitObject<ObjectTemplateSpinner,
+	OsuHitObjectFlags::NoApproachCircle |
+	OsuHitObjectFlags::NoFadeoutAnimation>
 {
 public:
     explicit Spinner(std::shared_ptr<ObjectTemplateSpinner>, const HitObjectArguments& args);

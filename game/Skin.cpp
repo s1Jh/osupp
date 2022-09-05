@@ -63,6 +63,9 @@ bool Skin::load(const std::filesystem::path &path)
         if (fields.find("fps") != fields.end())
             object.animationFPS = fields["fps"].integer();
 
+		if (fields.find("frames") != fields.end())
+			object.animationFrames = fields["frames"].integer();
+
         if (fields.find("tints") != fields.end()) {
             object.tints.clear();
             const auto &tints = fields["tints"];
@@ -116,6 +119,16 @@ FPS_t Skin::getAnimationFramerate(const std::string &object) const
     return DEFAULT_TEXTURE_FPS;
 }
 
+int Skin::getFrameCount(const std::string &object) const
+{
+	LOG_ENTER();
+
+	if (textures.contains(object))
+		return textures.at(object).animationFrames;
+
+	return -1;
+}
+
 TextureP Skin::getTexture(const std::string &object) const
 {
     LOG_ENTER();
@@ -165,6 +178,7 @@ ObjectSprite Skin::createObjectSprite(const std::string &object,
 	ret.setTexture(getTexture(object));
 	ret.setFPS(getAnimationFramerate(object));
 	ret.setTint(getTint(object, args.objectSeed));
+	ret.setTotalFrames(getFrameCount(object));
 
     return ret;
 }

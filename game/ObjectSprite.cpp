@@ -70,6 +70,12 @@ void ObjectSprite::setFrameTime(float frameTimeIn)
     frameTime = frameTimeIn;
 }
 
+void ObjectSprite::setTotalFrames(int framesIn)
+{
+	if (framesIn > 0)
+		frameCount = framesIn;
+}
+
 void ObjectSprite::setTint(const color &tintIn)
 { tint = tintIn; }
 

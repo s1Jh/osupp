@@ -191,6 +191,8 @@ constexpr const char *SLIDER_BALL_RING_SPRITE = "slider_ring";
 
 constexpr const char *PLAY_FIELD_SPRITE = "play_field";
 
+constexpr const char *CURSOR_SPRITE = "cursor";
+
 constexpr const char *SLIDER_SHADER = "slider";
 
 constexpr const char *HIT_SOUND = "hit_sound";

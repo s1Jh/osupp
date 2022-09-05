@@ -30,6 +30,7 @@
 #include "Renderer.hpp"
 #include "SoundStream.hpp"
 #include "Skin.hpp"
+#include "InputMapper.hpp"
 
 #include <list>
 
@@ -52,7 +53,7 @@ class GameManager
 public:
     using StorageT = std::list<std::shared_ptr<BaseHitObject>>;
 
-    explicit GameManager();
+	explicit GameManager();
 
     virtual void update(double delta);
 
@@ -68,11 +69,15 @@ public:
 
     [[nodiscard]] MapInfoP getMap() const;
 
-    void setMap(MapInfoP map);
+    bool setMap(MapInfoP map);
 
     void reset();
 
-    [[nodiscard]] fvec2d getCursorPosition() const;
+	bool start();
+
+	void stop();
+
+	[[nodiscard]] fvec2d getCursorPosition() const;
 
     [[nodiscard]] const Mat3f &getTransform() const;
 
@@ -84,28 +89,53 @@ public:
 
     [[nodiscard]] float getHitWindow();
 
+	[[nodiscard]] float getHpDrain();
+
+	[[nodiscard]] float getStartOffset();
+
 	[[nodiscard]] const SampleSet &getSamples() const;
 
 	[[nodiscard]] bool isFinished() const;
 
-protected:
-	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject& object) const;
+	void setInputMapper(std::unique_ptr<InputMapper>&& mapper);
 
-    StorageT::iterator last;
-    StorageT activeObjects;
-    MapInfoP info;
+	[[nodiscard]] std::weak_ptr<BaseHitObject> getCurrentObject() const;
 
-	SampleSet samples;
+	[[nodiscard]] std::weak_ptr<BaseHitObject> getNextObject() const;
+
+	[[nodiscard]] const StorageT& getStoredObjects() const;
 
 private:
+	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject& object) const;
+
+	ObjectSprite cursor;
+
+	std::unique_ptr<InputMapper> input{nullptr};
+	StorageT::iterator last{};
+	StorageT activeObjects{};
+	MapInfoP info{nullptr};
+	SampleSet samples{};
+	bool simulationRunning{false};
+    Mat3f transform{MAT3_NO_TRANSFORM<float>};
+    frect playField{UNIT_RECT<float>};
+    double currentTime{0.0};
+
+
+	float arMultiplier{1.0f};
+	float csMultiplier{1.0f};
+	float hwMultiplier{1.0f};
+	float hpMultiplier{1.0f};
+	float ftMultiplier{1.0f};
+
+	unsigned int historyInsertSpot{0};
+	std::array<float, 64> history;
 	unsigned int printCounter = 60;
 	unsigned long rollingUT = 0.0;
 	unsigned long rollingUPF = 0;
 	double averageUPF = 1.0f;
 	double averageUT = 1.0f;
-    Mat3f transform;
-    frect playField;
-    double currentTime;
+	float minUT = std::numeric_limits<float>::max();
+	float maxUT = 0.0f;
 };
 
 NS_END

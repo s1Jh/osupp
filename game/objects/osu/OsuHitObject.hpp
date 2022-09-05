@@ -31,19 +31,23 @@ enum class OsuHitObjectFlags : uint8_t
 {
 	NoApproachCircle = 0 << 1,
 	DrawApproachCircle = 1 << 1,	// bit 1
+	NoFadeoutAnimation = 0 << 2,
+	ApplyFadeoutAnimation = 1 << 2,	// bit 2
 };
 
 ENABLE_BITMASK_OPERATORS(OsuHitObjectFlags)
 
-constexpr OsuHitObjectFlags DEFAULT_OSU_HIT_OBJECT_FLAGS = OsuHitObjectFlags::DrawApproachCircle;
+constexpr OsuHitObjectFlags DEFAULT_OSU_HIT_OBJECT_FLAGS =
+	OsuHitObjectFlags::DrawApproachCircle |
+	OsuHitObjectFlags::ApplyFadeoutAnimation;
 
 template <typename TemplateT, OsuHitObjectFlags Flags = DEFAULT_OSU_HIT_OBJECT_FLAGS>
 requires IsTemplateV<TemplateT>
 class OsuHitObject : public HitObject<TemplateT, OsuHitObjectFlags, Flags>
 {
 public:
-	explicit OsuHitObject(std::shared_ptr<TemplateT> templateIn, const HitObjectArguments& args) :
-		HitObject<TemplateT, OsuHitObjectFlags, Flags>(std::move(templateIn))
+	explicit OsuHitObject(std::shared_ptr<TemplateT> templateIn, const HitObjectArguments& argsIn) :
+		HitObject<TemplateT, OsuHitObjectFlags, Flags>(std::move(templateIn)), args(argsIn)
 	{
 		approachCircle = this->ctx.activeSkin->createObjectSprite(APPROACH_CIRCLE_SPRITE, args);
 	}
@@ -59,8 +63,8 @@ protected:
 		const auto &transform = this->getObjectTransform();
 
 		if (this->isApproachCircleDrawn()) {
-			auto scale = 4.0f;  // how big will the circle be at -ar
-			float offset = 1.0; // how big the circle will be at 0
+			const auto scale = 4.0f;  // how big will the circle be at -ar
+			const auto offset = 1.0f; // how big the circle will be at 0
 
 			float slope = (scale - offset) / this->ctx.game.getApproachTime();
 
@@ -79,10 +83,28 @@ protected:
 
 	[[nodiscard]] Mat3f calculateObjectTransform() const override
 	{
+		if (
+			this->getState() == HitObjectState::Fading &&
+			bool(Flags & OsuHitObjectFlags::ApplyFadeoutAnimation)
+			)
+		{
+			// make objects float up after they've been struck
+			// use the alpha value, as it's 1.0 when fading
+			// starts and 0.0 when it finishes
+			float fadingProgress = 1.0f - this->getAlpha();
+
+			float floatAmount = 0.1f;
+			float scale = Lerp(1.0f, 0.75f, SmoothStep(fadingProgress));
+
+			return
+				MakeTranslationMatrix<float>({0.0f, fadingProgress * floatAmount}) *
+				MakeScaleMatrix<float>({scale, scale}, this->SOF.position);
+		}
 		return MAT3_NO_TRANSFORM<float>;
 	}
 
 private:
+	HitObjectArguments args;
 	ObjectSprite approachCircle;
 };
 

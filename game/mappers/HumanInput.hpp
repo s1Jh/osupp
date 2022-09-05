@@ -19,9 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
+#pragma once
 
-//
-// Created by sijh on 12.08.22.
-//
+#include <vector>
+#include "define.hpp"
+#include "InputMapper.hpp"
+#include "Vec2.hpp"
+#include "Keyboard.hpp"
 
-#include "OsuHitObject.hpp"
+NS_BEGIN
+
+class HumanInput : public InputMapper
+{
+public:
+	explicit HumanInput();
+	[[nodiscard]] bool isKeyPressed(BlockMode) const override;
+	[[nodiscard]] bool isKeyReleased() const override;
+	[[nodiscard]] bool isKeyPressing(BlockMode) const override;
+	[[nodiscard]] fvec2d getCursor() const override;
+	void update() override;
+
+private:
+	std::vector<Key> activationKeys;
+};
+
+NS_END

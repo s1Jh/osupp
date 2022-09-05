@@ -19,54 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
 #include "define.hpp"
 
-#include "Renderer.hpp"
-#include "Texture.hpp"
-#include "Types.hpp"
+#include "Vec2.hpp"
 
 NS_BEGIN
 
-struct ObjectDrawInfo
-{
-    frect destination = UNIT_RECT<float>;
-    float alpha = 1.0f;
-    const Mat3f &transform = MAT3_NO_TRANSFORM<float>;
-};
-
-class ObjectSprite
+class InputMapper
 {
 public:
-    BEFRIEND_RENDER_FUNCTOR(ObjectSprite)
+	enum BlockMode {
+		BLOCKING,
+		NO_BLOCKING,
+	};
 
-    ObjectSprite() = default;
+	[[nodiscard]] virtual bool isKeyPressed(BlockMode) const = 0;
+	[[nodiscard]] virtual bool isKeyReleased() const = 0;
 
-    void update(double delta);
-
-    void setTexture(const TextureP &texture);
-    void setFPS(FPS_t fps);
-	void setTotalFrames(int frames);
-    void setFrameTime(float frameTime);
-    void setTint(const color &tint);
-
-	[[nodiscard]] const color &getTint() const;
-
-    [[nodiscard]] TextureP getTexture() const;
-
-private:
-    color tint{WHITE};
-	TextureP texture{nullptr};
-    AnimationLayout layout = AnimationLayout::Horizontal;
-    float frameTime = 0.0f;
-    float frameTimer = 0.0f;
-    unsigned int frameCount = 1;
-    unsigned int frameCounter = 0;
+	[[nodiscard]] virtual bool isKeyPressing(BlockMode) const = 0;
+	[[nodiscard]] virtual fvec2d getCursor() const = 0;
+	virtual void update() = 0;
 };
-
-BEGIN_RENDER_FUNCTOR_DECL(ObjectSprite, const ObjectDrawInfo&)
-END_RENDER_FUNCTOR_DECL()
 
 NS_END

@@ -43,7 +43,6 @@ public:
     int init(GameState state) override;
 
 private:
-	bool canRun{false};
 	Timer timer;
 	Timer endTimer;
     frect field;

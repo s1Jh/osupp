@@ -42,6 +42,10 @@ void Spinner::onLogicUpdate(double delta)
 
         lastVector = cursor;
     }
+
+	float x = float(ctx.timing.getTime()) * 30.f;
+	const float outset = 0.25f;
+	SOF.position = {std::cos(x) * outset, std::sin(x) * outset};
 }
 
 void Spinner::onUpdate(double delta)
@@ -85,7 +89,7 @@ void Spinner::onPress()
 void Spinner::onDraw()
 {
     auto alpha = getAlpha();
-    const auto &objectTransform = ctx.game.getTransform();
+	const auto& objectTransform = getObjectTransform();
 
     auto size = objectTemplate->free ? ctx.game.getCircleSize() : 0.8f;
 

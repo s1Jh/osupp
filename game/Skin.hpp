@@ -58,6 +58,7 @@ public:
     FPS_t getAnimationFramerate(const std::string &object) const;
     TextureP getTexture(const std::string &object) const;
     color getTint(const std::string &object, unsigned int seed = 0) const;
+	int getFrameCount(const std::string &object) const;
 
     ShaderP getShader(const std::string &object) const;
 
@@ -75,6 +76,7 @@ private:
         TextureP texture;
         std::vector<color8> tints = {WHITE};
         FPS_t animationFPS = DEFAULT_TEXTURE_FPS;
+		int animationFrames = -1;
     };
     struct ShaderInfo
     {

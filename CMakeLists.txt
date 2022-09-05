@@ -27,6 +27,7 @@ set(OBJECT_DIRECTORY ${GAME_DIRECTORY}/objects)
 set(OSU_OBJECT_DIRECTORY ${OBJECT_DIRECTORY}/osu)
 set(ASSET_DIRECTORY ${ROOT_DIRECTORY}/assets)
 set(STATES_DIRECTORY ${GAME_DIRECTORY}/states)
+set(MAPPERS_DIRECTORY ${GAME_DIRECTORY}/mappers)
 
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
@@ -48,6 +49,7 @@ set(DIRECTORIES
         ${GAME_DIRECTORY}
         ${ASSET_DIRECTORY}
         ${STATES_DIRECTORY}
+        ${MAPPERS_DIRECTORY}
         )
 
 set(SOURCES
@@ -67,6 +69,10 @@ set(SOURCES
 
         ${INPUT_DIRECTORY}/Keyboard.cpp
         ${INPUT_DIRECTORY}/Mouse.cpp
+
+        ${MAPPERS_DIRECTORY}/HumanInput.cpp
+        ${MAPPERS_DIRECTORY}/TestInput.cpp
+        ${MAPPERS_DIRECTORY}/AutoPilot.cpp
 
         ${AUDIO_DIRECTORY}/Audio.cpp
         ${AUDIO_DIRECTORY}/AudioDevice.cpp

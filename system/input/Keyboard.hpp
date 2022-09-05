@@ -112,41 +112,6 @@ enum class Key
 
 std::ostream &operator<<(std::ostream &os, const Key &key);
 
-#ifdef IMPLEMENTATION
-std::ostream &operator<<(std::ostream &os, const Key &key) {
-  if ((unsigned int)key & (unsigned int)Key::Ctrl)
-    os << "Ctrl + ";
-  if ((unsigned int)key & (unsigned int)Key::RCtrl)
-    os << "RCtrl + ";
-  if ((unsigned int)key & (unsigned int)Key::Alt)
-    os << "Alt + ";
-  if ((unsigned int)key & (unsigned int)Key::RAlt)
-    os << "RAlt + ";
-  if ((unsigned int)key & (unsigned int)Key::Shift)
-    os << "Shift + ";
-  if ((unsigned int)key & (unsigned int)Key::RShift)
-    os << "RShift + ";
-  if ((unsigned int)key & (unsigned int)Key::Meta)
-    os << "Meta + ";
-  if ((unsigned int)key & (unsigned int)Key::RMeta)
-    os << "RMeta + ";
-
-  Key code = Key((int)key & 0xff);
-  switch (code) {
-#define KEY(name)                                                              \
-  case Key::name:                                                              \
-    os << #name;                                                               \
-    break;
-    KEY_LIST
-#undef KEY
-  default:
-    os << "Unknown (" << std::to_string((int)code) << ')';
-    break;
-  }
-  return os;
-}
-#endif
-
 /**
  * Total number of different recognizable keys.
  */

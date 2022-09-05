@@ -42,7 +42,7 @@ public:
 
     double getDelta();
 
-    double getTime();
+    double getTime() const;
 
 private:
     using Clock = std::chrono::steady_clock;

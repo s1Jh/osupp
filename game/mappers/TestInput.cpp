@@ -19,54 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
+#include "TestInput.hpp"
 
-#pragma once
+#include <cmath>
 
-#include "define.hpp"
-
-#include "Renderer.hpp"
-#include "Texture.hpp"
-#include "Types.hpp"
+#include "Context.hpp"
 
 NS_BEGIN
 
-struct ObjectDrawInfo
+bool TestInput::isKeyPressed(InputMapper::BlockMode mode) const
 {
-    frect destination = UNIT_RECT<float>;
-    float alpha = 1.0f;
-    const Mat3f &transform = MAT3_NO_TRANSFORM<float>;
-};
+	return false;
+}
 
-class ObjectSprite
+bool TestInput::isKeyReleased() const
 {
-public:
-    BEFRIEND_RENDER_FUNCTOR(ObjectSprite)
+	return false;
+}
 
-    ObjectSprite() = default;
+bool TestInput::isKeyPressing(InputMapper::BlockMode mode) const
+{
+	return false;
+}
 
-    void update(double delta);
+fvec2d TestInput::getCursor() const
+{
+	const auto& ctx = GetContext();
+	return dvec2d{std::cos(ctx.timing.getTime()), std::sin(ctx.timing.getTime())};
+}
 
-    void setTexture(const TextureP &texture);
-    void setFPS(FPS_t fps);
-	void setTotalFrames(int frames);
-    void setFrameTime(float frameTime);
-    void setTint(const color &tint);
+void TestInput::update()
+{
 
-	[[nodiscard]] const color &getTint() const;
-
-    [[nodiscard]] TextureP getTexture() const;
-
-private:
-    color tint{WHITE};
-	TextureP texture{nullptr};
-    AnimationLayout layout = AnimationLayout::Horizontal;
-    float frameTime = 0.0f;
-    float frameTimer = 0.0f;
-    unsigned int frameCount = 1;
-    unsigned int frameCounter = 0;
-};
-
-BEGIN_RENDER_FUNCTOR_DECL(ObjectSprite, const ObjectDrawInfo&)
-END_RENDER_FUNCTOR_DECL()
+}
 
 NS_END

@@ -96,58 +96,48 @@ Timer::Timer(double time, TimerMode mode, bool start) :
 Timer::Timer(Timer& other) :
 	Callbacks(other), TimerControl ( this ), wasDone (false )
 {
-    std::scoped_lock lock{timerMutex, other.timerMutex};
-
-	time = other.time;
-	timer = other.timer;
-	running = other.running;
-	mode = other.mode;
+	time = (double)other.time;
+	timer = (double)other.timer;
+	running = (bool)other.running;
+	mode = (TimerMode)other.mode;
 }
 
 Timer::Timer(Timer&& other) noexcept :
-	Callbacks(other), TimerControl ( this ), wasDone (false )
+	Callbacks(std::move(other)), TimerControl ( this ), wasDone (false )
 {
-    std::scoped_lock lock{timerMutex, other.timerMutex};
-
-	time = other.time;
-	timer = other.timer;
-	running = other.running;
-	mode = other.mode;
+	time = (double)other.time;
+	timer = (double)other.timer;
+	running = (bool)other.running;
+	mode = (TimerMode)other.mode;
 }
 
-Timer& Timer::operator=(Timer& other)
+Timer& Timer::operator=(const Timer& other)
 {
-    std::scoped_lock lock{timerMutex, other.timerMutex};
-
-	time = other.time;
-	timer = other.timer;
-	running = other.running;
-	mode = other.mode;
+	time = (double)other.time;
+	timer = (double)other.timer;
+	running = (bool)other.running;
+	mode = (TimerMode)other.mode;
 
     return *this;
 }
 
 Timer& Timer::operator=(Timer&& other) noexcept
 {
-    std::scoped_lock lock{timerMutex, other.timerMutex};
-
-	time = other.time;
-	timer = other.timer;
-	running = other.running;
-	mode = other.mode;
+	time = (double)other.time;
+	timer = (double)other.timer;
+	running = (bool)other.running;
+	mode = (TimerMode)other.mode;
 
     return *this;
 }
 
 bool Timer::isRunning()
 {
-    std::scoped_lock lock{timerMutex};
     return running;
 }
 
 bool Timer::increment(double delta)
 {
-    std::scoped_lock lock{timerMutex};
 	timer += delta;
 
     if (!wasDone)
@@ -158,75 +148,63 @@ bool Timer::increment(double delta)
 
 void Timer::pause()
 {
-    std::scoped_lock lock{timerMutex};
 	running = false;
 }
 
 void Timer::resume()
 {
-    std::scoped_lock lock{timerMutex};
 	running = true;
 }
 
 void Timer::stop()
 {
-    std::scoped_lock lock{timerMutex};
 	running = false;
 	timer = 0.0;
 }
 
 void Timer::start()
 {
-    std::scoped_lock lock{timerMutex};
 	running = true;
 	timer = 0.0;
 }
 
 void Timer::reset()
 {
-    std::scoped_lock lock{timerMutex};
 	timer = 0.0;
 }
 
 void Timer::addTime(double timeIn)
 {
-    std::scoped_lock lock{timerMutex};
 	time += timeIn;
 }
 
 void Timer::setTime(double timeIn)
 {
-    std::scoped_lock lock{timerMutex};
 	time = timeIn;
 }
 
 void Timer::setMode(TimerMode modeIn)
 {
-    std::scoped_lock lock{timerMutex};
 	mode = modeIn;
 }
 
 double Timer::getCurrentTime()
 {
-    std::scoped_lock lock{timerMutex};
     return timer;
 }
 
 double Timer::getRemainingTime()
 {
-    std::scoped_lock lock{timerMutex};
     return time - timer;
 }
 
 double Timer::getTime()
 {
-    std::scoped_lock lock{timerMutex};
     return time;
 }
 
 bool Timer::isDone()
 {
-    std::scoped_lock lock{timerMutex};
     bool done = wasDone;
 	wasDone = false;
     return done;
@@ -234,7 +212,6 @@ bool Timer::isDone()
 
 TimerMode Timer::getMode()
 {
-    std::scoped_lock lock{timerMutex};
     return mode;
 }
 

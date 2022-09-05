@@ -65,7 +65,7 @@ void Timing::setFramerate(int newFps)
 void Timing::setTime(double newFrameTime)
 { frameTime = newFrameTime; }
 
-double Timing::getTime()
+double Timing::getTime() const
 {
     return double(std::chrono::duration_cast<std::chrono::milliseconds>(
         now.time_since_epoch())
