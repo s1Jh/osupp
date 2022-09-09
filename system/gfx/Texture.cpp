@@ -24,7 +24,8 @@
 
 #include "Math.hpp"
 #include "Util.hpp"
-#include <GL/glew.h>
+#include "GraphicsContext.hpp"
+#include "GL.hpp"
 
 NS_BEGIN
 
@@ -32,13 +33,39 @@ Texture::Texture()
     : glTexture(nullptr), img(nullptr), channels(4), pixelSize({-1, -1})
 {}
 
-bool Texture::load(const std::filesystem::path &location)
+template<>
+Resource<Texture> Load(const std::filesystem::path &location)
 {
+	Resource<Texture> tex;
     Image texImg;
+
     if (!texImg.load(location)) {
-        return false;
+		return Resource<Texture>(nullptr);
     }
-    return setImage(texImg);
+
+	if (!tex.held->setImage(texImg)) {
+		return Resource<Texture>(nullptr);
+	}
+
+	return tex;
+}
+
+template<>
+Resource<Texture> Create()
+{
+	Image image;
+	image.resize(128, 128);
+	image.setRectArea({{64, 64}, {0, 0}}, BLACK);
+	image.setRectArea({{64, 64}, {0, 64}}, PINK);
+	image.setRectArea({{64, 64}, {64, 0}}, PINK);
+	image.setRectArea({{64, 64}, {64, 64}}, BLACK);
+
+	Resource<Texture> tex;
+	if (!tex.held->setImage(image)) {
+		return Resource<Texture>(nullptr);
+	}
+
+	return tex;
 }
 
 void Texture::use(unsigned int index) const
@@ -81,6 +108,9 @@ void Texture::GLTexDeleter(unsigned int *ptr)
 
 bool Texture::setImage(Image &imgIn)
 {
+	if (!detail::EnsureOpenGL())
+		return false;
+
     glTexture = std::shared_ptr<unsigned int>(new unsigned int, GLTexDeleter);
 
     auto pixels = imgIn.getPixels();
@@ -119,17 +149,6 @@ bool Texture::setImage(Image &imgIn)
 
 isize Texture::getSize() const
 { return pixelSize; }
-
-bool Texture::create()
-{
-    Image image;
-    image.resize(128, 128);
-    image.setRectArea({{64, 64}, {0, 0}}, BLACK);
-    image.setRectArea({{64, 64}, {0, 64}}, PINK);
-    image.setRectArea({{64, 64}, {64, 0}}, PINK);
-    image.setRectArea({{64, 64}, {64, 64}}, BLACK);
-    return setImage(image);
-}
 
 void Texture::setClipArea(const frect &rect)
 {

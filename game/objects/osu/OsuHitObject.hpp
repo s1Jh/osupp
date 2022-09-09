@@ -29,17 +29,17 @@ NS_BEGIN
 
 enum class OsuHitObjectFlags : uint8_t
 {
-	NoApproachCircle = 0 << 1,
-	DrawApproachCircle = 1 << 1,	// bit 1
-	NoFadeoutAnimation = 0 << 2,
-	ApplyFadeoutAnimation = 1 << 2,	// bit 2
+	NO_APPROACH_CIRCLE = 0 << 1,
+	DRAW_APPROACH_CIRCLE = 1 << 1,	// bit 1
+	NO_FADEOUT_ANIMATION = 0 << 2,
+	APPLY_FADEOUT_ANIMATION = 1 << 2,	// bit 2
 };
 
 ENABLE_BITMASK_OPERATORS(OsuHitObjectFlags)
 
 constexpr OsuHitObjectFlags DEFAULT_OSU_HIT_OBJECT_FLAGS =
-	OsuHitObjectFlags::DrawApproachCircle |
-	OsuHitObjectFlags::ApplyFadeoutAnimation;
+	OsuHitObjectFlags::DRAW_APPROACH_CIRCLE |
+	OsuHitObjectFlags::APPLY_FADEOUT_ANIMATION;
 
 template <typename TemplateT, OsuHitObjectFlags Flags = DEFAULT_OSU_HIT_OBJECT_FLAGS>
 requires IsTemplateV<TemplateT>
@@ -84,8 +84,8 @@ protected:
 	[[nodiscard]] Mat3f calculateObjectTransform() const override
 	{
 		if (
-			this->getState() == HitObjectState::Fading &&
-			bool(Flags & OsuHitObjectFlags::ApplyFadeoutAnimation)
+			this->getState() == HitObjectState::FADING &&
+			bool(Flags & OsuHitObjectFlags::APPLY_FADEOUT_ANIMATION)
 			)
 		{
 			// make objects float up after they've been struck

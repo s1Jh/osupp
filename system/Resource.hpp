@@ -24,30 +24,119 @@
 
 #include "define.hpp"
 
+#include <memory>
+#include <vector>
 #include <string>
 #include <filesystem>
 
 NS_BEGIN
 class Resources;
 
-namespace detail
-{
+template <typename T> class Resource;
 
+template <typename T>
+Resource<T> Default()
+{
+	return Resource<T>::defaultValue;
+}
+
+template <typename T> Resource<T> Load(const std::filesystem::path&);
+template <typename T> Resource<T> Create();
+
+template <typename T>
 class Resource
 {
+	friend Resource<T> Load <T>(const std::filesystem::path& path);
+	friend Resource<T> Create <T>();
+	friend Resource<T> Default <T>();
 public:
-    Resource() = default;
+	Resource()
+	{
+		held = std::make_shared<T>();
+	}
 
-    virtual ~Resource() = default;
+	Resource(nullptr_t)
+	{
+		held = defaultValue.held;
+	}
 
-    virtual bool load(const std::filesystem::path &path) = 0;
+	operator bool () const
+	{
+		return (held != defaultValue.held) && held;
+	}
 
-    virtual bool create() = 0;
+	operator std::weak_ptr<T> () const
+	{
+		return {held};
+	}
+
+	std::weak_ptr<T> ref () const
+	{
+		return {held};
+	}
+
+	T* operator -> () const
+	{
+		return held.get();
+	}
+
+	T* get () const
+	{
+		return held.get();
+	}
+
+	T& operator* () const
+	{
+		return *held;
+	}
+
+	auto useCount() const
+	{
+		return held.use_count();
+	}
+
+	static const std::vector<std::string> allowedExtensions;
+
+protected:
+	using ResourceT = Resource<T>;
+
+	std::shared_ptr<T> held;
+	static Resource<T> defaultValue;
 };
 
-} // namespace detail
+template <typename T>
+Resource<T> Resource<T>::defaultValue = Create<T>();
+template <typename T>
+const std::vector<std::string> Resource<T>::allowedExtensions;
 
-template<typename T>
-concept IsResource = std::is_base_of_v<detail::Resource, T> and std::is_default_constructible_v<T>;
+template <typename T>
+Resource<T> Create() { return {}; }
+
+template <typename T>
+Resource<T> Load(const std::filesystem::path&)
+{
+	WRAP_CONSTEXPR_ASSERTION("Load method not overridden for T.");
+	return {};
+}
+
+//namespace detail
+//{
+//
+//class Resource
+//{
+//public:
+//    Resource() = default;
+//
+//    virtual ~Resource() = default;
+//
+//    virtual bool load(const std::filesystem::path &path) = 0;
+//
+//    virtual bool create() = 0;
+//};
+//
+//} // namespace detail
+//
+//template<typename T>
+//concept IsResource = std::is_base_of_v<detail::Resource, T> and std::is_default_constructible_v<T>;
 
 NS_END

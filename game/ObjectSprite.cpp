@@ -40,7 +40,7 @@ void ObjectSprite::update(double delta)
     }
 }
 
-void ObjectSprite::setTexture(const TextureP &textureIn)
+void ObjectSprite::setTexture(const Resource<Texture> &textureIn)
 {
     LOG_ENTER();
 
@@ -52,8 +52,8 @@ void ObjectSprite::setTexture(const TextureP &textureIn)
         auto longerSide = (float) Max(texture->getHeight(), texture->getWidth());
         auto shorterSide = (float) Min(texture->getHeight(), texture->getWidth());
         layout = texture->getWidth() >= texture->getHeight()
-                 ? AnimationLayout::Horizontal
-                 : AnimationLayout::Vertical;
+                 ? AnimationLayout::HORIZONTAL
+                 : AnimationLayout::VERTICAL;
         frameCount = Max(int(longerSide / shorterSide), 1);
 
         // advance the animation by one frame upon construction
@@ -84,7 +84,7 @@ const color &ObjectSprite::getTint() const
 	return tint;
 }
 
-TextureP ObjectSprite::getTexture() const
+Resource<Texture> ObjectSprite::getTexture() const
 {
     return texture;
 }
@@ -100,12 +100,12 @@ void detail::RenderFunctor<ObjectSprite>::operator()(Renderer &renderer,
     auto offset = slice * float(object.frameCounter);
 
     frect clip = {{
-                      object.layout == AnimationLayout::Horizontal ? slice : 1.0f,
-                      object.layout == AnimationLayout::Horizontal ? 1.0f : slice,
+                      object.layout == AnimationLayout::HORIZONTAL ? slice : 1.0f,
+                      object.layout == AnimationLayout::HORIZONTAL ? 1.0f : slice,
                   },
                   {
-                      object.layout == AnimationLayout::Horizontal ? offset : 0.0f,
-                      object.layout == AnimationLayout::Horizontal ? 0.0f : offset,
+                      object.layout == AnimationLayout::HORIZONTAL ? offset : 0.0f,
+                      object.layout == AnimationLayout::HORIZONTAL ? 0.0f : offset,
                   }};
 
     object.texture->setClipArea(clip);

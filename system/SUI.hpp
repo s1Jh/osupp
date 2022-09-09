@@ -42,7 +42,7 @@ NS_BEGIN
 
 enum class SUIFlags: uint8_t
 {
-    Visible = 1 << 0,
+    VISIBLE = 1 << 0,
 };
 
 ENABLE_BITMASK_OPERATORS(SUIFlags)

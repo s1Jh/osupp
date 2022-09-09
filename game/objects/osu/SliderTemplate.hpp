@@ -32,7 +32,7 @@ NS_BEGIN
 BEGIN_OBJECT_TEMPLATE(Slider)
 
     SliderPathT path;
-    CurveType sliderType = CurveType::Straight;
+    CurveType sliderType = CurveType::STRAIGHT;
     unsigned int repeats = 0;
 END_OBJECT_TEMPLATE()
 }

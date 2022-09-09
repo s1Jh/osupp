@@ -42,7 +42,7 @@ private:
     void showMainMenuTab();
     void showSettingsTab();
 
-	MapInfoP selectedMap{nullptr};
+	Resource<MapInfo> selectedMap{nullptr};
 
     Context &ctx;
 };

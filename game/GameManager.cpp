@@ -34,7 +34,7 @@
   case HitObjectType::TYPE: {                                                   \
     auto object = std::make_shared<TYPE>(                                       \
         std::static_pointer_cast<ObjectTemplate##TYPE>(objectTemplate), args); \
-    activeObjects.push_front(object);                                           \
+    activeObjects.push_back(object);                                           \
     break;                                                                      \
   }
 
@@ -57,12 +57,9 @@ void GameManager::setCurrentTime(double newTime)
 
 void GameManager::update(double delta)
 {
-	if (!simulationRunning)
-		return;
-
     currentTime += delta;
 
-	cursor.update(delta);
+	input->update();
 
 	// objects are sorted by order of appearance
 	int updates = 0;
@@ -77,59 +74,33 @@ void GameManager::update(double delta)
 		obj->update(delta);
 		updates++;
 		switch (obj->getState()) {
-		case HitObjectState::Invisible:
-			if (obj->isFinished()) {
-				// This object has already been passed and is invisible.
-				// We can assume it will not need to be checked anymore.
-				// Therefore, we will set the object after this as the next "last"
-				// object. The onUpdate loop will then start with that object,
-				// ignoring all objects before, who we've assumed to already be done.
-				auto nextIt = std::next(it);
-				if (last != nextIt) {
-					if (nextIt == activeObjects.end()) {
-						// first check if nextIt is the end, if it is so
-						// just set it without checking for time as that would
-						// cause access violation
-						last = activeObjects.end();
-						// we also stop the simulation
-						simulationRunning = false;
-					}
-					else if ((*last)->getEndTime() < (*nextIt)->getEndTime()) {
-						last = nextIt;
-					}
-				}
-				continue;
-			}
-			else {
+		case HitObjectState::INVISIBLE: {
+			if (!obj->isFinished()) {
 				// The object is ahead of our field of vision, since objects are sorted
 				// by order of appearance, all objects ahead of this one will also be
 				// invisible. We therefore stop checking and return.
-
-				// before that, let's take the opportunity and do some performance calculations
-				rollingUPF += updates;
-				auto duration = std::chrono::high_resolution_clock::now() - start;
-				auto micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-				rollingUT += micros;
-
-				if (printCounter >= 60) {
-					averageUPF = double(rollingUPF) / 60.0;
-					averageUT = double(rollingUT) / 60.0;
-
-					history[historyInsertSpot] = averageUT;
-					historyInsertSpot++;
-					historyInsertSpot %= history.size();
-
-					minUT = Min(minUT, averageUT);
-					maxUT = Max(maxUT, averageUT);
-
-					printCounter = 0;
-					rollingUT = 0;
-					rollingUPF = 0;
-				}
-
 				goto breakout;
 			}
-		case HitObjectState::Ready: {
+			// This object has already been passed and is invisible.
+			// We can assume it will not need to be checked anymore.
+			// Therefore, we will set the object after this as the next "last"
+			// object. The onUpdate loop will then start with that object,
+			// ignoring all objects before, who we've assumed to already be done.
+			auto nextIt = std::next(it);
+			if (last != nextIt) {
+				if (nextIt == activeObjects.end()) {
+					// first check if nextIt is the end, if it is so
+					// just set it without checking for time as that would
+					// cause access violation
+					last = activeObjects.end();
+				}
+				else if ((*last)->getEndTime() < (*nextIt)->getEndTime()) {
+					last = nextIt;
+				}
+			}
+			continue;
+		}
+		case HitObjectState::READY: {
 			// The object can now be interacted with, check for user inputs and then
 			// update the object accordingly.
 			auto func = obj->getActivationFunction();
@@ -144,7 +115,7 @@ void GameManager::update(double delta)
 
 			break;
 		}
-		case HitObjectState::Active: {
+		case HitObjectState::ACTIVE: {
 			// object has been activated and is currently being held, check if it's
 			// been released
 
@@ -157,7 +128,7 @@ void GameManager::update(double delta)
 			}
 			break;
 		}
-		case HitObjectState::Inactive: {
+		case HitObjectState::INACTIVE: {
 			// object has been activated but is not being held, check if it's being
 			// held again
 			auto func = obj->getActivationFunction();
@@ -170,20 +141,40 @@ void GameManager::update(double delta)
 			break;
 		}
 			// The object cannot be interacted with in these states
-		case HitObjectState::Pickup: {
+		case HitObjectState::PICKUP: {
 			auto score = obj->finish();
 			log::info("SCORE: ", (int) score);
 			break;
 		}
-		case HitObjectState::Fading:
-		case HitObjectState::Approaching:
+		case HitObjectState::FADING:
+		case HitObjectState::APPROACHING:
 		default:
 			break;
 		}
 	}
 
 breakout:
-	input->update();
+	rollingUPF += updates;
+	auto duration = std::chrono::high_resolution_clock::now() - start;
+	auto micros = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+	rollingUT += micros;
+
+	if (printCounter >= 60) {
+		averageUPF = double(rollingUPF) / 60.0;
+		averageUT = double(rollingUT) / 60.0;
+
+		history[historyInsertSpot] = averageUT;
+		historyInsertSpot++;
+		historyInsertSpot %= history.size();
+
+		minUT = Min(minUT, averageUT);
+		maxUT = Max(maxUT, averageUT);
+
+		printCounter = 0;
+		rollingUT = 0;
+		rollingUPF = 0;
+	}
+
 }
 
 void GameManager::draw(Renderer &renderer)
@@ -214,7 +205,7 @@ void GameManager::draw(Renderer &renderer)
 	// first find the last object that would be drawn
 	auto end = std::find_if(last, activeObjects.end(), [](const std::shared_ptr<BaseHitObject> &obj)
 	{
-		return (obj->getState() == HitObjectState::Invisible) && !obj->isFinished();
+		return (obj->getState() == HitObjectState::INVISIBLE) && !obj->isFinished();
 	});
 
 	// render everything from the object before last to the current object
@@ -239,43 +230,18 @@ void GameManager::draw(Renderer &renderer)
 //        renderer.draw(ptr->getSOF(), VisualAppearance{.fillColor = tint}, transform);
 	}
 
-	if (input) {
-		//							V Cursor size here!
-		const float cursorSize = getCircleSize();
-		ObjectDrawInfo cursorInfo{{{cursorSize, cursorSize}, input->getCursor()}, 1.0f, transform};
-		renderer.draw(cursor, cursorInfo);
-	}
 }
 
-bool GameManager::setMap(MapInfoP map)
+bool GameManager::setMap(Resource<MapInfo> map)
 {
-	if (simulationRunning)
-		return false;
-
     info = std::move(map);
     activeObjects.clear();
 
-    if (info) {
-		HitObjectArguments args;
-		args.mapSeed = 0;
+	if (info) {
+		lastLoadedObject = info->getObjectTemplates().begin();
+		loadObjects(1000);
+	}
 
-        auto templates = info->getObjectTemplates();
-        for (const auto &objectTemplate: templates) {
-            switch (objectTemplate->getType()) {
-                MAKE_CASE(Spinner)
-                MAKE_CASE(Slider)
-                MAKE_CASE(Note)
-                default:
-					info.reset();
-                    log::warning("Corrupted map template: ", objectTemplate);
-					return false;
-            }
-
-            if (bool(objectTemplate->parameters & HitObjectParams::ComboEnd))
-				args.comboSeed++;
-			args.objectSeed++;
-        }
-    }
 	return true;
 }
 
@@ -284,7 +250,7 @@ void GameManager::reset()
 //    log::debug("Resetting the game state");
 
     if (info)
-        currentTime = info->getStartOffset();
+        currentTime = -info->getStartOffset();
     else
         currentTime = 0.0;
 
@@ -303,8 +269,6 @@ void GameManager::reset()
 	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
 	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
 	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
-
-	cursor = skin->createObjectSprite(CURSOR_SPRITE, HitObjectArguments{});
 }
 
 const frect &GameManager::getPlayField() const
@@ -318,7 +282,7 @@ void GameManager::setPlayField(const frect &field)
         MakeTranslationMatrix(field.position);
 }
 
-MapInfoP GameManager::getMap() const
+Resource<MapInfo> GameManager::getMap() const
 { return info; }
 
 const Mat3f &GameManager::getTransform() const
@@ -366,7 +330,7 @@ const SampleSet &GameManager::getSamples() const
 
 bool GameManager::isFinished() const
 {
-	return last == activeObjects.end() && !simulationRunning;
+	return last == activeObjects.end();
 }
 
 bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& object) const
@@ -374,12 +338,12 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 	if (!input)
 		return false;
 
-	if (func == HitObjectFunction::NoActivation)
+	if (func == HitObjectFunction::NO_ACTIVATION)
 		return false;
 
-	HitObjectFunction buttonRules = func & HitObjectFunction::ButtonMask;
-	HitObjectFunction cursorRules = func & HitObjectFunction::CursorMask;
-	HitObjectFunction mergeRules = func & HitObjectFunction::MergeMask;
+	HitObjectFunction buttonRules = func & HitObjectFunction::BUTTON_MASK;
+	HitObjectFunction cursorRules = func & HitObjectFunction::CURSOR_MASK;
+	HitObjectFunction mergeRules = func & HitObjectFunction::MERGE_MASK;
 
 	bool buttonValid = true;
 	bool cursorValid = true;
@@ -387,69 +351,50 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 	auto SOF = object.getSOF();
 
 	switch (buttonRules) {
-	case HitObjectFunction::ButtonPressed:
+	case HitObjectFunction::BUTTON_PRESSED:
 		buttonValid = input->isKeyPressing(InputMapper::BLOCKING);
 		break;
-	case HitObjectFunction::ButtonHeld:
+	case HitObjectFunction::BUTTON_HELD:
 		buttonValid = input->isKeyPressed(InputMapper::BLOCKING);
 		break;
-	case HitObjectFunction::ButtonReleased:
+	case HitObjectFunction::BUTTON_RELEASED:
 		buttonValid = input->isKeyReleased();
 		break;
-	case HitObjectFunction::ButtonPressedNoLock:
+	case HitObjectFunction::BUTTON_PRESSED_NO_LOCK:
 		buttonValid = input->isKeyPressing(InputMapper::NO_BLOCKING);
 		break;
-	case HitObjectFunction::ButtonHeldNoLock:
+	case HitObjectFunction::BUTTON_HELD_NO_LOCK:
 		buttonValid = input->isKeyPressed(InputMapper::NO_BLOCKING);
 		break;
-	case HitObjectFunction::ButtonIgnore:
+	case HitObjectFunction::BUTTON_IGNORE:
 	default:
 		break;
 	}
 
 	switch (cursorRules) {
-	case HitObjectFunction::CursorEnter:
+	case HitObjectFunction::CURSOR_ENTER:
 		cursorValid = Distance(SOF.position, input->getCursor()) <= SOF.radius;
 		break;
-	case HitObjectFunction::CursorLeave:
+	case HitObjectFunction::CURSOR_LEAVE:
 		cursorValid = Distance(SOF.position, input->getCursor()) > SOF.radius;
 		break;
-	case HitObjectFunction::CursorIgnore:
+	case HitObjectFunction::CURSOR_IGNORE:
 	default:
 		break;
 	}
 
 	switch (mergeRules) {
-	case HitObjectFunction::And:
+	case HitObjectFunction::AND:
 		return buttonValid && cursorValid;
-	case HitObjectFunction::Or:
+	case HitObjectFunction::OR:
 		return buttonValid || cursorValid;
-	case HitObjectFunction::Xor:
+	case HitObjectFunction::XOR:
 		return buttonValid + cursorValid;
 	default:
 		return false;
 	}
 }
 
-void GameManager::stop()
-{
-	simulationRunning = false;
-}
-
-bool GameManager::start()
-{
-	simulationRunning = true;
-
-	if (!info) {
-		simulationRunning = false;
-	}
-
-	if (activeObjects.empty()) {
-		simulationRunning = false;
-	}
-
-	return simulationRunning;
-}
 float GameManager::getStartOffset()
 {
 	if (info)
@@ -467,6 +412,19 @@ std::weak_ptr<BaseHitObject> GameManager::getCurrentObject() const
 	if (last != activeObjects.end()) {
 		return *last;
 	}
+	return {};
+}
+
+std::weak_ptr<BaseHitObject> GameManager::getClosestActiveObject() const
+{
+	auto it = last;
+
+	while (it != activeObjects.end()) {
+		if (!(*it)->isFinished())
+			return *it;
+		it = std::next(it);
+	}
+
 	return {};
 }
 
@@ -493,6 +451,49 @@ fvec2d GameManager::getCursorPosition() const
 GameManager::GameManager()
 {
 	last = activeObjects.begin();
+}
+
+int GameManager::loadObjects(unsigned int amount)
+{
+	HitObjectArguments args;
+	args.mapSeed = 0;
+
+	auto &templates = info->getObjectTemplates();
+	log::debug("Loading ", amount, " objects");
+
+	unsigned int loaded = 0;
+	auto it = lastLoadedObject;
+	for (it = lastLoadedObject; (it != templates.end()) && (loaded < amount); loaded++, it++) {
+		const auto& objectTemplate = *it;
+		log::debug("Loading ", objectTemplate);
+
+		switch (objectTemplate->getType()) {
+		MAKE_CASE(Spinner)
+		MAKE_CASE(Slider)
+		MAKE_CASE(Note)
+		default:
+			info = nullptr;
+			log::warning("Corrupted map template: ", objectTemplate);
+			return false;
+		}
+
+		if (bool(objectTemplate->parameters & HitObjectParams::COMBO_END))
+			args.comboSeed++;
+		args.objectSeed++;
+	}
+	lastLoadedObject = ++it;
+
+	return loaded;
+}
+
+void GameManager::skipToFirst()
+{
+	currentTime = (*last)->getStartTime() - 3.0f;
+}
+
+void GameManager::scrobble(double amount)
+{
+	setCurrentTime(currentTime + amount);
 }
 
 NS_END

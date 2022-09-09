@@ -114,7 +114,7 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
             }
 
             points.reverse();
-            map.addSlider(points, false, time, speed, CurveType::Straight, 1);
+            map.addSlider(points, false, time, speed, CurveType::STRAIGHT, 1);
             break;
         }
         case 'P': {

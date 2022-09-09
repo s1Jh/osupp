@@ -127,7 +127,7 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 	 * Converts a float value in range [1;-1] to a unsigned 8 or 16 bit integer.
 	 */
 	auto crushData = [&](float dataIn) -> auto {
-		if constexpr ((fmt & SampleFormat::Type) == SampleFormat::Type8) {
+		if constexpr ((fmt & SampleFormat::TYPE) == SampleFormat::TYPE8) {
 			// Crush data to uint8_t
 			dataIn = (dataIn + 1.0f) / 2.0f;
 			dataIn = Clamp(dataIn, 0.0f + std::numeric_limits<float>::epsilon(),
@@ -135,7 +135,7 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 
 			return uint8_t(std::ceil(dataIn * std::numeric_limits<uint8_t>::max()));
 
-		} else if constexpr ((fmt & SampleFormat::Type) == SampleFormat::Type16) {
+		} else if constexpr ((fmt & SampleFormat::TYPE) == SampleFormat::TYPE16) {
 			// Crush data to int16_t
 			dataIn = Clamp(dataIn, -1.0f + std::numeric_limits<float>::epsilon(),
 						   1.0f - std::numeric_limits<float>::epsilon());
@@ -148,7 +148,7 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 	};
 
 	for (int i = 1; i < ctx.frame->nb_samples; i++) {
-		if constexpr(bool(fmt & SampleFormat::IsStereo)) {
+		if constexpr(bool(fmt & SampleFormat::IS_STEREO)) {
 			const size_t rightId = Min(2, ctx.frame->channels);
 			const size_t leftId = Min(1, ctx.frame->channels);
 

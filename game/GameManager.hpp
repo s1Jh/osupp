@@ -39,13 +39,13 @@ NS_BEGIN
 class BaseHitObject;
 
 struct SampleSet {
-	SoundSampleP hit;
-	SoundSampleP miss;
-	SoundSampleP sliderBounce;
-	SoundSampleP sliderSlide;
-	SoundSampleP sliderBreak;
-	SoundSampleP spinnerSwoosh;
-	SoundSampleP spinnerDing;
+	Resource<SoundSample> hit;
+	Resource<SoundSample> miss;
+	Resource<SoundSample> sliderBounce;
+	Resource<SoundSample> sliderSlide;
+	Resource<SoundSample> sliderBreak;
+	Resource<SoundSample> spinnerSwoosh;
+	Resource<SoundSample> spinnerDing;
 };
 
 class GameManager
@@ -61,21 +61,21 @@ public:
 
     [[nodiscard]] double getCurrentTime() const;
 
-    void setCurrentTime(double newTime);
+	void scrobble(double amount);
+
+	void setCurrentTime(double newTime);
 
     [[nodiscard]] const frect &getPlayField() const;
 
     void setPlayField(const frect &playField);
 
-    [[nodiscard]] MapInfoP getMap() const;
+    [[nodiscard]] Resource<MapInfo> getMap() const;
 
-    bool setMap(MapInfoP map);
+    bool setMap(Resource<MapInfo> map);
+
+	void skipToFirst();
 
     void reset();
-
-	bool start();
-
-	void stop();
 
 	[[nodiscard]] fvec2d getCursorPosition() const;
 
@@ -101,25 +101,26 @@ public:
 
 	[[nodiscard]] std::weak_ptr<BaseHitObject> getCurrentObject() const;
 
+	[[nodiscard]] std::weak_ptr<BaseHitObject> getClosestActiveObject() const;
+
 	[[nodiscard]] std::weak_ptr<BaseHitObject> getNextObject() const;
 
 	[[nodiscard]] const StorageT& getStoredObjects() const;
 
 private:
+	int loadObjects(unsigned int amount);
 	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject& object) const;
-
-	ObjectSprite cursor;
 
 	std::unique_ptr<InputMapper> input{nullptr};
 	StorageT::iterator last{};
 	StorageT activeObjects{};
-	MapInfoP info{nullptr};
+	Resource<MapInfo> info{nullptr};
 	SampleSet samples{};
-	bool simulationRunning{false};
     Mat3f transform{MAT3_NO_TRANSFORM<float>};
     frect playField{UNIT_RECT<float>};
     double currentTime{0.0};
 
+	MapInfo::StorageT::const_iterator lastLoadedObject;
 
 	float arMultiplier{1.0f};
 	float csMultiplier{1.0f};
@@ -127,6 +128,7 @@ private:
 	float hpMultiplier{1.0f};
 	float ftMultiplier{1.0f};
 
+	// Profiling
 	unsigned int historyInsertSpot{0};
 	std::array<float, 64> history;
 	unsigned int printCounter = 60;

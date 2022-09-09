@@ -34,7 +34,7 @@ bool BaseHitObject::isFinished() const
 
 void BaseHitObject::reset()
 {
-    state = HitObjectState::Invisible;
+    state = HitObjectState::INVISIBLE;
     finished = false;
     timeFinished = 0.0;
     this->onReset();
@@ -51,92 +51,92 @@ fcircle BaseHitObject::getSOF() const
 
 BaseHitObject::BaseHitObject()
     : ctx(GetContext()), finished(false), timeStarted(0.0), timeFinished(0.0),
-	  state(HitObjectState::Invisible)
+	  state(HitObjectState::INVISIBLE)
 {
     reset();
 }
 
 void BaseHitObject::transferApproaching()
 {
-    state = HitObjectState::Approaching;
+    state = HitObjectState::APPROACHING;
     finished = false;
 }
 
 void BaseHitObject::transferReady()
 {
-    state = HitObjectState::Ready;
+    state = HitObjectState::READY;
     finished = false;
 }
 
 void BaseHitObject::transferActive()
 {
     timeStarted = ctx.game.getCurrentTime();
-    state = HitObjectState::Active;
+    state = HitObjectState::ACTIVE;
     finished = false;
 }
 
 void BaseHitObject::transferActiveInactive()
 {
-    state = HitObjectState::Inactive;
+    state = HitObjectState::INACTIVE;
     finished = false;
 }
 
 void BaseHitObject::transferInactiveActive()
 {
-    state = HitObjectState::Active;
+    state = HitObjectState::ACTIVE;
     finished = false;
 }
 
 void BaseHitObject::transferToPickup()
 {
-    state = HitObjectState::Pickup;
+    state = HitObjectState::PICKUP;
     finished = true;
     timeFinished = ctx.game.getCurrentTime();
 }
 
 void BaseHitObject::transferToFading()
 {
-    state = HitObjectState::Fading;
+    state = HitObjectState::FADING;
     finished = true;
 }
 
 void BaseHitObject::transferToInvisible()
 {
-    state = HitObjectState::Invisible;
+    state = HitObjectState::INVISIBLE;
     finished = false;
     timeFinished = 0.0;
 }
 
 void BaseHitObject::transferToInvisibleComplete()
 {
-    state = HitObjectState::Invisible;
+    state = HitObjectState::INVISIBLE;
     finished = true;
     timeFinished = ctx.game.getCurrentTime();
 }
 
 bool BaseHitObject::isApproachCircleDrawn() const
 {
-    return (state == HitObjectState::Approaching || state == HitObjectState::Ready);
+    return (state == HitObjectState::APPROACHING || state == HitObjectState::READY);
 }
 
 bool BaseHitObject::isFadingIn() const
 {
-    return state == HitObjectState::Approaching;
+    return state == HitObjectState::APPROACHING;
 }
 
 bool BaseHitObject::isFadingOut() const
 {
-    return state == HitObjectState::Pickup || state == HitObjectState::Fading;
+    return state == HitObjectState::PICKUP || state == HitObjectState::FADING;
 }
 
 bool BaseHitObject::isUpdating() const
 {
-    return state == HitObjectState::Active || state == HitObjectState::Inactive ||
-        state == HitObjectState::Ready;
+    return state == HitObjectState::ACTIVE || state == HitObjectState::INACTIVE ||
+        state == HitObjectState::READY;
 }
 
 bool BaseHitObject::isActive() const
-{ return state == HitObjectState::Active; }
+{ return state == HitObjectState::ACTIVE; }
 
 void BaseHitObject::onDraw()
 {}
@@ -157,7 +157,7 @@ void BaseHitObject::onReset()
 {}
 
 HitResult BaseHitObject::onFinish()
-{ return HitResult::Missed; }
+{ return HitResult::MISSED; }
 
 void BaseHitObject::onUpdate(double)
 {}
@@ -175,12 +175,12 @@ double BaseHitObject::getTimeStarted() const
 
 HitObjectFunction BaseHitObject::getActivationFunction() const
 {
-	return HitObjectFunction::NoActivation;
+	return HitObjectFunction::NO_ACTIVATION;
 }
 
 HitObjectFunction BaseHitObject::getDeactivationFunction() const
 {
-	return HitObjectFunction::CursorLeave | HitObjectFunction::Or | HitObjectFunction::ButtonReleased;
+	return HitObjectFunction::CURSOR_LEAVE | HitObjectFunction::OR | HitObjectFunction::BUTTON_RELEASED;
 }
 
 
@@ -226,14 +226,14 @@ void BaseHitObject::update(double delta)
 	this->onUpdate(delta);
 
 	// perform all timed state transfers
-	if (state == HitObjectState::Invisible && !finished) {
+	if (state == HitObjectState::INVISIBLE && !finished) {
 		// check if we've gone past the closer edge of the approach window,
 		// α-transition
 		if (currentTime >= alphaTime) {
 			transferApproaching();
 		}
 	}
-	if (state == HitObjectState::Approaching) {
+	if (state == HitObjectState::APPROACHING) {
 		// β-transition
 		if (currentTime >= betaTime) {
 			// We're now in the hit window, we are ready to be hit
@@ -251,7 +251,7 @@ void BaseHitObject::update(double delta)
 			transferToPickup();
 		}
 	}
-	if (state == HitObjectState::Fading) {
+	if (state == HitObjectState::FADING) {
 		// 𝜁-transition
 		if (currentTime >= etaTime) {
 			transferToInvisibleComplete();
@@ -261,7 +261,7 @@ void BaseHitObject::update(double delta)
 
 void BaseHitObject::begin()
 {
-	if (getState() == HitObjectState::Ready) {
+	if (getState() == HitObjectState::READY) {
 		transferActive();
 		this->onBegin();
 	}
@@ -270,24 +270,24 @@ void BaseHitObject::begin()
 HitResult BaseHitObject::finish()
 {
 	// η-transition
-	if (getState() == HitObjectState::Pickup) {
+	if (getState() == HitObjectState::PICKUP) {
 		transferToFading();
 		return this->onFinish();
 	}
 	log::error(this, " tried invalid state change (pickup->finish)");
-	return HitResult::Missed;
+	return HitResult::MISSED;
 }
 
 void BaseHitObject::raise()
 {
-	if (getState() == HitObjectState::Active) {
+	if (getState() == HitObjectState::ACTIVE) {
 		transferActiveInactive();
 		this->onRaise();
 	}
 }
 void BaseHitObject::press()
 {
-	if (getState() == HitObjectState::Inactive) {
+	if (getState() == HitObjectState::INACTIVE) {
 		transferInactiveActive();
 		this->onPress();
 	}
@@ -295,7 +295,7 @@ void BaseHitObject::press()
 
 void BaseHitObject::draw()
 {
-	if (getState() != HitObjectState::Invisible)
+	if (getState() != HitObjectState::INVISIBLE)
 		this->onDraw();
 }
 

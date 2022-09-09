@@ -29,9 +29,9 @@ NS_BEGIN
 class Renderer;
 
 #define ALL_STATES \
-    USER_STATE(None, = 0x100) \
+    USER_STATE(NONE, = 0x100) \
     USER_STATES \
-    USER_STATE(Exit, = 0xffffffff)
+    USER_STATE(EXIT, = 0xffffffff)
 
 enum class GameState: unsigned int
 {

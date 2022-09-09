@@ -38,42 +38,42 @@ NS_BEGIN
     detail::SettingMetadataFields<Type, SettingType>::applyConstraints =                  \
     []([[maybe_unused]] const SettingMetadata<Type>& ctx, const Type& value) -> Type
 
-TO_STRING_FUNC(float, SettingType::Float)
+TO_STRING_FUNC(float, SettingType::FLOAT)
 {
     return std::to_string(value);
 };
 
-FROM_STRING_FUNC(float, SettingType::Float)
+FROM_STRING_FUNC(float, SettingType::FLOAT)
 {
     return std::strtof(string.c_str(), nullptr);
 };
 
-CONSTRAINT_FUNC(float, SettingType::Float)
+CONSTRAINT_FUNC(float, SettingType::FLOAT)
 {
     return ctx.min != ctx.max ? Clamp(value, ctx.min, ctx.max) : value;
 };
 
-TO_STRING_FUNC(int, SettingType::Integer)
+TO_STRING_FUNC(int, SettingType::INTEGER)
 {
     return std::to_string(value);
 };
 
-FROM_STRING_FUNC(int, SettingType::Integer)
+FROM_STRING_FUNC(int, SettingType::INTEGER)
 {
     return (int) std::strtol(string.c_str(), nullptr, 10);
 };
 
-CONSTRAINT_FUNC(int, SettingType::Integer)
+CONSTRAINT_FUNC(int, SettingType::INTEGER)
 {
     return ctx.min != ctx.max ? Clamp(value, ctx.min, ctx.max) : value;
 };
 
-TO_STRING_FUNC(color, SettingType::Color)
+TO_STRING_FUNC(color, SettingType::COLOR)
 {
     return (std::string) value;
 };
 
-FROM_STRING_FUNC(color, SettingType::Color)
+FROM_STRING_FUNC(color, SettingType::COLOR)
 {
     color8 truncated;
     auto components = GetCharacterSeparatedValues(string, ',');
@@ -84,7 +84,7 @@ FROM_STRING_FUNC(color, SettingType::Color)
     return (color) truncated;
 };
 
-CONSTRAINT_FUNC(color, SettingType::Color)
+CONSTRAINT_FUNC(color, SettingType::COLOR)
 {
     auto &palette = ctx.palette;
     // if there are no options to choose from, assume this setting to not
@@ -101,34 +101,34 @@ CONSTRAINT_FUNC(color, SettingType::Color)
     return palette[0];
 };
 
-TO_STRING_FUNC(bool, SettingType::Boolean)
+TO_STRING_FUNC(bool, SettingType::BOOLEAN)
 {
     return value ? "true" : "false";
 };
 
-FROM_STRING_FUNC(bool, SettingType::Boolean)
+FROM_STRING_FUNC(bool, SettingType::BOOLEAN)
 {
     std::string conv = TrimCopy(string);
     std::transform(conv.begin(), conv.end(), conv.begin(), ::tolower);
     return conv == "true";
 };
 
-CONSTRAINT_FUNC(bool, SettingType::Boolean)
+CONSTRAINT_FUNC(bool, SettingType::BOOLEAN)
 {
     return value;
 };
 
-TO_STRING_FUNC(std::string, SettingType::String)
+TO_STRING_FUNC(std::string, SettingType::STRING)
 {
     return value;
 };
 
-FROM_STRING_FUNC(std::string, SettingType::String)
+FROM_STRING_FUNC(std::string, SettingType::STRING)
 {
     return string;
 };
 
-CONSTRAINT_FUNC(std::string, SettingType::String)
+CONSTRAINT_FUNC(std::string, SettingType::STRING)
 {
     auto &options = ctx.options;
     // if there are no options to choose from, assume this setting to not

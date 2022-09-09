@@ -46,7 +46,7 @@ public:
 
     void update(double delta);
 
-    void setTexture(const TextureP &texture);
+    void setTexture(const Resource<Texture> &texture);
     void setFPS(FPS_t fps);
 	void setTotalFrames(int frames);
     void setFrameTime(float frameTime);
@@ -54,12 +54,12 @@ public:
 
 	[[nodiscard]] const color &getTint() const;
 
-    [[nodiscard]] TextureP getTexture() const;
+    [[nodiscard]] Resource<Texture> getTexture() const;
 
 private:
     color tint{WHITE};
-	TextureP texture{nullptr};
-    AnimationLayout layout = AnimationLayout::Horizontal;
+	Resource<Texture> texture{nullptr};
+    AnimationLayout layout = AnimationLayout::HORIZONTAL;
     float frameTime = 0.0f;
     float frameTimer = 0.0f;
     unsigned int frameCount = 1;

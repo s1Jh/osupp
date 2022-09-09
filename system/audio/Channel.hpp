@@ -37,15 +37,15 @@ class Channel
 	friend class AudioDevice;
 public:
 
-	bool forceSetSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false);
-	bool setSound(const std::shared_ptr<detail::BaseSound>& resource, bool play = false,
-				  SoundPriority priority = SoundPriority::Medium);
+	bool forceSetSound(const std::weak_ptr<detail::BaseSound>& resource, bool play = false);
+	bool setSound(const std::weak_ptr<detail::BaseSound>& resource, bool play = false,
+				  SoundPriority priority = SoundPriority::MEDIUM);
 
-	bool playSound(const std::shared_ptr<detail::BaseSound>& resource,
-				  SoundPriority priority = SoundPriority::Medium);
+	bool playSound(const std::weak_ptr<detail::BaseSound>& resource,
+				  SoundPriority priority = SoundPriority::MEDIUM);
 
-	Channel& loopSound(const std::shared_ptr<detail::BaseSound>& resource,
-				   SoundPriority priority = SoundPriority::Medium);
+	Channel& loopSound(const std::weak_ptr<detail::BaseSound>& resource,
+				   SoundPriority priority = SoundPriority::MEDIUM);
 
 	[[nodiscard]] ChannelState getState() const;
 	[[nodiscard]] SoundPriority getSoundPriority() const;
@@ -74,9 +74,9 @@ private:
 	static void ALStructureDeleter(ALStructures* struc);
 
 	std::shared_ptr<ALStructures> held;
-	std::shared_ptr<detail::BaseSound> activeSound{nullptr};
-	SoundPriority currentPriority{SoundPriority::Medium};
-	ChannelState state{ChannelState::Free};
+	std::weak_ptr<detail::BaseSound> activeSound;
+	SoundPriority currentPriority{SoundPriority::MEDIUM};
+	ChannelState state{ChannelState::FREE};
 };
 
 NS_END

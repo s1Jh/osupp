@@ -43,7 +43,7 @@ bool AutoPilot::isKeyReleased() const
 
 bool AutoPilot::isKeyPressing(InputMapper::BlockMode mode) const
 {
-	return held != lastHeld;
+	return held;
 }
 
 fvec2d AutoPilot::getCursor() const
@@ -53,30 +53,14 @@ fvec2d AutoPilot::getCursor() const
 
 void AutoPilot::update()
 {
-	lastHeld = held;
+//	lastHeld = held;
 
-	if (ImGui::Begin("Autopilot control")) {
-
-		ImGui::SliderFloat("Velocity", &velocity, 0.0f, 50.f);
-
-		ImGui::Checkbox("Held", &held);
-
-		ImGui::End();
-	}
-
-	auto thisPtr = ctx.game.getCurrentObject().lock();
+	auto thisPtr = ctx.game.getClosestActiveObject().lock();
 
 	if (!thisPtr)
 		return;
 
-	if (thisPtr->isFinished()) {
-		if (auto nextPtr = ctx.game.getNextObject().lock()) {
-			thisPtr = nextPtr;
-			target = nextPtr->getSOF().position;
-		}
-	} else {
-		target = thisPtr->getSOF().position;
-	}
+	target = thisPtr->getSOF().position;
 
 	held = ctx.game.getCurrentTime() >= thisPtr->getStartTime();
 	bool inObject = Distance(position, thisPtr->getSOF().position) < thisPtr->getSOF().radius;
@@ -89,12 +73,35 @@ void AutoPilot::update()
 	auto direction = target - position;
 	auto normalized = Normalize(direction);
 
+	double velocity;
+
+	if (held)
+		velocity = 100.f;
+	else
+		velocity = Distance(position, target);
+
+	velocity = 10.0;
+
 	auto move = normalized * velocity * ctx.timing.getDelta();
 
 	move.x = Clamp(move.x, direction.x, -direction.x);
 	move.y = Clamp(move.y, direction.y, -direction.y);
 
+	const auto& transform = ctx.game.getTransform();
+
+	ctx.gfx.draw(target, 0.1f, VisualAppearance{.fillColor = RED}, transform);
+	ctx.gfx.draw(position, 0.1f, VisualAppearance{.fillColor = GREEN}, transform);
+	ctx.gfx.draw(fline{target, position}, DEFAULT_APPEARANCE, transform);
+
 	position += move;
+
+	if (ImGui::Begin("Autopilot control")) {
+		ImGui::Checkbox("Held", &held);
+		ImGui::Text("Target: %lx", (unsigned long)thisPtr.get());
+		ImGui::Text("Velocity: %f", velocity);
+
+		ImGui::End();
+	}
 }
 
 AutoPilot::AutoPilot() :

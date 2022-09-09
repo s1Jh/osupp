@@ -37,10 +37,10 @@ NS_BEGIN
 
 enum class SettingCallbacks
 {
-    SettingChanged
+    SETTING_CHANGED
 };
 
-MAKE_CALLBACK(SettingCallbacks, SettingCallbacks::SettingChanged, const std::string&)
+MAKE_CALLBACK(SettingCallbacks, SettingCallbacks::SETTING_CHANGED, const std::string&)
 
 void SetSettingFromString(std::shared_ptr<detail::BaseSetting>& setting, const std::string& value);
 std::string GetStringFromSetting(const std::shared_ptr<detail::BaseSetting>& setting);

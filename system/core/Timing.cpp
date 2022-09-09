@@ -36,9 +36,9 @@ Timing::Timing() noexcept
 void Timing::await()
 {
     if (!phase) {
-        int delay = int((frameTime - delta) * 1000.0);
+        int delay = int((frameTime - delta) * 1000000.0);
         if (delay > 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+            std::this_thread::sleep_for(std::chrono::microseconds(delay));
         }
         phase = true;
     }

@@ -44,7 +44,7 @@ public:
 
     enum class EntryType
     {
-        String, Real, Integer, Vector, Boolean, Color, Clump
+        STRING, REAL, INTEGER, VECTOR, BOOLEAN, COLOR, CLUMP
     };
 
     std::string &str(const std::string & = "null");
@@ -123,11 +123,11 @@ public:
 private:
     enum class SearchDirection
     {
-        Forwards, Backwards
+        FORWARDS, BACKWARDS
     };
 
     static std::string getToken(const std::string &, size_t start,
-                                SearchDirection dir = SearchDirection::Forwards);
+                                SearchDirection dir = SearchDirection::FORWARDS);
 
     static void getClump(const std::string &chunk, df2 &clump, int end = -1,
                          int resume = 0, int debug_level = 0);

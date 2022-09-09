@@ -26,6 +26,8 @@
 
 #include "Settings.hpp"
 #include "Util.hpp"
+#include "Setting.hpp"
+
 
 NS_BEGIN
 
@@ -48,29 +50,29 @@ void Settings::iterateSettingsSearch(
 
         std::string strRepr;
         switch (setting.second.getType()) {
-            case df2::EntryType::Clump:
+            case df2::EntryType::CLUMP:
                 iterateSettingsSearch(entries, setting.second, thisName);
                 break;
-            case df2::EntryType::Color:
+            case df2::EntryType::COLOR:
                 push(std::to_string(value.col().r) + ','
                          + std::to_string(value.col().g) + ','
                          + std::to_string(value.col().b) + ','
                          + std::to_string(value.col().a));
                 break;
-            case df2::EntryType::Vector:
+            case df2::EntryType::VECTOR:
                 push(std::to_string(value.vec().x) + ';' + std::to_string(value.vec().y));
                 break;
 
-            case df2::EntryType::Integer:
+            case df2::EntryType::INTEGER:
                 push(std::to_string(value.integer()));
                 break;
-            case df2::EntryType::Real:
+            case df2::EntryType::REAL:
                 push(std::to_string(value.real()));
                 break;
-            case df2::EntryType::Boolean:
+            case df2::EntryType::BOOLEAN:
                 push(value.boolean() ? "true" : "false");
                 break;
-            case df2::EntryType::String:
+            case df2::EntryType::STRING:
                 push(value.str());
                 break;
             default:
@@ -89,7 +91,6 @@ bool Settings::read(const std::filesystem::path &path)
 {
     auto read = df2::read(path);
     iterateSettingsSearch(savedValues, read, "setting.");
-	invokeCallback<SettingCallbacks::SettingChanged>("");
     return !read.isEmpty();
 }
 
@@ -100,12 +101,24 @@ detail::BaseSetting::BaseSetting(SettingType typeIn) noexcept
 void Settings::apply()
 {
     log::debug("Invoking callbacks");
-    invokeCallback<SettingCallbacks::SettingChanged>("");
+
+	for (const auto& setting : activeValues) {
+		if (setting.second->wasChanged()) {
+			log::debug("Invoking ", setting.first);
+			invokeCallback<SettingCallbacks::SETTING_CHANGED>(setting.first);
+		}
+	}
+
 }
 
 SettingType detail::BaseSetting::getType() const
 {
     return type;
+}
+
+bool detail::BaseSetting::wasChanged()
+{
+	return false;
 }
 
 Settings::ActiveSettingStorageT::iterator Settings::begin()
@@ -168,14 +181,14 @@ void SetSettingFromString(std::shared_ptr<detail::BaseSetting> &setting, const s
 #define SETTING_TYPE(Name, Storage ) \
 	case SettingType::Name: { \
 		auto cast = std::static_pointer_cast<Setting<Storage>>(setting); \
-		if (!bool(cast->getMetadata().flags & SettingFlags::Readonly)) \
+		if (!bool(cast->getMetadata().flags & SettingFlags::READONLY)) \
 			cast->set(SettingMetadata<Storage>::fromString(value)); \
 		break; \
 	}
 
 	SETTING_TYPES
 #undef SETTING_TYPE
-	case SettingType::None:
+	case SettingType::NONE:
 	default:
 		break;
 	}
@@ -188,14 +201,14 @@ std::string GetStringFromSetting(const std::shared_ptr<detail::BaseSetting> &val
 #define SETTING_TYPE(Name, Storage ) \
 	case SettingType::Name: { \
 		auto cast = std::static_pointer_cast<Setting<Storage>>(value); \
-		if (bool(cast->getMetadata().flags & SettingFlags::WriteToFile)) \
+		if (bool(cast->getMetadata().flags & SettingFlags::WRITE_TO_FILE)) \
 			return SettingMetadata<Storage>::toString(cast->get()); \
 		return ""; \
 	}
 
 	SETTING_TYPES
 #undef SETTING_TYPE
-	case SettingType::None:
+	case SettingType::NONE:
 	default:
 		return "";
 	}

@@ -29,16 +29,7 @@ NS_BEGIN
 
 enum class ShapeType
 {
-    Polygon,
-    Point,
-    Circle,
-    Rectangle,
-    Line,
-    Triangle,
-    Line3,
-    Sphere,
-    Cylinder,
-    Cuboid
+    POLYGON, POINT, CIRCLE, RECTANGLE, LINE, TRIANGLE, LINE3, SPHERE, CYLINDER, CUBOID
 };
 
 template<typename Sh>

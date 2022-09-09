@@ -30,6 +30,8 @@
 
 NS_BEGIN
 
+template<> const std::vector<std::string> Resource<MapInfo>::allowedExtensions = {".map", ".osu"};
+
 const MapInfo::StorageT &MapInfo::getObjectTemplates() const
 {
     return objectTemplates;
@@ -43,7 +45,7 @@ void MapInfo::addNote(const fvec2d &position, bool comboEnd, double time)
     object->startTime = time;
     object->endTime = time;
     object->position = position;
-    object->parameters |= comboEnd ? HitObjectParams::ComboEnd : HitObjectParams::None;
+    object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
     insertElement(object);
 }
 
@@ -54,7 +56,7 @@ void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
 
     auto object = std::make_shared<ObjectTemplateSlider>();
     object->startTime = time;
-    object->parameters |= comboEnd ? HitObjectParams::ComboEnd : HitObjectParams::None;
+    object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
     object->path = points;
     object->endTime = endTime;
     object->sliderType = type;
@@ -87,15 +89,16 @@ void MapInfo::insertElement(std::shared_ptr<BaseObjectTemplate> obj)
         std::find_if(objectTemplates.begin(), objectTemplates.end(),
                      [&obj](const std::shared_ptr<BaseObjectTemplate> &checked)
                      {
-                         return checked->startTime <= obj->startTime;
+                         return checked->startTime > obj->startTime;
                      });
 
     if (insertPoint == objectTemplates.end()) {
         objectTemplates.push_back(obj);
     }
     else {
-        objectTemplates.insert(insertPoint, obj);
+        objectTemplates.insert(std::prev(insertPoint), obj);
     }
+
 }
 
 const std::string &MapInfo::getName() const
@@ -195,25 +198,28 @@ void MapInfo::setOverallDifficulty(float overallDifficulty)
     MapInfo::overallDifficulty = overallDifficulty;
 }
 
-bool MapInfo::load(const std::filesystem::path &path)
+template<>
+Resource<MapInfo> Load(const std::filesystem::path &path)
 {
     LOG_ENTER();
 
-	directory = path.parent_path();
+	Resource<MapInfo> r;
+
+	r.held->directory = path.parent_path();
+
+	bool success;
 
     if (path.extension() == ".osu")
-        return LoadOSU(path, *this);
+		LoadOSU(path, *r);
     else if (path.extension() == ".map")
-        return LoadMAP(path, *this);
+		LoadMAP(path, *r);
     else {
         log::error("Unrecognized file type");
-        return false;
+		return nullptr;
     }
 
+	return r;
 }
-
-bool MapInfo::create()
-{ return true; }
 
 const std::string &MapInfo::getRomanisedName() const
 {

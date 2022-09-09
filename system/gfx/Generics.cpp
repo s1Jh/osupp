@@ -33,7 +33,7 @@ GenericMeshCollection::GenericMeshCollection()
 	bool success = true;
 
 	rectMask.setAttributeDescriptors({
-										  AttributeType::Vec2 // position
+										  AttributeType::VEC2 // position
 									  });
 	rectMask.insertVertices({{1.f, 1.f},
 							  {1.f, -1.f},
@@ -44,8 +44,8 @@ GenericMeshCollection::GenericMeshCollection()
 
 	// Create geometry for rectangular meshes
 	rect.setAttributeDescriptors({
-									 AttributeType::Vec2, // position
-									 AttributeType::Vec2  // uv
+									 AttributeType::VEC2, // position
+									 AttributeType::VEC2  // uv
 								 });
 	rect.insertVertices({{1.f, 1.f, 1.f, 1.f},
 						 {1.f, -1.f, 1.f, 0.f},
@@ -60,8 +60,8 @@ GenericMeshCollection::GenericMeshCollection()
 	fvec2d circle_vec = {1.f, 0.f};
 
 	circle.setAttributeDescriptors({
-									 AttributeType::Vec2, // position
-									 AttributeType::Vec2  // uv
+									 AttributeType::VEC2, // position
+									 AttributeType::VEC2  // uv
 								 });
 	circle.insertVertex({0.0, 0.0, 0.5f, 0.5f});
 

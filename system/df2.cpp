@@ -43,7 +43,7 @@ void df2::reload()
 { *this = read(path); }
 
 df2::df2() noexcept
-    : type(df2::EntryType::Clump)
+    : type(df2::EntryType::CLUMP)
 {}
 
 df2 df2::read(const std::string &path)
@@ -86,7 +86,7 @@ df2 df2::read(const std::string &path)
 std::string df2::getToken(const std::string &string, size_t start,
                           df2::SearchDirection dir)
 {
-    int traversal_rate = dir == SearchDirection::Forwards ? 1 : -1;
+    int traversal_rate = dir == SearchDirection::FORWARDS ? 1 : -1;
     bool found_first = false;
     std::vector<char> accum;
     std::string filtered_chars = "\n\t\a\f\r\t\v";
@@ -115,7 +115,7 @@ std::string df2::getToken(const std::string &string, size_t start,
         if (found_first) {
             // remove invalid characters
             if (filtered_chars.find(string.at(i)) == std::string::npos) {
-                if (dir == SearchDirection::Forwards) {
+                if (dir == SearchDirection::FORWARDS) {
                     accum.push_back(string.at(i));
                 }
                 else {
@@ -141,7 +141,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
     for (int i = resume; i < end; i++) {
         switch (chunk.at(i)) {
             case '$': {
-                std::string token_name = getToken(chunk, i, SearchDirection::Forwards);
+                std::string token_name = getToken(chunk, i, SearchDirection::FORWARDS);
                 if (enableSpam)
                     log::debug("[PARSE] Character ", i, " level ", debug_level,
                                " found tag \"", token_name, '\"');
@@ -150,8 +150,8 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
             }
             case '=': {
                 std::string token_name, token_value;
-                token_name = getToken(chunk, i, SearchDirection::Backwards);
-                token_value = getToken(chunk, i, SearchDirection::Forwards);
+                token_name = getToken(chunk, i, SearchDirection::BACKWARDS);
+                token_value = getToken(chunk, i, SearchDirection::FORWARDS);
                 if (enableSpam)
                     log::debug("[PARSE] Character ", i, " level ", debug_level,
                                " found value \"", token_name, "\" with value \"",
@@ -296,7 +296,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                 break;
             }
             case '{': {
-                std::string token_name = getToken(chunk, i, SearchDirection::Backwards);
+                std::string token_name = getToken(chunk, i, SearchDirection::BACKWARDS);
                 if (enableSpam)
                     log::debug("[PARSE] Character ", i, " level ", debug_level,
                                " found clump \"", token_name, '\"');
@@ -358,33 +358,33 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level)
 
         switch (entry.second.getType()) {
             // "name" = "numvalue"
-            case df2::EntryType::Integer: {
+            case df2::EntryType::INTEGER: {
                 int val = entry.second.integer();
                 accum << '"' << entry.first << "\" = \"" << std::to_string(val) << '"';
                 break;
             }
-            case df2::EntryType::Real: {
+            case df2::EntryType::REAL: {
                 double val = entry.second.real();
                 accum << '"' << entry.first << "\" = \"" << std::to_string(val) << '"';
                 break;
             }
                 // "name" = "strvalue"
-            case df2::EntryType::String:
+            case df2::EntryType::STRING:
                 accum << '"' << entry.first << "\" = \"" << entry.second.str() << '"';
                 break;
                 // $"<name>"
-            case df2::EntryType::Boolean:
+            case df2::EntryType::BOOLEAN:
                 accum << "$\"" << entry.first << '"';
                 break;
                 // "name" = "#R,G,B,A"
-            case df2::EntryType::Color: {
+            case df2::EntryType::COLOR: {
                 auto color = (color8) entry.second.col();
                 accum << '"' << entry.first << "\" = \"#" << color.r << ',' << color.g << ','
                       << color.b << ',' << color.a << '"';
                 break;
             }
                 // "name" = { ... }
-            case df2::EntryType::Clump:
+            case df2::EntryType::CLUMP:
                 accum << '"' << entry.first << "\"\n";
                 for (size_t i = 0; i < level; i++)
                     accum << '\t';
@@ -399,7 +399,7 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level)
                 break;
 
                 // "name" = "x;y"
-            case df2::EntryType::Vector:
+            case df2::EntryType::VECTOR:
                 accum << '"' << entry.first << "\" = \""
                       << "\"" << entry.second.vec().x << ";" << entry.second.vec().y
                       << "\"\n";
@@ -440,11 +440,11 @@ int df2::getEndOfClump(const std::string &str, char left, char right,
 std::string &df2::str(const std::string &fallback)
 {
     auto val = std::get_if<std::string>(&data);
-    if (val && type == df2::EntryType::String) {
+    if (val && type == df2::EntryType::STRING) {
         return *val;
     }
     else {
-        type = df2::EntryType::String;
+        type = df2::EntryType::STRING;
         data = DataType(fallback);
         return std::get<std::string>(data);
     }
@@ -452,7 +452,7 @@ std::string &df2::str(const std::string &fallback)
 
 std::string &df2::name(const std::string &fallback)
 {
-    type = df2::EntryType::Clump;
+    type = df2::EntryType::CLUMP;
     if (auto val = std::get_if<std::string>(&data)) {
         return *val;
     }
@@ -471,7 +471,7 @@ double &df2::real(const double fallback)
         return *((double *) ival);
     }
     else {
-        type = df2::EntryType::Real;
+        type = df2::EntryType::REAL;
         data = DataType(fallback);
         return std::get<double>(data);
     }
@@ -486,7 +486,7 @@ int &df2::integer(const int fallback)
         return *((int *) dval);
     }
     else {
-        type = df2::EntryType::Integer;
+        type = df2::EntryType::INTEGER;
         data = DataType(fallback);
         return std::get<int>(data);
     }
@@ -498,7 +498,7 @@ fvec2d &df2::vec(const fvec2d &fallback)
         return *val;
     }
     else {
-        type = df2::EntryType::Vector;
+        type = df2::EntryType::VECTOR;
         data = DataType(fallback);
         return std::get<fvec2d>(data);
     }
@@ -510,7 +510,7 @@ bool &df2::boolean(const bool fallback)
         return *val;
     }
     else {
-        type = df2::EntryType::Boolean;
+        type = df2::EntryType::BOOLEAN;
         data = DataType(fallback);
         return std::get<bool>(data);
     }
@@ -522,7 +522,7 @@ color &df2::col(const struct color &fallback)
         return *val;
     }
     else {
-        type = df2::EntryType::Boolean;
+        type = df2::EntryType::BOOLEAN;
         data = DataType(fallback);
         return std::get<struct color>(data);
     }

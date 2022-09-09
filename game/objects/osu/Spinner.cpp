@@ -64,9 +64,9 @@ void Spinner::onBegin()
 HitResult Spinner::onFinish()
 {
     if (rotationsCompleted == 0)
-        return HitResult::Missed;
+        return HitResult::MISSED;
 
-    return HitResult::Hit50;
+    return HitResult::HIT50;
 }
 
 Spinner::Spinner(std::shared_ptr<ObjectTemplateSpinner> t, const HitObjectArguments& args)
@@ -113,12 +113,12 @@ void Spinner::onReset()
 
 HitObjectFunction Spinner::getActivationFunction() const
 {
-	return HitObjectFunction::ButtonHeld | HitObjectFunction::CursorIgnore;
+	return HitObjectFunction::BUTTON_HELD | HitObjectFunction::CURSOR_IGNORE;
 }
 
 HitObjectFunction Spinner::getDeactivationFunction() const
 {
-	return HitObjectFunction::ButtonReleased | HitObjectFunction::CursorIgnore;
+	return HitObjectFunction::BUTTON_RELEASED | HitObjectFunction::CURSOR_IGNORE;
 }
 
 NS_END

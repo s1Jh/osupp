@@ -87,7 +87,7 @@ template<typename T>
 struct IsShape<circle<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Circle;
+    static const ShapeType type = ShapeType::CIRCLE;
 };
 
 NS_END

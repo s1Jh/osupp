@@ -27,6 +27,7 @@
 #include "Rect.hpp"
 #include "State.hpp"
 #include "Timer.hpp"
+#include "ObjectSprite.hpp"
 
 NS_BEGIN
 
@@ -43,7 +44,11 @@ public:
     int init(GameState state) override;
 
 private:
-	Timer timer;
+	std::vector<fvec2d> cursorTrail;
+	int trailIndex{0};
+	ObjectSprite playField;
+	ObjectSprite cursor;
+	bool musicStarted{false};
 	Timer endTimer;
     frect field;
     Context &ctx;

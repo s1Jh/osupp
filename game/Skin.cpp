@@ -31,32 +31,29 @@
 
 NS_BEGIN
 
-bool Skin::load(const std::filesystem::path &path)
+template<>
+Resource<Skin> Load(const std::filesystem::path &path)
 {
     LOG_ENTER();
 
 	auto& res = GetContext().resources;
 
-    bool success = true;
-    success &= create();
+	Resource<Skin> r;
 
-    if (!success) {
-        log::error("Failed to create skin objects (one or more was null)");
-        return false;
-    }
-
-    directory = path.parent_path();
+    r->directory = path.parent_path();
 
     df2 settings = df2::read(path);
 
+	int failed = 0;
+
     for (const auto &entry: settings["textures"]) {
-        auto &object = textures[entry.first];
+        auto &object = r->textures[entry.first];
         // apply settings
         const auto &fields = entry.second;
 
-        std::filesystem::path texPath = GetContext().resources.findFile(entry.first, directory);
+        std::filesystem::path texPath = GetContext().resources.findFile(entry.first, r->directory);
         if (fields.find("texturePath") != fields.end()) {
-            texPath = directory / fields["texturePath"].str(entry.first);
+            texPath = r->directory / fields["texturePath"].str(entry.first);
         }
 		object.path = texPath.string();
 
@@ -80,33 +77,24 @@ bool Skin::load(const std::filesystem::path &path)
 
     log::info("Loading skin assets...");
 
-    for (auto &texture: textures) {
-        texture.second.texture = res.load<Texture>(texture.second.path, directory);
-        success &= bool(texture.second.texture);
+    for (auto &texture: r->textures) {
+        texture.second.texture = res.load<Texture>(texture.second.path, r->directory);
+		failed += !bool(texture.second.texture);
     }
-    for (auto &shader: shaders) {
-        shader.second.shader = res.load<Shader>(shader.second.path, directory);
-        success &= bool(shader.second.shader);
+    for (auto &shader: r->shaders) {
+        shader.second.shader = res.load<Shader>(shader.second.path, r->directory);
+		failed += !bool(shader.second.shader);
     }
-	for (auto &sound: sounds) {
-		sound.second.sound = res.load<SoundSample>(sound.second.path, directory);
-		success &= bool(sound.second.sound);
+	for (auto &sound: r->sounds) {
+		sound.second.sound = res.load<SoundSample>(sound.second.path, r->directory);
+		failed += !bool(sound.second.sound);
 	}
 
     log::info("Loaded skin ", path);
-    return success;
-}
-
-bool Skin::create()
-{
-    LOG_ENTER();
-
-    bool success = true;
-
-    textures.clear();
-    shaders.clear();
-
-    return success;
+	if (failed != 0) {
+		log::info("Failed to load ", failed, " assets");
+	}
+	return r;
 }
 
 FPS_t Skin::getAnimationFramerate(const std::string &object) const
@@ -129,7 +117,7 @@ int Skin::getFrameCount(const std::string &object) const
 	return -1;
 }
 
-TextureP Skin::getTexture(const std::string &object) const
+Resource<Texture> Skin::getTexture(const std::string &object) const
 {
     LOG_ENTER();
 
@@ -158,7 +146,7 @@ color Skin::getTint(const std::string &object, unsigned int seed) const
     return tints.at(i);
 }
 
-ShaderP Skin::getShader(const std::string &object) const
+Resource<Shader> Skin::getShader(const std::string &object) const
 {
     LOG_ENTER();
 
@@ -183,7 +171,7 @@ ObjectSprite Skin::createObjectSprite(const std::string &object,
     return ret;
 }
 
-SoundSampleP Skin::getSound(const std::string &object)
+Resource<SoundSample> Skin::getSound(const std::string &object)
 {
 	if (sounds.contains(object)) {
 		return sounds.at(object).sound;

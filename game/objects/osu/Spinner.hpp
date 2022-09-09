@@ -28,8 +28,8 @@
 
 NS_BEGIN
 class Spinner: public OsuHitObject<ObjectTemplateSpinner,
-	OsuHitObjectFlags::NoApproachCircle |
-	OsuHitObjectFlags::NoFadeoutAnimation>
+	OsuHitObjectFlags::NO_APPROACH_CIRCLE |
+	OsuHitObjectFlags::NO_FADEOUT_ANIMATION>
 {
 public:
     explicit Spinner(std::shared_ptr<ObjectTemplateSpinner>, const HitObjectArguments& args);

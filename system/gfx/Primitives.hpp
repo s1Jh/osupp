@@ -57,30 +57,19 @@ MAKE_1D_PRIMITIVE_RENDER_FUNCTOR(vec2d, float)
         void detail::RenderFunctor<Type<T>>::operator()(Renderer &renderer, const Type<T> &object, \
                                                         const VisualAppearance &appearance, \
                                                         const Mat3f& transform) { \
-            const auto& shader = getData().shader; \
             Mat3f shape = ShapeExpression;                                        \
             const auto& mesh = GetGenericMeshes().Type;                             \
-            DrawGeneric2DShape(renderer, shader, mesh, shape, appearance, transform, RenderType); \
+            DrawGeneric2DShape(renderer, mesh, shape, appearance, transform, RenderType); \
         }
 
 
-BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(rect)
-{
-    shader.load("static_shape.shader");
-}
+BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(rect) {}
 
-BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(circle)
-{
-    shader.load("static_shape.shader");
-}
+BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(circle) {}
 
-BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(line)
-{
-}
+BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(line) {}
 
-BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(vec2d)
-{
-}
+BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(vec2d) {}
 
 IMPLEMENT_2D_PRIMITIVE_RENDER_FUNCTION(
     rect,

@@ -51,7 +51,7 @@ template<typename T>
 struct IsShape<line3<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Line3;
+    static const ShapeType type = ShapeType::LINE3;
 };
 
 NS_END

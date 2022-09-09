@@ -41,14 +41,12 @@ public:
 
 private:
 	std::weak_ptr<BaseHitObject> previous;
-
-
-	float velocity{20.0f};
+//	float velocity{20.0f};
 
 	fvec2d target;
 	fvec2d position;
 	bool held;
-	bool lastHeld;
+	double lastTime;
 
 	Context &ctx;
 };

@@ -45,7 +45,7 @@ template<typename T>
 struct IsShape<triangle<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Triangle;
+    static const ShapeType type = ShapeType::TRIANGLE;
 };
 
 NS_END

@@ -46,6 +46,7 @@ void State<GameState::MainMenu>::showDebugControl()
     static bool showImGuiDebugger = false;
     static bool showImGuiLogger = false;
     static bool showImGuiStack = false;
+	static bool showResourceDebug = false;
 
     if (showVersion) {
         if (ImGui::Begin(ctx.locale["ui.main.version.title"].c_str(),
@@ -83,6 +84,10 @@ void State<GameState::MainMenu>::showDebugControl()
         ctx.locale.showDebugListings(&showLocalisations);
     }
 
+	if (showResourceDebug) {
+		ctx.resources.drawDebugDialog(&showResourceDebug);
+	}
+
     auto size = (fsize) GetContext().gfx.getSize();
     ImGui::SetNextWindowSize({size.w, size.h});
     ImGui::SetNextWindowPos({0, 0});
@@ -107,6 +112,9 @@ void State<GameState::MainMenu>::showDebugControl()
             if (ImGui::MenuItem(ctx.locale["ui.main.debug.localisations"].c_str())) {
                 showLocalisations = true;
             }
+			if (ImGui::MenuItem(ctx.locale["ui.main.debug.resources"].c_str())) {
+				showResourceDebug = true;
+			}
 
             if (ImGui::BeginMenu(ctx.locale["ui.main.debug.imgui"].c_str())) {
                 if (ImGui::MenuItem(ctx.locale["ui.main.debug.imgui.debugger"].c_str())) {
@@ -176,21 +184,19 @@ int State<GameState::MainMenu>::exit()
 
 int State<GameState::MainMenu>::init(GameState)
 {
-    log::debug("Entering main menu");
-
     return 0;
 }
 
 void State<GameState::MainMenu>::showMainMenuTab()
 {
     // FIXME: This doesn't properly work with skins
-    static TextureP star = GetContext().resources.get<Texture>("star_icon");
-    static TextureP difficulty = GetContext().resources.get<Texture>("difficulty_icon");
-    static TextureP approach = GetContext().resources.get<Texture>("approach_rate_icon");
-    static TextureP circle = GetContext().resources.get<Texture>("note_icon");
-    static TextureP window = GetContext().resources.get<Texture>("hit_window_icon");
-    static TextureP drain = GetContext().resources.get<Texture>("hp_drain_icon");
-    static TextureP duration = GetContext().resources.get<Texture>("duration_icon");
+    static auto star = GetContext().resources.get<Texture>("star_icon");
+    static auto difficulty = GetContext().resources.get<Texture>("difficulty_icon");
+    static auto approach = GetContext().resources.get<Texture>("approach_rate_icon");
+    static auto circle = GetContext().resources.get<Texture>("note_icon");
+    static auto window = GetContext().resources.get<Texture>("hit_window_icon");
+    static auto drain = GetContext().resources.get<Texture>("hp_drain_icon");
+    static auto duration = GetContext().resources.get<Texture>("duration_icon");
 
     static unsigned int selected = -1;
 
@@ -267,8 +273,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 					selectedMap = map;
 					auto& channel = ctx.audio.getMusicChannel();
 					auto music = ctx.resources.get<SoundStream>(map->getSongPath(), map->getDirectory(), false);
-					channel.setSound(music, true);
-					log::debug("Setting music to ", music);
+					channel.setSound(music.ref(), true);
                     selected = i;
                 }
                 ImGui::SameLine();
