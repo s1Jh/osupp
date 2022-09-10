@@ -22,11 +22,15 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include <Vec2.hpp>
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <variant>
+#include <filesystem>
+
 #include "Color.hpp"
 
 NS_BEGIN
@@ -36,15 +40,15 @@ class df2
 public:
     df2() noexcept;
 
-    static df2 read(const std::string &path);
+    static df2 read(const std::filesystem::path& path);
 
     void reload();
 
-    static bool write(df2 &def, const std::string &path);
+    static bool write(df2 &def, const std::filesystem::path& path);
 
     enum class EntryType
     {
-        String, Real, Integer, Vector, Boolean, Color, Clump
+        STRING, REAL, INTEGER, VECTOR, BOOLEAN, COLOR, CLUMP
     };
 
     std::string &str(const std::string & = "null");
@@ -123,11 +127,11 @@ public:
 private:
     enum class SearchDirection
     {
-        Forwards, Backwards
+        FORWARDS, BACKWARDS
     };
 
     static std::string getToken(const std::string &, size_t start,
-                                SearchDirection dir = SearchDirection::Forwards);
+                                SearchDirection dir = SearchDirection::FORWARDS);
 
     static void getClump(const std::string &chunk, df2 &clump, int end = -1,
                          int resume = 0, int debug_level = 0);

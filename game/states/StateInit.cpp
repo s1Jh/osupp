@@ -42,7 +42,7 @@ int State<GameState::Init>::update(double)
     }
 
     for (; i < end; i++) {
-        ctx.maps.push_back(ctx.resources.get<MapInfo>(filesToLoad[i]));
+        ctx.maps.push_back(ctx.resources.get<MapInfo>(filesToLoad[i].string()));
     }
     lastLoaded = i++;
 
@@ -75,7 +75,7 @@ int State<GameState::Init>::init(GameState)
     auto &ctx = GetContext();
     auto &resources = ctx.resources;
 
-    auto pathStr = ctx.settings.addSetting<std::string>("setting.paths", "", SettingFlags::WriteToFile).get();
+    auto pathStr = ctx.settings.addSetting<std::string>("setting.paths", "", SettingFlags::WRITE_TO_FILE).get();
     const auto &paths = GetCharacterSeparatedValues(pathStr, ',');
 
     std::string skin = ctx.settings.addSetting<std::string>("setting.user.skin", "default").get();
@@ -90,7 +90,7 @@ int State<GameState::Init>::init(GameState)
         resources.addSearchPath(profilesDirectory);
     }
 
-    filesToLoad = resources.findFiles("songs", detail::ResourcePile<MapInfo>::allowedFileExtensions);
+    filesToLoad = resources.findFiles("songs", Resource<MapInfo>::allowedExtensions);
 
     ctx.activeSkin = resources.get<Skin>(skin);
 

@@ -52,12 +52,12 @@ constexpr FPS_t operator ""_fps(unsigned long long int val)
 
 enum class AnimationLayout: bool
 {
-    Horizontal, Vertical
+    HORIZONTAL, VERTICAL
 };
 
 enum BlendMode
 {
-    None, Multiply, Add, Subtract
+    NONE, MULTIPLY, ADD, SUBTRACT
 };
 
 namespace detail

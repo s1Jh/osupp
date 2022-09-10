@@ -36,25 +36,25 @@
 NS_BEGIN
 
 #define SETTING_TYPES \
-	SETTING_TYPE(Boolean, bool) \
-	SETTING_TYPE(Integer, int) \
-	SETTING_TYPE(Float, float) \
-	SETTING_TYPE(String, std::string) \
-	SETTING_TYPE(Color, color)
+	SETTING_TYPE(BOOLEAN, bool) \
+	SETTING_TYPE(INTEGER, int) \
+	SETTING_TYPE(FLOAT, float) \
+	SETTING_TYPE(STRING, std::string) \
+	SETTING_TYPE(COLOR, color)
 
 enum class SettingType
 {
-    None,
+    NONE,
 #define SETTING_TYPE(Name, Storage) Name,
 	SETTING_TYPES
 #undef SETTING_TYPE
 };
 
 enum class SettingFlags {
-	None = 0,
-	WriteToFile = 1 << 0,
-	Readonly = 1 << 1,
-	Hidden = 1 << 2,
+	NONE = 0,
+	WRITE_TO_FILE = 1 << 0,
+	READONLY = 1 << 1,
+	HIDDEN = 1 << 2,
 };
 
 ENABLE_BITMASK_OPERATORS(SettingFlags);
@@ -67,6 +67,8 @@ public:
     explicit BaseSetting(SettingType typeIn) noexcept;
 
     [[nodiscard]] SettingType getType() const;
+
+	virtual bool wasChanged();
 
 private:
     const SettingType type;
@@ -97,13 +99,13 @@ struct SettingMetadataFields
     const static ConstraintFunction applyConstraints;
 
     U initial{};
-	SettingFlags flags{SettingFlags::WriteToFile | SettingFlags::Readonly};
+	SettingFlags flags{SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY};
 };
 
 }
 
 template<>
-struct SettingMetadata<float>: public detail::SettingMetadataFields<float, SettingType::Float>
+struct SettingMetadata<float>: public detail::SettingMetadataFields<float, SettingType::FLOAT>
 {
     float min{0};
     float max{1};
@@ -111,25 +113,25 @@ struct SettingMetadata<float>: public detail::SettingMetadataFields<float, Setti
 };
 
 template<>
-struct SettingMetadata<int>: public detail::SettingMetadataFields<int, SettingType::Integer>
+struct SettingMetadata<int>: public detail::SettingMetadataFields<int, SettingType::INTEGER>
 {
     int min{0};
     int max{1};
 };
 
 template<>
-struct SettingMetadata<color>: public detail::SettingMetadataFields<color, SettingType::Color>
+struct SettingMetadata<color>: public detail::SettingMetadataFields<color, SettingType::COLOR>
 {
     std::vector<color> palette = {};
 };
 
 template<>
-struct SettingMetadata<bool>: public detail::SettingMetadataFields<bool, SettingType::Boolean>
+struct SettingMetadata<bool>: public detail::SettingMetadataFields<bool, SettingType::BOOLEAN>
 {
 };
 
 template<>
-struct SettingMetadata<std::string>: public detail::SettingMetadataFields<std::string, SettingType::String>
+struct SettingMetadata<std::string>: public detail::SettingMetadataFields<std::string, SettingType::STRING>
 {
     std::vector<std::string> options = {};
 };
@@ -156,8 +158,10 @@ public:
 
     SettingMetadata<T> getMetadata() const;
 
+	bool wasChanged() override;
+
     Setting<T> &operator=(const T &right);
-    Setting<T> &operator=(Setting<T> &&right) noexcept ;
+    Setting<T> &operator=(Setting<T> &&right) noexcept;
 
 private:
     template<typename U>
@@ -166,6 +170,7 @@ private:
         U value;
         SettingMetadata<U> meta;
         std::mutex mutex{};
+		bool changed{false};
     };
 
     std::shared_ptr<SettingContainer<T>> held;
@@ -174,7 +179,7 @@ private:
 template<typename T>
 requires std::is_default_constructible_v<T>
 Setting<T>::Setting()
-    : BaseSetting(SettingType::None), held(nullptr)
+    : BaseSetting(SettingType::NONE), held(nullptr)
 {}
 
 template<typename T>
@@ -196,7 +201,7 @@ Setting<T>::Setting(SettingMetadata<T> meta)
     BaseSetting(meta.type)
 {
     held = std::make_shared<SettingContainer<T>>(std::move(T{}), std::move(meta));
-    set(held->meta.initial);
+    held->value = held->meta.applyConstraints(held->meta, held->meta.initial);
 }
 
 template<typename T>
@@ -212,7 +217,10 @@ requires std::is_default_constructible_v<T>
 void Setting<T>::set(const T &newValue)
 {
     std::scoped_lock<std::mutex> lock(held->mutex);
-    held->value = held->meta.applyConstraints(held->meta, newValue);
+	if (held->value != newValue) {
+		held->value = held->meta.applyConstraints(held->meta, newValue);
+		held->changed = true;
+	}
 }
 
 template<typename T>
@@ -278,6 +286,15 @@ requires std::is_default_constructible_v<T>
 T *Setting<T>::getPtr() const
 {
     return &held->value;
+}
+
+template<typename T>
+requires std::is_default_constructible_v<T>
+bool Setting<T>::wasChanged()
+{
+	auto oldValue = held->changed;
+	held->changed = false;
+	return oldValue;
 }
 
 NS_END

@@ -28,32 +28,30 @@
 
 NS_BEGIN
 
-template<> const std::vector<std::string> detail::ResourcePile<Texture>::allowedFileExtensions = {".png", ".jpg"};
+//template<> const std::vector<std::string> detail::ResourcePile<Texture>::allowedFileExtensions = {".png", ".jpg"};
+//
+//template<> const std::vector<std::string> detail::ResourcePile<Shader>::allowedFileExtensions = {".shader"};
+//
+//template<> const std::vector<std::string> detail::ResourcePile<Mesh>::allowedFileExtensions = {".obj"};
+//
+//template<> const std::vector<std::string> detail::ResourcePile<Skin>::allowedFileExtensions = {".skin"};
+//
+//template<> const std::vector<std::string> detail::ResourcePile<SoundSample>::allowedFileExtensions =
+//	{".wav", ".mp3", ".ogg"};
+//
+//template<> const std::vector<std::string> detail::ResourcePile<SoundStream>::allowedFileExtensions =
+//	{".wav", ".mp3", ".ogg"};
 
-template<> const std::vector<std::string> detail::ResourcePile<Shader>::allowedFileExtensions = {".shader"};
-
-template<> const std::vector<std::string> detail::ResourcePile<Mesh>::allowedFileExtensions = {".obj"};
-
-template<> const std::vector<std::string> detail::ResourcePile<MapInfo>::allowedFileExtensions = {".map", ".osu"};
-
-template<> const std::vector<std::string> detail::ResourcePile<Skin>::allowedFileExtensions = {".skin"};
-
-template<> const std::vector<std::string> detail::ResourcePile<SoundSample>::allowedFileExtensions =
-	{".wav", ".mp3", ".ogg"};
-
-template<> const std::vector<std::string> detail::ResourcePile<SoundStream>::allowedFileExtensions =
-	{".wav", ".mp3", ".ogg"};
-
-int Resources::loadPersistentAssets()
-{
-    int success = 0;
-
-#define RESOURCE_POOL(_Type, _Name, ...) success += (_Name).loadPersistent();
-    RESOURCE_POOLS
-#undef RESOURCE_POOL
-
-    return success;
-}
+//int Resources::loadPersistentAssets()
+//{
+//    int success = 0;
+//
+//#define RESOURCE_POOL(_Type, _Name, ...) success += (_Name).loadPersistent();
+//    RESOURCE_POOLS
+//#undef RESOURCE_POOL
+//
+//    return success;
+//}
 
 void Resources::addSearchPath(const std::filesystem::path &path)
 {
@@ -138,14 +136,6 @@ Resources::findFiles(const std::filesystem::path &pathPrefix,
     return ret;
 }
 
-Resources::Resources()
-    :
-#define RESOURCE_POOL(_Type, _Name, ...) _Name(*this),
-    RESOURCE_POOLS
-#undef RESOURCE_POOL
-    searchPaths()
-{}
-
 unsigned int Resources::purgeUnusedFiles()
 {
     unsigned int total = 0;
@@ -155,6 +145,26 @@ unsigned int Resources::purgeUnusedFiles()
 #undef RESOURCE_POOL
 
     return total;
+}
+
+void Resources::drawDebugDialog(bool *open) const
+{
+	if (ImGui::Begin("Resources", open)) {
+
+		if (ImGui::BeginTabBar("#resourcetabs")) {
+#define RESOURCE_POOL(_Type, _Name, ...) \
+			if (ImGui::BeginTabItem(#_Name)) {     \
+				ImGui::Text("test");               \
+				ImGui::EndTabItem();               \
+			}
+
+			RESOURCE_POOLS
+#undef RESOURCE_POOL
+			ImGui::EndTabBar();
+		}
+
+		ImGui::End();
+	}
 }
 
 NS_END

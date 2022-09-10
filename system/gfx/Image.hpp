@@ -29,6 +29,7 @@
 #include "Rect.hpp"
 #include "define.hpp"
 
+#include <filesystem>
 #include <memory>
 
 NS_BEGIN
@@ -38,7 +39,7 @@ class Image
 public:
     Image();
 
-    bool load(const std::string &path);
+    bool load(const std::filesystem::path &path);
 
     bool resize(int width, int height);
 

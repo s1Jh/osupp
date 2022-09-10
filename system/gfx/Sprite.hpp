@@ -68,7 +68,7 @@ class Sprite
 public:
     Sprite();
 
-    explicit Sprite(const TextureP &tex);
+    explicit Sprite(const Resource<Texture> &tex);
     // Sprite ( const df2& def );
 
     template<class Animator, class... Args>
@@ -86,7 +86,7 @@ public:
 
     void update(double delta);
 
-    void setTexture(const TextureP &tex);
+    void setTexture(const Resource<Texture> &tex);
 
     void setClipRectSize(const dsize &n);
 
@@ -120,7 +120,7 @@ public:
 
     [[nodiscard]] drect getClipRect() const;
 
-    [[nodiscard]] TextureP getTexture() const;
+    [[nodiscard]] Resource<Texture> getTexture() const;
 
     [[nodiscard]] dvec2d getPosition() const;
 
@@ -146,7 +146,7 @@ private:
     fvec2d pivotPoint;
     drect position;
     drect clippingRect;
-    TextureP texture;
+	Resource<Texture> texture;
 };
 
 BEGIN_RENDER_FUNCTOR_DECL(Sprite, const Mat3f& = MAT3_NO_TRANSFORM<float>)

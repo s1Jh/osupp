@@ -36,14 +36,14 @@ class Resources;
 namespace detail
 {
 
-template<typename T> requires IsResource<T>
+template<typename T>
 struct ResourcePile
 {
-    using StorageT = std::shared_ptr<T>;
+    using StorageT = Resource<T>;
 
-    explicit ResourcePile(Resources &res);
+//    explicit ResourcePile(Resources &res);
 
-    int loadPersistent();
+//    int loadPersistent();
 
     [[nodiscard]] StorageT get(const std::string &name) const;
 
@@ -51,16 +51,16 @@ struct ResourcePile
 
     [[nodiscard]] StorageT load(const std::string &name, const std::filesystem::path &path);
 
-    [[nodiscard]] StorageT getDefault() const;
+//    [[nodiscard]] StorageT getDefault() const;
 
     void loadOne(const std::string &name, const std::filesystem::path &pathPrefix = "");
 
     unsigned int purgeUnusedFiles();
 
-    static const std::vector<std::string> allowedFileExtensions;
+//    static const std::vector<std::string> allowedFileExtensions;
     std::unordered_map<std::string, StorageT> loadedAssets;
-    StorageT null;
-    Resources &resourceRef;
+//    StorageT null;
+//    Resources &resourceRef;
 };
 
 } // namespace detail

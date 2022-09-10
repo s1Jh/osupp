@@ -34,14 +34,11 @@
 
 NS_BEGIN
 
-class MapInfo: public detail::Resource
+class MapInfo
 {
+	friend Resource<MapInfo> Load<MapInfo>(const std::filesystem::path &);
 public:
     using StorageT = std::list<std::shared_ptr<BaseObjectTemplate>>;
-
-    bool load(const std::filesystem::path &path) override;
-
-    bool create() override;
 
     [[nodiscard]] const StorageT &getObjectTemplates() const;
 
@@ -174,6 +171,9 @@ private:
     StorageT objectTemplates;
 };
 
-using MapInfoP = std::shared_ptr<MapInfo>;
+template<>
+Resource<MapInfo> Load(const std::filesystem::path &);
+
+template<> const std::vector<std::string> Resource<MapInfo>::allowedExtensions;
 
 NS_END

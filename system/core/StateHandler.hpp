@@ -26,6 +26,7 @@
 #include "State.hpp"
 
 #include <memory>
+#include <string>
 
 NS_BEGIN
 

@@ -24,30 +24,113 @@
 
 #include "define.hpp"
 
+#include <memory>
+#include <vector>
 #include <string>
 #include <filesystem>
 
 NS_BEGIN
 class Resources;
 
-namespace detail
-{
+template <typename T> class Resource;
 
+template <typename T> Resource<T> Default();
+template <typename T> Resource<T> Load(const std::filesystem::path&);
+template <typename T> Resource<T> Create();
+
+template <typename T>
 class Resource
 {
+	friend Resource<T> Load <T>(const std::filesystem::path& path);
+	friend Resource<T> Create <T>();
+	friend Resource<T> Default <T>();
 public:
-    Resource() = default;
+	Resource()
+	{
+		held = std::make_shared<T>();
+	}
 
-    virtual ~Resource() = default;
+	Resource(nullptr_t)
+	{
+		held = Default<T>().held;
+	}
 
-    virtual bool load(const std::filesystem::path &path) = 0;
+	operator bool () const
+	{
+		return (held != defaultValue.held) && held;
+	}
 
-    virtual bool create() = 0;
+	operator std::weak_ptr<T> () const
+	{
+		return {held};
+	}
+
+	std::weak_ptr<T> ref () const
+	{
+		return {held};
+	}
+
+	T* operator -> () const
+	{
+		return held.get();
+	}
+
+	T* get () const
+	{
+		return held.get();
+	}
+
+	T& operator* () const
+	{
+		return *held;
+	}
+
+	auto useCount() const
+	{
+		return held.use_count();
+	}
+
+	static const std::vector<std::string> allowedExtensions;
+
+protected:
+	Resource(nullptr_t, nullptr_t)
+	{
+		held = nullptr;
+	}
+
+	using ResourceT = Resource<T>;
+
+	std::shared_ptr<T> held;
+	static Resource<T> defaultValue;
 };
 
-} // namespace detail
+template <typename T>
+Resource<T> Resource<T>::defaultValue{ nullptr, nullptr };
+template <typename T>
+const std::vector<std::string> Resource<T>::allowedExtensions;
 
-template<typename T>
-concept IsResource = std::is_base_of_v<detail::Resource, T> and std::is_default_constructible_v<T>;
+template <typename T>
+Resource<T> Create() { return {}; }
+
+template <typename T>
+Resource<T> Load(const std::filesystem::path&)
+{
+	WRAP_CONSTEXPR_ASSERTION("Load method not overridden for T.");
+	return {};
+}
+
+template <typename T>
+Resource<T> Default()
+{
+	auto& d = Resource<T>::defaultValue;
+	if (!d.held) {
+		// HACK: To prevent infinite recursion, we make sure the pointer
+		// is valid, so that subsequent default checks don't try to create
+		// it as well.
+		d.held = std::make_shared<T>();
+		d = Create<T>();
+	}
+	return d;
+}
 
 NS_END

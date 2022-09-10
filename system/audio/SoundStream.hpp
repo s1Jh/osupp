@@ -33,12 +33,12 @@ NS_BEGIN
 
 class SoundStream : public detail::BaseSound
 {
+	friend Resource<SoundStream> Load<SoundStream>(const std::filesystem::path &path);
+	friend Resource<SoundStream> Create<SoundStream>();
 public:
-	bool load(const std::filesystem::path &path) override;
-	bool create() override;
 	[[nodiscard]] SoundType getType() const override;
 
-	~SoundStream() override;
+	~SoundStream();
 
 protected:
 	void reset() override;
@@ -50,6 +50,12 @@ private:
 	FFmpegCtx ctx;
 };
 
-using SoundStreamP = std::shared_ptr<SoundStream>;
+template <>
+Resource<SoundStream> Load(const std::filesystem::path &path);
+
+template <>
+Resource<SoundStream> Create();
+
+template<> const std::vector<std::string> Resource<SoundStream>::allowedExtensions;
 
 NS_END

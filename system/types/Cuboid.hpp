@@ -74,7 +74,7 @@ template<typename T>
 struct IsShape<cuboid<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Cuboid;
+    static const ShapeType type = ShapeType::CUBOID;
 };
 
 NS_END

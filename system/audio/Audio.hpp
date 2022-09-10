@@ -37,17 +37,17 @@ constexpr unsigned int DEFAULT_SFX_CHANNELS = 16;
 constexpr unsigned int AUDIO_STREAMING_BUFFERS = 4;
 
 enum class SampleFormat {
-	IsStereo = 0b001,
-	Type = 0b110,
+	IS_STEREO = 0b001,
+	TYPE = 0b110,
 
-	Type8 = 0 << 1,
-	Type16 = 1 << 1,
+	TYPE8 = 0 << 1,
+	TYPE16 = 1 << 1,
 
-	Mono8 = Type8,
-	Mono16 = Type16,
+	MONO8 = TYPE8,
+	MONO16 = TYPE16,
 
-	Stereo8 = Type8 | IsStereo,
-	Stereo16 = Type16 | IsStereo,
+	STEREO8 = TYPE8 | IS_STEREO,
+	STEREO16 = TYPE16 | IS_STEREO,
 };
 
 ENABLE_BITMASK_OPERATORS(SampleFormat)
@@ -86,36 +86,26 @@ struct SampleInfo<StereoSample<Type>> { \
 	const static size_t size = sizeof(StereoSample<Type>); \
 };
 
-DECLARE_MONO_SAMPLE_INFO(uint8_t, SampleFormat::Mono8)
-DECLARE_MONO_SAMPLE_INFO(int16_t, SampleFormat::Mono16)
+DECLARE_MONO_SAMPLE_INFO(uint8_t, SampleFormat::MONO8)
+DECLARE_MONO_SAMPLE_INFO(int16_t, SampleFormat::MONO16)
 
-DECLARE_STEREO_SAMPLE_INFO(uint8_t, SampleFormat::Stereo8)
-DECLARE_STEREO_SAMPLE_INFO(int16_t, SampleFormat::Stereo16)
+DECLARE_STEREO_SAMPLE_INFO(uint8_t, SampleFormat::STEREO8)
+DECLARE_STEREO_SAMPLE_INFO(int16_t, SampleFormat::STEREO16)
 
 enum class SoundType {
-	Sample, Stream, Record
+	SAMPLE, STREAM, RECORD
 };
 
 enum class SoundPriority {
-	VeryLow, Low, Medium, High, VeryHigh
+	VERY_LOW, LOW, MEDIUM, HIGH, VERY_HIGH
 };
 
 enum class ChannelState {
-	Free, Playing, Paused, Stopped
+	FREE, PLAYING, PAUSED, STOPPED
 };
 
 enum class AudioDeviceType {
-	Unrecognized,
-	DisplayPort,
-	Handset,
-	HDMI,
-	Headphones,
-	Headset,
-	Line,
-	Microphone,
-	Network,
-	SPDIF,
-	Speakers
+	UNRECOGNIZED, DISPLAY_PORT, HANDSET, HDMI, HEADPHONES, HEADSET, LINE, MICROPHONE, NETWORK, SPDIF, SPEAKERS
 };
 
 struct AudioDeviceSpec {

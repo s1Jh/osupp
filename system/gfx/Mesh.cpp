@@ -25,14 +25,9 @@
 #include <fstream>
 #include <sstream>
 #include <utility>
-
-#include <GL/glew.h>
-
-#define GLFW_DLL
-
-#include <GLFW/glfw3.h>
 #include <filesystem>
 
+#include "GL.hpp"
 #include "Line.hpp"
 #include "Math.hpp"
 #include "MeshLoaders.hpp"
@@ -49,7 +44,7 @@ void Mesh::clear() noexcept
 {
     vertices.clear();
     indices.clear();
-    dataDescriptors = {AttributeType::Vec3}; // just position
+    dataDescriptors = {AttributeType::VEC3}; // just position
     totalDataPerVertex = 3;
 };
 
@@ -158,6 +153,9 @@ void Mesh::deleteMesh()
 
 bool Mesh::upload()
 {
+	if (!detail::EnsureOpenGL())
+		return false;
+
     data.reset(new GLObjs, GLObjDeleter);
     deleteMesh();
 
@@ -270,18 +268,29 @@ void Mesh::GLObjDeleter(Mesh::GLObjs *obj)
     CheckGLh("Buffer deletion");
 }
 
-bool Mesh::load(const std::filesystem::path &path)
+template<>
+Resource<Mesh> Load(const std::filesystem::path &path)
 {
-    return LoadOBJ(path, *this);
+	Resource<Mesh> r;
+    if (!LoadOBJ(path, *r.held))
+		return Resource<Mesh>(nullptr);
+
+	return r;
 }
 
-bool Mesh::create()
+template<>
+Resource<Mesh> Create()
 {
-    setAttributeDescriptors({AttributeType::Vec2});
-    insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
-    insertIndices({0, 1, 2});
+	Resource<Mesh> r;
+    r.held->setAttributeDescriptors({AttributeType::VEC2});
+	r.held->insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
+	r.held->insertIndices({0, 1, 2});
 
-    return upload();
+    if (!r.held->upload())
+		return Resource<Mesh>(nullptr);
+
+	return r;
+
 }
 
 void detail::RenderFunctor<Mesh>::operator()(Renderer &renderer,

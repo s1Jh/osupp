@@ -30,10 +30,9 @@ NS_BEGIN
 
 class SoundSample : public detail::BaseSound
 {
+	friend Resource<SoundSample> Load<SoundSample>(const std::filesystem::path &path);
+	friend Resource<SoundSample> Create<SoundSample>();
 public:
-	~SoundSample() override = default;
-	bool load(const std::filesystem::path &path) override;
-	bool create() override;
 	[[nodiscard]] SoundType getType() const override;
 
 protected:
@@ -45,6 +44,12 @@ private:
 	BufferT data;
 };
 
-using SoundSampleP = std::shared_ptr<SoundSample>;
+template <>
+Resource<SoundSample> Load(const std::filesystem::path &path);
+
+template <>
+Resource<SoundSample> Create();
+
+template<> const std::vector<std::string> Resource<SoundSample>::allowedExtensions;
 
 NS_END

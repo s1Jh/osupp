@@ -73,7 +73,7 @@ template<typename T>
 struct IsShape<sphere<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Sphere;
+    static const ShapeType type = ShapeType::SPHERE;
 };
 
 NS_END

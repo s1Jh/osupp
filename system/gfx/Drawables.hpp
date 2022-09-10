@@ -52,7 +52,7 @@ struct VisualAppearance
 {
     const Texture *texture = nullptr;
     const Mat3f *uvTransform = nullptr;
-    BlendMode blendMode = BlendMode::Multiply;
+    BlendMode blendMode = BlendMode::MULTIPLY;
     color fillColor = WHITE;
     float outlineWidth = 0.01f;
     color outlineColor = BLACK;
@@ -63,7 +63,7 @@ constexpr VisualAppearance DEFAULT_APPEARANCE =
     VisualAppearance{
         .texture = nullptr,
         .uvTransform = nullptr,
-        .blendMode = BlendMode::None,
+        .blendMode = BlendMode::NONE,
         .fillColor = WHITE,
         .outlineWidth = 0.01f,
         .outlineColor = BLACK,
@@ -73,7 +73,7 @@ constexpr VisualAppearance DEFAULT_APPEARANCE =
 namespace detail
 {
 
-void DrawGeneric2DShape(const Renderer &renderer, const Shader &shader, const Mesh &mesh,
+void DrawGeneric2DShape(const Renderer &renderer, const Mesh &mesh,
                         const Mat3f &shape, const VisualAppearance &appearance,
                         const Mat3f &transform,
                         RenderMode mode = RenderMode::Triangles);

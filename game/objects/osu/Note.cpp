@@ -40,10 +40,10 @@ HitResult Note::onFinish()
 {
     if (!wasHit) {
         // object wasn't hit, return miss
-		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss);
-        return HitResult::Missed;
+		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
+        return HitResult::MISSED;
     }
-	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit);
+	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
     // negative if hit before the start time
     double hitDelta = getTimeStarted() - getStartTime();
     // should be in the interval < -hitWindow; +hitWindow >
@@ -93,7 +93,7 @@ void Note::onReset()
 
 HitObjectFunction Note::getActivationFunction() const
 {
-	return HitObjectFunction::ButtonPressed | HitObjectFunction::CursorEnter;
+	return HitObjectFunction::BUTTON_PRESSED | HitObjectFunction::CURSOR_ENTER;
 }
 
 NS_END

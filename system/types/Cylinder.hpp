@@ -66,6 +66,6 @@ template<typename T>
 struct IsShape<cylinder<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Cylinder;
+    static const ShapeType type = ShapeType::CYLINDER;
 };
 }

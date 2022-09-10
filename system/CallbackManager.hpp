@@ -57,7 +57,7 @@ auto wrap(const CLOSURE &fn)
 
 enum class CallbackReturn
 {
-    Ok, Unsubscribe
+    OK, UNSUBSCRIBE
 };
 
 template<class CBGroup, CBGroup CBType, typename... Parameters> requires std::is_enum_v<CBGroup>
@@ -220,7 +220,7 @@ protected:
                     ret = bound();
                 }
 
-                if (ret == CallbackReturn::Unsubscribe)
+                if (ret == CallbackReturn::UNSUBSCRIBE)
                     handle->markedForDeletion = true;
             }
         }
@@ -308,7 +308,7 @@ protected:
                     ret = ((HandleType *) handle.get())->function(params...);
                 }
 
-                if (ret == CallbackReturn::Unsubscribe)
+                if (ret == CallbackReturn::UNSUBSCRIBE)
                     handle->markedForDeletion = true;
             }
         }

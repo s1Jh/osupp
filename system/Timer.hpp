@@ -13,12 +13,12 @@ NS_BEGIN
 
 enum class TimerCallbacks
 {
-    TimerDone
+    TIMER_DONE
 };
 
 enum class TimerMode
 {
-    Single, Repeat, Manual
+    SINGLE, REPEAT, MANUAL
 };
 
 class Timer;
@@ -55,7 +55,7 @@ class Timer : public detail::Callbacks<TimerCallbacks>, public detail::TimerCont
     friend class TimerControl;
 public:
     Timer();
-    explicit Timer(double time, TimerMode mode = TimerMode::Repeat, bool start = false);
+    explicit Timer(double time, TimerMode mode = TimerMode::REPEAT, bool start = false);
 
     Timer(Timer&);
     Timer(Timer&&) noexcept;
@@ -92,6 +92,6 @@ protected:
 	std::atomic<bool> wasDone;
 };
 
-MAKE_CALLBACK(TimerCallbacks, TimerCallbacks::TimerDone, Timer*)
+MAKE_CALLBACK(TimerCallbacks, TimerCallbacks::TIMER_DONE, Timer*)
 
 NS_END

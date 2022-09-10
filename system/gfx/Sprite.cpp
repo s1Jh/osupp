@@ -55,7 +55,7 @@ Sprite::Sprite()
       position(UNIT_RECT<float>), clippingRect(UNIT_RECT<float>), texture(nullptr)
 {}
 
-Sprite::Sprite(const TextureP &tex)
+Sprite::Sprite(const Resource<Texture> &tex)
     : tint(WHITE), disabled(false), rotation(0.0), pivotPoint({0, 0}),
       position(UNIT_RECT<float>), clippingRect(UNIT_RECT<float>), texture(nullptr)
 {
@@ -85,7 +85,7 @@ void Sprite::update(double delta)
             animators.end());
 }
 
-void Sprite::setTexture(const TextureP &tex)
+void Sprite::setTexture(const Resource<Texture> &tex)
 {
     texture = tex;
     clippingRect = UNIT_RECT<float>;
@@ -135,7 +135,7 @@ dvec2d Sprite::getClipRectPosition() const
 drect Sprite::getClipRect() const
 { return clippingRect; }
 
-TextureP Sprite::getTexture() const
+Resource<Texture> Sprite::getTexture() const
 { return texture; }
 
 dvec2d Sprite::getPosition() const
@@ -189,7 +189,7 @@ const drect &Sprite::getRect() const
 
 BEGIN_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(Sprite)
 {
-    shader.load("sprite.shader");
+//    shader.load("sprite.shader");
 }
 
 void detail::RenderFunctor<Sprite>::operator()(Renderer &renderer, const Sprite &sprite, const Mat3f &transform)

@@ -23,7 +23,7 @@
 #include "Util.hpp"
 #include "AnimateTexture.hpp"
 
-#include <GL/glew.h>
+#include "GL.hpp"
 
 #define GLFW_DLL
 
@@ -52,7 +52,6 @@ int CheckGLFWErrors(const std::string &file, int line,
 unsigned int CheckGLErrors(const std::string &file, int line,
                          const std::string &helper)
 {
-    LOG_ENTER("GL");
     GLenum error = glGetError();
     const char *err_str;
     if (error != 0) {

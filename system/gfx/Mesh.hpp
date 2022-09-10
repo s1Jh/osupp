@@ -36,7 +36,7 @@ NS_BEGIN
 
 enum class AttributeType
 {
-    Scalar = 1, Vec2, Vec3, Vec4, Color = Vec4
+    SCALAR = 1, VEC2, VEC3, VEC4, COLOR = VEC4
 };
 
 // direct mapping to opengl render modes
@@ -54,14 +54,10 @@ enum class RenderMode
     Polygon
 };
 
-class Mesh: public detail::Resource
+class Mesh
 {
 public:
     Mesh() noexcept;
-
-    bool load(const std::filesystem::path &path) override;
-
-    bool create() override;
 
     using Vertex = std::vector<float>;
 
@@ -135,7 +131,11 @@ private:
     std::shared_ptr<GLObjs> data;
 };
 
-using MeshP = std::shared_ptr<Mesh>;
+template<>
+Resource<Mesh> Load(const std::filesystem::path &path);
+
+template<>
+Resource<Mesh> Create();
 
 BEGIN_RENDER_FUNCTOR_DECL(Mesh, const Shader &shader,
                           const Shader::Uniforms &shaderUniforms = {},

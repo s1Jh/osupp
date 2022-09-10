@@ -22,12 +22,22 @@
 #include "GraphicsContext.hpp"
 
 #include <mutex>
-#include <GL/glew.h>
+
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
+#include <cstring>
 
+#include "GL.hpp"
 #include "Log.hpp"
 #include "Util.hpp"
+
+#define GLEXT(ret, name, ...) name##proc * gl##name;
+
+GL_FUNC_LIST_SHARED
+GL_FUNC_LIST_LINUX
+GL_FUNC_LIST_WIN32
+
+#undef GLEXT
 
 NS_BEGIN
 
@@ -47,7 +57,7 @@ void OnGLFWError(int code, const char *msg)
 	log::error("GLFW: [", code, "] ", msg);
 }
 
-WindowHandle* EnsureGraphicalContext() {
+WindowHandle* CreateWindowHandle() {
 	std::scoped_lock<std::mutex> lock(CallMutex);
 	WindowHandle *handle;
 	if (GraphicsUsers <= 0) {
@@ -80,14 +90,14 @@ WindowHandle* EnsureGraphicalContext() {
 		glfwSetWindowSizeCallback(TO_GLFW(handle), reinterpret_cast<GLFWwindowsizefun>(OnGLFWResize));
 		glfwMakeContextCurrent(TO_GLFW(handle));
 
-		if (glewInit() != GLEW_OK) {
-			log::error("Failed to load GLEW");
+		if (!EnsureOpenGL()) {
+			log::error("Failed to load OpenGL");
 			glfwDestroyWindow(TO_GLFW(handle));
 			return nullptr;
 		}
 
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_ALWAYS);
+		glDepthFunc(GL_LEQUAL);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 #ifdef DEBUG
@@ -117,6 +127,104 @@ bool FreeGraphicalContext(WindowHandle* handle) {
 		glfwTerminate();
 	}
 	return true;
+}
+
+bool EnsureOpenGL()
+{
+	static bool isInit;
+
+	if (isInit)
+	{
+		return true;
+	}
+
+	isInit = true;
+	int failedFunctions = 0;
+
+	log::info("[GL] Loading OpenGL functions");
+#if defined(LINUX)
+	void* libGL = dlopen("libGL.so", RTLD_LAZY);
+	if (!libGL)
+	{
+		log::error("[GL] libGL.so couldn't be loaded");
+		return false;
+	}
+
+#define GLEXT(ret, name, ...)                                              \
+    gl##name = (name##proc *) dlsym(libGL, "gl" #name);                    \
+    if (!gl##name) {                                                       \
+        log::error("[GL] Function gl" #name " couldn't be loaded from libGL.so"); \
+        failedFunctions++; \
+    }
+
+	GL_FUNC_LIST_SHARED
+	GL_FUNC_LIST_LINUX
+
+#undef GLE
+
+#elif defined(WINDOWS)
+	HMODULE dll = LoadLibraryA("opengl32.dll");
+    typedef PROC WINAPI wglGetProcAddressproc(LPCSTR lpszProc);
+    if (!dll)
+    {
+        log::error("[GL] opengl32.dll not found.");
+        return false;
+    }
+    wglGetProcAddressproc* wglGetProcAddress =
+        (wglGetProcAddressproc*)GetProcAddress(dll, "wglGetProcAddress");
+	glGenerateTextureMipmap = (GenerateTextureMipmapproc*) GetProcAddress(dll, "a");
+
+#define GLEXT(ret, name, ...) \
+    gl##name = (name##proc *)wglGetProcAddress("gl" #name); \
+    if (!gl##name) { \
+		gl##name = (name##proc*)GetProcAddress(dll, "gl" #name);          \
+    }
+
+    GL_FUNC_LIST_SHARED
+    GL_FUNC_LIST_WIN32
+
+#undef GLE
+
+#else
+#error "OpenGL loading for this platform is not implemented yet."
+#endif
+
+	if (failedFunctions != 0) {
+		//log::error("Failed to load ", failedFunctions, " OpenGL functions.");
+		return false;
+	}
+	return true;
+}
+
+bool IsExtensionSupported(const char *extList, const char *extension)
+{
+	const char *start;
+	const char *where, *terminator;
+
+	/* Extension names should not have spaces. */
+	where = strchr(extension, ' ');
+	if (where || *extension == '\0')
+		return false;
+
+	/* It takes a bit of care to be fool-proof about parsing the
+		OpenGL extensions string. Don't be fooled by sub-strings,
+		etc. */
+	for (start=extList;;) {
+		where = strstr(start, extension);
+
+		if (!where)
+			break;
+
+		terminator = where + strlen(extension);
+
+		if ( where == start || *(where - 1) == ' ' )
+			if ( *terminator == ' ' || *terminator == '\0' )
+				return true;
+
+		start = terminator;
+	}
+
+	return false;
 }
 
 }

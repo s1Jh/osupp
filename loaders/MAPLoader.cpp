@@ -39,7 +39,7 @@ void ReadEvent(float &elementTime, char type, std::stringstream &line,
 
 void ReadString(std::stringstream &from, std::string &to);
 
-bool LoadMAP(const std::string &path, MapInfo &map)
+bool LoadMAP(const std::filesystem::path &path, MapInfo &map)
 {
     LOG_ENTER("MAP::LOADMAP");
 
@@ -114,7 +114,7 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
             }
 
             points.reverse();
-            map.addSlider(points, false, time, speed, CurveType::Straight, 1);
+            map.addSlider(points, false, time, speed, CurveType::STRAIGHT, 1);
             break;
         }
         case 'P': {

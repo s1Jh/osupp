@@ -4,3 +4,5 @@ cmake*/
 
 # default skin - only add once we all have custom assets
 assets/skins/default
+/build
+/out/build/x64-Debug

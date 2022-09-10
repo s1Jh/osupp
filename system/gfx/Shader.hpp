@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <string>
+#include "define.hpp"
 
 #include "Color.hpp"
 #include "Matrix.hpp"
@@ -31,7 +31,6 @@
 #include "Vec2.hpp"
 #include "Vec3.hpp"
 #include "Vec4.hpp"
-#include "define.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -39,7 +38,7 @@
 
 NS_BEGIN
 
-class Shader: public detail::Resource
+class Shader
 {
 public:
     Shader() noexcept;
@@ -49,10 +48,6 @@ public:
         const std::string &frag_src,
         const std::string &geom_src = ""
     );
-
-    bool load(const std::filesystem::path &path) override;
-
-    bool create() override;
 
     // Calls OpenGL's glUseProgram with it's id.
     void use() const;
@@ -128,6 +123,10 @@ private:
     unsigned int id;
 };
 
-using ShaderP = std::shared_ptr<Shader>;
+template<>
+Resource<Shader> Load(const std::filesystem::path &path);
+
+template<>
+Resource<Shader> Create();
 
 NS_END

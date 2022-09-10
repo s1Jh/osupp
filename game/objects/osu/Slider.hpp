@@ -35,7 +35,7 @@ constexpr double SLIDER_ANGLE_OPT_THRESHOLD = 0.05;
 
 constexpr double SLIDER_DISTANCE_OPT_THRESHOLD = 0.1;
 
-constexpr unsigned int SLIDER_STEPS_PER_CURVE_UNIT = 10;
+constexpr unsigned int SLIDER_STEPS_PER_CURVE_UNIT = 2;
 
 class Slider: public OsuHitObject<ObjectTemplateSlider>
 {
@@ -75,7 +75,7 @@ protected:
     void onPress() override;
 
 private:
-    ShaderP bodyShader;
+    Resource<Shader> bodyShader;
 
     ObjectSprite bodyTexture;
 	ObjectSprite ballRing;

@@ -46,7 +46,7 @@ NS_BEGIN
 
 enum class CurveType
 {
-    Bezier, Straight, Catmull, SemiCircle, Circle
+    BEZIER, STRAIGHT, CATMULL, SEMI_CIRCLE, CIRCLE
 };
 
 /*====================================================================================================================*/
@@ -121,7 +121,7 @@ protected:
 };
 
 template<>
-struct CurveCalculationFunctor<CurveType::Straight>
+struct CurveCalculationFunctor<CurveType::STRAIGHT>
 {
     template<typename TType, typename IteratorT, typename LengthT = double>
     requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
@@ -131,22 +131,7 @@ struct CurveCalculationFunctor<CurveType::Straight>
 };
 
 template<>
-struct CurveCalculationFunctor<CurveType::Bezier>
-{
-    template<typename TType, typename IteratorT, typename LengthT = double>
-    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
-        std::floating_point<LengthT>
-    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
-                                  TType t);
-
-protected:
-    template<typename IteratorT, typename TType>
-    requires IsCurveIterator<IteratorT> and std::floating_point<TType>
-    static vec2d<TType> bezierCalculate(IteratorT begin, IteratorT end, TType t);
-};
-
-template<>
-struct CurveCalculationFunctor<CurveType::Catmull>
+struct CurveCalculationFunctor<CurveType::BEZIER>
 {
     template<typename TType, typename IteratorT, typename LengthT = double>
     requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
@@ -156,7 +141,7 @@ struct CurveCalculationFunctor<CurveType::Catmull>
 };
 
 template<>
-struct CurveCalculationFunctor<CurveType::Circle>
+struct CurveCalculationFunctor<CurveType::CATMULL>
 {
     template<typename TType, typename IteratorT, typename LengthT = double>
     requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
@@ -166,7 +151,17 @@ struct CurveCalculationFunctor<CurveType::Circle>
 };
 
 template<>
-struct CurveCalculationFunctor<CurveType::SemiCircle>
+struct CurveCalculationFunctor<CurveType::CIRCLE>
+{
+    template<typename TType, typename IteratorT, typename LengthT = double>
+    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+        std::floating_point<LengthT>
+    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                  TType t);
+};
+
+template<>
+struct CurveCalculationFunctor<CurveType::SEMI_CIRCLE>
 {
     template<typename TType, typename IteratorT, typename LengthT = double>
     requires std::floating_point<TType> and IsCurveIterator<IteratorT> and

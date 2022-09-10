@@ -39,36 +39,36 @@ NS_BEGIN
 enum class SUIButtonFlags: uint8_t
 {
     // should this button display a icon
-    Icon = 1 << 0,
+    ICON = 1 << 0,
 
     // controls whether the button reacts to input
-    Enabled = 1 << 1,
-    Disabled = 0 << 1,
+    ENABLED = 1 << 1,
+    DISABLED = 0 << 1,
 
     // controls whether the button should appear locked
     // it will still call callbacks
-    Locked = 1 << 2,
-    Unlocked = 0 << 2,
+    LOCKED = 1 << 2,
+    UNLOCKED = 0 << 2,
 
     // controls the visibility
-    Visible = 1 << 3,
-    Hidden = 0 << 3,
+    VISIBLE = 1 << 3,
+    HIDDEN = 0 << 3,
 };
 
 ENABLE_BITMASK_OPERATORS(SUIButtonFlags)
 
-constexpr SUIButtonFlags SUIBUTTON_DEFAULT_FLAGS = SUIButtonFlags::Enabled |
-    SUIButtonFlags::Unlocked |
-    SUIButtonFlags::Visible;
+constexpr SUIButtonFlags SUIBUTTON_DEFAULT_FLAGS = SUIButtonFlags::ENABLED |
+    SUIButtonFlags::UNLOCKED |
+    SUIButtonFlags::VISIBLE;
 
 enum class ButtonCallbacks
 {
-    OnReleased,
-    OnHover,
-    OnHovering,
-    OnPressing,
-    OnPressed,
-    OnReleasing
+    ON_RELEASED,
+    ON_HOVER,
+    ON_HOVERING,
+    ON_PRESSING,
+    ON_PRESSED,
+    ON_RELEASING
 };
 
 class SUIButton;
@@ -86,15 +86,15 @@ public:
     enum class State: uint8_t
     {
         // first we're ...
-        Released,
+        RELEASED,
         // then a mouse cursor starts ...
-        Hovering,
+        HOVERING,
         // then a button is ...
-        Pressing,
+        PRESSING,
         // then it's ...
-        Pressed,
+        PRESSED,
         // after that it's ...
-        Releasing
+        RELEASING
     };
 
     SUIButton(const std::string &id, const drect &rect,

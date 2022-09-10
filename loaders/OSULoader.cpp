@@ -63,7 +63,7 @@ public:
 
     enum Section
     {
-        Metadata, HitObjects, General, TimingPoints, DontCare, Colours, Difficulty, Editor, Events
+        METADATA, HIT_OBJECTS, GENERAL, TIMING_POINTS, DONT_CARE, COLOURS, DIFFICULTY, EDITOR, EVENTS
     };
 
     static fvec2d PosConversion(fvec2d v)
@@ -102,7 +102,7 @@ public:
         std::string strLine;
         std::istringstream line(strLine);
 
-        Section section = DontCare;
+        Section section = DONT_CARE;
 
         while (!ifs.eof()) {
             std::getline(ifs, strLine);
@@ -114,31 +114,31 @@ public:
             if (strLine.starts_with('[')) {
                 Trim(strLine);
                 if (strLine == "[HitObjects]") {
-                    section = HitObjects;
+                    section = HIT_OBJECTS;
                 }
                 else if (strLine == "[General]") {
-                    section = General;
+                    section = GENERAL;
                 }
                 else if (strLine == "[Metadata]") {
-                    section = Metadata;
+                    section = METADATA;
                 }
                 else if (strLine == "[TimingPoints]") {
-                    section = TimingPoints;
+                    section = TIMING_POINTS;
                 }
                 else if (strLine == "[Editor]") {
-                    section = Editor;
+                    section = EDITOR;
                 }
                 else if (strLine == "[Difficulty]") {
-                    section = Difficulty;
+                    section = DIFFICULTY;
                 }
                 else if (strLine == "[Events]") {
-                    section = Events;
+                    section = EVENTS;
                 }
                 else if (strLine == "[Colours]") {
-                    section = Colours;
+                    section = COLOURS;
                 }
                 else {
-                    section = DontCare;
+                    section = DONT_CARE;
                 }
                 continue;
             }
@@ -146,7 +146,7 @@ public:
             line = std::istringstream(strLine);
 
             switch (section) {
-                case HitObjects: {
+                case HIT_OBJECTS: {
                     HitObject object{};
 
                     // x, y, time, type, hitSound, objectParams, hitSample
@@ -170,7 +170,7 @@ public:
                     hitObjectParams.push_back(std::move(object));
                     break;
                 }
-                case TimingPoints: {
+                case TIMING_POINTS: {
                     TimingPoint point{};
 
                     // time, beatLength, meter, sampleSet, sampleIndex, volume, uninherited, effects
@@ -189,9 +189,9 @@ public:
 
                     break;
                 }
-                case General:
-                case Metadata:
-                case Difficulty: {
+                case GENERAL:
+                case METADATA:
+                case DIFFICULTY: {
                     auto values = GetCharacterSeparatedValues(strLine, ':');
                     if (values.size() >= 2) {
                         auto &key = values[0];
@@ -205,11 +205,27 @@ public:
                     break;
                 }
                     // TODO:
-                case Events:
-                case Editor:
+                case EVENTS: {
+					auto params = GetCharacterSeparatedValues(strLine, ',');
+
+					int type = GetParam<int>(params, 0, -1);
+					if (type == -1) {
+						// the event type, might be a string
+						auto videoException = GetParam<std::string>(params, 0, "");
+						if (videoException == "Video") {
+							type = 1;
+						} else {
+							log::error("Event type could not be determined");
+						}
+					}
+					double startTime = TimeConversion(GetParam<int>(params, 1, 0));
+					if (params.size() > 2)
+						auto extraParams = std::vector(std::next(params.begin(), 2), std::prev(params.end()));
+				}
+                case EDITOR:
                     break;
 
-                case DontCare:
+                case DONT_CARE:
                 default:
                     break;
             }
@@ -372,22 +388,22 @@ public:
                 // TODO: uncomment once all types of curve interpolation are finished
                 switch (curveType.front()) {
                     case 'B':
-                        type = CurveType::Bezier;
+                        type = CurveType::BEZIER;
                         break;
                     case 'C':
-                        type = CurveType::Catmull;
+                        type = CurveType::CATMULL;
                         break;
                     case 'L':
-                        type = CurveType::Straight;
+                        type = CurveType::STRAIGHT;
                         break;
                     case 'P':
-                        type = CurveType::Circle;
+                        type = CurveType::CIRCLE;
                         break;
                     default:
-                        type = CurveType::Straight;
+                        type = CurveType::STRAIGHT;
                         break;
                 }
-                type = CurveType::Bezier;
+                type = CurveType::BEZIER;
 
                 map.addSlider(path, comboEnd, object.time, endTime, type, repeats);
             }

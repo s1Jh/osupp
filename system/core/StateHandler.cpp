@@ -30,8 +30,8 @@
 NS_BEGIN
 
 StateHandler::StateHandler()
-    : currentState(GameState::None),
-      nextState(GameState::None),
+    : currentState(GameState::NONE),
+      nextState(GameState::NONE),
       currentStatePtr(nullptr)
 {}
 
@@ -42,7 +42,7 @@ int StateHandler::update(double delta)
 
     int ret = currentStatePtr->update(delta);
 
-    if (ret >= (int) GameState::None) {
+    if (ret >= (int) GameState::NONE) {
         nextState = (GameState) ret;
     }
     return ret;
@@ -63,7 +63,7 @@ void StateHandler::setState(GameState state)
 
 void StateHandler::process()
 {
-    if (nextState != GameState::None && nextState != currentState) {
+    if (nextState != GameState::NONE && nextState != currentState) {
         log::info("Setting state to ", Stringify(nextState));
 
         if (currentStatePtr != nullptr)
@@ -77,8 +77,8 @@ void StateHandler::process()
             USER_STATES
 #undef USER_STATE
 
-            case GameState::Exit:
-            case GameState::None:
+            case GameState::EXIT:
+            case GameState::NONE:
                 currentStatePtr = nullptr;
                 break;
             default:
@@ -89,16 +89,16 @@ void StateHandler::process()
         if (currentStatePtr != nullptr)
             currentStatePtr->init(oldState);
     }
-    nextState = GameState::None;
+    nextState = GameState::NONE;
 }
 
 bool StateHandler::isRunning() const
 {
-    return currentState != GameState::Exit;
+    return currentState != GameState::EXIT;
 }
 void StateHandler::exit()
 {
-    setState(GameState::Exit);
+    setState(GameState::EXIT);
 }
 
 std::string StateHandler::Stringify(const GameState &state)

@@ -25,11 +25,11 @@
 #include "define.hpp"
 
 #include "MapInfo.hpp"
-#include <string>
+#include <filesystem>
 
 NS_BEGIN
 
-bool LoadMAP(const std::string &fpath, MapInfo &map);
+bool LoadMAP(const std::filesystem::path& fpath, MapInfo &map);
 
 bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map);
 

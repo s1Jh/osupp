@@ -78,7 +78,7 @@ template<typename T>
 struct IsShape<polygon<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Polygon;
+    static const ShapeType type = ShapeType::POLYGON;
 };
 
 NS_END

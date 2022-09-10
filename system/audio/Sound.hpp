@@ -39,7 +39,7 @@ class Channel;
 
 namespace detail {
 
-class BaseSound : public detail::Resource {
+class BaseSound {
 	friend class ::PROJECT_NAMESPACE::Channel;
 public:
 	using SampleT = StereoSample16;

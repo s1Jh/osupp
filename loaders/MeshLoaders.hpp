@@ -26,10 +26,10 @@
 
 #include "Mesh.hpp"
 
-#include <string>
+#include <filesystem>
 
 NS_BEGIN
 
-bool LoadOBJ(const std::string &fpath, Mesh &mesh);
+bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh);
 
 NS_END

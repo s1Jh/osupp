@@ -25,6 +25,7 @@
 #define GLFW_DLL
 
 #include <GLFW/glfw3.h>
+#include <string>
 
 NS_BEGIN
 
@@ -152,21 +153,21 @@ const int Keyboard::GLFWConversionTable[KEY_COUNT] = {GLFW_KEY_LEFT_CONTROL,
                                                       GLFW_KEY_KP_9};
 
 std::ostream &operator<<(std::ostream &os, const Key &key) {
-	if ((unsigned int)key & (unsigned int)Key::Ctrl)
+	if ((unsigned int)key & (unsigned int)Key::CTRL)
 		os << "Ctrl + ";
-	if ((unsigned int)key & (unsigned int)Key::RCtrl)
+	if ((unsigned int)key & (unsigned int)Key::RCTRL)
 		os << "RCtrl + ";
-	if ((unsigned int)key & (unsigned int)Key::Alt)
+	if ((unsigned int)key & (unsigned int)Key::ALT)
 		os << "Alt + ";
-	if ((unsigned int)key & (unsigned int)Key::RAlt)
+	if ((unsigned int)key & (unsigned int)Key::RALT)
 		os << "RAlt + ";
-	if ((unsigned int)key & (unsigned int)Key::Shift)
+	if ((unsigned int)key & (unsigned int)Key::SHIFT)
 		os << "Shift + ";
-	if ((unsigned int)key & (unsigned int)Key::RShift)
+	if ((unsigned int)key & (unsigned int)Key::RSHIFT)
 		os << "RShift + ";
-	if ((unsigned int)key & (unsigned int)Key::Meta)
+	if ((unsigned int)key & (unsigned int)Key::META)
 		os << "Meta + ";
-	if ((unsigned int)key & (unsigned int)Key::RMeta)
+	if ((unsigned int)key & (unsigned int)Key::RMETA)
 		os << "RMeta + ";
 
 	Key code = Key((int)key & 0xff);
@@ -198,24 +199,24 @@ void Keyboard::update()
         // calculate the new key code
         current.code = (Key) i;
 
-        if (i >= (unsigned int) Key::Esc) {
+        if (i >= (unsigned int) Key::ESC) {
             // if the pressed key isn't a modifier, calculate the mods
-            if (keys[(int) Key::KeyShift].pressed)
-                current.code = current.code + Key::Shift;
-            if (keys[(int) Key::KeyRShift].pressed)
-                current.code = current.code + Key::RShift;
-            if (keys[(int) Key::KeyCtrl].pressed)
-                current.code = current.code + Key::Ctrl;
-            if (keys[(int) Key::KeyRCtrl].pressed)
-                current.code = current.code + Key::RCtrl;
-            if (keys[(int) Key::KeyAlt].pressed)
-                current.code = current.code + Key::Alt;
-            if (keys[(int) Key::KeyRAlt].pressed)
-                current.code = current.code + Key::RAlt;
-            if (keys[(int) Key::KeyMeta].pressed)
-                current.code = current.code + Key::Meta;
-            if (keys[(int) Key::KeyRMeta].pressed)
-                current.code = current.code + Key::RMeta;
+            if (keys[(int) Key::KEY_SHIFT].pressed)
+                current.code = current.code + Key::SHIFT;
+            if (keys[(int) Key::KEY_RSHIFT].pressed)
+                current.code = current.code + Key::RSHIFT;
+            if (keys[(int) Key::KEY_CTRL].pressed)
+                current.code = current.code + Key::CTRL;
+            if (keys[(int) Key::KEY_RCTRL].pressed)
+                current.code = current.code + Key::RCTRL;
+            if (keys[(int) Key::KEY_ALT].pressed)
+                current.code = current.code + Key::ALT;
+            if (keys[(int) Key::KEY_RALT].pressed)
+                current.code = current.code + Key::RALT;
+            if (keys[(int) Key::KEY_META].pressed)
+                current.code = current.code + Key::META;
+            if (keys[(int) Key::KEY_RMETA].pressed)
+                current.code = current.code + Key::RMETA;
         }
 
         // onFinish previous pressing/releasing ops

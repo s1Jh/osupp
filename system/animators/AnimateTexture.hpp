@@ -34,17 +34,17 @@ class AnimateTexture: public detail::BaseAnimator
 {
 public:
     AnimateTexture(Sprite &, FPS_t frameRate,
-                   AnimationLayout layout = AnimationLayout::Horizontal);
+                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
     AnimateTexture(Sprite &, float frameTime,
-                   AnimationLayout layout = AnimationLayout::Horizontal);
+                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
 
     AnimateTexture(Sprite &, FPS_t frameRate, unsigned int frameCount,
                    frect firstFrame,
-                   AnimationLayout layout = AnimationLayout::Horizontal);
+                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
 
     AnimateTexture(Sprite &, float frameTime, unsigned int frameCount,
                    frect firstFrame,
-                   AnimationLayout layout = AnimationLayout::Horizontal);
+                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
 
     void applyTransform(Sprite &sprite, double delta) override;
 

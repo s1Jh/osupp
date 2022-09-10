@@ -22,7 +22,6 @@
 #include "Image.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
-
 #include "stb/stb_image.h"
 
 #include "Util.hpp"
@@ -43,10 +42,17 @@ int Image::getChannels() const
 color8 *Image::getPixels()
 { return data.get(); }
 
-bool Image::load(const std::string &path)
+bool Image::load(const std::filesystem::path &path)
 {
 
-    data.reset((color8 *) stbi_load(path.c_str(), &width, &height, &channels,
+#ifdef LINUX
+    const char* ptr = path.c_str();
+#else
+    auto string = path.u8string();
+    const char* ptr = (const char*)string.c_str();
+#endif
+
+    data.reset((color8 *) stbi_load(ptr, &width, &height, &channels,
                                     STBI_rgb_alpha),
                deleteImage);
 

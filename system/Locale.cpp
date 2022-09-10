@@ -42,7 +42,7 @@ int Locale::loadFromFile(const std::filesystem::path &path)
 
     auto &translationClumps = clump["translations"];
     for (auto &translationClump: translationClumps) {
-        if (translationClump.second.getType() == df2::EntryType::String) {
+        if (translationClump.second.getType() == df2::EntryType::STRING) {
             translations[translationClump.first] =
                 std::move(translationClump.second.str());
 //            log::debug("[LOCALE] Added locale entry ", translationClump.first);

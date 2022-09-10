@@ -39,10 +39,10 @@ void AnimateTexture::applyTransform(org::sijh::NotOSU::Sprite &sprite,
         frameCounter %= frameCount;
     }
 
-    fvec2d offset = {layout == AnimationLayout::Horizontal
+    fvec2d offset = {layout == AnimationLayout::HORIZONTAL
                      ? start.position.x + start.size.w * float(frameCounter)
                      : 0,
-                     layout == AnimationLayout::Vertical
+                     layout == AnimationLayout::VERTICAL
                      ? start.position.y + start.size.h * float(frameCounter)
                      : 0};
     frect newClip = Translate(start, offset);
@@ -84,7 +84,7 @@ AnimateTexture::AnimateTexture(Sprite &sprite, float frameTime,
 
 void AnimateTexture::calculateRectSize(const fvec2d &size)
 {
-    if (layout == AnimationLayout::Horizontal) {
+    if (layout == AnimationLayout::HORIZONTAL) {
         frameCount =
             int(size.x / Max(size.y, std::numeric_limits<float>::epsilon()));
     }
@@ -96,8 +96,8 @@ void AnimateTexture::calculateRectSize(const fvec2d &size)
 
     auto slice = 1.0f / float(frameCount);
     start = {{
-                 layout == AnimationLayout::Horizontal ? slice : 1,
-                 layout == AnimationLayout::Horizontal ? 1 : slice,
+                 layout == AnimationLayout::HORIZONTAL ? slice : 1,
+                 layout == AnimationLayout::HORIZONTAL ? 1 : slice,
              },
              {0, 0}};
 }

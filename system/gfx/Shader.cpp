@@ -26,19 +26,17 @@
 
 #include <fstream>
 
-#include <GL/glew.h>
-
-#define GLFW_DLL
-
-#include <GLFW/glfw3.h>
-
+#include "GL.hpp"
 #include "Util.hpp"
-#include "define.hpp"
+#include "GraphicsContext.hpp"
 
 NS_BEGIN
 
-bool Shader::load(const std::filesystem::path &path)
+template<>
+Resource<Shader> Load(const std::filesystem::path &path)
 {
+	Resource<Shader> r;
+
     log::info("Loading shader ", path);
     std::string frag_src, vert_src, geom_src;
 
@@ -89,13 +87,20 @@ bool Shader::load(const std::filesystem::path &path)
         }
     }
     ifs.close();
-    return fromString(vert_src, frag_src, geom_src);
+
+    if (!r.held->fromString(vert_src, frag_src, geom_src))
+		return Resource<Shader>(nullptr);
+
+	return r;
 }
 
 bool Shader::fromString(const std::string &vert_src,
                         const std::string &frag_src,
                         const std::string &geom_src)
 {
+	if (!detail::EnsureOpenGL())
+		return false;
+
     id = glCreateProgram();
 
     unsigned int vert = compileShader(vert_src, GL_VERTEX_SHADER);
@@ -203,12 +208,19 @@ SHADER_MATRIX_SETTER_METHODS
 
 SHADER_INTER_CAST_SETTER_METHODS
 
-bool Shader::create()
+template<>
+Resource<Shader> Create()
 {
-    return fromString(std::string("#version ") + GL_VERSION_STR + '\n' +
-                          GL_DEFAULT_VERTEX_SHADER,
-                      std::string("#version ") + GL_VERSION_STR + '\n' +
-                          GL_DEFAULT_FRAGMENT_SHADER);
+	Resource<Shader> r;
+
+	if (!r.held->fromString(
+		std::string("#version ") + GL_VERSION_STR + '\n' + GL_DEFAULT_VERTEX_SHADER,
+		std::string("#version ") + GL_VERSION_STR + '\n' + GL_DEFAULT_FRAGMENT_SHADER))
+	{
+		return Resource<Shader>(nullptr);
+	}
+
+	return r;
 }
 
 #undef GENERATE_SHADER_SET_FUNC

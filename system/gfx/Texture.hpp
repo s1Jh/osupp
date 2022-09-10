@@ -32,14 +32,10 @@
 
 NS_BEGIN
 
-class Texture: public detail::Resource
+class Texture
 {
 public:
     Texture();
-
-    bool load(const std::filesystem::path &location) override;
-
-    bool create() override;
 
     bool setImage(Image &img);
 
@@ -70,6 +66,10 @@ private:
     isize pixelSize;
 };
 
-using TextureP = std::shared_ptr<Texture>;
+template<>
+Resource<Texture> Load(const std::filesystem::path&);
+
+template<>
+Resource<Texture> Create();
 
 NS_END

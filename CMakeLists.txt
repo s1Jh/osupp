@@ -141,27 +141,51 @@ set(SOURCES
 
 set(OpenGL_GL_PREFERENCE GLVND)
 
-find_package(glfw3 3.3 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(OpenAL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(FFmpeg REQUIRED avcodec avformat avutil)
+if (MSVC)
+
+else()
+	find_package(glfw3 3.3 REQUIRED)
+	find_package(OpenGL REQUIRED)
+	find_package(OpenAL REQUIRED)
+	find_package(GLEW REQUIRED)
+	find_package(Freetype REQUIRED)
+	find_package(FFmpeg REQUIRED avcodec avformat avutil)
+endif()
 
 include_directories(${DIRECTORIES})
-include_directories(${GLEW_INCLUDE_DIRS})
-include_directories(${FREETYPE_INCLUDE_DIRS})
-include_directories(${FFMPEG_INCLUDE_DIRS})
 
-set(LIBS
-        glfw OpenGL::GL alut ${OPENAL_LIBRARY}
-        ${GLEW_LIBRARIES} ${FREETYPE_LIBRARIES}
-        ${FFMPEG_LIBRARIES})
+set(LIBS)
 
-set(PLATFORM LINUX)
-set(ARCHITECTURE ARCH_AMD64)
+function(ConfigureLibrary LIBRARY_NAME)
+	
+	message("Configuring ${LIBRARY_NAME}")
+	
+	set(HEADERS ${LIBRARY_NAME}_HEADERS)
+	set(LIBRARIES ${LIBRARY_NAME}_LIBS)
+	
+	if (DEFINED ${HEADERS})
+		include_directories(${${HEADERS}})
+	else()
+		message(FATAL_ERROR "${LIBRARY_NAME} headers not defined")
+	endif()
+	
+	if (DEFINED ${LIBRARIES})
+		set(LIBS "${LIBS} ${${LIBRARIES}}" PARENT_SCOPE)
+	else()
+		message(FATAL_ERROR "${LIBRARY_NAME} libraries not defined")
+	endif()
+
+endfunction()
+
+ConfigureLibrary(GLFW)
+ConfigureLibrary(OAL)
+ConfigureLibrary(FFMPEG)
+ConfigureLibrary(FT2)
+
+string(STRIP ${LIBS} LIBS)
 
 message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
+message("Linking agains: ${LIBS}")
 add_compile_definitions(${PLATFORM})
 add_compile_definitions(${ARCHITECTURE})
 
@@ -169,7 +193,7 @@ add_executable(${TARGET_NAME} ${SOURCES})
 
 # Set the proper warning levels
 if (MSVC)
-    target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX)
+    target_compile_options(${TARGET_NAME} PRIVATE /W4 /Zc:preprocessor)
 else ()
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()

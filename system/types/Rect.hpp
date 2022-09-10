@@ -84,7 +84,7 @@ template<typename T>
 struct IsShape<rect<T>>
 {
     static const bool enable = true;
-    static const ShapeType type = ShapeType::Rectangle;
+    static const ShapeType type = ShapeType::RECTANGLE;
 };
 
 NS_END

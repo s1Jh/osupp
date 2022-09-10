@@ -24,6 +24,7 @@
 
 #include "define.hpp"
 #include <iostream>
+#include <string>
 
 #define DECOMPOSE_COLOR_RGBA(obj) obj.r, obj.g, obj.b, obj.a
 #define DECOMPOSE_COLOR_RGB(obj) obj.r, obj.g, obj.b

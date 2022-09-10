@@ -42,8 +42,8 @@ enum class HitObjectType: uint8_t
 
 enum class HitObjectParams: uint8_t
 {
-    None = 0,
-    ComboEnd = 1 << 0
+    NONE = 0,
+    COMBO_END = 1 << 0
 };
 
 constexpr HitObjectParams OBJECT_NO_PARAMS = static_cast<HitObjectParams>(0);
@@ -52,15 +52,15 @@ ENABLE_BITMASK_OPERATORS(HitObjectParams)
 
 enum class SliderType
 {
-    Straight, Circle, Catmull, Bezier
+    STRAIGHT, CIRCLE, CATMULL, BEZIER
 };
 
 enum class LoadLayers
 {
-    Meta = 1 << 0,
-    Objects = 1 << 1,
-    Event = 1 << 2,
-    Media = 1 << 3
+    META = 1 << 0,
+    OBJECTS = 1 << 1,
+    EVENT = 1 << 2,
+    MEDIA = 1 << 3
 };
 
 constexpr LoadLayers MAP_LOAD_ALL = static_cast<LoadLayers>(0xf);
@@ -69,7 +69,7 @@ ENABLE_BITMASK_OPERATORS(LoadLayers)
 
 enum class HitResult
 {
-    Missed = 0, Hit50, Hit100, Hit300
+    MISSED = 0, HIT50, HIT100, HIT300
 };
 
 /**
@@ -99,17 +99,17 @@ enum class HitResult
 enum class HitObjectState
 { // Vis | Interactive | Interacting | Render  | AR
     // circle
-    Invisible,   // object is not yet rendered or updated 0    X             X 0 0
-    Approaching, // the current startTime is within this object's approach window
+    INVISIBLE,   // object is not yet rendered or updated 0    X             X 0 0
+    APPROACHING, // the current startTime is within this object's approach window
     // 1    0             X             fade-in    1
-    Ready, // object is ready to be pressed 1    1             ⮭¹            1
+    READY, // object is ready to be pressed 1    1             ⮭¹            1
     // 1
-    Active, // object has been pressed on and is being held 1    1             1
+    ACTIVE, // object has been pressed on and is being held 1    1             1
     // 1          0
-    Inactive, // object has been pressed on, but is not being held 1    1 0 1 0
-    Pickup,   // object is waiting for the final ranking to be picked up 1    0 X
+    INACTIVE, // object has been pressed on, but is not being held 1    1 0 1 0
+    PICKUP,   // object is waiting for the final ranking to be picked up 1    0 X
     // fade-out   0
-    Fading, // object is no longer active, but is still fading away from the
+    FADING, // object is no longer active, but is still fading away from the
     // screen     1    0             X             fade-out   0
 };
 /**
@@ -118,26 +118,26 @@ enum class HitObjectState
 
 enum class HitObjectFunction : uint8_t
 {
-	ButtonMask = 0b0111,		// 3 bits - 3
-	ButtonIgnore = 0,			// buttons will not contribute to decision-making
-	ButtonPressed = 1,			// activated when a button is pressed down
-	ButtonHeld = 2,				// activated if a button is already held down
-	ButtonReleased = 3,			// activated when a button is released
-	ButtonLockMask = 0b100,
-	ButtonPressedNoLock = 4,	// ditto, no locking
-	ButtonHeldNoLock = 5,		//
+	BUTTON_MASK = 0b0111,		// 3 bits - 3
+	BUTTON_IGNORE = 0,			// buttons will not contribute to decision-making
+	BUTTON_PRESSED = 1,			// activated when a button is pressed down
+	BUTTON_HELD = 2,			// activated if a button is already held down
+	BUTTON_RELEASED = 3,		// activated when a button is released
+	BUTTON_LOCK_MASK = 0b100,
+	BUTTON_PRESSED_NO_LOCK = 4,	// ditto, no locking
+	BUTTON_HELD_NO_LOCK = 5,	//
 
-	CursorMask = 0b11000,		// 2 bits - 5
-	CursorIgnore = 0 << 3,		// cursor position does not contribute to decision-making
-	CursorLeave = 1 << 3,		// true when cursor is not in the object's SOF
-	CursorEnter = 2 << 3,		// true when the cursor is inside the object's SOF
+	CURSOR_MASK = 0b11000,		// 2 bits - 5
+	CURSOR_IGNORE = 0 << 3,		// cursor position does not contribute to decision-making
+	CURSOR_LEAVE = 1 << 3,		// true when cursor is not in the object's SOF
+	CURSOR_ENTER = 2 << 3,		// true when the cursor is inside the object's SOF
 
-	MergeMask = 0b1100000,		// 2 bits - 7
-	And = 0 << 5,			// button and cursor values will be AND-ed together
-	Or = 1 << 5,			// button and cursor values will be OR-ed together
-	Xor = 2 << 5,			// button and cursor values will be XOR-ed together
+	MERGE_MASK = 0b1100000,		// 2 bits - 7
+	AND = 0 << 5,				// button and cursor values will be AND-ed together
+	OR = 1 << 5,				// button and cursor values will be OR-ed together
+	XOR = 2 << 5,				// button and cursor values will be XOR-ed together
 
-	NoActivation = 0xff			// will always resolve to false
+	NO_ACTIVATION = 0xff		// will always resolve to false
 };
 
 ENABLE_BITMASK_OPERATORS(HitObjectFunction)

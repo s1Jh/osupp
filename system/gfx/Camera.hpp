@@ -36,7 +36,7 @@ public:
 
     enum class Direction
     {
-        Up, Down, Left, Right, Out, In
+        UP, DOWN, LEFT, RIGHT, OUT, IN
     };
 
     void setPosition(const fvec2d &in);

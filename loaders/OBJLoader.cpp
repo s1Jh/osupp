@@ -34,7 +34,7 @@
 
 NS_BEGIN
 
-bool LoadOBJ(const std::string &fpath, Mesh &mesh)
+bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh)
 {
     LOG_ENTER("OBJ LOAD");
     std::ifstream ifs(fpath);
@@ -44,9 +44,9 @@ bool LoadOBJ(const std::string &fpath, Mesh &mesh)
 
     // will also clear the current mesh
     mesh.setAttributeDescriptors({
-                                     AttributeType::Vec3, // position
-                                     AttributeType::Vec3, // uv/w coordinate
-                                     AttributeType::Vec3  // normal
+                                     AttributeType::VEC3, // position
+                                     AttributeType::VEC3, // uv/w coordinate
+                                     AttributeType::VEC3  // normal
                                  });
 
     std::string strline;

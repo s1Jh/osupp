@@ -28,23 +28,41 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "SoundSample.hpp"
 #include "Timer.hpp"
+#include "Resource.hpp"
 
-#include <cstdio>
-
-#include <AL/alut.h>
-#include <AL/al.h>
-#include <AL/alc.h>
+#ifdef WINDOWS
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
 
 using namespace PROJECT_NAMESPACE;
 
-#ifdef WIN32
+NS_BEGIN
+template <>
+Resource<int> Load(const std::filesystem::path &p) {
+	log::debug(p);
+	Resource<int> r;
+	*(r.held) = 3;
+	return r;
+}
+
+NS_END
+
+#if defined(WINDOWS) && defined(RELEASE)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                     PWSTR pCmdLine, int nCmdShow)
-#elif LINUX
-int main(int argc, char **argv)
+#else
+int main()
 #endif
 {
-	alutInitWithoutContext(&argc, argv);
+	auto res = Load<int>("f");
+
+	auto res2 = res;
+
+	*res2 = 5;
+
+	auto def = Default<int>();
 
     log::custom("GREETING", "Hello, world!");
 
@@ -55,7 +73,7 @@ int main(int argc, char **argv)
     auto &ctx = GetContext();
 
 	auto currentPath = std::filesystem::current_path();
-    df2::addAlias("GAMEDIR", currentPath);
+    df2::addAlias("GAMEDIR", currentPath.string());
 	ctx.settings.read();
     ctx.resources.addSearchPath(currentPath);
 
@@ -65,7 +83,7 @@ int main(int argc, char **argv)
 	}
 
 	auto locale = ctx.settings
-		.addSetting<std::string>("setting.user.locale", std::string("english.ldf"), SettingFlags::WriteToFile);
+		.addSetting<std::string>("setting.user.locale", std::string("english.ldf"), SettingFlags::WRITE_TO_FILE);
 	ctx.locale.loadFromFile(locale.get());
 	log::info("Set locale ", ctx.locale.getLocName());
 
@@ -75,21 +93,21 @@ int main(int argc, char **argv)
 		deviceNames.push_back(dev.name);
 
 	auto audioDev =
-		ctx.settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WriteToFile, deviceNames);
+		ctx.settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WRITE_TO_FILE, deviceNames);
 	ctx.audio = GetAudioDevice(audioDev.get());
 	log::info("Configured audio");
 
-	ctx.settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap([&audioDev, &ctx](const std::string &)
+	ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap([&audioDev, &ctx](const std::string &)
 																		  {
 																			  ctx.audio =
 																				  GetAudioDevice(audioDev.get());
-																			  return CallbackReturn::Ok;
+																			  return CallbackReturn::OK;
 																		  }));
 
 	if (!ctx.gfx.create()) {
 		return -2;
 	}
-	ctx.resources.loadPersistentAssets();
+//	ctx.resources.loadPersistentAssets();
 
 	ctx.keyboard.setViewport(ctx.gfx.getWindowHandle());
 	ctx.mouse.setViewport(ctx.gfx.getWindowHandle());
@@ -116,16 +134,18 @@ int main(int argc, char **argv)
 		ctx.mouse.update();
 		ctx.audio.process();
 
-        if (ctx.keyboard[Key::Ctrl + Key::Q].releasing)
-            ctx.state.setState(GameState::Exit);
+        if (ctx.keyboard[Key::CTRL + Key::Q].releasing)
+            ctx.state.setState(GameState::EXIT);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ctx.state.update(delta);
 
         ctx.gfx.begin();
+
+		ctx.state.update(delta);
         ctx.state.draw();
+
         ImGui::Render();
         auto data = ImGui::GetDrawData();
         if (data)

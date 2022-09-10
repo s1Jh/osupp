@@ -27,7 +27,7 @@ NS_BEGIN
 
 FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 {
-	av_log_set_level(AV_LOG_QUIET);
+	av_log_set_level(AV_LOG_TRACE);
 
 	FFmpegCtx ctx;
 
@@ -35,16 +35,23 @@ FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 
 	auto invalidate = [&](const std::string& message = "") {
 		if (err != 0) {
-			char buf[64];
-			av_make_error_string(buf, 64, err);
-			log::error("Failed creating a FFMPEG context: ", message, ' ', buf);
+			char buf[128];
+			av_make_error_string(buf, 128, err);
+			log::error("Failed creating a FFMPEG context: ", message, ', ', buf);
 		}
 		FreeFFmpegContext(ctx);
 		ctx.valid = false;
 		return ctx;
 	};
 
-	if ((err = avformat_open_input(&ctx.format, path.c_str(), nullptr, nullptr)) != 0) {
+#ifdef LINUX
+	const char* ptr = path.c_str();
+#else
+	auto string = path.u8string();
+	const char* ptr = (const char*)string.c_str();
+#endif
+
+	if ((err = avformat_open_input(&ctx.format, ptr, nullptr, nullptr)) != 0) {
 		return invalidate("Error opening file.");
 	}
 

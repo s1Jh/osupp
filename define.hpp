@@ -59,7 +59,7 @@
  */
 
 #if __cplusplus < 202002L
-#error("C++ version too old")
+// #error("C++ version too old")
 #endif
 
 #if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
@@ -127,7 +127,7 @@ constexpr const char *BUILD_TIME = __TIME__;
 
 constexpr int VERSION_MAJOR = 0;
 
-constexpr int VERSION_MINOR = 7;
+constexpr int VERSION_MINOR = 8;
 
 constexpr int VERSION_PATCH = 0;
 

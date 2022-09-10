@@ -42,7 +42,7 @@ Channel &AudioDevice::getSFXChannel()
 
 	// return the first free channel found, otherwise return the last channel with the lowest playing priority
 	for (auto& channel : sfxChannels) {
-		if (channel.getState() == ChannelState::Free)
+		if (channel.getState() == ChannelState::FREE)
 			return channel;
 
 		if (channel.getSoundPriority() <= lowestPriority->getSoundPriority()) {
@@ -65,7 +65,7 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 	}
 
 	auto freqSetting = GetContext().settings.addSetting<int>("setting.audio.frequency", 44100,
-															 SettingFlags::WriteToFile, 1000, 48000).get();
+															 SettingFlags::WRITE_TO_FILE, 1000, 48000).get();
 
 	const int params[] = {AL_FREQUENCY, freqSetting, 0};
 

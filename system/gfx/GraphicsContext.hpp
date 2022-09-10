@@ -26,14 +26,18 @@
 #define TO_GLFW(V) ((::GLFWwindow*)(V))
 #define FROM_GLFW(V) ((WindowHandle*)(V))
 
+/***************************************************************/
+/* Defined helper functions                                    */
+/***************************************************************/
 NS_BEGIN
 
 typedef struct WindowHandle WindowHandle;
 
 namespace detail {
 
-WindowHandle* EnsureGraphicalContext();
-
+bool EnsureOpenGL();
+bool IsExtensionSupported(const char*, const char*);
+WindowHandle* CreateWindowHandle();
 bool FreeGraphicalContext(WindowHandle*);
 
 }

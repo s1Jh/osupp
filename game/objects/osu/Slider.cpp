@@ -24,7 +24,7 @@
 
 #include <utility>
 
-#include <GL/glew.h>
+#include "GL.hpp"
 
 NS_BEGIN
 
@@ -40,7 +40,7 @@ void Slider::onUpdate(double delta)
     hitPoint.update(delta);
 }
 
-void Slider::onLogicUpdate(double)
+void Slider::onLogicUpdate(double delta)
 {
 //	if (ctx.game.getCurrentTime() > getStartTime() && getState() == HitObjectState::Ready) {
 //		transferActive();
@@ -60,7 +60,7 @@ void Slider::onLogicUpdate(double)
 
 	TravelDirection nextDirection = currentRepeat % 2 == 1 ? TravelDirection::Backward : TravelDirection::Forward;
 	if (currentDirection != nextDirection) {
-		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce);
+		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce.ref());
 		currentDirection = nextDirection;
 	}
 
@@ -75,38 +75,51 @@ void Slider::onLogicUpdate(double)
         SOF.position = getEndPosition();
     }
     else {
-        SOF.position = curve.get<CurveType::Straight>(curvePosition);
+        SOF.position = curve.get<CurveType::STRAIGHT>(curvePosition);
     }
+
+	const float maxSOFSizeMultiplier = 3.0;
+	const float SOFGrowthFactor = 6.0f;
+	auto maxSOFSize = (float)ctx.game.getCircleSize() * maxSOFSizeMultiplier;
+
+	auto growthChunk = float(maxSOFSize * SOFGrowthFactor * delta);
+
     if (isActive())
-        SOF.radius = ctx.game.getCircleSize() * 3;
-    else
-        SOF.radius = ctx.game.getCircleSize();
+        SOF.radius += growthChunk;
+    else {
+		SOF.radius -= growthChunk;
+	}
+
+	SOF.radius = Clamp(
+		SOF.radius, ctx.game.getCircleSize(),
+		ctx.game.getCircleSize() * maxSOFSizeMultiplier
+		);
 }
 
 void Slider::onBegin()
 {
 	startPoint = Min(ctx.game.getCurrentTime(), getStartTime());
 
-	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit);
+	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
 	started = true;
 }
 
 HitResult Slider::onFinish()
 {
     if (!started) {
-		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss);
-		return HitResult::Missed;
+		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
+		return HitResult::MISSED;
 	}
     if (broken) {
-		return HitResult::Hit100;
+		return HitResult::HIT100;
 	}
 
-    return HitResult::Hit100;
+    return HitResult::HIT300;
 }
 
 void Slider::onRaise()
 {
-	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak);
+	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak.ref());
     broken = true;
 }
 
@@ -153,9 +166,6 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
 
     // Interpolate over n * length steps.
     for (unsigned int i = 0; i <= steps; i++) {
-        middleIt = std::prev(interpolatedPath.end(), 1);
-        lastIt = std::prev(interpolatedPath.end(), 2);
-
         const auto t = double(i) / double(steps);
 
         fvec2d thisPosition = templateCurve.get(objectTemplate->sliderType, t);
@@ -163,7 +173,9 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
         // meshSpine.push_back(thisPosition);
 
         // Optimizations
-        if (middleIt != interpolatedPath.end()) {
+        if (i >= 2) {
+            middleIt = std::prev(interpolatedPath.end(), 1);
+            lastIt = std::prev(interpolatedPath.end(), 2);
 			auto lastPosition = lastIt->position;
 			auto midPosition = middleIt->position;
             if (lastIt != interpolatedPath.end()) {
@@ -181,9 +193,10 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
 
             // Optimization #2: If the new point is too close to an existing point,
             // don't add it.
-//            if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
-//                continue;
-//            }
+            if (i < steps)
+                if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
+                    continue;
+                }
         }
         interpolatedPath.push_back({thisPosition, false});
     }
@@ -357,8 +370,8 @@ fvec2d Slider::findDirection(double t)
     // We find the direction vector by pointing a vector from the requested
     // parametric position t and another position equal to t + ε, with ε being a
     // small positive offset. We normalize this vector and return.
-    auto targetPosition = curve.get<CurveType::Straight>(t);
-    auto offsetPosition = curve.get<CurveType::Straight>(t + SLIDER_DIRECTION_EPSILON);
+    auto targetPosition = curve.get<CurveType::STRAIGHT>(t);
+    auto offsetPosition = curve.get<CurveType::STRAIGHT>(t + SLIDER_DIRECTION_EPSILON);
     return Normalize(offsetPosition - targetPosition);
 }
 
@@ -381,10 +394,10 @@ fvec2d Slider::getEndPosition() const
 }
 HitObjectFunction Slider::getActivationFunction() const
 {
-	if (getState() == HitObjectState::Ready && ctx.game.getCurrentTime() < getStartTime()) {
-		return HitObjectFunction::CursorEnter | HitObjectFunction::ButtonPressed;
+	if (getState() == HitObjectState::READY && ctx.game.getCurrentTime() < getStartTime()) {
+		return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_PRESSED;
 	} else {
-		return HitObjectFunction::CursorEnter | HitObjectFunction::ButtonHeld;
+		return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_HELD;
 	}
 }
 }

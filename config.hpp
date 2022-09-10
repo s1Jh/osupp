@@ -36,8 +36,8 @@
 #endif
 
 #define USER_CONTEXT_FIELDS \
-    CONTEXT_FIELD(std::vector<MapInfoP>, maps) \
-    CONTEXT_FIELD(SkinP, activeSkin) \
+    CONTEXT_FIELD(std::vector<Resource<MapInfo>>, maps) \
+    CONTEXT_FIELD(Resource<Skin>, activeSkin) \
     CONTEXT_FIELD(GameManager, game)
 
 #ifdef USER_CONTEXT_INCLUDES

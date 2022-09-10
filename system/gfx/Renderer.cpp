@@ -22,7 +22,7 @@
 
 #include "Renderer.dpp"
 
-#include <GL/glew.h>
+#include "GL.hpp"
 
 #define GLFW_DLL
 
@@ -89,7 +89,7 @@ void Renderer::begin(const color &clearColor)
 	glClearDepth(1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glClearColor(DECOMPOSE_COLOR_RGBA(BLACK));
+    glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
@@ -99,24 +99,27 @@ void Renderer::end()
 bool Renderer::create()
 {
     auto &settings = GetContext().settings;
-    resolution = settings.addSetting<std::string>("setting.gfx.resolution", "1920x1080", SettingFlags::WriteToFile,
+    resolution = settings.addSetting<std::string>("setting.gfx.resolution", "1920x1080", SettingFlags::WRITE_TO_FILE,
 												  StandardResolutions);
-    fullscreen = settings.addSetting<bool>("setting.gfx.fullscreen", false, SettingFlags::WriteToFile);
-    refreshRate = settings.addSetting<int>("setting.gfx.refresh_rate", 60, SettingFlags::WriteToFile, 0, 120);
+    fullscreen = settings.addSetting<bool>("setting.gfx.fullscreen", false, SettingFlags::WRITE_TO_FILE);
+    refreshRate = settings.addSetting<int>("setting.gfx.refresh_rate", 60, SettingFlags::WRITE_TO_FILE, 0, 120);
 
-    auto onSettingChange = [](Renderer *self, const std::string &) -> CallbackReturn
+    auto onSettingChange = [](Renderer *self, const std::string &name) -> CallbackReturn
     {
+		if (!name.starts_with("setting.gfx."))
+			return CallbackReturn::OK;
+
         auto dimensions = GetCharacterSeparatedValues(self->resolution.get(), 'x');
 
         auto width = GetParam(dimensions, 0, 1280);
         auto height = GetParam(dimensions, 1, 720);
         self->setMode(width, height, self->fullscreen.get(), self->refreshRate.get());
-        return CallbackReturn::Ok;
+        return CallbackReturn::OK;
     };
 
-    GetContext().settings.subscribeCallback<SettingCallbacks::SettingChanged>(wrap(onSettingChange), this);
+    GetContext().settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap(onSettingChange), this);
 
-	windowHandle = detail::EnsureGraphicalContext();
+	windowHandle = detail::CreateWindowHandle();
 	if (!windowHandle) {
 		log::error("Unable to create a renderer");
 		return false;

@@ -38,31 +38,29 @@
 
 NS_BEGIN
 
-class Skin: public detail::Resource
+class Skin
 {
+	friend Resource<Skin> Load<Skin>(const std::filesystem::path &path);
 public:
     enum class ColourAssignmentMode: uint8_t
     {
-        Object = 0 << 0,        // bit 0 and 1
-        Combo = 1 << 0,
-        Map = 2 << 0,
-        Random = 0 << 2,        // bit 2
-        Sequential = 1 << 2,
+        OBJECT = 0 << 0,        // bit 0 and 1
+        COMBO = 1 << 0,
+        MAP = 2 << 0,
+        RANDOM = 0 << 2,        // bit 2
+        SEQUENTIAL = 1 << 2,
     };
 
     Skin() = default;
 
-	bool load(const std::filesystem::path &path) override;
-    bool create() override;
-
     FPS_t getAnimationFramerate(const std::string &object) const;
-    TextureP getTexture(const std::string &object) const;
+    Resource<Texture> getTexture(const std::string &object) const;
     color getTint(const std::string &object, unsigned int seed = 0) const;
 	int getFrameCount(const std::string &object) const;
 
-    ShaderP getShader(const std::string &object) const;
+	Resource<Shader> getShader(const std::string &object) const;
 
-	SoundSampleP getSound(const std::string &object);
+	Resource<SoundSample> getSound(const std::string &object);
 
     ObjectSprite createObjectSprite(const std::string &object,
                                     const HitObjectArguments& args) const;
@@ -73,7 +71,7 @@ private:
     struct TextureInfo
     {
         std::string path;
-        TextureP texture;
+		Resource<Texture> texture;
         std::vector<color8> tints = {WHITE};
         FPS_t animationFPS = DEFAULT_TEXTURE_FPS;
 		int animationFrames = -1;
@@ -81,12 +79,12 @@ private:
     struct ShaderInfo
     {
         std::string path;
-        ShaderP shader;
+		Resource<Shader> shader;
     };
 	struct SoundInfo
 	{
 		std::string path;
-		SoundSampleP sound;
+		Resource<SoundSample> sound;
 	};
 
     std::unordered_map<std::string, TextureInfo> textures;
@@ -94,6 +92,7 @@ private:
 	std::unordered_map<std::string, SoundInfo> sounds;
 };
 
-using SkinP = std::shared_ptr<Skin>;
+template<>
+Resource<Skin> Load(const std::filesystem::path &path);
 
 NS_END

@@ -28,38 +28,56 @@
 
 NS_BEGIN
 
-bool SoundSample::load(const std::filesystem::path &path)
-{
-	auto ctx = OpenFFmpegContext(path);
-	if (!ctx.valid)
-		return false;
+template<> const std::vector<std::string> Resource<SoundSample>::allowedExtensions = {".wav", ".mp3", ".ogg"};
 
+template<>
+Resource<SoundSample> Load(const std::filesystem::path &path)
+{
+	Resource<SoundSample> r;
+
+	auto ctx = OpenFFmpegContext(path);
+
+	if (!ctx.valid) {
+		return nullptr;
+	}
+
+	auto& data = r->data;
 	data.clear();
 
 	IterateFFmpegFrames(ctx, -1, [&](FFmpegCtx& ctx) {
-		ExtractFFmpegSamplesAppend<SampleT>(ctx, data);
+		ExtractFFmpegSamplesAppend<SoundSample::SampleT>(ctx, data);
 		return true;
 	});
 
 	FreeFFmpegContext(ctx);
 
-	return configure(data.size(), ctx.sampleRate, SampleInfo<SampleT>::format);
+	if (!r->configure(data.size(), ctx.sampleRate, SampleInfo<SoundSample::SampleT>::format)) {
+		return nullptr;
+	}
+
+	return r;
 }
 
-bool SoundSample::create()
+template<>
+Resource<SoundSample> Create()
 {
+	Resource<SoundSample> r;
 	int secs = 1;
-	float sampleRate = 44100;
-	SampleFormat format = SampleFormat::Mono8;
+	int sampleRate = 44100;
+	SampleFormat format = SampleFormat::MONO8;
 	int size = secs * (int)sampleRate;
 
-	data.resize(size);
-	return configure(size, sampleRate, format);
+	r->data.resize(size);
+	if (!r->configure(size, sampleRate, format)) {
+		return nullptr;
+	}
+
+	return r;
 }
 
 SoundType SoundSample::getType() const
 {
-	return SoundType::Sample;
+	return SoundType::SAMPLE;
 }
 
 bool SoundSample::fillBuffer(detail::BaseSound::BufferT &buffer)

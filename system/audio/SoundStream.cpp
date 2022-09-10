@@ -26,21 +26,31 @@
 
 NS_BEGIN
 
-bool SoundStream::load(const std::filesystem::path &path)
+template<> const std::vector<std::string> Resource<SoundStream>::allowedExtensions = {".wav", ".mp3", ".ogg"};
+
+template<>
+Resource<SoundStream> Load(const std::filesystem::path &path)
 {
-	ctx = OpenFFmpegContext(path);
-	return ctx.valid && configure(0, ctx.sampleRate, SampleInfo<SampleT>::format);
+	Resource<SoundStream> r;
+	r->ctx = OpenFFmpegContext(path);
+
+	if (r->ctx.valid && r->configure(0, r->ctx.sampleRate, SampleInfo<SoundStream::SampleT>::format))
+		return r;
+
+	return nullptr;
 }
 
-bool SoundStream::create()
+template<>
+Resource<SoundStream> Create()
 {
-	ctx.valid = false;
-	return true;
+	Resource<SoundStream> r;
+	r->ctx.valid = false;
+	return r;
 }
 
 SoundType SoundStream::getType() const
 {
-	return SoundType::Stream;
+	return SoundType::STREAM;
 }
 
 bool SoundStream::fillBuffer(detail::BaseSound::BufferT &buffer)
@@ -58,7 +68,7 @@ bool SoundStream::fillBuffer(detail::BaseSound::BufferT &buffer)
 
 bool SoundStream::isAtEOF() const
 {
-	return ctx.eof;
+	return ctx.eof && ctx.valid;
 }
 
 bool SoundStream::isStreaming() const
@@ -70,9 +80,11 @@ SoundStream::~SoundStream()
 {
 	FreeFFmpegContext(ctx);
 }
+
 void SoundStream::reset()
 {
-	av_seek_frame(ctx.format, ctx.audioStreamIndex, 0, 0);
+	if (ctx.valid)
+		av_seek_frame(ctx.format, ctx.audioStreamIndex, 0, 0);
 }
 
 NS_END

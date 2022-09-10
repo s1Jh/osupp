@@ -37,6 +37,7 @@ void TimerControl::TimerRunner()
         Time.await();
         double delta = Time.getDelta();
         {
+
 		std::scoped_lock timers_lock { TimersMutex };
 
         for (auto* timer : ActiveTimers)
@@ -45,17 +46,17 @@ void TimerControl::TimerRunner()
             {
                 if (timer->increment(delta))
                 {
-                    timer->invokeCallback<TimerCallbacks::TimerDone>( timer );
+                    timer->invokeCallback<TimerCallbacks::TIMER_DONE>( timer );
                     switch (timer->getMode())
                     {
-                    case TimerMode::Repeat:
+                    case TimerMode::REPEAT:
 						timer->start();
                         break;
 
-                    case TimerMode::Single:
+                    case TimerMode::SINGLE:
 						timer->stop();
                         break;
-                    case TimerMode::Manual:
+                    case TimerMode::MANUAL:
 					default:
                         break;
                     }
@@ -85,7 +86,7 @@ void StopTimerThread()
 
 Timer::Timer() :
 	TimerControl ( this ), time (0 ), timer (0 ),
-	running (false ), mode(TimerMode::Repeat ), wasDone (false )
+	running (false ), mode(TimerMode::REPEAT ), wasDone (false )
 {}
 
 Timer::Timer(double time, TimerMode mode, bool start) :
