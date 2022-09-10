@@ -223,61 +223,63 @@ void Slider::onDraw()
 	/*============================================================================================================*/
 	// Draw the curve body.
 
-	for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
-		/*========================================================================================================*/
-		// Draw the bonus point.
-		const auto& node = *it;
+	if (bodyTexture.getTexture()) {
 
-		if (it != std::prev(interpolatedPath.end())) {
-			fline seg{node.position, std::next(it)->position};
+		for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
+			/*========================================================================================================*/
+			// Draw the bonus point.
+			const auto &node = *it;
 
-			auto offset = circleSize;
+			if (it != std::prev(interpolatedPath.end())) {
+				fline seg{node.position, std::next(it)->position};
 
-			auto right = (float) Max(seg.A.x, seg.B.x) + offset;
-			auto left = (float) Min(seg.A.x, seg.B.x) - offset;
-			auto top = (float) Max(seg.A.y, seg.B.y) + offset;
-			auto bottom = (float) Min(seg.A.y, seg.B.y) - offset;
+				auto offset = circleSize;
 
-			frect rect = {
-				{
-					left - right,
-					top - bottom
-				},
-				{
-					(left + right) / 2.0f,
-					(top + bottom) / 2.0f,
-				}
-			};
+				auto right = (float)Max(seg.A.x, seg.B.x) + offset;
+				auto left = (float)Min(seg.A.x, seg.B.x) - offset;
+				auto top = (float)Max(seg.A.y, seg.B.y) + offset;
+				auto bottom = (float)Min(seg.A.y, seg.B.y) - offset;
 
-			Mat3f shape = MakeScaleMatrix<float>(rect.size) *
-				MakeTranslationMatrix<float>(rect.position);
+				frect rect = {
+					{
+						left - right,
+						top - bottom
+					},
+					{
+						(left + right) / 2.0f,
+						(top + bottom) / 2.0f,
+					}
+				};
 
-			auto tint = bodyTexture.getTint();
-			tint.a = alpha;
-			glDepthFunc(GL_LEQUAL);
-			glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
-			ctx.gfx.draw(
-				GetGenericMeshes().rectMask, *bodyShader,
-				Shader::Uniforms{
-					{"resolution", (fvec2d) ctx.gfx.getSize()},
-					{"A", seg.A},
-					{"B", seg.B},
-					{"thickness", offset},
-					{"fill", &tint},
-					{"shape", &shape}
-				},
-				Shader::Textures{
-					{0, bodyTexture.getTexture().get()}
-				},
-				objectTransform
-			);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glDepthFunc(GL_ALWAYS);
+				Mat3f shape = MakeScaleMatrix<float>(rect.size) *
+					MakeTranslationMatrix<float>(rect.position);
+
+				auto tint = bodyTexture.getTint();
+				tint.a = alpha;
+				glDepthFunc(GL_LEQUAL);
+				glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+				ctx.gfx.draw(
+					GetGenericMeshes().rectMask, *bodyShader,
+					Shader::Uniforms{
+						{"resolution", (fvec2d)ctx.gfx.getSize()},
+						{"A", seg.A},
+						{"B", seg.B},
+						{"thickness", offset},
+						{"fill", &tint},
+						{"shape", &shape}
+					},
+					Shader::Textures{
+						{0, bodyTexture.getTexture().get()}
+					},
+					objectTransform
+				);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glDepthFunc(GL_ALWAYS);
+			}
 		}
+		glClearDepth(1.0f);
+		glClear(GL_DEPTH_BUFFER_BIT);
 	}
-	glClearDepth(1.0f);
-	glClear(GL_DEPTH_BUFFER_BIT);
-
 	/*============================================================================================================*/
 	// Draw curve decorations such as bonus points.
 
