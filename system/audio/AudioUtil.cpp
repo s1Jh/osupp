@@ -27,7 +27,7 @@ NS_BEGIN
 
 FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 {
-	av_log_set_level(AV_LOG_TRACE);
+	av_log_set_level(AV_LOG_QUIET);
 
 	FFmpegCtx ctx;
 
@@ -37,7 +37,7 @@ FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 		if (err != 0) {
 			char buf[128];
 			av_make_error_string(buf, 128, err);
-			log::error("Failed creating a FFMPEG context: ", message, ', ', buf);
+			log::error("Failed creating a FFMPEG context: ", message, ", ", buf);
 		}
 		FreeFFmpegContext(ctx);
 		ctx.valid = false;
@@ -137,9 +137,6 @@ size_t IterateFFmpegFrames(FFmpegCtx &ctx, size_t number, const std::function<bo
 			// => Free the buffers used by the frame and reset all fields.
 			av_packet_unref(ctx.packet);
 		} else {
-			// Something went wrong.
-			// EAGAIN is technically no error here but if it occurs we would need to buffer
-			// the packet and send it again after receiving more frames. Thus we handle it as an error here.
 			break; // Don't return, so we can clean up nicely.
 		}
 
@@ -162,6 +159,7 @@ size_t IterateFFmpegFrames(FFmpegCtx &ctx, size_t number, const std::function<bo
 	}
 	return read;
 }
+
 bool IsPlanar(AVSampleFormat fmt)
 {
 	return av_sample_fmt_is_planar(fmt);

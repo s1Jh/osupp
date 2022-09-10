@@ -24,6 +24,12 @@
 #include "define.hpp"
 
 /***************************************************************/
+/* Common OpenGL configuration and includes                    */
+/***************************************************************/
+
+typedef unsigned char* GLubyteptr;
+
+/***************************************************************/
 /* Linux OpenGL configuration and includes                     */
 /***************************************************************/
 #ifdef LINUX
@@ -100,7 +106,6 @@
 
 typedef char GLchar;
 typedef unsigned int GLenum;
-typedef unsigned char* GLubyteptr;
 typedef int GLint;
 typedef unsigned int GLuint;
 typedef ptrdiff_t GLintptr;
@@ -181,11 +186,18 @@ typedef ptrdiff_t GLsizeiptr;
     GLEXT ( void, DeleteBuffers, GLsizei n, const GLuint *buffers ) \
     GLEXT ( void, DeleteVertexArrays, GLsizei n, const GLuint *arrays ) \
 	GLEXT ( void, GenerateMipmap, GLenum target ) \
-	GLEXT ( void, GenerateTextureMipmap, GLuint texture )
+	GLEXT ( void, GenerateTextureMipmap, GLuint texture ) \
+    GLEXT ( const GLubyteptr, GetStringi, GLenum value, GLuint index) \
+    GLEXT( void, BlendFuncSeparate, GLenum dstRGB, GLenum dstAlpha, GLenum srcRGB, GLenum srcAlpha ) \
+    GLEXT( void, BlendEquationSeparate, GLenum rgbMode, GLenum alphaMode ) \
+    GLEXT( void, BufferSubData, GLenum target,GLintptr offset, GLsizeiptr size, const void* data) \
+    GLEXT( GLint, GetAttribLocation, GLuint program, const GLchar *name)
 
 #ifdef LINUX
 #   define GL_FUNC_LIST_WIN32
-#   define GL_FUNC_LIST_LINUX
+#   define GL_FUNC_LIST_LINUX \
+	GLEXT( void, BindSampler, GLuint unit, GLuint sampler ) \
+	GLEXT( void, DrawElementsBaseVertex, GLenum mode, GLsizei count, GLenum type, void *indices, GLint basevertex )
 #endif // LINUX
 
 #ifdef WIN32
@@ -193,11 +205,6 @@ typedef ptrdiff_t GLsizeiptr;
 #   define GL_FUNC_LIST_WIN32 \
     GLEXT( void, ActiveTexture, GLenum texture ) \
     GLEXT( void, BlendEquation, GLenum mode ) \
-    GLEXT( void, BlendFuncSeparate, GLenum dstRGB, GLenum dstAlpha, GLenum srcRGB, GLenum srcAlpha ) \
-    GLEXT( void, BlendEquationSeparate, GLenum rgbMode, GLenum alphaMode ) \
-    GLEXT( void, BufferSubData, GLenum target,GLintptr offset, GLsizeiptr size, const void* data) \
-    GLEXT( GLint, GetAttribLocation, GLuint program, const GLchar *name) \
-    GLEXT( const GLubyteptr, GetStringi, GLenum value, GLuint index)
 
 #endif // WIN32
 

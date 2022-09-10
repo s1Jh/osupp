@@ -130,7 +130,7 @@ private:
 
 	// Profiling
 	unsigned int historyInsertSpot{0};
-	std::array<float, 64> history;
+	std::array<float, 64> history{};
 	unsigned int printCounter = 60;
 	unsigned long rollingUT = 0.0;
 	unsigned long rollingUPF = 0;

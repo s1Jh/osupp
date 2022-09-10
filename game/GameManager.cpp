@@ -232,8 +232,7 @@ void GameManager::draw(Renderer &renderer)
 	}
 #endif
 }
-	}
-}
+
 
 bool GameManager::setMap(Resource<MapInfo> map)
 {
@@ -270,8 +269,6 @@ void GameManager::reset()
 	samples.sliderBounce = skin->getSound(SLIDER_BOUNCE_SOUND);
 	samples.sliderSlide = skin->getSound(SLIDER_SLIDE_SOUND);
 	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
-
-	cursor = skin->createObjectSprite(CURSOR_SPRITE, HitObjectArguments{});
 	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
 	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
 }
@@ -456,6 +453,8 @@ fvec2d GameManager::getCursorPosition() const
 GameManager::GameManager()
 {
 	last = activeObjects.begin();
+}
+
 int GameManager::loadObjects(unsigned int amount)
 {
 	HitObjectArguments args;
@@ -504,8 +503,6 @@ void GameManager::skipToFirst()
 void GameManager::scrobble(double amount)
 {
 	setCurrentTime(currentTime + amount);
-}
-
 }
 
 NS_END

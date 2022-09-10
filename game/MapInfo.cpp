@@ -207,8 +207,6 @@ Resource<MapInfo> Load(const std::filesystem::path &path)
 
 	r.held->directory = path.parent_path();
 
-	bool success;
-
     if (path.extension() == ".osu")
 		LoadOSU(path, *r);
     else if (path.extension() == ".map")
