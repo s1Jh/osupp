@@ -52,6 +52,38 @@ NS_BEGIN
   KEY(SEMICOLON) KEY(APOSTROPHE) KEY(COMMA) KEY(PERIOD) KEY(SLASH) KEY(NUM_LOCK) KEY(KPDIVIDE) KEY(KPMULTIPLY)         \
   KEY(KPSUBTRACT) KEY(KPADD) KEY(KPENTER) KEY(KPEQUALS) KEY(KPDECIMAL) KEY(KP0) KEY(KP1) KEY(KP2) KEY(KP3) KEY(KP4)     \
   KEY(KP5) KEY(KP6) KEY(KP7) KEY(KP8) KEY(KP9) 
+                  KEY(F1) KEY(F2) KEY(F3) KEY(F4) KEY(F5) KEY(F6) KEY(F7) KEY(     \
+                      F8) KEY(F9) KEY(F10) KEY(F11) KEY(F12) KEY(F13) KEY(F14)     \
+                      KEY(F15) KEY(F16) KEY(F17) KEY(F18) KEY(F19) KEY(            \
+                          F20) KEY(F21) KEY(F22) KEY(F23) KEY(F24)                 \
+                                                                                   \
+                          KEY(A) KEY(B) KEY(C) KEY(D) KEY(E) KEY(F) KEY(           \
+                              G) KEY(H) KEY(I) KEY(J) KEY(K) KEY(L) KEY(M)         \
+                              KEY(N) KEY(O) KEY(P) KEY(Q) KEY(R) KEY(S) KEY(       \
+                                  T) KEY(U) KEY(V) KEY(W) KEY(X) KEY(Y) KEY(Z)     \
+                                                                                   \
+                                  KEY(K0) KEY(K1) KEY(K2) KEY(K3) KEY(K4) KEY(     \
+                                      K5) KEY(K6) KEY(K7) KEY(K8) KEY(K9)          \
+                                                                                   \
+                                      KEY(Tilde) KEY(Minus) KEY(Equals) KEY(       \
+                                          LeftBracket) KEY(RightBracket)           \
+                                          KEY(BackSlash) KEY(Semicolon) KEY(       \
+                                              Apostrophe) KEY(Comma)               \
+                                              KEY(Period) KEY(Slash) KEY(          \
+                                                  NumLock)                         \
+                                                                                   \
+                                                  KEY(KPDivide) KEY(               \
+                                                      KPMultiply) KEY(KPSubtract)  \
+                                                      KEY(KPAdd) KEY(KPEnter) KEY( \
+                                                          KPEquals) KEY(KPDecimal) \
+                                                                                   \
+                                                          KEY(KP0) KEY(KP1) KEY(   \
+                                                              KP2) KEY(KP3)        \
+                                                              KEY(KP4) KEY(        \
+                                                                  KP5) KEY(KP6)    \
+                                                                  KEY(KP7) KEY(    \
+                                                                      KP8)         \
+                                                                      KEY(KP9)
 
 enum class Key
 {

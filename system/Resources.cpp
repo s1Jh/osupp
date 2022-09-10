@@ -153,10 +153,26 @@ void Resources::drawDebugDialog(bool *open) const
 
 		if (ImGui::BeginTabBar("#resourcetabs")) {
 #define RESOURCE_POOL(_Type, _Name, ...) \
-			if (ImGui::BeginTabItem(#_Name)) {     \
-				ImGui::Text("test");               \
-				ImGui::EndTabItem();               \
-			}
+if (ImGui::BeginTabItem(#_Name)) {    \
+    if (ImGui::BeginTable("#_Name_Loaded", 3)) { \
+        ImGui::TableSetupColumn("Internal ID", ImGuiTableColumnFlags_WidthStretch);\
+        ImGui::TableSetupColumn("Use count", ImGuiTableColumnFlags_WidthFixed, -1);\
+        ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed, -1);        \
+                                         \
+        ImGui::TableHeadersRow(); \
+                                         \
+		for (const auto& res : _Name.loadedAssets) { \
+            ImGui::TableNextColumn(); \
+            ImGui::Text("%s", res.first.c_str()); \
+            ImGui::TableNextColumn(); \
+            ImGui::Text("%u", res.second.useCount()); \
+            ImGui::TableNextColumn(); \
+            ImGui::Text("0x%Xl", res.second.get()); \
+		} \
+		ImGui::EndTable(); \
+	} \
+	ImGui::EndTabItem(); \
+}
 
 			RESOURCE_POOLS
 #undef RESOURCE_POOL
