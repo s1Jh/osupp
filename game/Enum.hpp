@@ -97,8 +97,7 @@ enum class HitResult
  * finish() called to get the object rank.
  */
 enum class HitObjectState
-{ // Vis | Interactive | Interacting | Render  | AR
-    // circle
+{
     INVISIBLE,   // object is not yet rendered or updated 0    X             X 0 0
     APPROACHING, // the current startTime is within this object's approach window
     // 1    0             X             fade-in    1

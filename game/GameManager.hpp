@@ -108,7 +108,7 @@ public:
 	[[nodiscard]] const StorageT& getStoredObjects() const;
 
 private:
-	int loadObjects(unsigned int amount);
+	unsigned int loadObjects(unsigned int amount);
 	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject& object) const;
 
 	std::unique_ptr<InputMapper> input{nullptr};

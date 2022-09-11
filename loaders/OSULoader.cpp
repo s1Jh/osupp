@@ -231,6 +231,8 @@ public:
             }
         }
 
+		std::reverse(timingPoints.begin(), timingPoints.end());
+
         return true;
     }
 
@@ -361,12 +363,13 @@ public:
 
                 auto length = GetParam<double>(object.objectParams, 2, 0);
 
+				int repeats = GetParam<int>(object.objectParams, 1, 0);
+
                 double SV = getSliderVelocity(object.time);
                 double beat = getBeatLength(object.time);
                 double duration = length / (sliderMultiplier * 100.0 * SV) * beat;
+				duration *= (repeats + 1);
                 double endTime = object.time + duration;
-
-                int repeats = GetParam<int>(object.objectParams, 1, 0);
 
                 auto curveParams = GetCharacterSeparatedValues(GetParam<std::string>(object.objectParams, 0, ""), '|');
 
@@ -421,8 +424,9 @@ private:
     float getSliderVelocity(double time)
     {
         for (const auto &timingPoint: timingPoints) {
-            if (!timingPoint.uninherited && timingPoint.time <= time) {
-                return 1.f / ((float(timingPoint.beatLength) * -1.f) / 100.f);
+			// timing points are in reverse order
+            if (timingPoint.time <= time && !timingPoint.uninherited) {
+				return 1.f / ((float(timingPoint.beatLength) * -1.f) / 100.f);
             }
         }
         return 1.0f;
@@ -431,7 +435,8 @@ private:
     float getBeatLength(double time)
     {
         for (const auto &timingPoint: timingPoints) {
-            if (timingPoint.uninherited && time >= timingPoint.time) {
+			// timing points are in reverse order
+            if (timingPoint.uninherited && time <= timingPoint.time) {
                 return TimeConversion((int) timingPoint.beatLength);
             }
         }

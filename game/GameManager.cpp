@@ -59,7 +59,7 @@ void GameManager::update(double delta)
 {
     currentTime += delta;
 
-	input->update();
+	auto active = getClosestActiveObject();
 
 	// objects are sorted by order of appearance
 	int updates = 0;
@@ -72,6 +72,11 @@ void GameManager::update(double delta)
 		auto &obj = *it;
 
 		obj->update(delta);
+		if (auto ptr = active.lock()) {
+			if (ptr == obj)
+				input->update();
+		}
+
 		updates++;
 		switch (obj->getState()) {
 		case HitObjectState::INVISIBLE: {
@@ -455,7 +460,7 @@ GameManager::GameManager()
 	last = activeObjects.begin();
 }
 
-int GameManager::loadObjects(unsigned int amount)
+unsigned int GameManager::loadObjects(unsigned int amount)
 {
 	HitObjectArguments args;
 	args.mapSeed = 0;

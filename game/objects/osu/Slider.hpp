@@ -35,7 +35,7 @@ constexpr double SLIDER_ANGLE_OPT_THRESHOLD = 0.05;
 
 constexpr double SLIDER_DISTANCE_OPT_THRESHOLD = 0.1;
 
-constexpr unsigned int SLIDER_STEPS_PER_CURVE_UNIT = 2;
+constexpr unsigned int SLIDER_STEPS_PER_CURVE_UNIT = 30;
 
 class Slider: public OsuHitObject<ObjectTemplateSlider>
 {
@@ -93,6 +93,7 @@ private:
     // cached variables
     float endBumperAngle;
     float startBumperAngle;
+	float visualRingSize;
 
     // state
 	double startPoint;

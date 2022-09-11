@@ -53,19 +53,14 @@ fvec2d AutoPilot::getCursor() const
 
 void AutoPilot::update()
 {
-//	lastHeld = held;
-
 	auto thisPtr = ctx.game.getClosestActiveObject().lock();
-
 	if (!thisPtr)
 		return;
 
 	target = thisPtr->getSOF().position;
-
 	held = ctx.game.getCurrentTime() >= thisPtr->getStartTime();
-	bool inObject = Distance(position, thisPtr->getSOF().position) < thisPtr->getSOF().radius;
 
-	if (held && !inObject) {
+	if (held && (Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius)) {
 		log::debug("Lagged behind!");
 		position = target;
 	}
@@ -73,25 +68,12 @@ void AutoPilot::update()
 	auto direction = target - position;
 	auto normalized = Normalize(direction);
 
-	double velocity;
-
-	if (held)
-		velocity = 100.f;
-	else
-		velocity = Distance(position, target);
-
-	velocity = 10.0;
+	double velocity = 10.0;
 
 	auto move = normalized * velocity * ctx.timing.getDelta();
 
 	move.x = Clamp(move.x, direction.x, -direction.x);
 	move.y = Clamp(move.y, direction.y, -direction.y);
-
-	const auto& transform = ctx.game.getTransform();
-
-	ctx.gfx.draw(target, 0.1f, VisualAppearance{.fillColor = RED}, transform);
-	ctx.gfx.draw(position, 0.1f, VisualAppearance{.fillColor = GREEN}, transform);
-	ctx.gfx.draw(fline{target, position}, DEFAULT_APPEARANCE, transform);
 
 	position += move;
 

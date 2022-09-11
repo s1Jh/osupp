@@ -84,14 +84,17 @@ void Slider::onLogicUpdate(double delta)
 
 	auto growthChunk = float(maxSOFSize * SOFGrowthFactor * delta);
 
-    if (isActive())
-        SOF.radius += growthChunk;
+    if (isActive()) {
+		SOF.radius = maxSOFSize;
+		visualRingSize += growthChunk;
+	}
     else {
-		SOF.radius -= growthChunk;
+		SOF.radius = ctx.game.getCircleSize();
+		visualRingSize -= growthChunk;
 	}
 
-	SOF.radius = Clamp(
-		SOF.radius, ctx.game.getCircleSize(),
+	visualRingSize = Clamp(
+		visualRingSize, ctx.game.getCircleSize(),
 		ctx.game.getCircleSize() * maxSOFSizeMultiplier
 		);
 }
@@ -193,10 +196,10 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
 
             // Optimization #2: If the new point is too close to an existing point,
             // don't add it.
-            if (i < steps)
-                if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
-                    continue;
-                }
+//            if (i < steps)
+//                if (Distance(thisPosition, midPosition) <= SLIDER_DISTANCE_OPT_THRESHOLD && i != steps) {
+//                    continue;
+//                }
         }
         interpolatedPath.push_back({thisPosition, false});
     }
@@ -344,10 +347,11 @@ void Slider::onDraw()
     ctx.gfx.draw(ball, ballInfo);
 
 	ObjectDrawInfo ringInfo = {
-		SOF, alpha,
+		{{visualRingSize, visualRingSize}, SOF.position}, alpha,
 		(Mat3f) Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
 			objectTransform};
-	ctx.gfx.draw(ballRing, ringInfo);
+	if (isActive())
+		ctx.gfx.draw(ballRing, ringInfo);
 }
 
 void Slider::onReset()
