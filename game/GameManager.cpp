@@ -72,10 +72,8 @@ void GameManager::update(double delta)
 		auto &obj = *it;
 
 		obj->update(delta);
-		if (auto ptr = active.lock()) {
-			if (ptr == obj)
-				input->update();
-		}
+		if (it == active)
+			input->update();
 
 		updates++;
 		switch (obj->getState()) {
@@ -422,17 +420,16 @@ std::weak_ptr<BaseHitObject> GameManager::getCurrentObject() const
 	return {};
 }
 
-std::weak_ptr<BaseHitObject> GameManager::getClosestActiveObject() const
+GameManager::StorageT::const_iterator GameManager::getClosestActiveObject() const
 {
 	auto it = last;
 
 	while (it != activeObjects.end()) {
 		if (!(*it)->isFinished())
-			return *it;
+			return it;
 		it = std::next(it);
 	}
-
-	return {};
+	return activeObjects.end();
 }
 
 std::weak_ptr<BaseHitObject> GameManager::getNextObject() const

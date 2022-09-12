@@ -57,7 +57,6 @@ public:
         int sampleSet;
         int sampleIndex;
         int volume;
-        bool uninherited;
         int effects;
     };
 
@@ -182,10 +181,16 @@ public:
                     point.sampleSet = GetParam<int>(params, 3, 0);
                     point.sampleIndex = GetParam<int>(params, 4, 0);
                     point.volume = GetParam<int>(params, 5, 100);
-                    point.uninherited = GetParam<int>(params, 6, 1);
                     point.effects = GetParam<int>(params, 7, 0);
 
-                    timingPoints.push_back(point);
+					bool unInherited = GetParam<int>(params, 6, 1);
+
+					if (unInherited) {
+						point.beatLength = TimeConversion((int)point.beatLength);
+						uninheritedTimingPoints.push_back(point);
+					} else {
+						inheritedTimingPoints.push_back(point);
+					}
 
                     break;
                 }
@@ -230,8 +235,6 @@ public:
                     break;
             }
         }
-
-		std::reverse(timingPoints.begin(), timingPoints.end());
 
         return true;
     }
@@ -361,16 +364,6 @@ public:
                 SliderPathT path;
                 path.push_back(SliderNode{object.position, false});
 
-                auto length = GetParam<double>(object.objectParams, 2, 0);
-
-				int repeats = GetParam<int>(object.objectParams, 1, 0);
-
-                double SV = getSliderVelocity(object.time);
-                double beat = getBeatLength(object.time);
-                double duration = length / (sliderMultiplier * 100.0 * SV) * beat;
-				duration *= (repeats + 1);
-                double endTime = object.time + duration;
-
                 auto curveParams = GetCharacterSeparatedValues(GetParam<std::string>(object.objectParams, 0, ""), '|');
 
                 for (unsigned int i = 1; i < curveParams.size(); i++) {
@@ -384,6 +377,16 @@ public:
                     path.push_back(SliderNode{position, false});
                 }
 
+				auto length = GetParam<double>(object.objectParams, 2, 0);
+
+				int repeats = Max(GetParam<int>(object.objectParams, 1, 1), 1);
+
+				double SV = getSliderVelocity(object.time);
+				double beat = getBeatLength(object.time);
+				double duration = length / (sliderMultiplier * 100.0 * SV) * beat;
+				duration *= repeats;
+				double endTime = object.time + duration;
+
                 CurveType type;
 
                 auto curveType = GetParam<std::string>(curveParams, 0, "");
@@ -394,19 +397,18 @@ public:
                         type = CurveType::BEZIER;
                         break;
                     case 'C':
-                        type = CurveType::CATMULL;
+                        type = CurveType::BEZIER;
                         break;
                     case 'L':
                         type = CurveType::STRAIGHT;
                         break;
                     case 'P':
-                        type = CurveType::CIRCLE;
+                        type = CurveType::BEZIER;
                         break;
                     default:
                         type = CurveType::STRAIGHT;
                         break;
                 }
-                type = CurveType::BEZIER;
 
                 map.addSlider(path, comboEnd, object.time, endTime, type, repeats);
             }
@@ -423,29 +425,37 @@ public:
 private:
     float getSliderVelocity(double time)
     {
-        for (const auto &timingPoint: timingPoints) {
-			// timing points are in reverse order
-            if (timingPoint.time <= time && !timingPoint.uninherited) {
-				return 1.f / ((float(timingPoint.beatLength) * -1.f) / 100.f);
-            }
-        }
-        return 1.0f;
+		for (auto it = inheritedTimingPoints.begin(); it != inheritedTimingPoints.end(); it++) {
+			if (it != std::prev(inheritedTimingPoints.end())) {
+				if (InRangeIE(time, it->time, std::next(it)->time)) {
+					return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
+				}
+			} else {
+				return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
+			}
+
+		}
+		return 1.0f;
     }
 
-    float getBeatLength(double time)
+    double getBeatLength(double time)
     {
-        for (const auto &timingPoint: timingPoints) {
-			// timing points are in reverse order
-            if (timingPoint.uninherited && time <= timingPoint.time) {
-                return TimeConversion((int) timingPoint.beatLength);
-            }
-        }
-        return 0.1f;
+		for (auto it = uninheritedTimingPoints.begin(); it != uninheritedTimingPoints.end(); it++) {
+			if (it != std::prev(uninheritedTimingPoints.end())) {
+				if (InRangeIE(time, it->time, std::next(it)->time)) {
+					return it->beatLength;
+				}
+			} else {
+				return it->beatLength;
+			}
+		}
+		return 0.1f;
     }
 
     float sliderMultiplier = 1.0f;
     std::vector<HitObject> hitObjectParams;
-    std::vector<TimingPoint> timingPoints;
+    std::vector<TimingPoint> inheritedTimingPoints;
+	std::vector<TimingPoint> uninheritedTimingPoints;
     std::map<std::string, std::string> meta;
 };
 

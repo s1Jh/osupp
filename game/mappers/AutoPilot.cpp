@@ -53,22 +53,37 @@ fvec2d AutoPilot::getCursor() const
 
 void AutoPilot::update()
 {
-	auto thisPtr = ctx.game.getClosestActiveObject().lock();
-	if (!thisPtr)
+	auto next = ctx.game.getClosestActiveObject();
+	auto& objects = ctx.game.getStoredObjects();
+	if (next == objects.end())
 		return;
+
+	auto thisPtr = *next;
 
 	target = thisPtr->getSOF().position;
 	held = ctx.game.getCurrentTime() >= thisPtr->getStartTime();
 
-	if (held && (Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius)) {
-		log::debug("Lagged behind!");
-		position = target;
-	}
-
 	auto direction = target - position;
 	auto normalized = Normalize(direction);
 
-	double velocity = 10.0;
+	auto currentObjectEnd = next->get()->getEndTime();
+	auto nextObjectPosition = target;
+	auto nextObjectStart = currentObjectEnd + 1.0;
+	BaseHitObject *to = nullptr;
+	if (next != std::prev(objects.end())) {
+		to = std::next(next)->get();
+		nextObjectStart = to->getStartTime();
+		nextObjectPosition = to->getSOF().position;
+	}
+
+	auto time = nextObjectStart - currentObjectEnd;
+	auto distance = Distance(nextObjectPosition, target);
+
+	float velocity;
+	if (held)
+		velocity = 100.f;
+	else
+		velocity = distance / time;
 
 	auto move = normalized * velocity * ctx.timing.getDelta();
 
@@ -77,10 +92,64 @@ void AutoPilot::update()
 
 	position += move;
 
+	if (Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius) {
+		if (held) {
+			log::debug("Lagged behind!");
+			position = target;
+		}
+	}
+
+	/*auto currentObjectEnd = next->get()->getEndTime();
+	auto nextObjectStart = currentObjectEnd + 1.0;
+	BaseHitObject *to = nullptr;
+	if (next != std::prev(objects.end())) {
+		to = std::next(next)->get();
+		nextObjectStart = std::next(next)->get()->getStartTime();
+	}
+
+	auto delta = nextObjectStart - currentObjectEnd;
+
+	auto direction = target - position;
+
+	acceleration = (direction * accMult) / delta;
+
+	velocity *= drag;
+	velocity += acceleration * ctx.timing.getDelta();
+	position += velocity * ctx.timing.getDelta();
+
+	if (Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius) {
+		if (held) {
+			log::debug("Lagged behind!");
+			position = target;
+			velocity = {0.0f, 0.0f};
+		}
+	}
+
+	const auto& transform = ctx.game.getTransform();
+	static float displayScale = 1.0f;*/
+
+//	ctx.gfx.draw(fline{position, target}, VisualAppearance{.fillColor = WHITE}, transform);
+//	ctx.gfx.draw(fline{position, position + acceleration * displayScale}, VisualAppearance{.fillColor = GREEN}, transform);
+//	ctx.gfx.draw(fline{position, position + velocity * displayScale}, VisualAppearance{.fillColor = RED}, transform);
+
 	if (ImGui::Begin("Autopilot control")) {
-		ImGui::Checkbox("Held", &held);
-		ImGui::Text("Target: %lx", (unsigned long)thisPtr.get());
+		ImGui::Text("Tracking: 0x%lx", thisPtr.get());
+		ImGui::Text("Next: 0x%lx", to);
+		ImGui::Text("Time to next: %f", time);
+		ImGui::Text("Distance to next: %f", distance);
 		ImGui::Text("Velocity: %f", velocity);
+		ImGui::Text("Held: %i", held);
+
+		/*ImGui::Text("Next: 0x%xl", to);
+		ImGui::Text("Delay to next: %f", delta);
+		ImGui::Text("Direction: %f %f", direction.x, direction.y);
+		ImGui::Text("Target: %f %f", target.x, target.y);
+		ImGui::Text("Position: %f %f", position.x, position.y);
+		ImGui::Text("Velocity: %f %f", velocity.x, velocity.y);
+		ImGui::Text("Acceleration: %f %f", acceleration.x, acceleration.y);
+		ImGui::SliderFloat("Acceleration multiplier", &accMult, 0.0f, 100.0f);
+		ImGui::SliderFloat("Drag", &drag, 0.0f, 1.0f);
+		ImGui::SliderFloat("Scale", &displayScale, 0.0f, 1.0f);*/
 
 		ImGui::End();
 	}
@@ -89,7 +158,6 @@ void AutoPilot::update()
 AutoPilot::AutoPilot() :
 	ctx(GetContext())
 {
-	previous = ctx.game.getCurrentObject();
 }
 
 NS_END

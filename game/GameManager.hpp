@@ -101,7 +101,7 @@ public:
 
 	[[nodiscard]] std::weak_ptr<BaseHitObject> getCurrentObject() const;
 
-	[[nodiscard]] std::weak_ptr<BaseHitObject> getClosestActiveObject() const;
+	[[nodiscard]] GameManager::StorageT::const_iterator getClosestActiveObject() const;
 
 	[[nodiscard]] std::weak_ptr<BaseHitObject> getNextObject() const;
 

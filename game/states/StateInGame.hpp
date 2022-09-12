@@ -28,6 +28,7 @@
 #include "State.hpp"
 #include "Timer.hpp"
 #include "ObjectSprite.hpp"
+#include "MapInfo.hpp"
 
 NS_BEGIN
 
@@ -44,6 +45,7 @@ public:
     int init(GameState state) override;
 
 private:
+	Resource<MapInfo> map;
 	std::vector<fvec2d> cursorTrail;
 	int trailIndex{0};
 	ObjectSprite playField;
