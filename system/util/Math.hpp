@@ -556,7 +556,7 @@ inline Mat3<T> MakeScaleMatrix(const vec2d<T> &scale,
 template<typename T>
 inline T Mag(const vec2d<T> &v)
 {
-    return std::hypot(v.x, v.y);
+	return std::sqrt(std::pow(v.x, 2) + std::pow(v.y, 2));
 }
 
 template<typename T>

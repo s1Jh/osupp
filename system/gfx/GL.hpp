@@ -187,7 +187,7 @@ typedef ptrdiff_t GLsizeiptr;
     GLEXT ( void, DeleteVertexArrays, GLsizei n, const GLuint *arrays ) \
 	GLEXT ( void, GenerateMipmap, GLenum target ) \
 	GLEXT ( void, GenerateTextureMipmap, GLuint texture ) \
-    GLEXT ( const GLubyteptr, GetStringi, GLenum value, GLuint index) \
+    GLEXT ( GLubyteptr, GetStringi, GLenum value, GLuint index) \
     GLEXT( void, BlendFuncSeparate, GLenum dstRGB, GLenum dstAlpha, GLenum srcRGB, GLenum srcAlpha ) \
     GLEXT( void, BlendEquationSeparate, GLenum rgbMode, GLenum alphaMode ) \
     GLEXT( void, BufferSubData, GLenum target,GLintptr offset, GLsizeiptr size, const void* data) \

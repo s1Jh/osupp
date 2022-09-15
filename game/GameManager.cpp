@@ -180,7 +180,7 @@ breakout:
 
 }
 
-void GameManager::draw(Renderer &renderer)
+void GameManager::draw(Renderer&)
 {
 	ImGui::SetNextWindowPos({0, 0});
 	ImGui::SetNextWindowCollapsed(false);

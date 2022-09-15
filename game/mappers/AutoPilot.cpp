@@ -19,15 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
-//
-// Created by sijh on 04.09.22.
-//
-
 #include "AutoPilot.hpp"
 #include "BaseHitObject.hpp"
-
-#include "imgui.h"
 
 NS_BEGIN
 
@@ -66,24 +59,25 @@ void AutoPilot::update()
 	auto direction = target - position;
 	auto normalized = Normalize(direction);
 
-	auto currentObjectEnd = next->get()->getEndTime();
-	auto nextObjectPosition = target;
-	auto nextObjectStart = currentObjectEnd + 1.0;
-	BaseHitObject *to = nullptr;
-	if (next != std::prev(objects.end())) {
-		to = std::next(next)->get();
-		nextObjectStart = to->getStartTime();
-		nextObjectPosition = to->getSOF().position;
+	auto currentObjectStart = next->get()->getStartTime();
+	fvec2d nextObjectPosition = {0.0f, 0.0f};
+	auto previousObjectEnd = currentObjectStart - 1.0;
+	BaseHitObject *from = nullptr;
+	if (next != objects.begin()) {
+		from = std::prev(next)->get();
+		previousObjectEnd = from->getEndTime();
+		nextObjectPosition = from->getSOF().position;
 	}
 
-	auto time = nextObjectStart - currentObjectEnd;
+	auto time = currentObjectStart - previousObjectEnd;
 	auto distance = Distance(nextObjectPosition, target);
 
 	float velocity;
 	if (held)
 		velocity = 100.f;
-	else
-		velocity = distance / time;
+	else {
+		velocity = Clamp(float(distance / time), minVelocity.get(), maxVelocity.get());
+	}
 
 	auto move = normalized * velocity * ctx.timing.getDelta();
 
@@ -98,66 +92,17 @@ void AutoPilot::update()
 			position = target;
 		}
 	}
-
-	/*auto currentObjectEnd = next->get()->getEndTime();
-	auto nextObjectStart = currentObjectEnd + 1.0;
-	BaseHitObject *to = nullptr;
-	if (next != std::prev(objects.end())) {
-		to = std::next(next)->get();
-		nextObjectStart = std::next(next)->get()->getStartTime();
-	}
-
-	auto delta = nextObjectStart - currentObjectEnd;
-
-	auto direction = target - position;
-
-	acceleration = (direction * accMult) / delta;
-
-	velocity *= drag;
-	velocity += acceleration * ctx.timing.getDelta();
-	position += velocity * ctx.timing.getDelta();
-
-	if (Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius) {
-		if (held) {
-			log::debug("Lagged behind!");
-			position = target;
-			velocity = {0.0f, 0.0f};
-		}
-	}
-
-	const auto& transform = ctx.game.getTransform();
-	static float displayScale = 1.0f;*/
-
-//	ctx.gfx.draw(fline{position, target}, VisualAppearance{.fillColor = WHITE}, transform);
-//	ctx.gfx.draw(fline{position, position + acceleration * displayScale}, VisualAppearance{.fillColor = GREEN}, transform);
-//	ctx.gfx.draw(fline{position, position + velocity * displayScale}, VisualAppearance{.fillColor = RED}, transform);
-
-	if (ImGui::Begin("Autopilot control")) {
-		ImGui::Text("Tracking: 0x%lx", thisPtr.get());
-		ImGui::Text("Next: 0x%lx", to);
-		ImGui::Text("Time to next: %f", time);
-		ImGui::Text("Distance to next: %f", distance);
-		ImGui::Text("Velocity: %f", velocity);
-		ImGui::Text("Held: %i", held);
-
-		/*ImGui::Text("Next: 0x%xl", to);
-		ImGui::Text("Delay to next: %f", delta);
-		ImGui::Text("Direction: %f %f", direction.x, direction.y);
-		ImGui::Text("Target: %f %f", target.x, target.y);
-		ImGui::Text("Position: %f %f", position.x, position.y);
-		ImGui::Text("Velocity: %f %f", velocity.x, velocity.y);
-		ImGui::Text("Acceleration: %f %f", acceleration.x, acceleration.y);
-		ImGui::SliderFloat("Acceleration multiplier", &accMult, 0.0f, 100.0f);
-		ImGui::SliderFloat("Drag", &drag, 0.0f, 1.0f);
-		ImGui::SliderFloat("Scale", &displayScale, 0.0f, 1.0f);*/
-
-		ImGui::End();
-	}
 }
 
 AutoPilot::AutoPilot() :
 	ctx(GetContext())
 {
+	minVelocity = ctx.settings.addSetting<float>(
+		"setting.input.autopilot.min_speed", 5.0f,
+		SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY, 0.0f, 20.f);
+	maxVelocity = ctx.settings.addSetting<float>(
+		"setting.input.autopilot.max_speed", 100.0f,
+		SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY, 20.f, 100.f);
 }
 
 NS_END

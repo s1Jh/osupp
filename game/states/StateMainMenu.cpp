@@ -374,15 +374,21 @@ void State<GameState::MainMenu>::showSettingsTab()
 
         ImGui::TableHeadersRow();
         for (auto &setting: ctx.settings) {
-            auto localised = ctx.locale[setting.first];
+
+			auto &ptr = setting.second;
+			if (bool(ptr->flags() & SettingFlags::HIDDEN)) {
+				continue;
+			}
+
+			auto localised = ctx.locale[setting.first];
             if (!filter.PassFilter(localised.c_str())) {
                 continue;
             }
+
             ImGui::TableNextColumn();
             ImGui::Text("%s", localised.c_str());
             ImGui::TableNextColumn();
 
-            auto &ptr = setting.second;
             std::string id = "##" + setting.first;
 
 			if (VisitSetting<std::string>(ptr, wrap([&](Setting<std::string>& setting) {
