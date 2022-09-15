@@ -71,6 +71,7 @@ public:
     [[nodiscard]] SettingType getType() const;
 
 	virtual bool wasChanged();
+	virtual bool changed() const;
 	[[nodiscard]] virtual SettingFlags flags() const;
 
 private:
@@ -142,6 +143,7 @@ struct SettingMetadata<std::string>: public detail::SettingMetadataFields<std::s
 template<typename T> requires std::is_default_constructible_v<T>
 class Setting: public detail::BaseSetting
 {
+	friend class Settings;
 public:
     explicit Setting();
     explicit Setting(SettingMetadata<T> meta);
@@ -161,13 +163,15 @@ public:
 
     SettingMetadata<T> getMetadata() const;
 
-	SettingFlags flags() const override;
-	bool wasChanged() override;
+	[[nodiscard]] SettingFlags flags() const override;
+
+	[[nodiscard]] bool changed() const override;
 
     Setting<T> &operator=(const T &right);
     Setting<T> &operator=(Setting<T> &&right) noexcept;
 
 private:
+	bool wasChanged() override;
     template<typename U>
     struct SettingContainer
     {
@@ -306,6 +310,13 @@ requires std::is_default_constructible_v<T>
 SettingFlags Setting<T>::flags() const
 {
 	return held->meta.flags;
+}
+
+template<typename T>
+requires std::is_default_constructible_v<T>
+bool Setting<T>::changed() const
+{
+	return held->changed;
 }
 
 NS_END

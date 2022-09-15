@@ -103,8 +103,12 @@ public:
 
         Section section = DONT_CARE;
 
-        while (!ifs.eof()) {
-            std::getline(ifs, strLine);
+		std::stringstream slurped;
+		slurped << ifs.rdbuf();
+		ifs.close();
+
+        while (!slurped.eof()) {
+            std::getline(slurped, strLine);
             Trim(strLine);
 
             if (strLine.empty())
@@ -157,7 +161,6 @@ public:
                     object.type = GetParam<int>(params, 3, 1);
                     object.hitSound = GetParam<int>(params, 4, 0);
                     if (params.size() > 5) {
-
                         if (params.back().find(':') != std::string::npos) {
                             object.hitSample = GetCharacterSeparatedValues(params.back(), ':');
                             object.objectParams = std::vector(std::next(params.begin(), 5), std::prev(params.end()));
@@ -433,7 +436,6 @@ private:
 			} else {
 				return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
 			}
-
 		}
 		return 1.0f;
     }

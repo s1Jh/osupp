@@ -65,6 +65,7 @@ public:
     ObjectSprite createObjectSprite(const std::string &object,
                                     const HitObjectArguments& args) const;
 
+	static const std::map<std::string, std::pair<std::string, std::string>> StaticGameShaders;
 private:
 
     std::filesystem::path directory;

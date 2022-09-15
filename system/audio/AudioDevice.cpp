@@ -31,6 +31,8 @@
 
 NS_BEGIN
 
+constexpr float VOLUME_SLIDER_MULTIPLIER = 0.01f;
+
 Channel &AudioDevice::getMusicChannel()
 {
 	return musicChannel;
@@ -83,6 +85,11 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 	std::for_each(sfxChannels.begin(), sfxChannels.end(), [](Channel& channel) { channel.setup(); });
 	musicChannel.setup();
 
+	musicChannelVolume = GetContext().settings.addSetting<float>(
+		"setting.audio.music_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
+	sfxChannelVolume = GetContext().settings.addSetting<float>(
+		"setting.audio.sfx_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
+
 	log::info("Successfully initiated device ", specIn.name, " @", freqSetting, "Hz");
 }
 
@@ -97,6 +104,9 @@ void AudioDevice::process()
 
 	for (auto& channel : sfxChannels)
 		channel.update();
+
+	setMusicVolume(musicChannelVolume.get() * VOLUME_SLIDER_MULTIPLIER);
+	setSfxVolume(sfxChannelVolume.get() * VOLUME_SLIDER_MULTIPLIER);
 }
 
 void AudioDevice::ALContextDeleter(AudioDevice::ALContainer *container)
@@ -104,6 +114,18 @@ void AudioDevice::ALContextDeleter(AudioDevice::ALContainer *container)
 	log::debug("Closing audio device ", container);
 	alcDestroyContext((ALCcontext*) container->context);
 	alcCloseDevice((ALCdevice*) container->device);
+}
+
+void AudioDevice::setMusicVolume(float fraction)
+{
+	musicChannel.setVolume(fraction, 0);
+}
+
+void AudioDevice::setSfxVolume(float fraction)
+{
+	for (auto& channel : sfxChannels) {
+		channel.setVolume(fraction, 0);
+	}
 }
 
 NS_END
