@@ -37,7 +37,6 @@ Resource<Shader> Load(const std::filesystem::path &path)
 {
 	Resource<Shader> r;
 
-    log::info("Loading shader ", path);
     std::string frag_src, vert_src, geom_src;
 
     vert_src = std::string("#version ") + GL_VERSION_STR + '\n' +
@@ -128,7 +127,7 @@ bool Shader::fromString(const std::string &vert_src,
     glGetProgramiv(id, GL_LINK_STATUS, &link_state);
     if (!link_state) {
         glGetProgramInfoLog(id, 512, nullptr, info_log);
-        log::warning("Warning, an error occurred during Shader program linking:\n",
+        log::error("Warning, an error occurred during Shader program linking:\n",
                      info_log, '\n');
         return false;
     }
@@ -143,7 +142,9 @@ unsigned int Shader::compileShader(const std::string &file, unsigned int type)
     auto cbuff = file.c_str();
 
     auto shader = glCreateShader(type);
+    CheckGLh("SHADER::LOAD_SHADER: Creation");
     glShaderSource(shader, 1, &cbuff, nullptr);
+    CheckGLh("SHADER::LOAD_SHADER: Setting source");
     glCompileShader(shader);
     CheckGLh("SHADER::LOAD_SHADER: Compilation");
 
@@ -151,7 +152,7 @@ unsigned int Shader::compileShader(const std::string &file, unsigned int type)
 
     if (!compile_state) {
         glGetShaderInfoLog(shader, 512, nullptr, info_log);
-        log::warning("Shader compilation error:\n", info_log);
+        log::error("Shader compilation error:\n", info_log);
     }
 
     return shader;
