@@ -125,6 +125,10 @@ SettingFlags detail::BaseSetting::flags() const
 {
 	return DEFAULT_SETTING_FLAGS;
 }
+bool detail::BaseSetting::changed() const
+{
+	return false;
+}
 
 Settings::ActiveSettingStorageT::iterator Settings::begin()
 {

@@ -29,6 +29,7 @@
 
 #include "Channel.hpp"
 #include "Audio.hpp"
+#include "Setting.hpp"
 
 #include <AL/al.h>
 
@@ -49,6 +50,9 @@ public:
 	Channel& getMusicChannel();
 	Channel& getSFXChannel();
 
+	void setMusicVolume(float fraction);
+	void setSfxVolume(float fraction);
+
 	AudioDeviceSpec spec;
 
 private:
@@ -56,6 +60,8 @@ private:
 		detail::ALCdevice *device;
 		detail::ALCcontext *context;
 	};
+	Setting<float> musicChannelVolume;
+	Setting<float> sfxChannelVolume;
 	static void ALContextDeleter(ALContainer*);
 	std::shared_ptr<ALContainer> held;
 	Channel musicChannel{};

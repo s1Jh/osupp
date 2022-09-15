@@ -42,11 +42,6 @@ void Slider::onUpdate(double delta)
 
 void Slider::onLogicUpdate(double delta)
 {
-//	if (ctx.game.getCurrentTime() > getStartTime() && getState() == HitObjectState::Ready) {
-//		transferActive();
-//		onPress();
-//	}
-
     double timeLength = getEndTime() - getStartTime();
     double timeRunning = ctx.game.getCurrentTime() - startPoint;
 
@@ -59,7 +54,7 @@ void Slider::onLogicUpdate(double delta)
     repeatsLeft = repeats - currentRepeat;
 
 	TravelDirection nextDirection = currentRepeat % 2 == 1 ? TravelDirection::Backward : TravelDirection::Forward;
-	if (currentDirection != nextDirection) {
+	if (currentDirection != nextDirection && repeatsLeft > 0) {
 		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce.ref());
 		currentDirection = nextDirection;
 	}
@@ -123,7 +118,7 @@ HitResult Slider::onFinish()
 void Slider::onRaise()
 {
 	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak.ref());
-    broken = true;
+	broken = true;
 }
 
 void Slider::onPress()

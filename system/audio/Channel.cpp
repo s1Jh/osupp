@@ -109,7 +109,7 @@ void Channel::update()
 
 void Channel::setVolume(float fraction, float transitionTime)
 {
-
+	alSourcef(held->ALSource, AL_GAIN, fraction);
 }
 
 void Channel::play()
