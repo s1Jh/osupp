@@ -27,7 +27,6 @@
 
 #include "Context.hpp"
 #include "HumanInput.hpp"
-#include "TestInput.hpp"
 #include "AutoPilot.hpp"
 
 NS_BEGIN
@@ -119,20 +118,6 @@ int State<GameState::InGame>::init(GameState)
     float base = 0.9f;
     field = {{base * ratio, base}, {0.0f, 0.0f}};
     ctx.game.setPlayField(field);
-
-	map->addSlider(
-		{
-		   {{-0.8f, -0.8f}, false},
-		   {{0.8f, 0.8f}, false},
-		},
-		false,
-		1.0f,
-		9.0f,
-		CurveType::BEZIER,
-		8
-	);
-
-//	ctx.game.setMap(map);
 
 	// give the player some time before the game starts
 	const float startDelay = 5.0f;

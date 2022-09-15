@@ -43,6 +43,8 @@ private:
 	fvec2d target;
 	fvec2d position;
 	bool held{false};
+	Setting<float> minVelocity;
+	Setting<float> maxVelocity;
 
 //	std::weak_ptr<BaseHitObject> previous;
 //	float velocity{20.0f};

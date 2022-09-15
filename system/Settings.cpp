@@ -121,6 +121,11 @@ bool detail::BaseSetting::wasChanged()
 	return false;
 }
 
+SettingFlags detail::BaseSetting::flags() const
+{
+	return DEFAULT_SETTING_FLAGS;
+}
+
 Settings::ActiveSettingStorageT::iterator Settings::begin()
 {
     return activeValues.begin();

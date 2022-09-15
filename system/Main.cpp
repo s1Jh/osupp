@@ -56,14 +56,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 int main()
 #endif
 {
-	auto res = Load<int>("f");
-
-	auto res2 = res;
-
-	*res2 = 5;
-
-	auto def = Default<int>();
-
     log::custom("GREETING", "Hello, world!");
 
     log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);

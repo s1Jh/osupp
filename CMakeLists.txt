@@ -71,7 +71,6 @@ set(SOURCES
         ${INPUT_DIRECTORY}/Mouse.cpp
 
         ${MAPPERS_DIRECTORY}/HumanInput.cpp
-        ${MAPPERS_DIRECTORY}/TestInput.cpp
         ${MAPPERS_DIRECTORY}/AutoPilot.cpp
 
         ${AUDIO_DIRECTORY}/Audio.cpp

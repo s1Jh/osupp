@@ -59,6 +59,8 @@ enum class SettingFlags {
 
 ENABLE_BITMASK_OPERATORS(SettingFlags);
 
+constexpr SettingFlags DEFAULT_SETTING_FLAGS = SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY;
+
 namespace detail
 {
 class BaseSetting
@@ -69,6 +71,7 @@ public:
     [[nodiscard]] SettingType getType() const;
 
 	virtual bool wasChanged();
+	[[nodiscard]] virtual SettingFlags flags() const;
 
 private:
     const SettingType type;
@@ -99,7 +102,7 @@ struct SettingMetadataFields
     const static ConstraintFunction applyConstraints;
 
     U initial{};
-	SettingFlags flags{SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY};
+	SettingFlags flags{DEFAULT_SETTING_FLAGS};
 };
 
 }
@@ -107,8 +110,8 @@ struct SettingMetadataFields
 template<>
 struct SettingMetadata<float>: public detail::SettingMetadataFields<float, SettingType::FLOAT>
 {
-    float min{0};
-    float max{1};
+    float min{0.0f};
+    float max{1.0f};
     bool slider{true};
 };
 
@@ -158,6 +161,7 @@ public:
 
     SettingMetadata<T> getMetadata() const;
 
+	SettingFlags flags() const override;
 	bool wasChanged() override;
 
     Setting<T> &operator=(const T &right);
@@ -295,6 +299,13 @@ bool Setting<T>::wasChanged()
 	auto oldValue = held->changed;
 	held->changed = false;
 	return oldValue;
+}
+
+template<typename T>
+requires std::is_default_constructible_v<T>
+SettingFlags Setting<T>::flags() const
+{
+	return held->meta.flags;
 }
 
 NS_END
