@@ -101,8 +101,8 @@ typedef unsigned char* GLubyteptr;
 #define GL_STATIC_DRAW                    0x88E4
 #define GL_STREAM_DRAW                    0x88E0
 #define GL_TEXTURE0                       0x84C0
-#define GL_VERTEX_SHADER                  0x8B31
-#define GL_LINK_STATUS                    0x0
+//#define GL_VERTEX_SHADER                  0x8B31
+//#define GL_LINK_STATUS                    0x0
 
 typedef char GLchar;
 typedef unsigned int GLenum;

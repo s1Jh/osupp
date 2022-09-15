@@ -226,7 +226,7 @@ void Slider::onDraw()
 	/*============================================================================================================*/
 	// Draw the curve body.
 
-	if (bodyTexture.getTexture()) {
+	if (bodyTexture.getTexture() && bodyShader) {
 
 		for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
 			/*========================================================================================================*/
