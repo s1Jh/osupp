@@ -74,7 +74,11 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 		if (!IsPlanar(avFormat)) {
 			// Format is interleaved
 			stream = data[0];
+#ifdef WINDOWS
+			offset = offset * ctx.frame->channels + channel;
+#else
 			offset = offset * ctx.frame->ch_layout.nb_channels + channel;
+#endif
 		} else {
 			// Format is planar
 			stream = data[channel];
@@ -149,8 +153,13 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 
 	for (int i = 1; i < ctx.frame->nb_samples; i++) {
 		if constexpr(bool(fmt & SampleFormat::IS_STEREO)) {
-			const size_t rightId = Min(2, ctx.frame->ch_layout.nb_channels);
-			const size_t leftId = Min(1, ctx.frame->ch_layout.nb_channels);
+#ifdef WINDOWS
+			auto channelCount = ctx.frame->channels;
+#else
+			auto channelCount = ctx.frame->ch_layout.nb_channels;
+#endif
+			const size_t rightId = Min(2, channelCount);
+			const size_t leftId = Min(1, channelCount);
 
 			float left = extractDataFromStream(leftId, i);
 			float right = extractDataFromStream(rightId, i);
