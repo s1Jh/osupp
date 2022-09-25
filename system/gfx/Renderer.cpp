@@ -98,11 +98,11 @@ void Renderer::end()
 
 bool Renderer::create()
 {
-    auto &settings = GetContext().settings;
-    resolution = settings.addSetting<std::string>("setting.gfx.resolution", "1920x1080", SettingFlags::WRITE_TO_FILE,
-												  StandardResolutions);
-    fullscreen = settings.addSetting<bool>("setting.gfx.fullscreen", false, SettingFlags::WRITE_TO_FILE);
-    refreshRate = settings.addSetting<int>("setting.gfx.refresh_rate", 60, SettingFlags::WRITE_TO_FILE, 0, 120);
+//    auto &settings = GetContext().settings;
+//    resolution = settings.addSetting<std::string>("setting.gfx.resolution", "1920x1080", SettingFlags::WRITE_TO_FILE,
+//												  StandardResolutions);
+//    fullscreen = settings.addSetting<bool>("setting.gfx.fullscreen", false, SettingFlags::WRITE_TO_FILE);
+//    refreshRate = settings.addSetting<int>("setting.gfx.refresh_rate", 60, SettingFlags::WRITE_TO_FILE, 0, 120);
 
     auto onSettingChange = [](Renderer *self, const std::string &name) -> CallbackReturn
     {
@@ -117,7 +117,7 @@ bool Renderer::create()
         return CallbackReturn::OK;
     };
 
-    GetContext().settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap(onSettingChange), this);
+//    GetContext().settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap(onSettingChange), this);
 
 	windowHandle = detail::CreateWindowHandle();
 	if (!windowHandle) {

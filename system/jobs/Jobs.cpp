@@ -74,6 +74,7 @@ int StopJobs()
         if (pair.first.joinable())
             pair.first.join();
     }
+    return 0;
 }
 
 int StartJobs()
@@ -88,6 +89,7 @@ int StartJobs()
         pair.second = std::make_shared<detail::BaseJobHolder>(-1);
         pair.second->done = false;
     }
+    return 0;
 }
 
 int UpdateJobs()

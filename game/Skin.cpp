@@ -149,7 +149,7 @@ Resource<Skin> Load(const std::filesystem::path &path)
 {
     LOG_ENTER();
 
-	auto& res = GetContext().resources;
+	//auto& res = GetContext().resources;
 
 	Resource<Skin> r;
 
@@ -164,7 +164,7 @@ Resource<Skin> Load(const std::filesystem::path &path)
         // apply settings
         const auto &fields = entry.second;
 
-        std::filesystem::path texPath = GetContext().resources.findFile(entry.first, r->directory);
+        std::filesystem::path texPath; //= GetContext().resources.findFile(entry.first, r->directory);
         if (fields.find("texturePath") != fields.end()) {
             texPath = r->directory / fields["texturePath"].str(entry.first);
         }
@@ -191,7 +191,7 @@ Resource<Skin> Load(const std::filesystem::path &path)
     log::info("Loading skin assets...");
 
     for (auto &texture: r->textures) {
-        texture.second.texture = res.load<Texture>(texture.second.path, r->directory);
+    //  texture.second.texture = res.load<Texture>(texture.second.path, r->directory);
 		failed += !bool(texture.second.texture);
     }
     for (const auto& shader : Skin::StaticGameShaders) {
@@ -201,7 +201,7 @@ Resource<Skin> Load(const std::filesystem::path &path)
 		failed += !bool(shaderObj->fromString(vertex, fragment));
     }
 	for (auto &sound: r->sounds) {
-		sound.second.sound = res.load<SoundSample>(sound.second.path, r->directory);
+	//	sound.second.sound = res.load<SoundSample>(sound.second.path, r->directory);
 		failed += !bool(sound.second.sound);
 	}
 
@@ -240,7 +240,7 @@ Resource<Texture> Skin::getTexture(const std::string &object) const
 		return textures.at(object).texture;
 	}
 
-	return GetContext().resources.get<Texture>(object, directory, false);
+	return Default<Texture>();
 }
 
 color Skin::getTint(const std::string &object, unsigned int seed) const
@@ -268,7 +268,7 @@ Resource<Shader> Skin::getShader(const std::string &object) const
     if (shaders.contains(object)) {
         return shaders.at(object).shader;
     }
-	return GetContext().resources.get<Shader>(object, directory, false);
+	return Default<Shader>();
 }
 
 ObjectSprite Skin::createObjectSprite(const std::string &object,
@@ -291,7 +291,7 @@ Resource<SoundSample> Skin::getSound(const std::string &object)
 	if (sounds.contains(object)) {
 		return sounds.at(object).sound;
 	}
-	return GetContext().resources.get<SoundSample>(object, directory, false);
+	return Default<SoundSample>();
 }
 
 NS_END

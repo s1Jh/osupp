@@ -46,16 +46,7 @@ private:
 	Setting<float> minVelocity;
 	Setting<float> maxVelocity;
 
-//	std::weak_ptr<BaseHitObject> previous;
-//	float velocity{20.0f};
-//	bool lastHeld;
-//	fvec2d velocity;
-//	fvec2d acceleration;
-//	float accMult{60.0f};
-//	float drag{0.7f};
-//	double lastTime;
-
-	Context &ctx;
+	Context ctx;
 };
 
 NS_END

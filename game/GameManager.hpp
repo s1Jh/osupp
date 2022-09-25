@@ -81,17 +81,17 @@ public:
 
     [[nodiscard]] const Mat3f &getTransform() const;
 
-    [[nodiscard]] float getCircleSize();
+    [[nodiscard]] float getCircleSize() const;
 
-    [[nodiscard]] float getApproachTime();
+    [[nodiscard]] float getApproachTime() const;
 
-    [[nodiscard]] float getFadeTime();
+    [[nodiscard]] float getFadeTime() const;
 
-    [[nodiscard]] float getHitWindow();
+    [[nodiscard]] float getHitWindow() const;
 
-	[[nodiscard]] float getHpDrain();
+	[[nodiscard]] float getHpDrain() const;
 
-	[[nodiscard]] float getStartOffset();
+	[[nodiscard]] float getStartOffset() const;
 
 	[[nodiscard]] const SampleSet &getSamples() const;
 

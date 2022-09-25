@@ -64,7 +64,6 @@ set(SOURCES
         ${SYSTEM_DIRECTORY}/Timer.cpp
         # ${SYSTEM_DIRECTORY}/SUI.cpp
 
-        ${CORE_DIRECTORY}/Context.cpp
         ${CORE_DIRECTORY}/Timing.cpp
         ${CORE_DIRECTORY}/State.cpp
         ${CORE_DIRECTORY}/StateHandler.cpp
@@ -157,7 +156,9 @@ add_compile_definitions(${ARCHITECTURE})
 set(ADDITIONAL_EXECUTABLE_OPTIONS)
 
 if (${PLATFORM} STREQUAL "WINDOWS")
-	set(ADDITIONAL_EXECUTABLE_OPTIONS WIN32)
+	if (CONFIG:Release)
+		set(ADDITIONAL_EXECUTABLE_OPTIONS WIN32)
+	endif()
 else()
 	set(OpenGL_GL_PREFERENCE GLVND)
 	find_package(glfw3 3.3 REQUIRED)
@@ -243,7 +244,7 @@ add_executable(${TARGET_NAME} ${ADDITIONAL_EXECUTABLE_OPTIONS} ${SOURCES})
 
 # Set the proper warning levels
 if (MSVC)
-    target_compile_options(${TARGET_NAME} PRIVATE /W4 /Zc:preprocessor)
+    target_compile_options(${TARGET_NAME} PRIVATE /W0 /Zc:preprocessor)
 else ()
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()

@@ -216,6 +216,9 @@ template<typename T>
 requires std::is_default_constructible_v<T>
 T Setting<T>::get() const
 {
+    if (!held)
+        return T{};
+
     std::scoped_lock<std::mutex> lock(held->mutex);
     return held->value;
 }
@@ -224,6 +227,9 @@ template<typename T>
 requires std::is_default_constructible_v<T>
 void Setting<T>::set(const T &newValue)
 {
+    if (!held)
+        return;
+
     std::scoped_lock<std::mutex> lock(held->mutex);
 	if (held->value != newValue) {
 		held->value = held->meta.applyConstraints(held->meta, newValue);
@@ -235,6 +241,8 @@ template<typename T>
 requires std::is_default_constructible_v<T>
 void Setting<T>::set(T &&newValue)
 {
+    if (!held)
+        return;
     std::scoped_lock<std::mutex> lock(held->mutex);
     held->value = held->meta.applyConstraints(held->meta, newValue);
 }
@@ -243,6 +251,9 @@ template<typename T>
 requires std::is_default_constructible_v<T>
 void Setting<T>::reset()
 {
+    if (!held)
+        return;
+
     std::scoped_lock<std::mutex> lock(held->mutex);
     set(held->meta.initial);
 }

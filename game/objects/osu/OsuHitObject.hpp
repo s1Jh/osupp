@@ -59,7 +59,8 @@ protected:
 		//		 also update the sprite animation. This will break if the approach circle
 		// 		 for whatever reason gets drawn twice during one frame. The animation will
 		//		 be sped up as a result. Also, we lose const-ness on this function.
-		approachCircle.update(this->ctx.timing.getDelta());
+
+        //approachCircle.update(this->ctx.timing.getDelta());
 		const auto &transform = this->getObjectTransform();
 
 		if (this->isApproachCircleDrawn()) {

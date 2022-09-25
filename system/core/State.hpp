@@ -23,7 +23,8 @@
 #pragma once
 
 #include "define.hpp"
-#include "StateHandler.hpp"
+#include "GameState.hpp"
+#include "Context.hpp"
 
 NS_BEGIN
 
@@ -34,7 +35,6 @@ namespace detail
 
 class BaseState
 {
-    friend class StateHandler;
 public:
     virtual int update(double);
     virtual int draw();
@@ -45,6 +45,7 @@ public:
 
     std::unique_ptr<Context> ctx;
 };
+
 }
 
 template<GameState Name>

@@ -24,7 +24,34 @@
 
 #include "define.hpp"
 
+#define USER_CONTEXT_INCLUDES
+#include "config.hpp"
+
+#include "Renderer.dpp"
+#include "Resources.hpp"
+#include "Keyboard.hpp"
+#include "Mouse.hpp"
+#include "Locale.hpp"
+#include "Settings.hpp"
+#include "AudioDevice.hpp"
+#include "PersistentJob.hpp"
+#include "Timing.hpp"
 
 NS_BEGIN
+
+struct Context
+{
+    AudioDevice audio;
+    Resources resources;
+    Renderer gfx;
+    Keyboard keyboard;
+    Mouse mouse;
+    Settings settings;
+    Locale locale;
+
+#define CONTEXT_FIELD(Type, Name) Type Name;
+    USER_CONTEXT_FIELDS
+#undef CONTEXT_FIELD
+};
 
 NS_END

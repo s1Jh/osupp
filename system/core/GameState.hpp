@@ -19,5 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
+#pragma once
 
-#include "Context.hpp"
+#include "define.hpp"
+
+NS_BEGIN
+
+#define ALL_STATES \
+    USER_STATE(NONE, = 0x100) \
+    USER_STATES \
+    USER_STATE(EXIT, = 0xffffffff)
+
+enum class GameState: unsigned int
+{
+#define USER_STATE(Name, ...) Name __VA_ARGS__,
+    ALL_STATES
+#undef USER_STATE
+};
+
+NS_END

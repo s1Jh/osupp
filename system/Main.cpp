@@ -22,13 +22,6 @@
 
 #include "define.hpp"
 
-#include "Context.hpp"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "SoundSample.hpp"
-#include "Timer.hpp"
-#include "Resource.hpp"
 #include "Jobs.hpp"
 
 #include <chrono>
@@ -40,23 +33,6 @@
 #endif
 
 using namespace PROJECT_NAMESPACE;
-
-struct MessageA {
-    int a;
-};
-
-struct A {
-    int operator() (int r, int s, char id) {
-        log::info("Starting job ", id);
-        std::this_thread::sleep_for(std::chrono::seconds(3));
-        log::info("Finishing job ", id, ", the result was: ", r*s);
-        return 0;
-    }
-
-    bool receive(const MessageA& msg) {
-        return msg.a == 4;
-    }
-};
 
 #if defined(WINDOWS) && defined(RELEASE)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -73,73 +49,7 @@ int main()
     }
     StopJobs();
     return 0;
-
-    log::custom("GREETING", "Hello, world!");
-
-    log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);
-    log::info("Build: ", BUILD_TYPE, " (", BUILD_DATE, ' ', BUILD_TIME, ')');
-    log::info("Target: ", PLATFORM, ", ", ARCH);
-
-    auto &ctx = GetContext();
-
-	auto currentPath = std::filesystem::current_path();
-    df2::addAlias("GAMEDIR", currentPath.string());
-	ctx.settings.read();
-    ctx.resources.addSearchPath(currentPath);
-
-	if (!StartTimerThread()) {
-		log::error("Failed to start timers");
-		return -1;
-	}
-
-	auto locale = ctx.settings
-		.addSetting<std::string>("setting.user.locale", std::string("english.ldf"), SettingFlags::WRITE_TO_FILE);
-	ctx.locale.loadFromFile(locale.get());
-	log::info("Set locale ", ctx.locale.getLocName());
-
-	auto devices = GetAudioDevices();
-	std::vector<std::string> deviceNames;
-	for (const auto &dev : devices)
-		deviceNames.push_back(dev.name);
-
-	auto audioDev =
-		ctx.settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WRITE_TO_FILE, deviceNames);
-	ctx.audio = GetAudioDevice(audioDev.get());
-	log::info("Configured audio");
-
-	ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap([&audioDev, &ctx](const std::string &n)
-	  {
-		if (n != "setting.audio.device")
-			return CallbackReturn::OK;
-
-		ctx.audio = GetAudioDevice(audioDev.get());
-  		return CallbackReturn::OK;
-
-	  }));
-
-	if (!ctx.gfx.create()) {
-		return -2;
-	}
-//	ctx.resources.loadPersistentAssets();
-
-	ctx.keyboard.setViewport(ctx.gfx.getWindowHandle());
-	ctx.mouse.setViewport(ctx.gfx.getWindowHandle());
-
-	IMGUI_CHECKVERSION();
-
-	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO();
-	(void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-	ImGui::StyleColorsClassic();
-
-	ImGui_ImplGlfw_InitForOpenGL(TO_GLFW(ctx.gfx.getWindowHandle()), true);
-	ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
-
-    ctx.state.setState(GameState::INITIAL_STATE);
-
+/*
     while (ctx.state.isRunning()) {
         double delta = ctx.timing.getDelta();
 
@@ -159,6 +69,9 @@ int main()
 //		ctx.state.update(delta);
         ctx.state.draw();
 
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
         ImGui::Render();
         auto data = ImGui::GetDrawData();
         if (data)
@@ -178,4 +91,5 @@ int main()
     ctx.settings.write();
 	StopTimerThread();
     std::exit(0);
-}
+    */
+ }

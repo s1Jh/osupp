@@ -52,7 +52,6 @@ private:
 	bool musicStarted{false};
 	Timer endTimer;
     frect field;
-    Context &ctx;
 };
 
 NS_END

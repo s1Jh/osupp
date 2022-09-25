@@ -43,8 +43,6 @@ private:
     void showSettingsTab();
 
 	Resource<MapInfo> selectedMap{nullptr};
-
-    Context &ctx;
 };
 
 NS_END

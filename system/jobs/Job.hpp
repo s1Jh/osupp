@@ -28,6 +28,7 @@
 
 #include <type_traits>
 #include <tuple>
+#include <mutex>
 #include <queue>
 
 NS_BEGIN

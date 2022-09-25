@@ -27,6 +27,9 @@
 #define USER_STATE_INCLUDES
 #include "config.hpp"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 #include "State.hpp"
 
 NS_BEGIN
@@ -69,10 +72,13 @@ void StateHandler::process()
         log::info("Setting state to ", Stringify(nextState));
 
         std::unique_ptr<Context> contextPtr;
-        std::swap(contextPtr, currentStatePtr->ctx);
 
-        if (currentStatePtr != nullptr)
+        if (currentStatePtr != nullptr) {
             currentStatePtr->exit();
+            std::swap(contextPtr, currentStatePtr->ctx);
+        } else {
+            contextPtr = std::make_unique<Context>();
+        }
 
         auto oldState = currentState;
         currentState = nextState;
@@ -121,8 +127,19 @@ std::string StateHandler::Stringify(const GameState &state)
 int StateHandler::operator()()
 {
     process();
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
     update();
+
     draw();
+
+    ImGui::Render();
+    auto data = ImGui::GetDrawData();
+    if (data)
+        ImGui_ImplOpenGL3_RenderDrawData(data);
 
     time.await();
     return isRunning();

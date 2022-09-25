@@ -66,10 +66,10 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 		return;
 	}
 
-	auto freqSetting = GetContext().settings.addSetting<int>("setting.audio.frequency", 44100,
-															 SettingFlags::WRITE_TO_FILE, 1000, 48000).get();
+	//auto freqSetting = GetContext().settings.addSetting<int>("setting.audio.frequency", 44100,
+	//														 SettingFlags::WRITE_TO_FILE, 1000, 48000).get();
 
-	const int params[] = {AL_FREQUENCY, freqSetting, 0};
+	const int params[] = {AL_FREQUENCY, 44100, 0};
 
 	held->context = (detail::ALCcontext*) alcCreateContext((ALCdevice*)held->device, params);
 
@@ -85,12 +85,12 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 	std::for_each(sfxChannels.begin(), sfxChannels.end(), [](Channel& channel) { channel.setup(); });
 	musicChannel.setup();
 
-	musicChannelVolume = GetContext().settings.addSetting<float>(
-		"setting.audio.music_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
-	sfxChannelVolume = GetContext().settings.addSetting<float>(
-		"setting.audio.sfx_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
+//	musicChannelVolume = GetContext().settings.addSetting<float>(
+//		"setting.audio.music_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
+//	sfxChannelVolume = GetContext().settings.addSetting<float>(
+//		"setting.audio.sfx_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
 
-	log::info("Successfully initiated device ", specIn.name, " @", freqSetting, "Hz");
+	log::info("Successfully initiated device ", specIn.name, " @", "PLACEHOLDER", "Hz");
 }
 
 AudioDevice::AudioDevice(unsigned int sfxChannelsIn)

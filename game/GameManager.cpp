@@ -265,15 +265,15 @@ void GameManager::reset()
 
     last = activeObjects.begin();
 
-	auto& skin = GetContext().activeSkin;
+//	auto& skin = GetContext().activeSkin;
 
-	samples.hit = skin->getSound(HIT_SOUND);
-	samples.miss = skin->getSound(MISS_SOUND);
-	samples.sliderBounce = skin->getSound(SLIDER_BOUNCE_SOUND);
-	samples.sliderSlide = skin->getSound(SLIDER_SLIDE_SOUND);
-	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
-	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
-	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
+//	samples.hit = skin->getSound(HIT_SOUND);
+//	samples.miss = skin->getSound(MISS_SOUND);
+//	samples.sliderBounce = skin->getSound(SLIDER_BOUNCE_SOUND);
+//	samples.sliderSlide = skin->getSound(SLIDER_SLIDE_SOUND);
+//	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
+//	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
+//	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
 }
 
 const frect &GameManager::getPlayField() const
@@ -293,35 +293,35 @@ Resource<MapInfo> GameManager::getMap() const
 const Mat3f &GameManager::getTransform() const
 { return transform; }
 
-float GameManager::getCircleSize()
+float GameManager::getCircleSize() const
 {
 	if (info)
     	return info->circleSize * csMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getApproachTime()
+float GameManager::getApproachTime() const
 {
 	if (info)
     	return info->approachTime * arMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getFadeTime()
+float GameManager::getFadeTime() const
 {
 	if (info)
     	return info->fadeTime * ftMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getHitWindow()
+float GameManager::getHitWindow() const
 {
 	if (info)
     	return info->hitWindow * hwMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getHpDrain()
+float GameManager::getHpDrain() const
 {
 	if (info)
 		return info->HPDrain * hpMultiplier;
@@ -400,7 +400,7 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 	}
 }
 
-float GameManager::getStartOffset()
+float GameManager::getStartOffset() const
 {
 	if (info)
 		return info->startOffset;

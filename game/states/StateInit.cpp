@@ -24,13 +24,15 @@
 #include "StateMainMenu.hpp"
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "Timer.hpp"
 
 NS_BEGIN
 
 int State<GameState::Init>::update(double)
 {
     const int batchSize = 50;
-    auto &ctx = GetContext();
 
     auto end = Min(lastLoaded + batchSize, filesToLoad.size());
     int i = lastLoaded;
@@ -42,7 +44,7 @@ int State<GameState::Init>::update(double)
     }
 
     for (; i < end; i++) {
-        ctx.maps.push_back(ctx.resources.get<MapInfo>(filesToLoad[i].string()));
+        ctx->maps.push_back(ctx->resources.get<MapInfo>(filesToLoad[i].string()));
     }
     lastLoaded = i++;
 
@@ -59,7 +61,7 @@ int State<GameState::Init>::draw()
     color.r = percent;
     color.b = 1.0f - percent;
     color.g = percent;
-    GetContext().gfx.clear(color);
+    ctx->gfx.clear(color);
     return 0;
 }
 
@@ -70,15 +72,74 @@ int State<GameState::Init>::exit()
 
 int State<GameState::Init>::init(GameState)
 {
-    log::info("Initiating game...");
+    log::custom("GREETING", "Hello, world!");
 
-    auto &ctx = GetContext();
-    auto &resources = ctx.resources;
+    log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);
+    log::info("Build: ", BUILD_TYPE, " (", BUILD_DATE, ' ', BUILD_TIME, ')');
+    log::info("Target: ", PLATFORM, ", ", ARCH);
 
-    auto pathStr = ctx.settings.addSetting<std::string>("setting.paths", "", SettingFlags::WRITE_TO_FILE).get();
+    auto currentPath = std::filesystem::current_path();
+    df2::addAlias("GAMEDIR", currentPath.string());
+    ctx->settings.read();
+    ctx->resources.addSearchPath(currentPath);
+
+    if (!StartTimerThread()) {
+        log::error("Failed to start timers");
+        return -1;
+    }
+
+    auto locale = ctx->settings.addSetting<std::string>(
+            "setting.user.locale", std::string("english.ldf"), SettingFlags::WRITE_TO_FILE
+    );
+    ctx->locale.loadFromFile(locale.get());
+    log::info("Set locale ", ctx->locale.getLocName());
+
+    auto devices = GetAudioDevices();
+    std::vector<std::string> deviceNames;
+    for (const auto &dev : devices)
+        deviceNames.push_back(dev.name);
+
+    auto audioDev =
+            ctx->settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WRITE_TO_FILE, deviceNames);
+    ctx->audio = GetAudioDevice(audioDev.get());
+    log::info("Configured audio");
+
+    ctx->settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap([&audioDev, this](const std::string &n)
+    {
+       if (n != "setting.audio.device")
+           return CallbackReturn::OK;
+
+       ctx->audio = GetAudioDevice(audioDev.get());
+       return CallbackReturn::OK;
+    }));
+
+    if (!ctx->gfx.create()) {
+        return -2;
+    }
+//	ctx.resources.loadPersistentAssets();
+
+    ctx->keyboard.setViewport(ctx->gfx.getWindowHandle());
+    ctx->mouse.setViewport(ctx->gfx.getWindowHandle());
+
+    IMGUI_CHECKVERSION();
+
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    ImGui::StyleColorsClassic();
+
+    ImGui_ImplGlfw_InitForOpenGL(TO_GLFW(ctx->gfx.getWindowHandle()), true);
+    ImGui_ImplOpenGL3_Init(GL_VERSION_PREPROCESSOR);
+
+    auto &resources = ctx->resources;
+
+    auto pathStr = ctx->settings.addSetting<std::string>("setting.paths", "", SettingFlags::WRITE_TO_FILE).get();
     const auto &paths = GetCharacterSeparatedValues(pathStr, ',');
 
-    std::string skin = ctx.settings.addSetting<std::string>("setting.user.skin", "default").get();
+    std::string skin = ctx->settings.addSetting<std::string>("setting.user.skin", "default").get();
 
     for (const auto &path: paths) {
         std::filesystem::path p(path);
@@ -92,7 +153,7 @@ int State<GameState::Init>::init(GameState)
 
     filesToLoad = resources.findFiles("songs", Resource<MapInfo>::allowedExtensions);
 
-    ctx.activeSkin = resources.get<Skin>(skin);
+    ctx->activeSkin = resources.get<Skin>(skin);
 
     return 0;
 }

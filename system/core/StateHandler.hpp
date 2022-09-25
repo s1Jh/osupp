@@ -24,59 +24,14 @@
 
 #include "define.hpp"
 
-#define USER_CONTEXT_INCLUDES
-#include "config.hpp"
-
-#include "StateHandler.hpp"
-#include "Renderer.dpp"
-#include "Resources.hpp"
-#include "Keyboard.hpp"
-#include "Mouse.hpp"
+#include "GameState.hpp"
 #include "Timing.hpp"
-#include "Locale.hpp"
-#include "Settings.hpp"
-#include "AudioDevice.hpp"
-#include "PersistentJob.hpp"
-#include "Timing.hpp"
+#include "State.hpp"
 
 #include <memory>
 #include <string>
 
 NS_BEGIN
-
-struct Context
-{
-    AudioDevice audio;
-    Resources resources;
-    Renderer gfx;
-    Keyboard keyboard;
-    Mouse mouse;
-    Timing timing;
-    Settings settings;
-    Locale locale;
-
-#define CONTEXT_FIELD(Type, Name) Type Name;
-    USER_CONTEXT_FIELDS
-#undef CONTEXT_FIELD
-};
-
-#define ALL_STATES \
-    USER_STATE(NONE, = 0x100) \
-    USER_STATES \
-    USER_STATE(EXIT, = 0xffffffff)
-
-enum class GameState: unsigned int
-{
-#define USER_STATE(Name, ...) Name __VA_ARGS__,
-    ALL_STATES
-#undef USER_STATE
-};
-
-namespace detail {
-
-class BaseState;
-
-}
 
 class StateHandler
 {

@@ -151,7 +151,7 @@ protected:
 
 	[[nodiscard]] const Mat3f& getObjectTransform() const;
 
-	Context& ctx;
+	Context ctx;
 	fcircle SOF;
 
 private:
