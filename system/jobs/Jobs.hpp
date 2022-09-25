@@ -19,87 +19,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
 #include "define.hpp"
 
-#define USER_CONTEXT_INCLUDES
-#include "config.hpp"
-
-#include "StateHandler.hpp"
-#include "Renderer.dpp"
-#include "Resources.hpp"
-#include "Keyboard.hpp"
-#include "Mouse.hpp"
-#include "Timing.hpp"
-#include "Locale.hpp"
-#include "Settings.hpp"
-#include "AudioDevice.hpp"
+#include "Job.hpp"
+#include "BaseJob.hpp"
 #include "PersistentJob.hpp"
-#include "Timing.hpp"
+#include "Result.hpp"
 
 #include <memory>
-#include <string>
+#include <type_traits>
+
+// Functors of persistent jobs
+#include "StateHandler.hpp"
+#include "Renderer.hpp"
+#define USER_PERSISTENT_JOB_INCLUDES
+#include "config.hpp"
+#undef USER_PERSISTENT_JOB_INCLUDES
 
 NS_BEGIN
 
-struct Context
-{
-    AudioDevice audio;
-    Resources resources;
-    Renderer gfx;
-    Keyboard keyboard;
-    Mouse mouse;
-    Timing timing;
-    Settings settings;
-    Locale locale;
-
-#define CONTEXT_FIELD(Type, Name) Type Name;
-    USER_CONTEXT_FIELDS
-#undef CONTEXT_FIELD
-};
-
-#define ALL_STATES \
-    USER_STATE(NONE, = 0x100) \
-    USER_STATES \
-    USER_STATE(EXIT, = 0xffffffff)
-
-enum class GameState: unsigned int
-{
-#define USER_STATE(Name, ...) Name __VA_ARGS__,
-    ALL_STATES
-#undef USER_STATE
-};
+constexpr unsigned int BASE_JOB_THREAD_COUNT = 16;
+constexpr unsigned int MAX_JOB_THREAD_COUNT = 32;
 
 namespace detail {
 
-class BaseState;
+bool EnqueueJob(const std::shared_ptr<BaseJobHolder>& newJob);
 
 }
 
-class StateHandler
-{
-public:
-    StateHandler();
+int StartJobs();
+int UpdateJobs();
+int StopJobs();
 
-    int update();
-    int draw();
+bool StartPersistentJob(PersistentJob id);
+bool StopPersistentJob(PersistentJob id);
 
-    void process();
-    void setState(GameState state);
+template <typename JobT>
+auto GetPersistentJob(PersistentJob id) {
 
-    int operator() ();
+}
 
-    [[nodiscard]] bool isRunning() const;
-    void exit();
+bool JobsRunning();
 
-private:
-    Timing time;
-    static std::string Stringify(const GameState &state);
-    GameState currentState;
-    GameState nextState;
-    std::unique_ptr<detail::BaseState> currentStatePtr;
-};
+template <class JobT, typename ... JobArgs>
+requires std::is_invocable_v<JobT, JobArgs...>
+auto AddJob(JobT &&job, JobArgs... args) {
+    using JobReturnT = typename std::invoke_result_t<JobT, JobArgs...>;
+    using JobResultT = JobResult<detail::JobHolder<JobT, JobReturnT, JobArgs...>>;
+    using JobHolderT = detail::JobHolder<JobT, JobReturnT, JobArgs...>;
+
+    auto holder = std::make_shared<JobHolderT>(job, std::tuple<JobArgs...>(args...));
+    EnqueueJob(holder);
+    return JobResultT(holder);
+}
 
 NS_END

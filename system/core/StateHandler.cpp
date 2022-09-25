@@ -27,20 +27,22 @@
 #define USER_STATE_INCLUDES
 #include "config.hpp"
 
+#include "State.hpp"
+
 NS_BEGIN
 
 StateHandler::StateHandler()
     : currentState(GameState::NONE),
-      nextState(GameState::NONE),
+      nextState(GameState::INITIAL_STATE),
       currentStatePtr(nullptr)
 {}
 
-int StateHandler::update(double delta)
+int StateHandler::update()
 {
     if (currentStatePtr == nullptr)
         return -1;
 
-    int ret = currentStatePtr->update(delta);
+    int ret = currentStatePtr->update(time.getDelta());
 
     if (ret >= (int) GameState::NONE) {
         nextState = (GameState) ret;
@@ -66,6 +68,9 @@ void StateHandler::process()
     if (nextState != GameState::NONE && nextState != currentState) {
         log::info("Setting state to ", Stringify(nextState));
 
+        std::unique_ptr<Context> contextPtr;
+        std::swap(contextPtr, currentStatePtr->ctx);
+
         if (currentStatePtr != nullptr)
             currentStatePtr->exit();
 
@@ -86,8 +91,10 @@ void StateHandler::process()
                 break;
         }
 
-        if (currentStatePtr != nullptr)
+        if (currentStatePtr != nullptr) {
+            std::swap(contextPtr, currentStatePtr->ctx);
             currentStatePtr->init(oldState);
+        }
     }
     nextState = GameState::NONE;
 }
@@ -109,6 +116,16 @@ std::string StateHandler::Stringify(const GameState &state)
 #undef USER_STATE
 	default:	return "Null";
     }
+}
+
+int StateHandler::operator()()
+{
+    process();
+    update();
+    draw();
+
+    time.await();
+    return isRunning();
 }
 
 NS_END

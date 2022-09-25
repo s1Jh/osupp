@@ -60,4 +60,11 @@
 #include "StateMainMenu.hpp"
 #endif
 
+#define USER_PERSISTENT_JOBS \
+    JOB(Gameplay, "Gameplay", GameManager)
+
+#ifdef USER_PERSISTENT_JOB_INCLUDES
+#include "GameManager.hpp"
+#endif
+
 #define INITIAL_STATE Init

@@ -231,8 +231,6 @@ public:
 						auto extraParams = std::vector(std::next(params.begin(), 2), std::prev(params.end()));
 				}
                 case EDITOR:
-                    break;
-
                 case DONT_CARE:
                 default:
                     break;

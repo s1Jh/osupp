@@ -42,4 +42,23 @@ struct IsShape
 
 template<class T> inline constexpr bool IsShapeV = IsShape<T>::enable;
 
+namespace detail
+{
+// Taken from https://stackoverflow.com/questions/44012938/how-to-tell-if-template-type-is-an-instance-of-a-template-class/44013408#44013408
+template<class, template<class, class...> class>
+struct IsInstanceImpl: public std::false_type
+{
+};
+
+template<class...Ts, template<class, class...> class U>
+struct IsInstanceImpl<U<Ts...>, U>: public std::true_type
+{
+};
+}
+
+template <class A, template <class, class...> class B>
+concept IsInstance = requires() {
+    detail::IsInstanceImpl<A, B>{};
+};
+
 NS_END

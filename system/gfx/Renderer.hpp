@@ -22,5 +22,7 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "Renderer.dpp"
 #include "Primitives.hpp"

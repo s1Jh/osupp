@@ -29,6 +29,9 @@
 #include "SoundSample.hpp"
 #include "Timer.hpp"
 #include "Resource.hpp"
+#include "Jobs.hpp"
+
+#include <chrono>
 
 #ifdef WINDOWS
 #define NOMINMAX
@@ -38,16 +41,22 @@
 
 using namespace PROJECT_NAMESPACE;
 
-NS_BEGIN
-template <>
-Resource<int> Load(const std::filesystem::path &p) {
-	log::debug(p);
-	Resource<int> r;
-	*(r.held) = 3;
-	return r;
-}
+struct MessageA {
+    int a;
+};
 
-NS_END
+struct A {
+    int operator() (int r, int s, char id) {
+        log::info("Starting job ", id);
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        log::info("Finishing job ", id, ", the result was: ", r*s);
+        return 0;
+    }
+
+    bool receive(const MessageA& msg) {
+        return msg.a == 4;
+    }
+};
 
 #if defined(WINDOWS) && defined(RELEASE)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -56,6 +65,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 int main()
 #endif
 {
+    StartJobs();
+    StartPersistentJob(PersistentJob::Game);
+
+    while (JobsRunning()) {
+        UpdateJobs();
+    }
+    StopJobs();
+    return 0;
+
     log::custom("GREETING", "Hello, world!");
 
     log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);
@@ -89,12 +107,15 @@ int main()
 	ctx.audio = GetAudioDevice(audioDev.get());
 	log::info("Configured audio");
 
-	ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap([&audioDev, &ctx](const std::string &)
-																		  {
-																			  ctx.audio =
-																				  GetAudioDevice(audioDev.get());
-																			  return CallbackReturn::OK;
-																		  }));
+	ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(wrap([&audioDev, &ctx](const std::string &n)
+	  {
+		if (n != "setting.audio.device")
+			return CallbackReturn::OK;
+
+		ctx.audio = GetAudioDevice(audioDev.get());
+  		return CallbackReturn::OK;
+
+	  }));
 
 	if (!ctx.gfx.create()) {
 		return -2;
@@ -135,7 +156,7 @@ int main()
 
         ctx.gfx.begin();
 
-		ctx.state.update(delta);
+//		ctx.state.update(delta);
         ctx.state.draw();
 
         ImGui::Render();

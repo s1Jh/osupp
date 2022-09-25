@@ -19,87 +19,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
 #include "define.hpp"
 
-#define USER_CONTEXT_INCLUDES
-#include "config.hpp"
+#include "Job.hpp"
 
-#include "StateHandler.hpp"
-#include "Renderer.dpp"
-#include "Resources.hpp"
-#include "Keyboard.hpp"
-#include "Mouse.hpp"
-#include "Timing.hpp"
-#include "Locale.hpp"
-#include "Settings.hpp"
-#include "AudioDevice.hpp"
-#include "PersistentJob.hpp"
-#include "Timing.hpp"
-
-#include <memory>
+#include <thread>
 #include <string>
 
 NS_BEGIN
 
-struct Context
-{
-    AudioDevice audio;
-    Resources resources;
-    Renderer gfx;
-    Keyboard keyboard;
-    Mouse mouse;
-    Timing timing;
-    Settings settings;
-    Locale locale;
+#define PERSISTENT_JOBS      \
+    JOB(Game, "Game state", StateHandler) \
+    //JOB(Renderer, "Rendering", Renderer) \
+    //USER_PERSISTENT_JOBS
 
-#define CONTEXT_FIELD(Type, Name) Type Name;
-    USER_CONTEXT_FIELDS
-#undef CONTEXT_FIELD
-};
-
-#define ALL_STATES \
-    USER_STATE(NONE, = 0x100) \
-    USER_STATES \
-    USER_STATE(EXIT, = 0xffffffff)
-
-enum class GameState: unsigned int
-{
-#define USER_STATE(Name, ...) Name __VA_ARGS__,
-    ALL_STATES
-#undef USER_STATE
-};
-
-namespace detail {
-
-class BaseState;
-
-}
-
-class StateHandler
-{
-public:
-    StateHandler();
-
-    int update();
-    int draw();
-
-    void process();
-    void setState(GameState state);
-
-    int operator() ();
-
-    [[nodiscard]] bool isRunning() const;
-    void exit();
-
-private:
-    Timing time;
-    static std::string Stringify(const GameState &state);
-    GameState currentState;
-    GameState nextState;
-    std::unique_ptr<detail::BaseState> currentStatePtr;
+enum class PersistentJob {
+#define JOB(ID, ...) ID,
+    PERSISTENT_JOBS
+#undef JOB
+    COUNT
 };
 
 NS_END

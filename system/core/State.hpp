@@ -23,28 +23,18 @@
 #pragma once
 
 #include "define.hpp"
+#include "StateHandler.hpp"
 
 NS_BEGIN
 
 class Renderer;
-
-#define ALL_STATES \
-    USER_STATE(NONE, = 0x100) \
-    USER_STATES \
-    USER_STATE(EXIT, = 0xffffffff)
-
-enum class GameState: unsigned int
-{
-#define USER_STATE(Name, ...) Name __VA_ARGS__,
-    ALL_STATES
-#undef USER_STATE
-};
 
 namespace detail
 {
 
 class BaseState
 {
+    friend class StateHandler;
 public:
     virtual int update(double);
     virtual int draw();
@@ -52,6 +42,8 @@ public:
     virtual int init(GameState);
 
     virtual ~BaseState() = default;
+
+    std::unique_ptr<Context> ctx;
 };
 }
 
