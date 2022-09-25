@@ -142,11 +142,24 @@ set(SOURCES
         ${GAME_DIRECTORY}/Skin.cpp
 )
 
-set(OpenGL_GL_PREFERENCE GLVND)
 
-if (MSVC)
+if (NOT DEFINED PLATFORM)
+	message(FATAL_ERROR "No platform defined")
+endif()
+if (NOT DEFINED ARCHITECTURE)
+	message(FATAL_ERROR "No architecture defined")
+endif()
 
+message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
+add_compile_definitions(${PLATFORM})
+add_compile_definitions(${ARCHITECTURE})
+
+set(ADDITIONAL_EXECUTABLE_OPTIONS)
+
+if (${PLATFORM} STREQUAL "WINDOWS")
+	set(ADDITIONAL_EXECUTABLE_OPTIONS WIN32)
 else()
+	set(OpenGL_GL_PREFERENCE GLVND)
 	find_package(glfw3 3.3 REQUIRED)
 	find_package(OpenGL REQUIRED)
 	find_package(OpenAL REQUIRED)
@@ -188,8 +201,6 @@ endif()
 
 include_directories(${DIRECTORIES})
 
-set(LIBS)
-
 function(ConfigureLibrary LIBRARY_NAME)
 	
 	message("Configuring ${LIBRARY_NAME}")
@@ -198,13 +209,24 @@ function(ConfigureLibrary LIBRARY_NAME)
 	set(LIBRARIES ${LIBRARY_NAME}_LIBS)
 	
 	if (DEFINED ${HEADERS})
-		include_directories(${${HEADERS}})
+                separate_arguments(${HEADERS} NATIVE_COMMAND "${${HEADERS}}")
+                foreach(HEADER ${${HEADERS}})
+		        include_directories(${HEADER})
+                        message("Including directory ${HEADER}")
+                endforeach()
 	else()
 		message(FATAL_ERROR "${LIBRARY_NAME} headers not defined")
 	endif()
 	
 	if (DEFINED ${LIBRARIES})
-		set(LIBS "${LIBS};${${LIBRARIES}}" PARENT_SCOPE)
+                separate_arguments(${LIBRARIES} NATIVE_COMMAND "${${LIBRARIES}}")
+                foreach(LIB ${${LIBRARIES}})
+                        cmake_path(GET LIB PARENT_PATH LIB_PATH)
+                        cmake_path(GET LIB FILENAME LIB_NAME)
+                        link_directories(${LIB_PATH})
+                        message("Adding ${LIB_NAME} from ${LIB_PATH}")
+                        link_libraries(${LIB_NAME})
+                endforeach()
 	else()
 		message(FATAL_ERROR "${LIBRARY_NAME} libraries not defined")
 	endif()
@@ -217,21 +239,7 @@ ConfigureLibrary(OGL)
 ConfigureLibrary(FFMPEG)
 ConfigureLibrary(FT2)
 
-string(STRIP "${LIBS}" LIBS)
-
-if (NOT DEFINED PLATFORM)
-	message(FATAL_ERROR "No platform defined")
-endif()
-if (NOT DEFINED ARCHITECTURE)
-	message(FATAL_ERROR "No architecture defined")
-endif()
-
-message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
-message("Linking against: ${LIBS}")
-add_compile_definitions(${PLATFORM})
-add_compile_definitions(${ARCHITECTURE})
-
-add_executable(${TARGET_NAME} ${SOURCES})
+add_executable(${TARGET_NAME} ${ADDITIONAL_EXECUTABLE_OPTIONS} ${SOURCES})
 
 # Set the proper warning levels
 if (MSVC)

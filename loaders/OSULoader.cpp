@@ -320,32 +320,29 @@ public:
             ------------------------------------------------------------------------------------------------------------
          */
 
-        map.setHpDrain(getField("HPDrainRate", 10.0f));
+        map.HPDrain = getField("HPDrainRate", 10.0f);
 
         double circleSizeLevel = getField("CircleSize", 5.0f);
-        auto circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
-        map.setCircleSize(circleSize);
+        map.circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
 
-        map.setOverallDifficulty(getField("OverallDifficulty", 5.0f));
+        map.overallDifficulty = getField("OverallDifficulty", 5.0f);
 
         float approachLevel = getField("ApproachRate", 5.0f);
-        float approachTime =
+        map.approachTime =
             1.8f - Min(approachLevel, 5) * 0.12f - (approachLevel > 5 ? (approachLevel - 5) * 0.15f : 0);
-        map.setApproachTime(approachTime);
 
         sliderMultiplier = getField("SliderMultiplier", 1.0f);
 
-        map.setSongPath(getField("AudioFilename", "audio.mp3"));
-        map.setStartOffset(TimeConversion(getField("AudioLeadIn", 0)));
-        map.setName(getField("TitleUnicode", ""));
-        map.setRomanisedName(getField("Title", ""));
-        map.setArtist(getField("ArtistUnicode", ""));
-        map.setRomanisedArtist(getField("Artist", ""));
-        map.setSource(getField("Source", ""));
-        map.setAuthor(getField("Creator", ""));
-        map.setDifficulty(getField("Version", ""));
-        std::string tags = getField("Tags", "");
-        map.setTags(GetCharacterSeparatedValues(tags, ' '));
+        map.songPath = getField("AudioFilename", "audio.mp3");
+        map.startOffset = TimeConversion(getField("AudioLeadIn", 0));
+        map.name = getField("TitleUnicode", "");
+        map.romanisedName = getField("Title", "");
+        map.artist = getField("ArtistUnicode", "");
+        map.romanisedArtist = getField("Artist", "");
+        map.source = getField("Source", "");
+        map.author = getField("Creator", "");
+        map.difficulty = getField("Version", "");
+        map.tags = GetCharacterSeparatedValues(getField("Tags", ""));
 
         for (auto it = hitObjectParams.begin(); it != hitObjectParams.end(); it++) {
             const auto &object = *it;

@@ -28,6 +28,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <cstddef>
 
 NS_BEGIN
 class Resources;
@@ -58,11 +59,6 @@ public:
 	operator bool () const
 	{
 		return (held != defaultValue.held) && held;
-	}
-
-	operator std::weak_ptr<T> () const
-	{
-		return {held};
 	}
 
 	std::weak_ptr<T> ref () const

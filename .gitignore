@@ -1,8 +1,9 @@
 # ide stuff
 cmake*/
-.idea/
+.*/**
 
 # default skin - only add once we all have custom assets
 assets/skins/default
 /build
 /out/build/x64-Debug
+*.dll

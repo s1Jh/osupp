@@ -48,7 +48,7 @@ int State<GameState::InGame>::update(double delta)
 
 		auto info = ctx.game.getMap();
 		auto& channel = ctx.audio.getMusicChannel();
-		auto musicTrack = ctx.resources.get<SoundStream>(info->getSongPath(), info->getDirectory(), false);
+		auto musicTrack = ctx.resources.get<SoundStream>(info->songPath, info->getDirectory(), false);
 		channel.setSound(musicTrack.ref(), true);
 	}
 

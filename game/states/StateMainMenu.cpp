@@ -247,7 +247,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
         for (unsigned int i = 0; i < ctx.maps.size(); i++) {
             const auto &map = ctx.maps[i];
 
-            auto filterName = map->getRomanisedName() + " " + map->getRomanisedArtist();
+            auto filterName = map->romanisedName + " " + map->romanisedArtist;
 
             if (filter.PassFilter(filterName.c_str())) {
 
@@ -272,13 +272,13 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 if (ImGui::Selectable(itemID.c_str(), false, ImGuiSelectableFlags_None)) {
 					selectedMap = map;
 					auto& channel = ctx.audio.getMusicChannel();
-					auto music = ctx.resources.get<SoundStream>(map->getSongPath(), map->getDirectory(), false);
+					auto music = ctx.resources.get<SoundStream>(map->songPath, map->getDirectory(), false);
 					channel.setSound(music.ref(), true);
                     selected = i;
                 }
                 ImGui::SameLine();
                 auto name =
-                    map->getRomanisedName() + " - " + map->getRomanisedArtist() + " (" + map->getDifficulty() + ')';
+                    map->romanisedName + " - " + map->romanisedArtist + " (" + map->difficulty + ')';
                 if (name.empty())
                     name = "#unknown_" + std::to_string(long(map.get()));
                 ImGui::Text("%s", name.c_str());
@@ -288,7 +288,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(difficulty->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char overallDiff[8];
-                sprintf(overallDiff, "%.1f", map->getOverallDifficulty());
+                sprintf(overallDiff, "%.1f", map->overallDifficulty);
                 ImGui::Text("%s", overallDiff);
 
                 // Song approach time
@@ -296,7 +296,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(approach->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char approachTime[8];
-                sprintf(approachTime, "%.1f", map->getApproachTime());
+                sprintf(approachTime, "%.1f", map->approachTime);
                 ImGui::Text("%s", approachTime);
 
                 // Song circle size
@@ -304,7 +304,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(circle->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char circleSize[8];
-                sprintf(circleSize, "%.2f", map->getCircleSize());
+                sprintf(circleSize, "%.2f", map->circleSize);
                 ImGui::Text("%s", circleSize);
 
                 // Song hit window time
@@ -312,7 +312,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(window->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hitWindow[8];
-                sprintf(hitWindow, "%.1f", map->getHitWindow());
+                sprintf(hitWindow, "%.1f", map->hitWindow);
                 ImGui::Text("%s", hitWindow);
 
                 // Song HP drain
@@ -320,7 +320,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(drain->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hpDrain[8];
-                sprintf(hpDrain, "%.1f", map->getHpDrain());
+                sprintf(hpDrain, "%.1f", map->HPDrain);
                 ImGui::Text("%s", hpDrain);
 
                 // Song duration
@@ -328,7 +328,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(duration->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
 
-                auto secsTotal = (int) map->getMapDuration();
+                auto secsTotal = (int) map->mapDuration;
                 int secs = secsTotal % 60;
                 int minutes = secsTotal / 60;
                 int hours = secsTotal / 3600;

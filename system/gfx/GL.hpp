@@ -41,7 +41,9 @@ typedef unsigned char* GLubyteptr;
 /* Windows OpenGL configuration and includes                   */
 /***************************************************************/
 #ifdef WIN32
-#define NOMINMAX
+#   ifndef NOMINMAX
+#       define NOMINMAX
+#   endif
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <wingdi.h>
