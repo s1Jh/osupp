@@ -37,7 +37,7 @@ OpenAL
 
 ## How to play
 
-Just like the game it's cloning, the main point of notOsu is to click circles which appear on you screen at the right
+Just like the game it's replicating, the main point of notOsu is to click circles which appear on you screen at the right
 time to the rhythm of music. There are three types of gameplay objects.
 
 The simplest of these are the humble notes. They appear as circles on screen To hit a note, simply move your cursor over
@@ -56,11 +56,13 @@ cursor to earn some points.
 The last type of object in the game is the spinner. They appear as large circles in the middle of your screen. Once a
 spinner appears, you must press down on any button and spin your cursor around the center of the spinner as fast as you
 can! After a while, the spinner will fill up, and you may stop spinning, you will be notified of this. However, if you
-keep spinning you may get some bonus points.
+keep spinning you will get some bonus points.
 
 There are two main scoring systems in the game. The point score, which is displayed as a number and a accuracy score,
 displayed as a percentage. The point score is the sum of all points you've gained while playing a map. You may earn
 these points by successfully completing any of the gameplay elements. NotOsu is a combo game, try to hit long streaks of
 accurate hits. Each element you play successfully increases a score multiplier. The accuracy score is a percentage. It
 is the average accuracy you've shown throughout the match. These two scores are very intertwined, as higher accuracy
-means more points! 
+means more points!
+
+Have fun!
