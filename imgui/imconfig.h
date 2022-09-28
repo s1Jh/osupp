@@ -14,12 +14,6 @@
 
 #pragma once
 
-#define ImTextureID unsigned int
-#define IMGUI_ENABLE_FREETYPE
-
-#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#include "GL.hpp"
-
 //---- Define assertion handler. Defaults to calling assert().
 // If your macro uses multiple statements, make sure is enclosed in a 'do { .. } while (0)' block so it can be used as a single statement.
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
@@ -66,8 +60,8 @@
 
 //---- Avoid multiple STB libraries implementations, or redefine path/filenames to prioritize another version
 // By default the embedded implementations are declared static and not available outside of Dear ImGui sources files.
-//#define IMGUI_STB_TRUETYPE_FILENAME   "stb/stb_truetype.h"
-//#define IMGUI_STB_RECT_PACK_FILENAME  "stb/stb_rect_pack.h"
+//#define IMGUI_STB_TRUETYPE_FILENAME   "my_folder/stb_truetype.h"
+//#define IMGUI_STB_RECT_PACK_FILENAME  "my_folder/stb_rect_pack.h"
 //#define IMGUI_STB_SPRINTF_FILENAME    "my_folder/stb_sprintf.h"    // only used if enabled
 //#define IMGUI_DISABLE_STB_TRUETYPE_IMPLEMENTATION
 //#define IMGUI_DISABLE_STB_RECT_PACK_IMPLEMENTATION
