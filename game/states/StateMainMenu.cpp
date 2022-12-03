@@ -23,7 +23,6 @@
 #include "StateMainMenu.hpp"
 
 #include "Log.hpp"
-#include "Texture.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/misc/cpp/imgui_stdlib.h"
