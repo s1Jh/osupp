@@ -170,8 +170,8 @@ breakout:
 		historyInsertSpot++;
 		historyInsertSpot %= history.size();
 
-		minUT = Min(minUT, averageUT);
-		maxUT = Max(maxUT, averageUT);
+		minUT = math::Min(minUT, averageUT);
+		maxUT = math::Max(maxUT, averageUT);
 
 		printCounter = 0;
 		rollingUT = 0;
@@ -282,9 +282,9 @@ const frect &GameManager::getPlayField() const
 void GameManager::setPlayField(const frect &field)
 {
     playField = field;
-    auto smaller = Min(field.size.w, field.size.h);
-    transform = MakeScaleMatrix(fvec2d(smaller, smaller)) *
-        MakeTranslationMatrix(field.position);
+    auto smaller = math::Min(field.size.w, field.size.h);
+    transform = math::MakeScaleMatrix(fvec2d(smaller, smaller)) *
+        math::MakeTranslationMatrix(field.position);
 }
 
 Resource<MapInfo> GameManager::getMap() const
@@ -378,10 +378,10 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 
 	switch (cursorRules) {
 	case HitObjectFunction::CURSOR_ENTER:
-		cursorValid = Distance(SOF.position, input->getCursor()) <= SOF.radius;
+		cursorValid = math::Distance(SOF.position, input->getCursor()) <= SOF.radius;
 		break;
 	case HitObjectFunction::CURSOR_LEAVE:
-		cursorValid = Distance(SOF.position, input->getCursor()) > SOF.radius;
+		cursorValid = math::Distance(SOF.position, input->getCursor()) > SOF.radius;
 		break;
 	case HitObjectFunction::CURSOR_IGNORE:
 	default:

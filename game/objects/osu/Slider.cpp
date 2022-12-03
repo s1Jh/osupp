@@ -45,7 +45,7 @@ void Slider::onLogicUpdate(double delta)
     double timeLength = getEndTime() - getStartTime();
     double timeRunning = ctx.game.getCurrentTime() - startPoint;
 
-    timeRunning = Clamp(timeRunning, 0.0, timeLength);
+    timeRunning = math::Clamp(timeRunning, 0.0, timeLength);
 
     progression = timeRunning / timeLength;
 
@@ -70,7 +70,7 @@ void Slider::onLogicUpdate(double delta)
         SOF.position = getEndPosition();
     }
     else {
-        SOF.position = curve.get<CurveType::STRAIGHT>(curvePosition);
+        SOF.position = curve.get<math::CurveType::STRAIGHT>(curvePosition);
     }
 
 	const float maxSOFSizeMultiplier = 3.0;
@@ -88,7 +88,7 @@ void Slider::onLogicUpdate(double delta)
 		visualRingSize -= growthChunk;
 	}
 
-	visualRingSize = Clamp(
+	visualRingSize = math::Clamp(
 		visualRingSize, ctx.game.getCircleSize(),
 		ctx.game.getCircleSize() * maxSOFSizeMultiplier
 		);
@@ -96,7 +96,7 @@ void Slider::onLogicUpdate(double delta)
 
 void Slider::onBegin()
 {
-	startPoint = Min(ctx.game.getCurrentTime(), getStartTime());
+	startPoint = math::Min(ctx.game.getCurrentTime(), getStartTime());
 
 	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
 	started = true;
@@ -153,14 +153,14 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
 
     /*============================================================================================================*/
     // Create curve out of the template points for interpolating.
-    Curve<SliderPathT::iterator> templateCurve(path.begin(), path.end());
+    math::Curve<SliderPathT::iterator> templateCurve(path.begin(), path.end());
 
     // Prepare some misc variables.
     interpolatedPath.clear();
     auto lastIt = interpolatedPath.end();
     auto middleIt = interpolatedPath.end();
     auto steps =
-        Max((unsigned int) (SLIDER_STEPS_PER_CURVE_UNIT * templateCurve.getLength()), 2);
+        math::Max((unsigned int) (SLIDER_STEPS_PER_CURVE_UNIT * templateCurve.getLength()), 2);
 
     // Interpolate over n * length steps.
     for (unsigned int i = 0; i <= steps; i++) {
@@ -180,10 +180,10 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
                 // Optimization #1: If a triplet of sequential points has a small enough
                 // angle, remove the middle point of this triplet.
 
-                auto vec1 = Normalize(lastPosition - midPosition);
-                auto vec2 = Normalize(thisPosition - midPosition);
+                auto vec1 = math::Normalize(lastPosition - midPosition);
+                auto vec2 = math::Normalize(thisPosition - midPosition);
 
-                auto angle = Abs(Cross(vec1, vec2));
+                auto angle = math::Abs(math::Cross(vec1, vec2));
                 if (angle <= SLIDER_ANGLE_OPT_THRESHOLD) {
                     interpolatedPath.erase(middleIt);
                 }
@@ -207,7 +207,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
     startBumperAngle = std::atan2(startBumperDirection.y, startBumperDirection.x);
     auto endBumperDirection = findNormal(1.0);
     // Needs to be flipped, add π.
-    endBumperAngle = std::atan2(endBumperDirection.y, endBumperDirection.x) + fPI;
+    endBumperAngle = std::atan2(endBumperDirection.y, endBumperDirection.x) + math::fPI;
 }
 
 void Slider::onDraw()
@@ -233,10 +233,10 @@ void Slider::onDraw()
 
 				auto offset = circleSize;
 
-				auto right = (float)Max(seg.A.x, seg.B.x) + offset;
-				auto left = (float)Min(seg.A.x, seg.B.x) - offset;
-				auto top = (float)Max(seg.A.y, seg.B.y) + offset;
-				auto bottom = (float)Min(seg.A.y, seg.B.y) - offset;
+				auto right = (float)math::Max(seg.A.x, seg.B.x) + offset;
+				auto left = (float)math::Min(seg.A.x, seg.B.x) - offset;
+				auto top = (float)math::Max(seg.A.y, seg.B.y) + offset;
+				auto bottom = (float)math::Min(seg.A.y, seg.B.y) - offset;
 
 				frect rect = {
 					{
@@ -249,8 +249,8 @@ void Slider::onDraw()
 					}
 				};
 
-				Mat3f shape = MakeScaleMatrix<float>(rect.size) *
-					MakeTranslationMatrix<float>(rect.position);
+				Mat3f shape = math::MakeScaleMatrix<float>(rect.size) *
+                    math::MakeTranslationMatrix<float>(rect.position);
 
 				auto tint = bodyTexture.getTint();
 				tint.a = alpha;
@@ -366,18 +366,18 @@ fvec2d Slider::findDirection(double t)
     // This is done so that if t=1, calling curve.get(t+ε) would yield the same
     // result as calling curve.get(t). because the value of t is clamped in the
     // calculation.
-    t = Clamp(t, 0.0, 1.0 - SLIDER_DIRECTION_EPSILON);
+    t = math::Clamp(t, 0.0, 1.0 - SLIDER_DIRECTION_EPSILON);
 
     // We find the direction vector by pointing a vector from the requested
     // parametric position t and another position equal to t + ε, with ε being a
     // small positive offset. We normalize this vector and return.
-    auto targetPosition = curve.get<CurveType::STRAIGHT>(t);
-    auto offsetPosition = curve.get<CurveType::STRAIGHT>(t + SLIDER_DIRECTION_EPSILON);
-    return Normalize(offsetPosition - targetPosition);
+    auto targetPosition = curve.get<math::CurveType::STRAIGHT>(t);
+    auto offsetPosition = curve.get<math::CurveType::STRAIGHT>(t + SLIDER_DIRECTION_EPSILON);
+    return math::Normalize(offsetPosition - targetPosition);
 }
 
 fvec2d Slider::findNormal(double t)
-{ return Normal(findDirection(t)); }
+{ return math::Normal(findDirection(t)); }
 
 fvec2d Slider::getStartPosition() const
 {

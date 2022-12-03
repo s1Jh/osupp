@@ -24,40 +24,58 @@
 
 #include "define.hpp"
 
+#include "Resource.hpp"
+
 #include <filesystem>
 #include <string>
 #include <unordered_map>
 
 NS_BEGIN
 
+namespace util
+{
+
 class Locale
 {
+    friend Resource<Locale> Load<Locale>(const std::filesystem::path &path);
 public:
-    int loadFromFile(const std::filesystem::path &path);
+    [[nodiscard]] const std::string &getTranslation(const std::string &key) const;
 
-    const std::string &getTranslation(const std::string &key) const;
+    [[nodiscard]] const std::string &operator[](const std::string &key) const;
 
-    const std::string &operator[](const std::string &key) const;
+    [[nodiscard]] const std::string &getTimeLocale() const;
 
-    const std::string &getTimeLocale() const;
+    [[nodiscard]] const std::string &getDateLocale() const;
 
-    const std::string &getDateLocale() const;
+    [[nodiscard]] const std::string &getDecimalSeparator() const;
 
-    const std::string &getDecimalSeparator() const;
+    [[nodiscard]] const std::string &getLocName() const;
 
-    const std::string &getLocName() const;
-
-    const std::string &getLocCredits() const;
-
-    void showDebugListings(bool *open = nullptr) const;
+    [[nodiscard]] const std::string &getLocCredits() const;
 
 private:
-    std::string timeLocale;
-    std::string dateLocale;
-    std::string decimalSeparator;
-    std::string locName;
-    std::string locCredits;
+    std::string timeLocale{"HH:mm:ss"};
+    std::string dateLocale{"YYYY/MM/dd"};
+    std::string decimalSeparator{'.'};
+    std::string locName{"Fallback"};
+    std::string locCredits{TOSTRING(GAME_TITLE)};
     std::unordered_map<std::string, std::string> translations;
 };
+
+void SetDefaultLocale(const Resource<Locale> &newLocale);
+const Resource<Locale> &DefaultLocale();
+
+}
+
+template<>
+Resource<util::Locale> Load(const std::filesystem::path& path);
+
+template<> const std::vector<std::string> Resource<util::Locale>::allowedExtensions;
+
+#if defined(WINDOWS)
+std::string operator "" _i18n(const char *key, unsigned long long);
+#elif defined(LINUX)
+std::string operator "" _i18n(const char *key, unsigned long);
+#endif
 
 NS_END

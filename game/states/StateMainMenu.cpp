@@ -33,29 +33,26 @@
 NS_BEGIN
 
 State<GameState::MainMenu>::State()
+    : ctx(GetContext())
 {}
 
 void State<GameState::MainMenu>::showDebugControl()
 {
-    static unsigned int purged = 0;
     static bool showVersion = false;
-    static bool showAssetPurge = false;
-    static bool showLocalisations = false;
     static bool showImGuiVersion = false;
     static bool showImGuiDebugger = false;
     static bool showImGuiLogger = false;
     static bool showImGuiStack = false;
-	static bool showResourceDebug = false;
 
     if (showVersion) {
-        if (ImGui::Begin(ctx->locale["ui.main.version.title"].c_str(),
+        if (ImGui::Begin("ui.main.version.title"_i18n.c_str(),
                          &showVersion,
                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoCollapse)) {
             ImGui::Text("%s", TOSTRING(GAME_TITLE));
             ImGui::Separator();
-            ImGui::Text(ctx->locale["ui.main.version.version"].c_str(),
+            ImGui::Text("ui.main.version.version"_i18n.c_str(),
                         VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, PLATFORM, ARCH);
-            ImGui::Text(ctx->locale["ui.main.version.build"].c_str(), BUILD_TYPE, BUILD_DATE, BUILD_TIME);
+            ImGui::Text("ui.main.version.build"_i18n.c_str(), BUILD_TYPE, BUILD_DATE, BUILD_TIME);
             ImGui::Separator();
             ImGui::Text("Copyright (c) 2022-2025 s1Jh");
             ImGui::End();
@@ -71,68 +68,41 @@ void State<GameState::MainMenu>::showDebugControl()
     if (showImGuiStack)
         ImGui::ShowStackToolWindow(&showImGuiStack);
 
-    if (showAssetPurge) {
-        if (ImGui::Begin(ctx->locale["ui.main.purge.title"].c_str(),
-                         &showAssetPurge,
-                         ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_Modal)) {
-            ImGui::Text(ctx->locale["ui.main.purge.message"].c_str(), purged);
-            ImGui::End();
-        }
-    }
-    if (showLocalisations) {
-        ctx->locale.showDebugListings(&showLocalisations);
-    }
-
-	if (showResourceDebug) {
-		ctx->resources.drawDebugDialog(&showResourceDebug);
-	}
-
-//    auto size = (fsize) ctx->gfx.getSize();
-//    ImGui::SetNextWindowSize({size.w, size.h});
+    auto size = (fsize) GetContext().gfx.getSize();
+    ImGui::SetNextWindowSize({size.w, size.h});
     ImGui::SetNextWindowPos({0, 0});
-    if (!ImGui::Begin(ctx->locale["ui.main.title"].c_str(), nullptr,
+    if (!ImGui::Begin("ui.main.title"_i18n.c_str(), nullptr,
                       ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove)) {
         ImGui::End();
         return;
     }
 
     if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu(ctx->locale["ui.main.about.title"].c_str())) {
-            ImGui::MenuItem(ctx->locale["ui.main.about.game_version"].c_str(), nullptr, &showVersion);
-            ImGui::MenuItem(ctx->locale["ui.main.about.imgui_version"].c_str(), nullptr, &showImGuiVersion);
+        if (ImGui::BeginMenu("ui.main.about.title"_i18n.c_str())) {
+            ImGui::MenuItem("ui.main.about.game_version"_i18n.c_str(), nullptr, &showVersion);
+            ImGui::MenuItem("ui.main.about.imgui_version"_i18n.c_str(), nullptr, &showImGuiVersion);
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu(ctx->locale["ui.main.debug.title"].c_str())) {
-            if (ImGui::MenuItem(ctx->locale["ui.main.debug.purge"].c_str())) {
-                showAssetPurge = true;
-                purged = ctx->resources.purgeUnusedFiles();
-            }
-            if (ImGui::MenuItem(ctx->locale["ui.main.debug.localisations"].c_str())) {
-                showLocalisations = true;
-            }
-			if (ImGui::MenuItem(ctx->locale["ui.main.debug.resources"].c_str())) {
-				showResourceDebug = true;
-			}
-
-            if (ImGui::BeginMenu(ctx->locale["ui.main.debug.imgui"].c_str())) {
-                if (ImGui::MenuItem(ctx->locale["ui.main.debug.imgui.debugger"].c_str())) {
+        if (ImGui::BeginMenu("ui.main.debug.title"_i18n.c_str())) {
+            if (ImGui::BeginMenu("ui.main.debug.imgui"_i18n.c_str())) {
+                if (ImGui::MenuItem("ui.main.debug.imgui.debugger"_i18n.c_str())) {
                     showImGuiDebugger = true;
                 }
-                if (ImGui::MenuItem(ctx->locale["ui.main.debug.imgui.logger"].c_str())) {
+                if (ImGui::MenuItem("ui.main.debug.imgui.logger"_i18n.c_str())) {
                     showImGuiLogger = true;
                 }
-                if (ImGui::MenuItem(ctx->locale["ui.main.debug.imgui.stack"].c_str())) {
+                if (ImGui::MenuItem("ui.main.debug.imgui.stack"_i18n.c_str())) {
                     showImGuiStack = true;
                 }
-                if (ImGui::BeginMenu(ctx->locale["ui.main.debug.imgui.theme"].c_str())) {
-                    if (ImGui::MenuItem(ctx->locale["ui.main.debug.imgui.theme.light"].c_str())) {
+                if (ImGui::BeginMenu("ui.main.debug.imgui.theme"_i18n.c_str())) {
+                    if (ImGui::MenuItem("ui.main.debug.imgui.theme.light"_i18n.c_str())) {
                         ImGui::StyleColorsLight();
                     }
-                    if (ImGui::MenuItem(ctx->locale["ui.main.debug.imgui.theme.dark"].c_str())) {
+                    if (ImGui::MenuItem("ui.main.debug.imgui.theme.dark"_i18n.c_str())) {
                         ImGui::StyleColorsDark();
                     }
-                    if (ImGui::MenuItem(ctx->locale["ui.main.debug.imgui.theme.classic"].c_str())) {
+                    if (ImGui::MenuItem("ui.main.debug.imgui.theme.classic"_i18n.c_str())) {
                         ImGui::StyleColorsClassic();
                     }
                     ImGui::EndMenu();
@@ -148,12 +118,12 @@ void State<GameState::MainMenu>::showDebugControl()
 
     if (ImGui::BeginTabBar("#tabs")) {
 
-        if (ImGui::BeginTabItem(ctx->locale["ui.main.maps.title"].c_str())) {
+        if (ImGui::BeginTabItem("ui.main.maps.title"_i18n.c_str())) {
             showMainMenuTab();
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem(ctx->locale["ui.main.settings.title"].c_str())) {
+        if (ImGui::BeginTabItem("ui.main.settings.title"_i18n.c_str())) {
             showSettingsTab();
             ImGui::EndTabItem();
         }
@@ -188,34 +158,28 @@ int State<GameState::MainMenu>::init(GameState)
 
 void State<GameState::MainMenu>::showMainMenuTab()
 {
-    // FIXME: This doesn't properly work with skins
-    static auto star = ctx->resources.get<Texture>("star_icon");
-    static auto difficulty = ctx->resources.get<Texture>("difficulty_icon");
-    static auto approach = ctx->resources.get<Texture>("approach_rate_icon");
-    static auto circle = ctx->resources.get<Texture>("note_icon");
-    static auto window = ctx->resources.get<Texture>("hit_window_icon");
-    static auto drain = ctx->resources.get<Texture>("hp_drain_icon");
-    static auto duration = ctx->resources.get<Texture>("duration_icon");
+    // FIXME: This doesn't refresh when skin changes
+    static auto star = GetContext().activeSkin->getTexture("star_icon");
+    static auto difficulty = GetContext().activeSkin->getTexture("difficulty_icon");
+    static auto approach = GetContext().activeSkin->getTexture("approach_rate_icon");
+    static auto circle = GetContext().activeSkin->getTexture("note_icon");
+    static auto window = GetContext().activeSkin->getTexture("hit_window_icon");
+    static auto drain = GetContext().activeSkin->getTexture("hp_drain_icon");
+    static auto duration = GetContext().activeSkin->getTexture("duration_icon");
 
     static unsigned int selected = -1;
 
     static ImGuiTextFilter filter;
 
     const float playButtonWidth = 60.f;
-    auto size = (fsize) ctx->gfx.getSize();
+    auto size = (fsize) GetContext().gfx.getSize();
 
-    if (ImGui::Button(ctx->locale["ui.main.maps.reload"].c_str())) {
-        ctx->maps.clear();
-        ctx->resources.purgeUnusedFiles();
-        ctx->resources.getDirectory("songs", ctx->maps);
-    }
 
     ImGui::SameLine();
-//    if (ImGui::Button(ctx->locale["ui.main.maps.exit"].c_str()))
-//        ctx->state.exit();
-
+    if (ImGui::Button("ui.main.maps.exit"_i18n.c_str()))
+        ctx.state.exit();
     ImGui::SameLine();
-    ImGui::Text("%s", ctx->locale["ui.main.maps.filter"].c_str());
+    ImGui::Text("%s", "ui.main.maps.filter"_i18n.c_str());
     ImGui::SameLine();
     filter.Draw("##", -1);
     ImGui::Separator();
@@ -224,30 +188,30 @@ void State<GameState::MainMenu>::showMainMenuTab()
                           ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY,
                           {0.0, size.h * 0.75f})) {
         ImGui::TableSetupColumn(" ", ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.star_rating"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.star_rating"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.name"].c_str(), ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.overall_difficulty"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.name"_i18n.c_str(), ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("ui.main.maps.overall_difficulty"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.approach_rate"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.approach_rate"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.circle_size"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.circle_size"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.hit_window"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.hit_window"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.hp_drain"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.hp_drain"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
-        ImGui::TableSetupColumn(ctx->locale["ui.main.maps.length"].c_str(),
+        ImGui::TableSetupColumn("ui.main.maps.length"_i18n.c_str(),
                                 ImGuiTableColumnFlags_WidthFixed, playButtonWidth);
 
         ImGui::TableHeadersRow();
 
         const float iconSize = 16;
 
-        for (unsigned int i = 0; i < ctx->maps.size(); i++) {
-            const auto &map = ctx->maps[i];
+        for (unsigned int i = 0; i < ctx.maps.size(); i++) {
+            const auto &map = ctx.maps[i];
 
-            auto filterName = map->romanisedName + " " + map->romanisedArtist;
+            auto filterName = map->getRomanisedName() + " " + map->getRomanisedArtist();
 
             if (filter.PassFilter(filterName.c_str())) {
 
@@ -255,8 +219,8 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::TableNextColumn();
                 if (i == selected) {
                     if (ImGui::Button("Play!", {playButtonWidth, 0})) {
-                        ctx->game.setMap(map);
-                        //ctx->state.setState(GameState::InGame);
+                        ctx.game.setMap(map);
+                        ctx.state.setState(GameState::InGame);
                     }
                 }
                 // Song star rating
@@ -271,14 +235,14 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 std::string itemID = "##" + std::to_string(i);
                 if (ImGui::Selectable(itemID.c_str(), false, ImGuiSelectableFlags_None)) {
 					selectedMap = map;
-					auto& channel = ctx->audio.getMusicChannel();
-					auto music = ctx->resources.get<SoundStream>(map->songPath, map->getDirectory(), false);
-					channel.setSound(music.ref(), true);
+					auto& channel = ctx.audio.getMusicChannel();
+					radio = Load<SoundStream>(map->getDirectory() / map->getSongPath());
+					channel.setSound(radio.ref(), true);
                     selected = i;
                 }
                 ImGui::SameLine();
                 auto name =
-                    map->romanisedName + " - " + map->romanisedArtist + " (" + map->difficulty + ')';
+                    map->getRomanisedName() + " - " + map->getRomanisedArtist() + " (" + map->getDifficulty() + ')';
                 if (name.empty())
                     name = "#unknown_" + std::to_string(long(map.get()));
                 ImGui::Text("%s", name.c_str());
@@ -288,7 +252,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(difficulty->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char overallDiff[8];
-                sprintf(overallDiff, "%.1f", map->overallDifficulty);
+                sprintf(overallDiff, "%.1f", map->getOverallDifficulty());
                 ImGui::Text("%s", overallDiff);
 
                 // Song approach time
@@ -296,7 +260,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(approach->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char approachTime[8];
-                sprintf(approachTime, "%.1f", map->approachTime);
+                sprintf(approachTime, "%.1f", map->getApproachTime());
                 ImGui::Text("%s", approachTime);
 
                 // Song circle size
@@ -304,7 +268,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(circle->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char circleSize[8];
-                sprintf(circleSize, "%.2f", map->circleSize);
+                sprintf(circleSize, "%.2f", map->getCircleSize());
                 ImGui::Text("%s", circleSize);
 
                 // Song hit window time
@@ -312,7 +276,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(window->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hitWindow[8];
-                sprintf(hitWindow, "%.1f", map->hitWindow);
+                sprintf(hitWindow, "%.1f", map->getHitWindow());
                 ImGui::Text("%s", hitWindow);
 
                 // Song HP drain
@@ -320,7 +284,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(drain->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hpDrain[8];
-                sprintf(hpDrain, "%.1f", map->HPDrain);
+                sprintf(hpDrain, "%.1f", map->getHpDrain());
                 ImGui::Text("%s", hpDrain);
 
                 // Song duration
@@ -328,7 +292,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 ImGui::Image(duration->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
 
-                auto secsTotal = (int) map->mapDuration;
+                auto secsTotal = (int) map->getMapDuration();
                 int secs = secsTotal % 60;
                 int minutes = secsTotal / 60;
                 int hours = secsTotal / 3600;
@@ -351,36 +315,37 @@ void State<GameState::MainMenu>::showSettingsTab()
 {
     static ImGuiTextFilter filter;
 
-    if (ImGui::Button(ctx->locale["ui.main.settings.read"].c_str())) {
-        ctx->settings.read();
+    if (ImGui::Button("ui.main.settings.read"_i18n.c_str())) {
+        ctx.settings.read();
     }
     ImGui::SameLine();
-    if (ImGui::Button(ctx->locale["ui.main.settings.write"].c_str())) {
-        ctx->settings.write();
+    if (ImGui::Button("ui.main.settings.write"_i18n.c_str())) {
+        ctx.settings.write();
     }
     ImGui::SameLine();
-    if (ImGui::Button(ctx->locale["ui.main.settings.apply"].c_str())) {
-        ctx->settings.apply();
+    if (ImGui::Button("ui.main.settings.apply"_i18n.c_str())) {
+        ctx.settings.apply();
     }
     ImGui::SameLine();
-    ImGui::Text("%s", ctx->locale["ui.main.settings.filter"].c_str());
+    ImGui::Text("%s", "ui.main.settings.filter"_i18n.c_str());
     ImGui::SameLine();
     filter.Draw("##_F", -1);
     ImGui::Separator();
 
     if (ImGui::BeginTable("##", 2, ImGuiTableFlags_ScrollY, {0.0f, -1.0f})) {
-        ImGui::TableSetupColumn(ctx->locale["ui.main.settings.key"].c_str());
-        ImGui::TableSetupColumn(ctx->locale["ui.main.settings.value"].c_str());
+        ImGui::TableSetupColumn("ui.main.settings.key"_i18n.c_str());
+        ImGui::TableSetupColumn("ui.main.settings.value"_i18n.c_str());
 
         ImGui::TableHeadersRow();
-        for (auto &setting: ctx->settings) {
+        auto& locale = util::DefaultLocale();
+        for (auto &setting: ctx.settings) {
 
 			auto &ptr = setting.second;
 			if (bool(ptr->flags() & SettingFlags::HIDDEN)) {
 				continue;
 			}
 
-			auto localised = ctx->locale[setting.first];
+			auto localised = locale->getTranslation(setting.first);
             if (!filter.PassFilter(localised.c_str())) {
                 continue;
             }

@@ -29,13 +29,13 @@ NS_BEGIN
 void Spinner::onLogicUpdate(double delta)
 {
     if (isActive()) {
-        auto cursor = Normalize(ctx.game.getCursorPosition() - objectTemplate->position);
-        auto alpha = (float) Cross(lastVector, cursor);
+        auto cursor = math::Normalize(ctx.game.getCursorPosition() - objectTemplate->position);
+        auto alpha = (float) math::Cross(lastVector, cursor);
 
-        RPM = float(double(Abs(alpha) / 2.0_pi) / delta * 60.0);
+        RPM = float(double(math::Abs(alpha) / 2.0_pi) / delta * 60.0);
         rotation += (float) alpha;
 
-        if (Abs(rotation) > 2.0_pi) {
+        if (math::Abs(rotation) > 2.0_pi) {
             rotation = std::fmod(rotation, (float) 2.0_pi);
             rotationsCompleted++;
         }
@@ -59,7 +59,7 @@ void Spinner::onUpdate(double delta)
 
 void Spinner::onBegin()
 {
-    lastVector = Normalize(ctx.game.getCursorPosition() - objectTemplate->position);
+    lastVector = math::Normalize(ctx.game.getCursorPosition() - objectTemplate->position);
 }
 
 HitResult Spinner::onFinish()
@@ -84,7 +84,7 @@ Spinner::Spinner(std::shared_ptr<ObjectTemplateSpinner> t, const HitObjectArgume
 
 void Spinner::onPress()
 {
-    lastVector = Normalize(ctx.game.getCursorPosition());
+    lastVector = math::Normalize(ctx.game.getCursorPosition());
 }
 
 void Spinner::onDraw()

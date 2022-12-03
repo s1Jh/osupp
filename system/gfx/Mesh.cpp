@@ -78,7 +78,7 @@ unsigned int Mesh::insertVertex(const Vertex &v)
     unsigned int index = vertices.size() / totalDataPerVertex;
 
     int i = 0;
-    for (; i < Min((int) v.size(), totalDataPerVertex); i++) {
+    for (; i < math::Min((int) v.size(), totalDataPerVertex); i++) {
         vertices.push_back(v[i]);
     }
     for (; i < totalDataPerVertex; i++) {
@@ -282,12 +282,12 @@ template<>
 Resource<Mesh> Create()
 {
 	Resource<Mesh> r;
-    r.held->setAttributeDescriptors({AttributeType::VEC2});
-	r.held->insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
-	r.held->insertIndices({0, 1, 2});
+    r->setAttributeDescriptors({AttributeType::VEC2});
+	r->insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
+	r->insertIndices({0, 1, 2});
 
-    if (!r.held->upload())
-		return Resource<Mesh>(nullptr);
+    if (!r->upload())
+		return {nullptr};
 
 	return r;
 

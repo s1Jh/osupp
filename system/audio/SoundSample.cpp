@@ -58,22 +58,22 @@ Resource<SoundSample> Load(const std::filesystem::path &path)
 	return r;
 }
 
-template<>
-Resource<SoundSample> Create()
-{
-	Resource<SoundSample> r;
-	int secs = 1;
-	int sampleRate = 44100;
-	SampleFormat format = SampleFormat::MONO8;
-	int size = secs * (int)sampleRate;
-
-	r->data.resize(size);
-	if (!r->configure(size, sampleRate, format)) {
-		return nullptr;
-	}
-
-	return r;
-}
+//template<>
+//Resource<SoundSample> Create()
+//{
+//	Resource<SoundSample> r;
+//	int secs = 1;
+//	int sampleRate = 44100;
+//	SampleFormat format = SampleFormat::MONO8;
+//	int size = secs * (int)sampleRate;
+//
+//	r->data.resize(size);
+//	if (!r->configure(size, sampleRate, format)) {
+//		return nullptr;
+//	}
+//
+//	return r;
+//}
 
 SoundType SoundSample::getType() const
 {

@@ -73,13 +73,13 @@ BEGIN_TEMPLATED_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(vec2d) {}
 
 IMPLEMENT_2D_PRIMITIVE_RENDER_FUNCTION(
     rect,
-    MakeScaleMatrix<float>(object.size) * MakeTranslationMatrix<float>(object.position),
+    math::MakeScaleMatrix<float>(object.size) * math::MakeTranslationMatrix<float>(object.position),
     RenderMode::Triangles
 )
 
 IMPLEMENT_2D_PRIMITIVE_RENDER_FUNCTION(
     circle,
-    MakeScaleMatrix<float>(dvec2d{object.radius, object.radius}) * MakeTranslationMatrix<float>(object.position),
+    math::MakeScaleMatrix<float>(dvec2d{object.radius, object.radius}) * math::MakeTranslationMatrix<float>(object.position),
     RenderMode::TriangleFan
 )
 

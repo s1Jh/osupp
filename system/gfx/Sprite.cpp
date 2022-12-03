@@ -26,7 +26,8 @@
 
 #include "Sprite.hpp"
 #include "Math.hpp"
-#include "Resources.hpp"
+#include "Resource.hpp"
+#include "Drawables.hpp"
 
 #include <algorithm>
 
@@ -199,17 +200,17 @@ void detail::RenderFunctor<Sprite>::operator()(Renderer &renderer, const Sprite 
 	//    const auto &spriteShader = getData().shader;
 
     Mat3f shape =
-        MakeScaleMatrix<float>(sprite.getSize()) *
-            MakeRotationMatrix<float>(sprite.getRotation(), sprite.getPivotPoint()) *
-            MakeTranslationMatrix<float>(sprite.getPosition());
-    Mat3f texture = MakeScaleMatrix<float>(sprite.getClipRectSize()) *
-        MakeTranslationMatrix<float>(sprite.getClipRectPosition());
+        math::MakeScaleMatrix<float>(sprite.getSize()) *
+            math::MakeRotationMatrix<float>(sprite.getRotation(), sprite.getPivotPoint()) *
+            math::MakeTranslationMatrix<float>(sprite.getPosition());
+    Mat3f texture = math::MakeScaleMatrix<float>(sprite.getClipRectSize()) *
+        math::MakeTranslationMatrix<float>(sprite.getClipRectPosition());
 
-    renderer.draw(sprite.getRect(), VisualAppearance{
-        .texture = sprite.getTexture().get(),
-        .uvTransform = &texture,
-        .fillColor = sprite.getTint()
-    }, transform * shape);
+//    renderer.draw(sprite.getRect(), VisualAppearance{
+//        .texture = sprite.getTexture().get(),
+//        .uvTransform = &texture,
+//        .fillColor = sprite.getTint()
+//    }, transform * shape);
 }
 
 NS_END

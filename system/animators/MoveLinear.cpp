@@ -30,7 +30,7 @@ void MoveLinear::applyTransform(Sprite &spr, double delta)
 {
     elapsed += float(delta);
 
-    spr.setPosition(BiLerp(from, to, elapsed / totalTime));
+    spr.setPosition(math::BiLerp(from, to, elapsed / totalTime));
 
     if (elapsed >= totalTime)
         setFinished();

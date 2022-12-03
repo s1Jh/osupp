@@ -35,9 +35,9 @@ Camera2D::Camera2D()
 
 void Camera2D::recalculateMatrix()
 {
-    cameraMatrix = MakeTranslationMatrix(position) *
-        MakeRotationMatrix<float>(rotation) *
-        MakeScaleMatrix(fvec2d{aspectRatio, 1.f} / viewScale);
+    cameraMatrix = math::MakeTranslationMatrix(position) *
+        math::MakeRotationMatrix<float>(rotation) *
+        math::MakeScaleMatrix(fvec2d{aspectRatio, 1.f} / viewScale);
 }
 
 const Mat3f &Camera2D::getMatrix() const
@@ -60,7 +60,7 @@ void Camera2D::setScale(const fvec2d &in)
 
 void Camera2D::translate(const fvec2d &amount)
 {
-    position += Rotate(amount, rotation);
+    position += math::Rotate(amount, rotation);
 }
 
 void Camera2D::setPosition(const fvec2d &in)

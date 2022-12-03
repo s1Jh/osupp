@@ -24,6 +24,10 @@
 
 #include "define.hpp"
 
+//#include "Result.hpp"
+//#include "Holder.hpp"
+#include "Log.hpp"
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -51,7 +55,7 @@ public:
 		held = std::make_shared<T>();
 	}
 
-	Resource(nullptr_t)
+	Resource(std::nullptr_t)
 	{
 		held = Default<T>().held;
 	}
@@ -89,15 +93,15 @@ public:
 	static const std::vector<std::string> allowedExtensions;
 
 protected:
-	Resource(nullptr_t, nullptr_t)
+	Resource(std::nullptr_t, std::nullptr_t)
 	{
 		held = nullptr;
 	}
 
 	using ResourceT = Resource<T>;
 
-	std::shared_ptr<T> held;
 	static Resource<T> defaultValue;
+	std::shared_ptr<T> held;
 };
 
 template <typename T>
@@ -106,7 +110,14 @@ template <typename T>
 const std::vector<std::string> Resource<T>::allowedExtensions;
 
 template <typename T>
+requires std::is_default_constructible_v<T>
 Resource<T> Create() { return {}; }
+
+template <typename T>
+Resource<T> Create() {
+	WRAP_CONSTEXPR_ASSERTION("Create method not overridden for T and T isn't default constructible.");
+	return {};
+}
 
 template <typename T>
 Resource<T> Load(const std::filesystem::path&)
@@ -128,5 +139,14 @@ Resource<T> Default()
 	}
 	return d;
 }
+
+//template <typename T>
+//struct LoadTask {
+//	using ResultType = tasks::Result<tasks::detail::TaskHolder<Resource<T>, LoadTask<T>>>;
+//
+//	Resource<T> operator() (const std::filesystem::path& path) {
+//		return Load<T>(path);
+//	}
+//};
 
 NS_END

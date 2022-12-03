@@ -47,7 +47,7 @@ fvec2d Mouse::position() const
     isize size;
     glfwGetWindowSize(TO_GLFW(parentViewport), &size.w, &size.h);
 
-    auto shorter = double(Min(size.w, size.h)) / 2.0;
+    auto shorter = double(math::Min(size.w, size.h)) / 2.0;
 
     ret -= dvec2d(size / 2);
     ret /= dvec2d{shorter, shorter};

@@ -79,6 +79,8 @@ void Settings::iterateSettingsSearch(
                 break;
         }
     }
+
+    apply();
 }
 
 bool Settings::write(const std::filesystem::path &path) const

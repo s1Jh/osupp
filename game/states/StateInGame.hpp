@@ -28,6 +28,7 @@
 #include "State.hpp"
 #include "Timer.hpp"
 #include "ObjectSprite.hpp"
+#include "SoundStream.hpp"
 #include "MapInfo.hpp"
 
 NS_BEGIN
@@ -49,6 +50,7 @@ private:
 	int trailIndex{0};
 	ObjectSprite playField;
 	ObjectSprite cursor;
+    Resource<SoundStream> musicTrack;
 	bool musicStarted{false};
 	Timer endTimer;
     frect field;

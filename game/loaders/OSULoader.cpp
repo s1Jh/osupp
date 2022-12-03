@@ -322,29 +322,32 @@ public:
             ------------------------------------------------------------------------------------------------------------
          */
 
-        map.HPDrain = getField("HPDrainRate", 10.0f);
+        map.setHpDrain(getField("HPDrainRate", 10.0f));
 
         double circleSizeLevel = getField("CircleSize", 5.0f);
-        map.circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
+        auto circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
+        map.setCircleSize(circleSize);
 
-        map.overallDifficulty = getField("OverallDifficulty", 5.0f);
+        map.setOverallDifficulty(getField("OverallDifficulty", 5.0f));
 
         float approachLevel = getField("ApproachRate", 5.0f);
-        map.approachTime =
-            1.8f - Min(approachLevel, 5) * 0.12f - (approachLevel > 5 ? (approachLevel - 5) * 0.15f : 0);
+        float approachTime =
+            1.8f - math::Min(approachLevel, 5) * 0.12f - (approachLevel > 5 ? (approachLevel - 5) * 0.15f : 0);
+        map.setApproachTime(approachTime);
 
         sliderMultiplier = getField("SliderMultiplier", 1.0f);
 
-        map.songPath = getField("AudioFilename", "audio.mp3");
-        map.startOffset = TimeConversion(getField("AudioLeadIn", 0));
-        map.name = getField("TitleUnicode", "");
-        map.romanisedName = getField("Title", "");
-        map.artist = getField("ArtistUnicode", "");
-        map.romanisedArtist = getField("Artist", "");
-        map.source = getField("Source", "");
-        map.author = getField("Creator", "");
-        map.difficulty = getField("Version", "");
-        map.tags = GetCharacterSeparatedValues(getField("Tags", ""));
+        map.setSongPath(getField("AudioFilename", "audio.mp3"));
+        map.setStartOffset(TimeConversion(getField("AudioLeadIn", 0)));
+        map.setName(getField("TitleUnicode", ""));
+        map.setRomanisedName(getField("Title", ""));
+        map.setArtist(getField("ArtistUnicode", ""));
+        map.setRomanisedArtist(getField("Artist", ""));
+        map.setSource(getField("Source", ""));
+        map.setAuthor(getField("Creator", ""));
+        map.setDifficulty(getField("Version", ""));
+        std::string tags = getField("Tags", "");
+        map.setTags(GetCharacterSeparatedValues(tags, ' '));
 
         for (auto it = hitObjectParams.begin(); it != hitObjectParams.end(); it++) {
             const auto &object = *it;
@@ -379,7 +382,7 @@ public:
 
 				auto length = GetParam<double>(object.objectParams, 2, 0);
 
-				int repeats = Max(GetParam<int>(object.objectParams, 1, 1), 1);
+				int repeats = math::Max(GetParam<int>(object.objectParams, 1, 1), 1);
 
 				double SV = getSliderVelocity(object.time);
 				double beat = getBeatLength(object.time);
@@ -387,26 +390,26 @@ public:
 				duration *= repeats;
 				double endTime = object.time + duration;
 
-                CurveType type;
+                math::CurveType type;
 
                 auto curveType = GetParam<std::string>(curveParams, 0, "");
 
                 // TODO: uncomment once all types of curve interpolation are finished
                 switch (curveType.front()) {
                     case 'B':
-                        type = CurveType::BEZIER;
+                        type = math::CurveType::BEZIER;
                         break;
                     case 'C':
-                        type = CurveType::BEZIER;
+                        type = math::CurveType::BEZIER;
                         break;
                     case 'L':
-                        type = CurveType::STRAIGHT;
+                        type = math::CurveType::STRAIGHT;
                         break;
                     case 'P':
-                        type = CurveType::BEZIER;
+                        type = math::CurveType::BEZIER;
                         break;
                     default:
-                        type = CurveType::STRAIGHT;
+                        type = math::CurveType::STRAIGHT;
                         break;
                 }
 
@@ -427,7 +430,7 @@ private:
     {
 		for (auto it = inheritedTimingPoints.begin(); it != inheritedTimingPoints.end(); it++) {
 			if (it != std::prev(inheritedTimingPoints.end())) {
-				if (InRangeIE(time, it->time, std::next(it)->time)) {
+				if (math::InRangeIE(time, it->time, std::next(it)->time)) {
 					return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
 				}
 			} else {
@@ -441,7 +444,7 @@ private:
     {
 		for (auto it = uninheritedTimingPoints.begin(); it != uninheritedTimingPoints.end(); it++) {
 			if (it != std::prev(uninheritedTimingPoints.end())) {
-				if (InRangeIE(time, it->time, std::next(it)->time)) {
+				if (math::InRangeIE(time, it->time, std::next(it)->time)) {
 					return it->beatLength;
 				}
 			} else {

@@ -56,7 +56,7 @@ GenericMeshCollection::GenericMeshCollection()
 
 	const unsigned int resolution = 32;
 
-	double circle_rotation = 2.0 * PI / (resolution - 1);
+	double circle_rotation = 2.0 * math::PI / (resolution - 1);
 	fvec2d circle_vec = {1.f, 0.f};
 
 	circle.setAttributeDescriptors({
@@ -70,7 +70,7 @@ GenericMeshCollection::GenericMeshCollection()
 		fvec2d uv = (vec + 1.0f) / 2.0f;
 		circle.insertVertex({vec.x, vec.y, uv.x, uv.y});
 		circle.insertIndice(i);
-		circle_vec = Rotate(circle_vec, circle_rotation);
+		circle_vec = math::Rotate(circle_vec, circle_rotation);
 	}
 	circle.insertIndice(1);
 	success &= circle.upload();

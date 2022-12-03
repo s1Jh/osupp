@@ -40,11 +40,11 @@ Resource<Texture> Load(const std::filesystem::path &location)
     Image texImg;
 
     if (!texImg.load(location)) {
-		return Resource<Texture>(nullptr);
+        return {nullptr};
     }
 
 	if (!tex.held->setImage(texImg)) {
-		return Resource<Texture>(nullptr);
+        return {nullptr};
 	}
 
 	return tex;
@@ -61,8 +61,8 @@ Resource<Texture> Create()
 	image.setRectArea({{64, 64}, {64, 64}}, BLACK);
 
 	Resource<Texture> tex;
-	if (!tex.held->setImage(image)) {
-		return Resource<Texture>(nullptr);
+	if (!tex->setImage(image)) {
+		return {nullptr};
 	}
 
 	return tex;
@@ -152,8 +152,8 @@ isize Texture::getSize() const
 
 void Texture::setClipArea(const frect &rect)
 {
-    clip = MakeScaleMatrix<float>(rect.size) *
-        MakeTranslationMatrix<float>(rect.position);
+    clip = math::MakeScaleMatrix<float>(rect.size) *
+        math::MakeTranslationMatrix<float>(rect.position);
 }
 
 const Mat3f &Texture::getUVTransform() const

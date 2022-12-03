@@ -29,6 +29,9 @@
 
 NS_BEGIN
 
+namespace math
+{
+
 CurveNode::CurveNode(fvec2d _position)
     : position(_position)
 {}
@@ -38,5 +41,7 @@ fvec2d CurveNode::getPosition() const
 
 fvec2d BaseCurveNode::getPosition() const
 { return {0.0, 0.0}; }
+
+} // math
 
 NS_END

@@ -129,7 +129,7 @@ constexpr int VERSION_MAJOR = 0;
 
 constexpr int VERSION_MINOR = 8;
 
-constexpr int VERSION_PATCH = 3;
+constexpr int VERSION_PATCH = 4;
 
 constexpr const char *GL_VERSION_STR = "330 core";
 

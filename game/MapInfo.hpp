@@ -47,7 +47,7 @@ public:
     void addNote(const fvec2d &position, bool comboEnd, double time);
 
     void addSlider(const SliderPathT &points, bool comboEnd, double time,
-                   double endTime, CurveType type, unsigned int repeats = 1);
+                   double endTime, math::CurveType type, unsigned int repeats = 1);
 
     void addSpinner(float spinRequired, float spinResistance, double time,
                     double endTime, const fvec2d &position = {0, 0});

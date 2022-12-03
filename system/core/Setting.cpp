@@ -22,6 +22,7 @@
 
 #include "Setting.hpp"
 #include "Math.hpp"
+#include "Util.hpp"
 
 NS_BEGIN
 
@@ -50,7 +51,7 @@ FROM_STRING_FUNC(float, SettingType::FLOAT)
 
 CONSTRAINT_FUNC(float, SettingType::FLOAT)
 {
-    return ctx.min != ctx.max ? Clamp(value, ctx.min, ctx.max) : value;
+    return ctx.min != ctx.max ? math::Clamp(value, ctx.min, ctx.max) : value;
 };
 
 TO_STRING_FUNC(int, SettingType::INTEGER)
@@ -65,7 +66,7 @@ FROM_STRING_FUNC(int, SettingType::INTEGER)
 
 CONSTRAINT_FUNC(int, SettingType::INTEGER)
 {
-    return ctx.min != ctx.max ? Clamp(value, ctx.min, ctx.max) : value;
+    return ctx.min != ctx.max ? math::Clamp(value, ctx.min, ctx.max) : value;
 };
 
 TO_STRING_FUNC(color, SettingType::COLOR)
@@ -77,10 +78,10 @@ FROM_STRING_FUNC(color, SettingType::COLOR)
 {
     color8 truncated;
     auto components = GetCharacterSeparatedValues(string, ',');
-    truncated.r = Min(GetParam<int>(components, 0, 0), 255);
-    truncated.g = Min(GetParam<int>(components, 1, 0), 255);
-    truncated.b = Min(GetParam<int>(components, 2, 0), 255);
-    truncated.a = Min(GetParam<int>(components, 3, 0), 255);
+    truncated.r = math::Min(GetParam<int>(components, 0, 0), 255);
+    truncated.g = math::Min(GetParam<int>(components, 1, 0), 255);
+    truncated.b = math::Min(GetParam<int>(components, 2, 0), 255);
+    truncated.a = math::Min(GetParam<int>(components, 3, 0), 255);
     return (color) truncated;
 };
 

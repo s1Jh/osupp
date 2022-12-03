@@ -134,14 +134,14 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 		if constexpr ((fmt & SampleFormat::TYPE) == SampleFormat::TYPE8) {
 			// Crush data to uint8_t
 			dataIn = (dataIn + 1.0f) / 2.0f;
-			dataIn = Clamp(dataIn, 0.0f + std::numeric_limits<float>::epsilon(),
+			dataIn = math::Clamp(dataIn, 0.0f + std::numeric_limits<float>::epsilon(),
 						   1.0f - std::numeric_limits<float>::epsilon());
 
 			return uint8_t(std::ceil(dataIn * std::numeric_limits<uint8_t>::max()));
 
 		} else if constexpr ((fmt & SampleFormat::TYPE) == SampleFormat::TYPE16) {
 			// Crush data to int16_t
-			dataIn = Clamp(dataIn, -1.0f + std::numeric_limits<float>::epsilon(),
+			dataIn = math::Clamp(dataIn, -1.0f + std::numeric_limits<float>::epsilon(),
 						   1.0f - std::numeric_limits<float>::epsilon());
 
 			return int16_t(dataIn * std::numeric_limits<int16_t>::max());
@@ -158,8 +158,8 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 #else
 			auto channelCount = ctx.frame->ch_layout.nb_channels;
 #endif
-			const size_t rightId = Min(2, channelCount);
-			const size_t leftId = Min(1, channelCount);
+			const size_t rightId = math::Min(2, channelCount);
+			const size_t leftId = math::Min(1, channelCount);
 
 			float left = extractDataFromStream(leftId, i);
 			float right = extractDataFromStream(rightId, i);

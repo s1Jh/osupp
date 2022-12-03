@@ -50,7 +50,7 @@ void MapInfo::addNote(const fvec2d &position, bool comboEnd, double time)
 }
 
 void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
-                        double endTime, CurveType type, unsigned int repeats)
+                        double endTime, math::CurveType type, unsigned int repeats)
 {
     LOG_ENTER();
 
@@ -60,7 +60,7 @@ void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
     object->path = points;
     object->endTime = endTime;
     object->sliderType = type;
-    object->repeats = Max(repeats, 1);
+    object->repeats = math::Max(repeats, 1);
     insertElement(object);
 }
 

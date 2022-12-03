@@ -34,15 +34,15 @@ bool HumanInput::isKeyPressed(BlockMode mode) const
 {
 	int found = 0;
 
-//	for (const auto code : activationKeys) {
-//		// check each key to see if it is pressed
-//		if (GetContext().keyboard[code].pressed) {
-//			if (mode == NO_BLOCKING)
-//				return true;
-//
-//			found++;
-//		}
-//	}
+	for (const auto code : activationKeys) {
+		// check each key to see if it is pressed
+		if (GetContext().keyboard[code].pressed) {
+			if (mode == NO_BLOCKING)
+				return true;
+
+			found++;
+		}
+	}
 
 	return found == 1;
 }
@@ -51,45 +51,42 @@ bool HumanInput::isKeyPressing(BlockMode mode) const
 {
 	bool found = false;
 
-//	for (const auto code : activationKeys) {
-//		// check each key to see if it is pressed
-//		const auto& key = GetContext().keyboard[code];
-//		if (key.pressing) {
-//			if (mode == NO_BLOCKING) {
-//				// if blocking is off, we just return true the moment we find a pressed key
-//				return true;
-//			}
-//			found = true;
-//		} else if (key.pressed && mode == BLOCKING) {
-//			return false;
-//		}
-//	}
-
+	for (const auto code : activationKeys) {
+		// check each key to see if it is pressed
+		const auto& key = GetContext().keyboard[code];
+		if (key.pressing) {
+			if (mode == NO_BLOCKING) {
+				// if blocking is off, we just return true the moment we find a pressed key
+				return true;
+			}
+			found = true;
+		} else if (key.pressed && mode == BLOCKING) {
+			return false;
+		}
+	}
 	return found;
 }
 
 bool HumanInput::isKeyReleased() const
 {
-//	for (const auto code : activationKeys) {
-//		const auto& key = GetContext().keyboard[code];
-//		if (key.pressed || key.pressing)
-//			return false;
-//	}
+	for (const auto code : activationKeys) {
+		const auto& key = GetContext().keyboard[code];
+		if (key.pressed || key.pressing)
+			return false;
+	}
 	return true;
 }
 
 fvec2d HumanInput::getCursor() const
 {
-//	const auto& ctx = GetContext();
-//	const auto& playField = ctx.game.getPlayField();
+	const auto& ctx = GetContext();
+	const auto& playField = ctx.game.getPlayField();
 
-//	fvec2d pos = ctx.mouse.position();
-//	pos -= playField.position;
-//	auto smaller = Min(playField.size.w, playField.size.h);
-//	pos /= fvec2d{smaller, smaller};
-//	return pos;
-
-    return {};
+	fvec2d pos = ctx.mouse.position();
+	pos -= playField.position;
+	auto smaller = math::Min(playField.size.w, playField.size.h);
+	pos /= fvec2d{smaller, smaller};
+	return pos;
 }
 
 void HumanInput::update()

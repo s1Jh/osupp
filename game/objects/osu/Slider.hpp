@@ -88,7 +88,7 @@ private:
 
     // the interpolated path
     SliderPathT interpolatedPath;
-    Curve<SliderPathT::iterator> curve;
+    math::Curve<SliderPathT::iterator> curve;
 
     // cached variables
     float endBumperAngle;

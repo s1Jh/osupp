@@ -34,7 +34,6 @@ NS_BEGIN
 class SoundStream : public detail::BaseSound
 {
 	friend Resource<SoundStream> Load<SoundStream>(const std::filesystem::path &path);
-	friend Resource<SoundStream> Create<SoundStream>();
 public:
 	[[nodiscard]] SoundType getType() const override;
 
@@ -52,9 +51,6 @@ private:
 
 template <>
 Resource<SoundStream> Load(const std::filesystem::path &path);
-
-template <>
-Resource<SoundStream> Create();
 
 template<> const std::vector<std::string> Resource<SoundStream>::allowedExtensions;
 

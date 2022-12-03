@@ -40,14 +40,6 @@ Resource<SoundStream> Load(const std::filesystem::path &path)
 	return nullptr;
 }
 
-template<>
-Resource<SoundStream> Create()
-{
-	Resource<SoundStream> r;
-	r->ctx.valid = false;
-	return r;
-}
-
 SoundType SoundStream::getType() const
 {
 	return SoundType::STREAM;

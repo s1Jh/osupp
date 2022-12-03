@@ -25,6 +25,7 @@
 #include "define.hpp"
 #include "State.hpp"
 #include "Context.hpp"
+#include "SoundStream.hpp"
 
 NS_BEGIN
 
@@ -43,6 +44,8 @@ private:
     void showSettingsTab();
 
 	Resource<MapInfo> selectedMap{nullptr};
+    Resource<SoundStream> radio;
+    Context &ctx;
 };
 
 NS_END

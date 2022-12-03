@@ -71,7 +71,7 @@ public:
     [[nodiscard]] SettingType getType() const;
 
 	virtual bool wasChanged();
-	virtual bool changed() const;
+	[[nodiscard]] virtual bool changed() const;
 	[[nodiscard]] virtual SettingFlags flags() const;
 
 private:
@@ -244,7 +244,11 @@ void Setting<T>::set(T &&newValue)
     if (!held)
         return;
     std::scoped_lock<std::mutex> lock(held->mutex);
-    held->value = held->meta.applyConstraints(held->meta, newValue);
+    auto newVal = held->meta.applyConstraints(held->meta, newValue);
+    if (held->value != newVal) {
+        held->value = newVal;
+        held->changed = true;
+    }
 }
 
 template<typename T>

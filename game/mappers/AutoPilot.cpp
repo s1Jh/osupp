@@ -57,7 +57,7 @@ void AutoPilot::update()
 	held = ctx.game.getCurrentTime() >= thisPtr->getStartTime();
 
 	auto direction = target - position;
-	auto normalized = Normalize(direction);
+	auto normalized = math::Normalize(direction);
 
 	auto currentObjectStart = next->get()->getStartTime();
 	fvec2d nextObjectPosition = {0.0f, 0.0f};
@@ -70,23 +70,23 @@ void AutoPilot::update()
 	}
 
 	auto time = currentObjectStart - previousObjectEnd;
-	auto distance = Distance(nextObjectPosition, target);
+	auto distance = math::Distance(nextObjectPosition, target);
 
 	float velocity;
 	if (held)
 		velocity = 100.f;
 	else {
-		velocity = Clamp(float(distance / time), minVelocity.get(), maxVelocity.get());
+		velocity = math::Clamp(float(distance / time), minVelocity.get(), maxVelocity.get());
 	}
 
 	auto move = normalized * velocity /** ctx.timing.getDelta()*/;
 
-	move.x = Clamp(move.x, direction.x, -direction.x);
-	move.y = Clamp(move.y, direction.y, -direction.y);
+	move.x = math::Clamp(move.x, direction.x, -direction.x);
+	move.y = math::Clamp(move.y, direction.y, -direction.y);
 
 	position += move;
 
-	if (Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius) {
+	if (math::Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius) {
 		if (held) {
 			log::debug("Lagged behind!");
 			position = target;

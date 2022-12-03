@@ -304,12 +304,12 @@ float BaseHitObject::getAlpha() const
 	if (isFadingIn()) {
 		auto x = float(ctx.game.getCurrentTime() - this->getStartTime());
 		auto a = x > 0 ? ctx.game.getHitWindow() : ctx.game.getApproachTime();
-		return Lerp(0.0f, 1.0f, QuadRR(x, a));
+		return math::Lerp(0.0f, 1.0f, math::QuadRR(x, a));
 	}
 	else if (isFadingOut()) {
 		auto x = float(ctx.game.getCurrentTime() - this->getTimeFinished());
 		auto a = ctx.game.getFadeTime();
-		return Lerp(0.0f, 1.0f, LinearUD(x, a));
+		return math::Lerp(0.0f, 1.0f, math::LinearUD(x, a));
 	}
 	else
 		return 1.0f;

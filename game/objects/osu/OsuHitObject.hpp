@@ -73,7 +73,7 @@ protected:
 			float y = x * -slope + offset;
 
 			float acSize = this->ctx.game.getCircleSize() * y;
-			acSize = Max(acSize, 0.0);
+			acSize = math::Max(acSize, 0.0);
 
 			this->ctx.gfx.draw(approachCircle, ObjectDrawInfo{
 				{{acSize, acSize}, this->SOF.position},
@@ -95,11 +95,11 @@ protected:
 			float fadingProgress = 1.0f - this->getAlpha();
 
 			float floatAmount = 0.1f;
-			float scale = Lerp(1.0f, 0.75f, SmoothStep(fadingProgress));
+			float scale = math::Lerp(1.0f, 0.75f, math::SmoothStep(fadingProgress));
 
 			return
-				MakeTranslationMatrix<float>({0.0f, fadingProgress * floatAmount}) *
-				MakeScaleMatrix<float>({scale, scale}, this->SOF.position);
+                math::MakeTranslationMatrix<float>({0.0f, fadingProgress * floatAmount}) *
+                math::MakeScaleMatrix<float>({scale, scale}, this->SOF.position);
 		}
 		return MAT3_NO_TRANSFORM<float>;
 	}

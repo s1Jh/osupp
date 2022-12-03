@@ -31,6 +31,9 @@
 
 NS_BEGIN
 
+namespace math
+{
+
 template<typename IteratorT, typename LengthT>
 requires IsCurveIterator<IteratorT> and std::floating_point<LengthT>
 Curve<IteratorT, LengthT>::Curve(const IteratorT _begin, const IteratorT _end)
@@ -81,18 +84,12 @@ Curve<IteratorT, LengthT>::get(CurveType type, TType t)
 const
 {
     switch (type) {
-        case CurveType::BEZIER:
-            return this->get<CurveType::BEZIER>(t);
-        case CurveType::STRAIGHT:
-            return this->get<CurveType::STRAIGHT>(t);
-        case CurveType::CATMULL:
-            return this->get<CurveType::CATMULL>(t);
-        case CurveType::CIRCLE:
-            return this->get<CurveType::CIRCLE>(t);
-        case CurveType::SEMI_CIRCLE:
-            return this->get<CurveType::SEMI_CIRCLE>(t);
-        default:
-            return {0, 0};
+        case CurveType::BEZIER:return this->get<CurveType::BEZIER>(t);
+        case CurveType::STRAIGHT:return this->get<CurveType::STRAIGHT>(t);
+        case CurveType::CATMULL:return this->get<CurveType::CATMULL>(t);
+        case CurveType::CIRCLE:return this->get<CurveType::CIRCLE>(t);
+        case CurveType::SEMI_CIRCLE:return this->get<CurveType::SEMI_CIRCLE>(t);
+        default:return {0, 0};
     }
 }
 
@@ -166,48 +163,24 @@ requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
 vec2d<TType> CurveCalculationFunctor<CurveType::BEZIER>::calculate(
     const Curve<IteratorT, LengthT> &curve, TType t)
 {
-	auto copy = std::vector<typename IteratorT::value_type>{curve.getBegin(), curve.getEnd()};
+    auto copy = std::vector<typename IteratorT::value_type>{curve.getBegin(), curve.getEnd()};
 
-	auto nt = 1.0 - t;
+    auto nt = 1.0 - t;
 
-	while(copy.size() > 1) {
-		for(int i = 0, e = copy.size() - 1; i < e; i++) {
-			copy[i].position = copy[i].position * nt + copy[i+1].position * t;
-		}
-		copy.erase(std::prev(copy.end()));
-	}
-	return copy[0].position;
+    while (copy.size() > 1) {
+        for (int i = 0, e = copy.size() - 1; i < e; i++) {
+            copy[i].position = copy[i].position * nt + copy[i + 1].position * t;
+        }
+        copy.erase(std::prev(copy.end()));
+    }
+    return copy[0].position;
 }
-
-//template<typename IteratorT, typename TType>
-//requires IsCurveIterator<IteratorT> and std::floating_point<TType> vec2d<TType>
-//CurveCalculationFunctor<CurveType::BEZIER>::bezierCalculate(IteratorT begin,
-//                                                            IteratorT end,
-//                                                            TType t)
-//{
-//    std::list<CurveNode> reduced;
-//
-//    auto size = std::distance(begin, end);
-//    if (size <= 2) {
-//        const auto &A = begin->getPosition();
-//        const auto &B = std::prev(end)->getPosition();
-//        return BiLerp(A, B, (float) t);
-//    }
-//
-//    for (auto it = begin; it != std::prev(end); it++) {
-//        const auto &firstPos = it->position;
-//        const auto &nextPos = std::next(it)->position;
-//        auto position = BiLerp(firstPos, nextPos, t);
-//        reduced.push_back({position});
-//    }
-//    return bezierCalculate(reduced.begin(), reduced.end(), t);
-//}
 
 template<typename TType, typename IteratorT, typename LengthT>
 requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
     std::floating_point<LengthT>
 vec2d<TType> CurveCalculationFunctor<CurveType::CATMULL>::calculate(
-    const Curve<IteratorT, LengthT> &curve, TType t)
+    const Curve<IteratorT, LengthT> &, TType)
 {
     return {0, 0};
 }
@@ -216,7 +189,7 @@ template<typename TType, typename IteratorT, typename LengthT>
 requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
     std::floating_point<LengthT>
 vec2d<TType> CurveCalculationFunctor<CurveType::CIRCLE>::calculate(
-    const Curve<IteratorT, LengthT> &curve, TType t)
+    const Curve<IteratorT, LengthT> &, TType)
 {
     return {0, 0};
 }
@@ -225,9 +198,11 @@ template<typename TType, typename IteratorT, typename LengthT>
 requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
     std::floating_point<LengthT>
 vec2d<TType> CurveCalculationFunctor<CurveType::SEMI_CIRCLE>::calculate(
-    const Curve<IteratorT, LengthT> &curve, TType t)
+    const Curve<IteratorT, LengthT> &, TType)
 {
     return {0, 0};
+}
+
 }
 
 NS_END

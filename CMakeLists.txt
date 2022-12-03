@@ -11,7 +11,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
 set(GAME_DIRECTORY ${ROOT_DIRECTORY}/game)
-set(SUI_DIRECTORY ${SYSTEM_DIRECTORY}/SUI)
 set(GFX_DIRECTORY ${SYSTEM_DIRECTORY}/gfx)
 set(INPUT_DIRECTORY ${SYSTEM_DIRECTORY}/input)
 set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
@@ -20,6 +19,7 @@ set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
 set(AUDIO_DIRECTORY ${SYSTEM_DIRECTORY}/audio)
 set(CORE_DIRECTORY ${SYSTEM_DIRECTORY}/core)
 set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
+set(MATH_DIRECTORY ${SYSTEM_DIRECTORY}/math)
 set(IMGUI_DIRECTORY ${ROOT_DIRECTORY}/imgui)
 set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
@@ -32,13 +32,13 @@ set(MAPPERS_DIRECTORY ${GAME_DIRECTORY}/mappers)
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
         ${SYSTEM_DIRECTORY}
-        ${SUI_DIRECTORY}
         ${GFX_DIRECTORY}
         ${INPUT_DIRECTORY}
         ${ANIMATORS_DIRECTORY}
         ${TYPES_DIRECTORY}
         ${UTIL_DIRECTORY}
         ${AUDIO_DIRECTORY}
+		${MATH_DIRECTORY}
         ${CORE_DIRECTORY}
         ${UTIL_DIRECTORY}
         ${IMGUI_DIRECTORY}
@@ -53,17 +53,13 @@ set(DIRECTORIES
         )
 
 set(SOURCES
-        ${SYSTEM_DIRECTORY}/df2.cpp
-        ${SYSTEM_DIRECTORY}/Resources.cpp
-        ${SYSTEM_DIRECTORY}/Locale.cpp
-        ${SYSTEM_DIRECTORY}/Main.cpp
-        ${SYSTEM_DIRECTORY}/Settings.cpp
-        ${SYSTEM_DIRECTORY}/Setting.cpp
-        ${SYSTEM_DIRECTORY}/Timer.cpp
-        # ${SYSTEM_DIRECTORY}/SUI.cpp
-
+        ${CORE_DIRECTORY}/Setting.cpp
+        ${CORE_DIRECTORY}/Context.cpp
+		${CORE_DIRECTORY}/Main.cpp
         ${CORE_DIRECTORY}/Timing.cpp
         ${CORE_DIRECTORY}/State.cpp
+		${CORE_DIRECTORY}/Program.cpp
+		${CORE_DIRECTORY}/Error.cpp
         ${CORE_DIRECTORY}/StateHandler.cpp
 
         ${INPUT_DIRECTORY}/Keyboard.cpp
@@ -102,13 +98,15 @@ set(SOURCES
         ${IMGUI_DIRECTORY}/misc/cpp/imgui_stdlib.cpp
         ${IMGUI_DIRECTORY}/misc/freetype/imgui_freetype.cpp
 
-        #${SUI_DIRECTORY}/Button.cpp
-        #${SUI_DIRECTORY}/Image.cpp
-
-        ${UTIL_DIRECTORY}/Math.cpp
+		${UTIL_DIRECTORY}/Timer.cpp
+		${UTIL_DIRECTORY}/Files.cpp
+		${UTIL_DIRECTORY}/Settings.cpp
+		${UTIL_DIRECTORY}/Locale.cpp
+		${UTIL_DIRECTORY}/df2.cpp
         ${UTIL_DIRECTORY}/Util.cpp
-        ${UTIL_DIRECTORY}/Curve.cpp
         ${UTIL_DIRECTORY}/Log.cpp
+
+		${MATH_DIRECTORY}/Curve.cpp
 
         ${ANIMATORS_DIRECTORY}/AnimateTexture.cpp
         ${ANIMATORS_DIRECTORY}/DisableAfter.cpp
@@ -117,8 +115,6 @@ set(SOURCES
         ${LOADER_DIRECTORY}/OBJLoader.cpp
         ${LOADER_DIRECTORY}/MAPLoader.cpp
         ${LOADER_DIRECTORY}/OSULoader.cpp
-
-        # ${GAMEMODE_DIRECTORY}/Standard.cpp
 
         ${OSU_OBJECT_DIRECTORY}/Note.cpp
         ${OSU_OBJECT_DIRECTORY}/Slider.cpp
@@ -137,26 +133,11 @@ set(SOURCES
         ${GAME_DIRECTORY}/Skin.cpp
 )
 
+set(OpenGL_GL_PREFERENCE GLVND)
 
-if (NOT DEFINED PLATFORM)
-	message(FATAL_ERROR "No platform defined")
-endif()
-if (NOT DEFINED ARCHITECTURE)
-	message(FATAL_ERROR "No architecture defined")
-endif()
+if (MSVC)
 
-message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
-add_compile_definitions(${PLATFORM})
-add_compile_definitions(${ARCHITECTURE})
-
-set(ADDITIONAL_EXECUTABLE_OPTIONS)
-
-if (${PLATFORM} STREQUAL "WINDOWS")
-	if (CONFIG:Release)
-		set(ADDITIONAL_EXECUTABLE_OPTIONS WIN32)
-	endif()
 else()
-	set(OpenGL_GL_PREFERENCE GLVND)
 	find_package(glfw3 3.3 REQUIRED)
 	find_package(OpenGL REQUIRED)
 	find_package(OpenAL REQUIRED)
@@ -198,6 +179,8 @@ endif()
 
 include_directories(${DIRECTORIES})
 
+set(LIBS)
+
 function(ConfigureLibrary LIBRARY_NAME)
 	
 	message("Configuring ${LIBRARY_NAME}")
@@ -206,24 +189,13 @@ function(ConfigureLibrary LIBRARY_NAME)
 	set(LIBRARIES ${LIBRARY_NAME}_LIBS)
 	
 	if (DEFINED ${HEADERS})
-                separate_arguments(${HEADERS} NATIVE_COMMAND "${${HEADERS}}")
-                foreach(HEADER ${${HEADERS}})
-		        include_directories(${HEADER})
-                        message("Including directory ${HEADER}")
-                endforeach()
+		include_directories(${${HEADERS}})
 	else()
 		message(FATAL_ERROR "${LIBRARY_NAME} headers not defined")
 	endif()
 	
 	if (DEFINED ${LIBRARIES})
-                separate_arguments(${LIBRARIES} NATIVE_COMMAND "${${LIBRARIES}}")
-                foreach(LIB ${${LIBRARIES}})
-                        cmake_path(GET LIB PARENT_PATH LIB_PATH)
-                        cmake_path(GET LIB FILENAME LIB_NAME)
-                        link_directories(${LIB_PATH})
-                        message("Adding ${LIB_NAME} from ${LIB_PATH}")
-                        link_libraries(${LIB_NAME})
-                endforeach()
+		set(LIBS "${LIBS};${${LIBRARIES}}" PARENT_SCOPE)
 	else()
 		message(FATAL_ERROR "${LIBRARY_NAME} libraries not defined")
 	endif()
@@ -236,11 +208,25 @@ ConfigureLibrary(OGL)
 ConfigureLibrary(FFMPEG)
 ConfigureLibrary(FT2)
 
-add_executable(${TARGET_NAME} ${ADDITIONAL_EXECUTABLE_OPTIONS} ${SOURCES})
+string(STRIP "${LIBS}" LIBS)
+
+if (NOT DEFINED PLATFORM)
+	message(FATAL_ERROR "No platform defined")
+endif()
+if (NOT DEFINED ARCHITECTURE)
+	message(FATAL_ERROR "No architecture defined")
+endif()
+
+message("Platform: ${PLATFORM}, architecture: ${ARCHITECTURE}")
+message("Linking against: ${LIBS}")
+add_compile_definitions(${PLATFORM})
+add_compile_definitions(${ARCHITECTURE})
+
+add_executable(${TARGET_NAME} ${SOURCES})
 
 # Set the proper warning levels
 if (MSVC)
-    target_compile_options(${TARGET_NAME} PRIVATE /W0 /Zc:preprocessor)
+    target_compile_options(${TARGET_NAME} PRIVATE /W4 /Zc:preprocessor)
 else ()
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()

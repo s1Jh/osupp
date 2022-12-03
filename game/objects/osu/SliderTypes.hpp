@@ -22,15 +22,17 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "Curve.hpp"
 #include "Line.hpp"
 #include "Vec2.hpp"
-#include "define.hpp"
+
 #include <list>
 
 NS_BEGIN
 
-struct SliderNode: public BaseCurveNode
+struct SliderNode: public math::BaseCurveNode
 {
     inline SliderNode(fvec2d _position, bool _bonus)
         : position(_position), bonus(_bonus)
@@ -43,7 +45,7 @@ struct SliderNode: public BaseCurveNode
     bool bonus = false;
 };
 
-struct ActiveSliderNode: public BaseCurveNode
+struct ActiveSliderNode: public math::BaseCurveNode
 {
     inline explicit ActiveSliderNode(fvec2d _position)
         : position(_position)

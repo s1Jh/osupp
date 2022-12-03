@@ -49,12 +49,12 @@ void ObjectSprite::setTexture(const Resource<Texture> &textureIn)
         frameTimer = 0;
         frameCounter = 0;
 
-        auto longerSide = (float) Max(texture->getHeight(), texture->getWidth());
-        auto shorterSide = (float) Min(texture->getHeight(), texture->getWidth());
+        auto longerSide = (float) math::Max(texture->getHeight(), texture->getWidth());
+        auto shorterSide = (float) math::Min(texture->getHeight(), texture->getWidth());
         layout = texture->getWidth() >= texture->getHeight()
                  ? AnimationLayout::HORIZONTAL
                  : AnimationLayout::VERTICAL;
-        frameCount = Max(int(longerSide / shorterSide), 1);
+        frameCount = math::Max(int(longerSide / shorterSide), 1);
 
         // advance the animation by one frame upon construction
         // to ensure a proper clip is set up before the texture is used

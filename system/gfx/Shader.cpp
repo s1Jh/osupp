@@ -214,7 +214,7 @@ Resource<Shader> Create()
 {
 	Resource<Shader> r;
 
-	if (!r.held->fromString(
+	if (!r->fromString(
 		std::string("#version ") + GL_VERSION_STR + '\n' + GL_DEFAULT_VERTEX_SHADER,
 		std::string("#version ") + GL_VERSION_STR + '\n' + GL_DEFAULT_FRAGMENT_SHADER))
 	{

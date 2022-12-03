@@ -54,7 +54,7 @@ AnimateTexture::AnimateTexture(Sprite &, unsigned int frameRate,
                                unsigned int frameCount, frect firstFrame,
                                AnimationLayout layout)
     : layout(layout), start(firstFrame),
-      frameTime(Max(1.0f / float(frameRate), 0.0f)), frameTimer(0.0f), frameCount(Max(frameCount, 0)),
+      frameTime(math::Max(1.0f / float(frameRate), 0.0f)), frameTimer(0.0f), frameCount(math::Max(frameCount, 0)),
       frameCounter(0)
 {}
 
@@ -62,21 +62,21 @@ AnimateTexture::AnimateTexture(Sprite &, float frameTime,
                                unsigned int frameCount, frect firstFrame,
                                AnimationLayout layout)
     : layout(layout), start(firstFrame),
-      frameTime(Max(frameTime, 0.0f)), frameTimer(0.0f), frameCount(Max(frameCount, 0)),
+      frameTime(math::Max(frameTime, 0.0f)), frameTimer(0.0f), frameCount(math::Max(frameCount, 0)),
       frameCounter(0)
 {}
 
 AnimateTexture::AnimateTexture(Sprite &sprite, unsigned int frameRate,
                                AnimationLayout layout)
     : layout(layout), start(UNIT_RECT<float>),
-      frameTime(Max(1.0f / float(frameRate), 0.0f)), frameTimer(0.0f), frameCount(0), frameCounter(0)
+      frameTime(math::Max(1.0f / float(frameRate), 0.0f)), frameTimer(0.0f), frameCount(0), frameCounter(0)
 {
     calculateRectSize(sprite.getTexture()->getSize());
 }
 
 AnimateTexture::AnimateTexture(Sprite &sprite, float frameTime,
                                AnimationLayout layout)
-    : layout(layout), start(UNIT_RECT<float>), frameTime(Max(frameTime, 0.0f)),
+    : layout(layout), start(UNIT_RECT<float>), frameTime(math::Max(frameTime, 0.0f)),
       frameTimer(0.0f), frameCount(0), frameCounter(0)
 {
     calculateRectSize(sprite.getTexture()->getSize());
@@ -86,13 +86,13 @@ void AnimateTexture::calculateRectSize(const fvec2d &size)
 {
     if (layout == AnimationLayout::HORIZONTAL) {
         frameCount =
-            int(size.x / Max(size.y, std::numeric_limits<float>::epsilon()));
+            int(size.x / math::Max(size.y, std::numeric_limits<float>::epsilon()));
     }
     else {
         frameCount =
-            int(size.y / Max(size.x, std::numeric_limits<float>::epsilon()));
+            int(size.y / math::Max(size.x, std::numeric_limits<float>::epsilon()));
     }
-    frameCount = Max(frameCount, 1);
+    frameCount = math::Max(frameCount, 1);
 
     auto slice = 1.0f / float(frameCount);
     start = {{

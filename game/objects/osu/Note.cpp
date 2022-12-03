@@ -47,8 +47,8 @@ HitResult Note::onFinish()
     // negative if hit before the start time
     double hitDelta = getTimeStarted() - getStartTime();
     // should be in the interval < -hitWindow; +hitWindow >
-    int rank = 3 - Abs(int(3 * hitDelta / ctx.game.getHitWindow()));
-    rank = Clamp(rank, 1, 3);
+    int rank = 3 - math::Abs(int(3 * hitDelta / ctx.game.getHitWindow()));
+    rank = math::Clamp(rank, 1, 3);
     return (HitResult) rank;
 }
 

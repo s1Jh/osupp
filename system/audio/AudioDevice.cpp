@@ -81,7 +81,7 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 		log::error("Failed to make OpenAL context current");
 	}
 
-	sfxChannels.resize(Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
+	sfxChannels.resize(math::Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
 	std::for_each(sfxChannels.begin(), sfxChannels.end(), [](Channel& channel) { channel.setup(); });
 	musicChannel.setup();
 
@@ -95,7 +95,7 @@ AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannels
 
 AudioDevice::AudioDevice(unsigned int sfxChannelsIn)
 {
-	sfxChannels.resize(Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
+	sfxChannels.resize(math::Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
 }
 
 void AudioDevice::process()

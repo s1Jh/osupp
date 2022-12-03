@@ -1,0 +1,79 @@
+//=*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*=
+// Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+//                                      =*=
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//                                      =*=
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//                                      =*=
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.                            =*=
+//=*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*=
+#pragma once
+
+#include "define.hpp"
+
+NS_BEGIN
+
+namespace math
+{
+
+template<typename XT, typename MaxT, typename MinT>
+bool InRangeII(XT x, MaxT a, MinT b)
+{
+	if (b > a) {
+		return (x >= a) && (x <= b);
+	} else {
+		return (x >= b) && (x <= a);
+	}
+}
+
+template<typename XT, typename MaxT, typename MinT>
+bool InRangeEE(XT x, MaxT a, MinT b)
+{
+	if (b > a) {
+		return (x > a) && (x < b);
+	} else {
+		return (x > b) && (x < a);
+	}
+}
+
+template<typename XT, typename MaxT, typename MinT>
+bool InRangeIE(XT x, MaxT a, MinT b)
+{
+	if (b > a) {
+		return (x >= a) && (x < b);
+	} else {
+		return (x >= b) && (x < a);
+	}
+}
+
+template<typename XT, typename MaxT, typename MinT>
+bool InRangeEI(XT x, MaxT a, MinT b)
+{
+	if (b > a) {
+		return (x > a) && (x <= b);
+	} else {
+		return (x > b) && (x <= a);
+	}
+}
+
+template<typename XT, typename MaxT, typename MinT>
+bool InRange(XT x, MaxT a, MinT b)
+{
+	return InRangeII(x, a, b);
+}
+
+}
+
+NS_END

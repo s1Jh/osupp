@@ -29,7 +29,6 @@
 #include "Shader.hpp"
 #include "Texture.hpp"
 #include "df2.hpp"
-#include "ResourcePile.hpp"
 #include "SoundSample.hpp"
 #include "HitObjectArguments.hpp"
 

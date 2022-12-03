@@ -190,9 +190,9 @@ constexpr const char *LINE_SHADER_FRAG =
 
 Transform2D::operator Mat3f() const
 {
-    return MakeTranslationMatrix(translate) *
-        MakeRotationMatrix<float>(rotate, rotationCenter) *
-        MakeScaleMatrix(scale) * MakeShearMatrix(shear);
+    return math::MakeTranslationMatrix(translate) *
+        math::MakeRotationMatrix<float>(rotate, rotationCenter) *
+        math::MakeScaleMatrix(scale) * math::MakeShearMatrix(shear);
 }
 
 void detail::DrawGeneric2DShape(const Renderer &renderer,
@@ -278,10 +278,10 @@ void detail::DrawLineSegment(const Renderer &renderer, const dline &seg,
 
 	auto offset = appearance.outlineWidth;
 
-    auto right = (float) Max(seg.A.x, seg.B.x) + offset;
-    auto left = (float) Min(seg.A.x, seg.B.x) - offset;
-    auto top = (float) Max(seg.A.y, seg.B.y) + offset;
-    auto bottom = (float) Min(seg.A.y, seg.B.y) - offset;
+    auto right = (float) math::Max(seg.A.x, seg.B.x) + offset;
+    auto left = (float) math::Min(seg.A.x, seg.B.x) - offset;
+    auto top = (float) math::Max(seg.A.y, seg.B.y) + offset;
+    auto bottom = (float) math::Min(seg.A.y, seg.B.y) - offset;
 
     frect rect = {
         {
@@ -294,8 +294,8 @@ void detail::DrawLineSegment(const Renderer &renderer, const dline &seg,
         }
     };
 
-    Mat3f shape = MakeScaleMatrix<float>(rect.size) *
-        MakeTranslationMatrix<float>(rect.position);
+    Mat3f shape = math::MakeScaleMatrix<float>(rect.size) *
+        math::MakeTranslationMatrix<float>(rect.position);
 
     lineShader.set("z", appearance.zIndex);
 
