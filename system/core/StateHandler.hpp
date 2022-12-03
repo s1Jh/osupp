@@ -38,19 +38,17 @@ class StateHandler
 public:
     StateHandler();
 
-    int update();
+    int update(double delta);
     int draw();
 
     void process();
     void setState(GameState state);
 
-    int operator() ();
-
     [[nodiscard]] bool isRunning() const;
     void exit();
 
 private:
-    Timing time;
+
     static std::string Stringify(const GameState &state);
     GameState currentState;
     GameState nextState;

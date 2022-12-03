@@ -36,16 +36,16 @@ NS_BEGIN
 
 StateHandler::StateHandler()
     : currentState(GameState::NONE),
-      nextState(GameState::INITIAL_STATE),
+      nextState(GameState::NONE),
       currentStatePtr(nullptr)
 {}
 
-int StateHandler::update()
+int StateHandler::update(double delta)
 {
     if (currentStatePtr == nullptr)
         return -1;
 
-    int ret = currentStatePtr->update(time.getDelta());
+    int ret = currentStatePtr->update(delta);
 
     if (ret >= (int) GameState::NONE) {
         nextState = (GameState) ret;
@@ -97,10 +97,8 @@ void StateHandler::process()
                 break;
         }
 
-        if (currentStatePtr != nullptr) {
-            std::swap(contextPtr, currentStatePtr->ctx);
+        if (currentStatePtr != nullptr)
             currentStatePtr->init(oldState);
-        }
     }
     nextState = GameState::NONE;
 }
@@ -122,27 +120,6 @@ std::string StateHandler::Stringify(const GameState &state)
 #undef USER_STATE
 	default:	return "Null";
     }
-}
-
-int StateHandler::operator()()
-{
-    process();
-
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    update();
-
-    draw();
-
-    ImGui::Render();
-    auto data = ImGui::GetDrawData();
-    if (data)
-        ImGui_ImplOpenGL3_RenderDrawData(data);
-
-    time.await();
-    return isRunning();
 }
 
 NS_END

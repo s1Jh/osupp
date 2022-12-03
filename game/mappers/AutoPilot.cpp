@@ -24,7 +24,7 @@
 
 NS_BEGIN
 
-bool AutoPilot::isKeyPressed(InputMapper::BlockMode) const
+bool AutoPilot::isKeyPressed(InputMapper::BlockMode mode) const
 {
 	return held;
 }
@@ -34,7 +34,7 @@ bool AutoPilot::isKeyReleased() const
 	return !held;
 }
 
-bool AutoPilot::isKeyPressing(InputMapper::BlockMode) const
+bool AutoPilot::isKeyPressing(InputMapper::BlockMode mode) const
 {
 	return held;
 }
