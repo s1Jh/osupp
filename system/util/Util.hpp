@@ -54,7 +54,7 @@ unsigned int CheckALErrors(const std::string &file, int line,
 
 unsigned int DumpGlErrors();
 
-std::vector<std::string> GetCharacterSeparatedValues(const std::string &in, char sep = ' ');
+std::vector<std::string> GetCharacterSeparatedValues(const std::string &in, char sep);
 
 template<typename T>
 static T GetParam(const std::vector<std::string> &params, unsigned int param, T backup) noexcept

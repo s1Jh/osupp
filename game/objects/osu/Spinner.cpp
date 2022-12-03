@@ -43,8 +43,7 @@ void Spinner::onLogicUpdate(double delta)
         lastVector = cursor;
     }
 
-//	float x = float(ctx.timing.getTime()) * 30.f;
-    float x = 0;
+	float x = float(ctx.timing.getTime()) * 30.f;
 	const float outset = 0.25f;
 	SOF.position = {std::cos(x) * outset, std::sin(x) * outset};
 }

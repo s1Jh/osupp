@@ -20,7 +20,9 @@ set(AUDIO_DIRECTORY ${SYSTEM_DIRECTORY}/audio)
 set(CORE_DIRECTORY ${SYSTEM_DIRECTORY}/core)
 set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
 set(MATH_DIRECTORY ${SYSTEM_DIRECTORY}/math)
-set(IMGUI_DIRECTORY ${ROOT_DIRECTORY}/imgui)
+set(EXTERNALS_DIRECTORY ${ROOT_DIRECTORY}/external)
+set(IMGUI_DIRECTORY ${EXTERNALS_DIRECTORY}/imgui)
+set(STB_DIRECTORY ${EXTERNALS_DIRECTORY}/stb)
 set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
 set(OBJECT_DIRECTORY ${GAME_DIRECTORY}/objects)
@@ -41,7 +43,9 @@ set(DIRECTORIES
 		${MATH_DIRECTORY}
         ${CORE_DIRECTORY}
         ${UTIL_DIRECTORY}
-        ${IMGUI_DIRECTORY}
+        ${EXTERNALS_DIRECTORY}
+		${IMGUI_DIRECTORY}
+		${STB_DIRECTORY}
         ${LOADER_DIRECTORY}
         ${GAMEMODE_DIRECTORY}
         ${OBJECT_DIRECTORY}
@@ -91,8 +95,8 @@ set(SOURCES
         ${IMGUI_DIRECTORY}/imgui.cpp
         ${IMGUI_DIRECTORY}/imgui_draw.cpp
         ${IMGUI_DIRECTORY}/imgui_demo.cpp
-        ${IMGUI_DIRECTORY}/imgui_impl_glfw.cpp
-        ${IMGUI_DIRECTORY}/imgui_impl_opengl3.cpp
+        ${IMGUI_DIRECTORY}/backends/imgui_impl_glfw.cpp
+        ${IMGUI_DIRECTORY}/backends/imgui_impl_opengl3.cpp
         ${IMGUI_DIRECTORY}/imgui_tables.cpp
         ${IMGUI_DIRECTORY}/imgui_widgets.cpp
         ${IMGUI_DIRECTORY}/misc/cpp/imgui_stdlib.cpp

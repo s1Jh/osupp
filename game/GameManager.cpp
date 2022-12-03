@@ -255,7 +255,7 @@ void GameManager::reset()
 //    log::debug("Resetting the game state");
 
     if (info)
-        currentTime = -info->startOffset;
+        currentTime = -info->getStartOffset();
     else
         currentTime = 0.0;
 
@@ -265,15 +265,15 @@ void GameManager::reset()
 
     last = activeObjects.begin();
 
-//	auto& skin = GetContext().activeSkin;
+	auto& skin = GetContext().activeSkin;
 
-//	samples.hit = skin->getSound(HIT_SOUND);
-//	samples.miss = skin->getSound(MISS_SOUND);
-//	samples.sliderBounce = skin->getSound(SLIDER_BOUNCE_SOUND);
-//	samples.sliderSlide = skin->getSound(SLIDER_SLIDE_SOUND);
-//	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
-//	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
-//	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
+	samples.hit = skin->getSound(HIT_SOUND);
+	samples.miss = skin->getSound(MISS_SOUND);
+	samples.sliderBounce = skin->getSound(SLIDER_BOUNCE_SOUND);
+	samples.sliderSlide = skin->getSound(SLIDER_SLIDE_SOUND);
+	samples.sliderBreak = skin->getSound(SLIDER_BREAK_SOUND);
+	samples.spinnerSwoosh = skin->getSound(SPINNER_SWOOSH_SOUND);
+	samples.spinnerDing = skin->getSound(SPINNER_DING_SOUND);
 }
 
 const frect &GameManager::getPlayField() const
@@ -293,38 +293,38 @@ Resource<MapInfo> GameManager::getMap() const
 const Mat3f &GameManager::getTransform() const
 { return transform; }
 
-float GameManager::getCircleSize() const
+float GameManager::getCircleSize()
 {
 	if (info)
-    	return info->circleSize * csMultiplier;
+    	return info->getCircleSize() * csMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getApproachTime() const
+float GameManager::getApproachTime()
 {
 	if (info)
-    	return info->approachTime * arMultiplier;
+    	return info->getApproachTime() * arMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getFadeTime() const
+float GameManager::getFadeTime()
 {
 	if (info)
-    	return info->fadeTime * ftMultiplier;
+    	return info->getFadeTime() * ftMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getHitWindow() const
+float GameManager::getHitWindow()
 {
 	if (info)
-    	return info->hitWindow * hwMultiplier;
+    	return info->getHitWindow() * hwMultiplier;
 	return 0.0f;
 }
 
-float GameManager::getHpDrain() const
+float GameManager::getHpDrain()
 {
 	if (info)
-		return info->HPDrain * hpMultiplier;
+		return info->getHpDrain() * hpMultiplier;
 	return 0.0f;
 }
 
@@ -400,10 +400,10 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 	}
 }
 
-float GameManager::getStartOffset() const
+float GameManager::getStartOffset()
 {
 	if (info)
-		return info->startOffset;
+		return info->getStartOffset();
 	return 0.0f;
 }
 

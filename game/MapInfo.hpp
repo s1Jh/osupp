@@ -42,7 +42,81 @@ public:
 
     [[nodiscard]] const StorageT &getObjectTemplates() const;
 
+    [[nodiscard]] const std::string &getName() const;
+
+    [[nodiscard]] const std::string &getDescription() const;
+
+    [[nodiscard]] const std::string &getArtist() const;
+
+    [[nodiscard]] const std::string &getDifficulty() const;
+
+    [[nodiscard]] const std::string &getSongPath() const;
+
+    [[nodiscard]] float getCircleSize() const;
+
+    [[nodiscard]] float getStartOffset() const;
+
+    [[nodiscard]] double getMapDuration() const;
+
+    [[nodiscard]] float getHpDrain() const;
+
+    [[nodiscard]] float getApproachTime() const;
+
+    [[nodiscard]] float getHitWindow() const;
+
+    [[nodiscard]] float getOverallDifficulty() const;
+
+    [[nodiscard]] float getFadeTime() const;
+
+    [[nodiscard]] const std::string &getRomanisedArtist() const;
+
+    [[nodiscard]] const std::string &getRomanisedName() const;
+
+    [[nodiscard]] const std::string &getSource() const;
+
+    [[nodiscard]] const std::vector<std::string> &getTags() const;
+
+    [[nodiscard]] const std::string &getAuthor() const;
+
 	[[nodiscard]] const std::filesystem::path &getDirectory() const;
+
+    void setName(const std::string &name);
+
+    void setDescription(const std::string &description);
+
+    void setArtist(const std::string &artist);
+
+    void setDifficulty(const std::string &difficulty);
+
+    void setSongPath(const std::string &songPath);
+
+    void setCircleSize(float circleSize);
+
+    void setStartOffset(float startOffset);
+
+    void setMapDuration(double mapDuration);
+
+    void setHpDrain(float hpDrain);
+
+    void setRomanisedName(const std::string &romanisedName);
+
+    void setRomanisedArtist(const std::string &romanisedArtist);
+
+    void setSource(const std::string &source);
+
+    void setTags(const std::vector<std::string> &tags);
+
+    void setApproachTime(float approachTime);
+
+    void setHitWindow(float hitWindow);
+
+    void setFadeTime(float fadeTime);
+
+    void setOverallDifficulty(float overallDifficulty);
+
+    void setAuthor(const std::string &author);
+
+    void clear();
 
     void addNote(const fvec2d &position, bool comboEnd, double time);
 
@@ -52,6 +126,7 @@ public:
     void addSpinner(float spinRequired, float spinResistance, double time,
                     double endTime, const fvec2d &position = {0, 0});
 
+private:
     void insertElement(std::shared_ptr<BaseObjectTemplate>);
 
     // Song's name.
@@ -92,8 +167,6 @@ public:
     float fadeTime = 0.25f;
     // The star difficulty of the map, used for display purposes only.
     float overallDifficulty = 0.0f;
-
-private:
 	std::filesystem::path directory;
     StorageT objectTemplates;
 };

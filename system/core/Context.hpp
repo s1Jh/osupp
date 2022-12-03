@@ -41,7 +41,7 @@ NS_BEGIN
 
 struct Context
 {
-    AudioDevice audio;
+	AudioDevice audio;
     StateHandler state;
     Renderer gfx;
     Keyboard keyboard;

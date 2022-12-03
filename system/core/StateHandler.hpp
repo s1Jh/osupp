@@ -23,9 +23,6 @@
 #pragma once
 
 #include "define.hpp"
-
-#include "GameState.hpp"
-#include "Timing.hpp"
 #include "State.hpp"
 
 #include <memory>

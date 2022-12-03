@@ -27,8 +27,6 @@
 
 #include "imgui/imgui.h"
 #include "imgui/misc/cpp/imgui_stdlib.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
 
 NS_BEGIN
 

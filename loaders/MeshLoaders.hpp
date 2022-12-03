@@ -19,43 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
+
 #pragma once
 
 #include "define.hpp"
 
-#include "InputMapper.hpp"
-#include "Context.hpp"
+#include "Mesh.hpp"
+
+#include <filesystem>
 
 NS_BEGIN
 
-class AutoPilot : public InputMapper
-{
-public:
-	AutoPilot();
-
-	[[nodiscard]] bool isKeyPressed(BlockMode mode) const override;
-	[[nodiscard]] bool isKeyReleased() const override;
-	[[nodiscard]] bool isKeyPressing(BlockMode mode) const override;
-	[[nodiscard]] fvec2d getCursor() const override;
-	void update() override;
-
-private:
-	fvec2d target;
-	fvec2d position;
-	bool held{false};
-	Setting<float> minVelocity;
-	Setting<float> maxVelocity;
-
-//	std::weak_ptr<BaseHitObject> previous;
-//	float velocity{20.0f};
-//	bool lastHeld;
-//	fvec2d velocity;
-//	fvec2d acceleration;
-//	float accMult{60.0f};
-//	float drag{0.7f};
-//	double lastTime;
-
-	Context &ctx;
-};
+bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh);
 
 NS_END

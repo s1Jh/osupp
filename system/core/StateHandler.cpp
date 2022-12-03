@@ -27,11 +27,6 @@
 #define USER_STATE_INCLUDES
 #include "config.hpp"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "State.hpp"
-
 NS_BEGIN
 
 StateHandler::StateHandler()
@@ -71,14 +66,8 @@ void StateHandler::process()
     if (nextState != GameState::NONE && nextState != currentState) {
         log::info("Setting state to ", Stringify(nextState));
 
-        std::unique_ptr<Context> contextPtr;
-
-        if (currentStatePtr != nullptr) {
+        if (currentStatePtr != nullptr)
             currentStatePtr->exit();
-            std::swap(contextPtr, currentStatePtr->ctx);
-        } else {
-            contextPtr = std::make_unique<Context>();
-        }
 
         auto oldState = currentState;
         currentState = nextState;

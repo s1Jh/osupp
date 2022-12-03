@@ -23,8 +23,6 @@
 #pragma once
 
 #include "define.hpp"
-#include "GameState.hpp"
-#include "Context.hpp"
 
 NS_BEGIN
 
@@ -55,7 +53,6 @@ public:
 
     virtual ~BaseState() = default;
 };
-
 }
 
 template<GameState Name>

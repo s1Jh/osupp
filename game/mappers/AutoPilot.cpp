@@ -79,7 +79,7 @@ void AutoPilot::update()
 		velocity = math::Clamp(float(distance / time), minVelocity.get(), maxVelocity.get());
 	}
 
-	auto move = normalized * velocity /** ctx.timing.getDelta()*/;
+	auto move = normalized * velocity * ctx.timing.getDelta();
 
 	move.x = math::Clamp(move.x, direction.x, -direction.x);
 	move.y = math::Clamp(move.y, direction.y, -direction.y);
@@ -94,7 +94,8 @@ void AutoPilot::update()
 	}
 }
 
-AutoPilot::AutoPilot()
+AutoPilot::AutoPilot() :
+	ctx(GetContext())
 {
 	minVelocity = ctx.settings.addSetting<float>(
 		"setting.input.autopilot.min_speed", 5.0f,
