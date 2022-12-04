@@ -58,7 +58,6 @@ Renderer::~Renderer()
 bool Renderer::setMode(int width, int height, bool fullscreenIn,
                        int refreshRateIn)
 {
-    LOG_ENTER("GFX");
     log::info("Setting mode ", width, "x", height, "@", refreshRateIn,
               "Hz fullscreen: ", fullscreenIn);
 

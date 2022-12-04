@@ -1,0 +1,85 @@
+//=*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*=
+// Copyright (c) 2022 sijh (s1Jh.199[at]gmail.com)
+//                                      =*=
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//                                      =*=
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//                                      =*=
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.                            =*=
+//=*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*==*=
+#pragma once
+
+#include "define.hpp"
+
+#include <type_traits>
+#include <memory>
+#include <atomic>
+
+NS_BEGIN
+
+namespace tasks
+{
+
+namespace detail
+{
+
+struct BaseTaskHolder;
+
+struct BaseMessageHolder
+{
+	inline virtual void receiveSelf(BaseTaskHolder *)
+	{}
+};
+
+template<typename HeldValueT, typename HolderT>
+struct MessageHolder: public BaseMessageHolder
+{
+	typedef std::remove_cvref_t<HeldValueT> HeldValueType;
+	typedef std::remove_cvref_t<HolderT> HolderType;
+	typedef typename HeldValueType::ResultType ResultType;
+
+	explicit MessageHolder(const HeldValueType &msgIn, const std::weak_ptr<HolderT> &execIn)
+		:
+		message(msgIn), executor(execIn)
+	{}
+
+	bool isComplete()
+	{
+		if (auto ptr = executor.lock()) {
+			return (ptr->isComplete() || complete);
+		} else {
+			return true;
+		}
+	}
+
+	inline void receiveSelf(BaseTaskHolder *holder) override
+	{
+		result = std::make_unique<ResultType>();
+
+		auto cast = (HolderType *)holder;
+		*result = cast->task.receive(message);
+		complete = true;
+	}
+
+	std::atomic<bool> complete{false};
+	HeldValueType message;
+	std::unique_ptr<ResultType> result;
+	std::weak_ptr<HolderT> executor;
+};
+}
+
+}
+
+NS_END

@@ -49,7 +49,6 @@ struct Context
     Timing timing;
     Settings settings;
     files::MultiDirectorySearch paths;
-//    Locale locale;
 
 #define CONTEXT_FIELD(Type, Name) Type Name;
     USER_CONTEXT_FIELDS

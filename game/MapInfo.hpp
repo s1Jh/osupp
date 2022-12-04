@@ -22,11 +22,12 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "BaseObjectTemplate.hpp"
 #include "Resource.hpp"
 #include "SliderTypes.hpp"
 #include "Vec2.hpp"
-#include "define.hpp"
 
 #include <filesystem>
 #include <list>
@@ -36,7 +37,7 @@ NS_BEGIN
 
 class MapInfo
 {
-	friend Resource<MapInfo> Load<MapInfo>(const std::filesystem::path &);
+    friend Resource<MapInfo> Load<MapInfo>(const std::filesystem::path &);
 public:
     using StorageT = std::list<std::shared_ptr<BaseObjectTemplate>>;
 
@@ -78,7 +79,7 @@ public:
 
     [[nodiscard]] const std::string &getAuthor() const;
 
-	[[nodiscard]] const std::filesystem::path &getDirectory() const;
+    [[nodiscard]] const std::filesystem::path &getDirectory() const;
 
     void setName(const std::string &name);
 
@@ -120,11 +121,15 @@ public:
 
     void addNote(const fvec2d &position, bool comboEnd, double time);
 
-    void addSlider(const SliderPathT &points, bool comboEnd, double time,
-                   double endTime, math::CurveType type, unsigned int repeats = 1);
+    void addSlider(
+        const SliderPathT &points, bool comboEnd, double time,
+        double endTime, math::CurveType type, unsigned int repeats = 1
+    );
 
-    void addSpinner(float spinRequired, float spinResistance, double time,
-                    double endTime, const fvec2d &position = {0, 0});
+    void addSpinner(
+        float spinRequired, float spinResistance, double time,
+        double endTime, const fvec2d &position = {0, 0}
+    );
 
 private:
     void insertElement(std::shared_ptr<BaseObjectTemplate>);
@@ -167,7 +172,7 @@ private:
     float fadeTime = 0.25f;
     // The star difficulty of the map, used for display purposes only.
     float overallDifficulty = 0.0f;
-	std::filesystem::path directory;
+    std::filesystem::path directory;
     StorageT objectTemplates;
 };
 

@@ -27,7 +27,9 @@
 #include "Vec2.hpp"
 #include "Vec3.hpp"
 #include "Vec4.hpp"
+#include "Constraint.hpp"
 
+#include <optional>
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -42,86 +44,114 @@ namespace Random
 
 template<typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, T>::type
-Scalar(T min = std::numeric_limits<T>::min(),
-	   T max = std::numeric_limits<T>::max());
+Scalar(
+    T min = std::numeric_limits<T>::min(),
+    T max = std::numeric_limits<T>::max(),
+    std::optional<unsigned int> seed = {false}
+);
 
 template<typename T>
-vec2d<T> Vec2(vec2d<T> min = {std::numeric_limits<T>::min(),
-							  std::numeric_limits<T>::min()},
-			  vec2d<T> max = {std::numeric_limits<T>::max(),
-							  std::numeric_limits<T>::max()});
+vec2d<T> Vec2(
+    vec2d<T> min = {std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::min()},
+    vec2d<T> max = {std::numeric_limits<T>::max(),
+        std::numeric_limits<T>::max()},
+    std::optional<unsigned int> seed = {false}
+);
 
 template<typename T>
-vec3d<T> Vec3(vec3d<T> min = {std::numeric_limits<T>::min(),
-							  std::numeric_limits<T>::min()},
-			  vec3d<T> max = {std::numeric_limits<T>::max(),
-							  std::numeric_limits<T>::max()});
+vec3d<T> Vec3(
+    vec3d<T> min = {std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::min()},
+    vec3d<T> max = {std::numeric_limits<T>::max(),
+        std::numeric_limits<T>::max()},
+    std::optional<unsigned int> seed = {false}
+);
 
 template<typename T>
-vec4d<T> Vec4(vec4d<T> min = {std::numeric_limits<T>::min(),
-							  std::numeric_limits<T>::min()},
-			  vec4d<T> max = {std::numeric_limits<T>::max(),
-							  std::numeric_limits<T>::max()});
+vec4d<T> Vec4(
+    vec4d<T> min = {std::numeric_limits<T>::min(),
+        std::numeric_limits<T>::min()},
+    vec4d<T> max = {std::numeric_limits<T>::max(),
+        std::numeric_limits<T>::max()},
+    std::optional<unsigned int> seed = {false}
+);
 
 } // namespace Random
 
 template<typename T>
 typename std::enable_if<std::is_arithmetic<T>::value, T>::type
-Random::Scalar(T min, T max)
+Random::Scalar(T min, T max, std::optional<unsigned int> seed)
 {
-	std::random_device seeder;
-	std::mt19937_64 generator(seeder());
+    std::random_device seeder;
+    std::mt19937_64 generator(seeder());
 
-	if constexpr (std::is_floating_point<T>::value) {
-		std::uniform_real_distribution<T> dis(min, max);
-		return static_cast<T>(dis(generator));
-	} else {
-		std::uniform_int_distribution<T> dis(min, max);
-		return static_cast<T>(dis(generator));
-	}
+    if (seed) {
+        generator.seed(seed.value());
+    }
+
+
+    if constexpr (std::is_floating_point<T>::value) {
+        std::uniform_real_distribution<T> dis(min, max);
+        return math::Clamp(static_cast<T>(dis(generator)), min, max);
+    } else {
+        std::uniform_int_distribution<T> dis(min, max);
+        return math::Clamp(static_cast<T>(dis(generator)), min, max);
+    }
 }
 
 template<typename T>
-vec2d<T> Random::Vec2(vec2d<T> min, vec2d<T> max)
+vec2d<T> Random::Vec2(
+    vec2d<T> min, vec2d<T> max,
+    std::optional<unsigned int> seed
+)
 {
-	return vec2d<T>{Random::Scalar<T>(min.x, max.x),
-					Random::Scalar<T>(min.y, max.y)};
+    return vec2d<T>{Random::Scalar<T>(min.x, max.x, seed),
+        Random::Scalar<T>(min.y, max.y, seed)};
 }
 
 template<typename T>
-vec3d<T> Random::Vec3(vec3d<T> min, vec3d<T> max)
+vec3d<T> Random::Vec3(
+    vec3d<T> min, vec3d<T> max,
+    std::optional<unsigned int> seed
+)
 {
-	return vec3d<T>{Random::Scalar<T>(min.x, max.x),
-					Random::Scalar<T>(min.y, max.y),
-					Random::Scalar<T>(min.z, max.z)};
+    return vec3d<T>{Random::Scalar<T>(min.x, max.x, seed),
+        Random::Scalar<T>(min.y, max.y, seed),
+        Random::Scalar<T>(min.z, max.z, seed)};
 }
 
 template<typename T>
-vec4d<T> Random::Vec4(vec4d<T> min, vec4d<T> max)
+vec4d<T> Random::Vec4(
+    vec4d<T> min, vec4d<T> max,
+    std::optional<unsigned int> seed
+)
 {
-	return vec4d<T>{
-		Random::Scalar<T>(min.x, max.x), Random::Scalar<T>(min.y, max.y),
-		Random::Scalar<T>(min.z, max.z), Random::Scalar<T>(min.w, max.w)};
+    return vec4d<T>{
+        Random::Scalar<T>(min.x, max.x, seed), Random::Scalar<T>(min.y, max.y, seed),
+        Random::Scalar<T>(min.z, max.z, seed), Random::Scalar<T>(min.w, max.w, seed)};
 }
 
 template<typename T>
 requires std::is_floating_point_v<T>
-T Perlin2D(T x, T y, unsigned int octaves, double persistence,
-		   int seed, double amplitude)
+T Perlin2D(
+    T x, T y, unsigned int octaves, double persistence,
+    int seed, double amplitude
+)
 {
-	T ret = 0;
+    T ret = 0;
 
-	int ix = (int)x;
-	int iy = (int)y;
+    int ix = (int) x;
+    int iy = (int) y;
 
-	int s = (ix + iy) * (ix + iy + 1) / 2 + iy + seed;
+    int s = (ix + iy) * (ix + iy + 1) / 2 + iy + seed;
 
-	for (unsigned int i = 0; i < octaves; i++) {
-		std::srand(s);
-		ret += amplitude * Random::Scalar<T>(0.0, 1.0);
-		amplitude *= persistence;
-	}
-	return ret;
+    for (unsigned int i = 0; i < octaves; i++) {
+        std::srand(s);
+        ret += amplitude * Random::Scalar<T>(0.0, 1.0);
+        amplitude *= persistence;
+    }
+    return ret;
 }
 
 }

@@ -22,58 +22,68 @@
 
 #include "Log.hpp"
 
+#include <thread>
+
 NS_BEGIN
+
+namespace log
+{
+
+static std::recursive_mutex LogMutex;
+#ifdef RELEASE
+static Severity MinimumSeverity = Severity::INFO;
+#else
+static Severity MinimumSeverity = Severity::DEVELOPMENT;
+#endif
+static bool Enabled = true;
 
 namespace detail
 {
 
-SectionEntry::~SectionEntry()
+bool BeginLogMessage(Severity msgSeverity)
 {
-    std::scoped_lock<std::recursive_mutex> lock(::PROJECT_NAMESPACE::log::logMutex);
+    if (msgSeverity < MinimumSeverity) {
+        return false;
+    }
 
-    ::PROJECT_NAMESPACE::log::sections.erase(
-        ::PROJECT_NAMESPACE::log::sections.end() - 1);
+    LogMutex.lock();
+    std::cout << '[' << std::this_thread::get_id() << "] ";
+    return true;
 }
 
-SectionEntry::SectionEntry(const std::string &section)
+void Init()
 {
-    std::scoped_lock<std::recursive_mutex> lock(::PROJECT_NAMESPACE::log::logMutex);
+    std::cin.tie(nullptr);
+    std::cout.sync_with_stdio(false);
+}
 
-    ::PROJECT_NAMESPACE::log::sections.push_back(section);
+void EndLogMessage()
+{
+    std::cout << '\n';
+    std::cout.flush();
+    LogMutex.unlock();
 }
 
 } // namespace detail
 
-std::recursive_mutex log::logMutex;
-
-#ifdef RELEASE
-bool log::enableDebug = false;
-#else
-
-bool log::enableDebug = true;
-
-#endif
-
-bool log::enabled = true;
-
-std::vector<std::string> log::sections;
-
-[[maybe_unused]] void log::setDebug(bool ns)
+void SetLogSeverity(Severity level)
 {
-    std::scoped_lock<std::recursive_mutex> lock(::PROJECT_NAMESPACE::log::logMutex);
-    enableDebug = ns;
+    std::scoped_lock<std::recursive_mutex> lock(LogMutex);
+    MinimumSeverity = level;
 }
 
-void log::enable()
+void Enable()
 {
-    std::scoped_lock<std::recursive_mutex> lock(::PROJECT_NAMESPACE::log::logMutex);
-    enabled = true;
+    std::scoped_lock<std::recursive_mutex> lock(LogMutex);
+    Enabled = true;
 }
 
-void log::disable()
+void Disable()
 {
-    std::scoped_lock<std::recursive_mutex> lock(::PROJECT_NAMESPACE::log::logMutex);
-    enabled = false;
+    std::scoped_lock<std::recursive_mutex> lock(LogMutex);
+    Enabled = false;
+}
+
 }
 
 NS_END

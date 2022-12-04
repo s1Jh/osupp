@@ -4,6 +4,7 @@
 #include "Timer.hpp"
 #include "Context.hpp"
 #include "Error.hpp"
+#include "Tasks.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
@@ -85,6 +86,11 @@ bool InitTimers()
 //    }
 }
 
+bool InitTasks()
+{
+    tasks::Start();
+}
+
 bool InitLocale()
 {
     auto &ctx = GetContext();
@@ -129,6 +135,8 @@ InitLayers Init(InitLayers layers)
 {
     log::custom("GREETING", "Hello, world!");
 
+    log::detail::Init();
+
     log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);
     log::info("Build: ", BUILD_TYPE, " (", BUILD_DATE, ' ', BUILD_TIME, ')');
     log::info("Target: ", PLATFORM, ", ", ARCH);
@@ -139,9 +147,9 @@ InitLayers Init(InitLayers layers)
 //    ctx.paths.addPath(currentPath); -- added automatically with default constructor
     df2::addAlias("GAMEDIR", currentPath.string());
 
-    InitLayers initialized = static_cast<InitLayers>(0);
+    auto initialized = static_cast<InitLayers>(0);
 
-    auto InitHelper = [&](InitLayers layer, std::function<bool()> f) -> bool
+    auto InitHelper = [&](InitLayers layer, const std::function<bool()>& f) -> bool
     {
         if (bool(layers & layer)) {
             if (f()) {
@@ -153,6 +161,7 @@ InitLayers Init(InitLayers layers)
     };
 
     InitHelper(InitLayers::ERROR, InitErrors);
+    InitHelper(InitLayers::TASKS, InitTasks);
     InitHelper(InitLayers::LOCALE, InitLocale);
     InitHelper(InitLayers::AUDIO, InitAudio);
 
@@ -160,8 +169,11 @@ InitLayers Init(InitLayers layers)
         // Only init imgui if video has been initated
         InitHelper(InitLayers::IMGUI, InitImGui);
     }
+
     ctx.settings.read();
     ctx.state.setState(GameState::INITIAL_STATE);
+
+    return initialized;
 }
 
 void Exit(int exitCode)
@@ -171,6 +183,8 @@ void Exit(int exitCode)
         Context &ctx = GetContext();
         ctx.settings.write();
     }
+
+    tasks::Stop();
 //    StopTimerThread();
     std::exit(exitCode);
 }

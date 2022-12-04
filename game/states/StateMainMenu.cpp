@@ -24,6 +24,8 @@
 
 #include "Log.hpp"
 
+#include "Import.hpp"
+
 #include "imgui/imgui.h"
 #include "imgui/misc/cpp/imgui_stdlib.h"
 
@@ -35,11 +37,15 @@ State<GameState::MainMenu>::State()
 
 void State<GameState::MainMenu>::showDebugControl()
 {
+    static std::vector<compat::OsuInstallation> installs;
     static bool showVersion = false;
+    static bool showImportDialog = false;
     static bool showImGuiVersion = false;
     static bool showImGuiDebugger = false;
     static bool showImGuiLogger = false;
     static bool showImGuiStack = false;
+
+    static char inputPathBuffer[1024];
 
     if (showVersion) {
         if (ImGui::Begin("ui.main.version.title"_i18n.c_str(),
@@ -52,6 +58,34 @@ void State<GameState::MainMenu>::showDebugControl()
             ImGui::Text("ui.main.version.build"_i18n.c_str(), BUILD_TYPE, BUILD_DATE, BUILD_TIME);
             ImGui::Separator();
             ImGui::Text("Copyright (c) 2022-2025 s1Jh");
+            ImGui::End();
+        }
+    }
+
+    if (showImportDialog) {
+        if (ImGui::Begin("ui.main.import.title"_i18n.c_str(), &showImportDialog, ImGuiWindowFlags_AlwaysAutoResize)) {
+            if (installs.empty()) {
+                ImGui::InputTextWithHint("##import_file", "Enter path to osu!", inputPathBuffer, 1024);
+                if (ImGui::Button("Import")) {
+
+                    log::info("Importing from ", inputPathBuffer);
+                    showImportDialog = false;
+                }
+            } else {
+                if (ImGui::BeginListBox("Select installation")) {
+                    for (const auto& install : installs) {
+                        if (ImGui::Selectable(install.path.c_str())) {
+                            log::info("Importing from ", install.path);
+                            showImportDialog = false;
+                            compat::ImportOsuData(install.path);
+                            ctx.maps.clear();
+                            ctx.maps.load(ctx.paths);
+                        }
+                    }
+                    ImGui::EndListBox();
+                }
+
+            }
             ImGui::End();
         }
     }
@@ -78,6 +112,10 @@ void State<GameState::MainMenu>::showDebugControl()
         if (ImGui::BeginMenu("ui.main.about.title"_i18n.c_str())) {
             ImGui::MenuItem("ui.main.about.game_version"_i18n.c_str(), nullptr, &showVersion);
             ImGui::MenuItem("ui.main.about.imgui_version"_i18n.c_str(), nullptr, &showImGuiVersion);
+            if (ImGui::MenuItem("ui.main.about.import"_i18n.c_str(), nullptr, &showImportDialog)) {
+                installs = compat::FindOsuInstallations();
+                log::info("Found ", installs.size(), " osu! installations");
+            }
             ImGui::EndMenu();
         }
 
@@ -134,6 +172,7 @@ void State<GameState::MainMenu>::showDebugControl()
 
 int State<GameState::MainMenu>::update(double)
 {
+    ctx.maps.update();
 	return 0;
 }
 
@@ -206,7 +245,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
         const float iconSize = 16;
 
         for (unsigned int i = 0; i < ctx.maps.size(); i++) {
-            const auto &map = ctx.maps[i];
+            const auto &map = ctx.maps.at(i);
 
             auto filterName = map->getRomanisedName() + " " + map->getRomanisedArtist();
 

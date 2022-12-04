@@ -24,6 +24,7 @@
 
 #include "Program.hpp"
 #include "Context.hpp"
+#include "Tasks.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/backends/imgui_impl_glfw.h"
@@ -52,6 +53,8 @@ int main()
 /*====================================================================================================================*/
     while (ctx.state.isRunning()) {
         double delta = ctx.timing.getDelta();
+
+        tasks::Update();
 
         ctx.keyboard.update();
         ctx.mouse.update();

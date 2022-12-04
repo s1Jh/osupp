@@ -39,7 +39,7 @@ NS_BEGIN
 
 class Skin
 {
-	friend Resource<Skin> Load<Skin>(const std::filesystem::path &path);
+    friend Resource<Skin> Load<Skin>(const std::filesystem::path &path);
 public:
     enum class ColourAssignmentMode: uint8_t
     {
@@ -53,46 +53,47 @@ public:
     Skin() = default;
 
     FPS_t getAnimationFramerate(const std::string &object) const;
-    Resource<Texture> getTexture(const std::string &object) const;
+    Resource<Texture> getTexture(const std::string &object);
     color getTint(const std::string &object, unsigned int seed = 0) const;
-	int getFrameCount(const std::string &object) const;
+    int getFrameCount(const std::string &object) const;
 
-	Resource<Shader> getShader(const std::string &object) const;
+    Resource<Shader> getShader(const std::string &object);
 
-	Resource<SoundSample> getSound(const std::string &object);
+    Resource<SoundSample> getSound(const std::string &object);
 
-    ObjectSprite createObjectSprite(const std::string &object,
-                                    const HitObjectArguments& args) const;
+    ObjectSprite createObjectSprite(const std::string &object, const HitObjectArguments &args);
 
-	static const std::map<std::string, std::pair<std::string, std::string>> StaticGameShaders;
+    static const std::map<std::string, std::pair<std::string, std::string>> StaticGameShaders;
 private:
 
     std::filesystem::path directory;
     struct TextureInfo
     {
         std::string path;
-		Resource<Texture> texture;
+        Resource<Texture> texture;
         std::vector<color8> tints = {WHITE};
         FPS_t animationFPS = DEFAULT_TEXTURE_FPS;
-		int animationFrames = -1;
+        int animationFrames = -1;
     };
     struct ShaderInfo
     {
         std::string path;
-		Resource<Shader> shader;
+        Resource<Shader> shader;
     };
-	struct SoundInfo
-	{
-		std::string path;
-		Resource<SoundSample> sound;
-	};
+    struct SoundInfo
+    {
+        std::string path;
+        Resource<SoundSample> sound;
+    };
 
     std::unordered_map<std::string, TextureInfo> textures;
     std::unordered_map<std::string, ShaderInfo> shaders;
-	std::unordered_map<std::string, SoundInfo> sounds;
+    std::unordered_map<std::string, SoundInfo> sounds;
 };
 
 template<>
 Resource<Skin> Load(const std::filesystem::path &path);
+
+template<> const std::vector<std::string> Resource<Skin>::allowedExtensions;
 
 NS_END

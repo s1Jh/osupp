@@ -39,8 +39,6 @@ const MapInfo::StorageT &MapInfo::getObjectTemplates() const
 
 void MapInfo::addNote(const fvec2d &position, bool comboEnd, double time)
 {
-    LOG_ENTER();
-
     auto object = std::make_shared<ObjectTemplateNote>();
     object->startTime = time;
     object->endTime = time;
@@ -52,8 +50,6 @@ void MapInfo::addNote(const fvec2d &position, bool comboEnd, double time)
 void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
                         double endTime, math::CurveType type, unsigned int repeats)
 {
-    LOG_ENTER();
-
     auto object = std::make_shared<ObjectTemplateSlider>();
     object->startTime = time;
     object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
@@ -67,8 +63,6 @@ void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
 void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
                          double endTime, const fvec2d &position)
 {
-    LOG_ENTER();
-
     auto object = std::make_shared<ObjectTemplateSpinner>();
     object->startTime = time;
     object->spinRequired = spinRequired;
@@ -83,8 +77,6 @@ void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
 
 void MapInfo::insertElement(std::shared_ptr<BaseObjectTemplate> obj)
 {
-    LOG_ENTER();
-
     auto insertPoint =
         std::find_if(objectTemplates.begin(), objectTemplates.end(),
                      [&obj](const std::shared_ptr<BaseObjectTemplate> &checked)
@@ -201,11 +193,9 @@ void MapInfo::setOverallDifficulty(float overallDifficulty)
 template<>
 Resource<MapInfo> Load(const std::filesystem::path &path)
 {
-    LOG_ENTER();
+    Resource<MapInfo> r;
 
-	Resource<MapInfo> r;
-
-	r.held->directory = path.parent_path();
+	r->directory = path.parent_path();
 
     if (path.extension() == ".osu")
 		LoadOSU(path, *r);

@@ -40,7 +40,6 @@ namespace detail
 int CheckGLFWErrors(const std::string &file, int line,
                     const std::string &helper)
 {
-    LOG_ENTER("GLFW");
     const char *buff[256];
     int err = glfwGetError(buff);
     if (err != GLFW_NO_ERROR)

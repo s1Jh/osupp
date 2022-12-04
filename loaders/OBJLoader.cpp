@@ -36,7 +36,6 @@ NS_BEGIN
 
 bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh)
 {
-    LOG_ENTER("OBJ LOAD");
     std::ifstream ifs(fpath);
     if (!ifs.is_open()) {
         return false;

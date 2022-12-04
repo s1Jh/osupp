@@ -31,22 +31,20 @@
     RESOURCE_POOL(Skin, skins)
 
 #ifdef USER_RESOURCE_INCLUDES
-#include "MapInfo.hpp"
 #include "Skin.hpp"
+#include "MapInfo.hpp"
 #endif
 
 #define USER_CONTEXT_FIELDS \
-    CONTEXT_FIELD(std::vector<Resource<MapInfo>>, maps) \
+    CONTEXT_FIELD(MapManager, maps) \
     CONTEXT_FIELD(Resource<Skin>, activeSkin) \
     CONTEXT_FIELD(GameManager, game)
 
 #ifdef USER_CONTEXT_INCLUDES
 #include "Skin.hpp"
-#include "MapInfo.hpp"
-#include "df2.hpp"
+#include "Resource.hpp"
 #include "GameManager.hpp"
-#include <memory>
-#include <vector>
+#include "MapManager.hpp"
 #endif
 
 #define USER_STATES \

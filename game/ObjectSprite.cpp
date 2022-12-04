@@ -29,8 +29,6 @@ NS_BEGIN
 
 void ObjectSprite::update(double delta)
 {
-    LOG_ENTER();
-
     frameTimer += float(delta);
 
     if (frameTimer >= frameTime) {
@@ -42,8 +40,6 @@ void ObjectSprite::update(double delta)
 
 void ObjectSprite::setTexture(const Resource<Texture> &textureIn)
 {
-    LOG_ENTER();
-
     if (textureIn) {
         texture = textureIn;
         frameTimer = 0;

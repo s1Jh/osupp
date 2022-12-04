@@ -243,8 +243,9 @@ bool GameManager::setMap(Resource<MapInfo> map)
     activeObjects.clear();
 
 	if (info) {
-		lastLoadedObject = info->getObjectTemplates().begin();
-		loadObjects(1000);
+        const auto& objs = info->getObjectTemplates();
+		lastLoadedObject = objs.begin();
+        loadObjects(objs.size());
 	}
 
 	return true;

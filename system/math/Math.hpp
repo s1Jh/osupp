@@ -34,8 +34,7 @@
 #include "Geometry.hpp"
 #include "Range.hpp"
 #include "VectorMath.hpp"
-
-#include <optional>
+#include "Constraint.hpp"
 
 NS_BEGIN
 
@@ -78,28 +77,6 @@ template<typename T>
 requires std::is_arithmetic_v<T>
 constexpr bool Sign(T in)
 { return in >= 0; }
-
-template<typename T1, typename T2>
-requires std::is_arithmetic_v<T1> and std::is_arithmetic_v<T2>
-constexpr T1 Min(T1 a, T2 b)
-{ return a < (T1)b ? a : (T1)b; }
-
-template<typename T1, typename T2>
-requires std::is_arithmetic_v<T1> and std::is_arithmetic_v<T2>
-constexpr T1 Max(T1 a, T2 b)
-{ return a > (T1)b ? a : (T1)b; }
-
-template<typename XT, typename MinT, typename MaxT>
-XT Clamp(XT x, MinT min, MaxT max)
-{
-	auto realMin = math::Min(min, max);
-	auto realMax = math::Max(min, max);
-
-	x = Max(x, realMin);
-	x = Min(x, realMax);
-	return x;
-}
-
 }
 
 constexpr long double operator ""_pi(long double val)

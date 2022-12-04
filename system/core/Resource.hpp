@@ -24,8 +24,8 @@
 
 #include "define.hpp"
 
-//#include "Result.hpp"
-//#include "Holder.hpp"
+#include "Result.hpp"
+#include "Holder.hpp"
 #include "Log.hpp"
 
 #include <memory>
@@ -140,13 +140,13 @@ Resource<T> Default()
 	return d;
 }
 
-//template <typename T>
-//struct LoadTask {
-//	using ResultType = tasks::Result<tasks::detail::TaskHolder<Resource<T>, LoadTask<T>>>;
-//
-//	Resource<T> operator() (const std::filesystem::path& path) {
-//		return Load<T>(path);
-//	}
-//};
+template <typename T>
+struct LoadTask {
+	using ResultType = tasks::Result<tasks::detail::TaskHolder<Resource<T>, LoadTask<T>>>;
+
+	Resource<T> operator() (const std::filesystem::path& path) {
+		return Load<T>(path);
+	}
+};
 
 NS_END

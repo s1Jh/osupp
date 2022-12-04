@@ -39,7 +39,6 @@ public:
 
 private:
     int lastLoaded = 0;
-    std::vector<std::filesystem::path> filesToLoad;
 };
 
 NS_END

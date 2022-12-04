@@ -30,37 +30,11 @@ NS_BEGIN
 
 int State<GameState::Init>::update(double)
 {
-    const int batchSize = 50;
-    auto &ctx = GetContext();
-
-    auto end = math::Min(lastLoaded + batchSize, filesToLoad.size());
-    int i = lastLoaded;
-
-    if (ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        float percent = float(lastLoaded) / float(filesToLoad.size()) * 100.f;
-        ImGui::Text("Loading files %i - %i (%.1f%%)", i, end, percent);
-        ImGui::End();
-    }
-
-    for (; i < end; i++) {
-        ctx.maps.push_back(Load<MapInfo>(filesToLoad[i].string()));
-    }
-    lastLoaded = i++;
-
-    if ((size_t) lastLoaded == filesToLoad.size())
-        return (int) GameState::MainMenu;
-
-    return 0;
+    return (int) GameState::MainMenu;
 }
 
 int State<GameState::Init>::draw()
 {
-    float percent = float(lastLoaded) / float(filesToLoad.size());
-    auto color = WHITE;
-    color.r = percent;
-    color.b = 1.0f - percent;
-    color.g = percent;
-    GetContext().gfx.clear(color);
     return 0;
 }
 
@@ -78,16 +52,25 @@ int State<GameState::Init>::init(GameState)
     auto pathStr = ctx.settings.addSetting<std::string>("setting.paths", "", SettingFlags::WRITE_TO_FILE).get();
     const auto &paths = GetCharacterSeparatedValues(pathStr, ',');
 
-    std::string skin = ctx.settings.addSetting<std::string>("setting.user.skin", "default").get();
-
-    for (const auto &path: paths) {
+    for (const auto &path : paths) {
         std::filesystem::path p(path);
         ctx.paths.addPath(p);
     }
 
-    filesToLoad = ctx.paths.findAll("songs", Resource<MapInfo>::allowedExtensions);
+    ctx.maps.load(ctx.paths);
 
-    ctx.activeSkin = Load<Skin>(skin);
+    auto skinPaths = ctx.paths.findAll("skins", Resource<Skin>::allowedExtensions);
+    std::vector<std::string> skinNames;
+    for (const auto &path : skinPaths) {
+        skinNames.push_back(path.stem());
+    }
+
+    std::string skin =
+        ctx.settings.addSetting<std::string>("setting.user.skin", "default", DEFAULT_SETTING_FLAGS, skinNames).get();
+
+    auto path = ctx.paths.find(skin, Resource<Skin>::allowedExtensions);
+
+    ctx.activeSkin = Load<Skin>(path);
 
     return 0;
 }
