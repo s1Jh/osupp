@@ -23,52 +23,48 @@
 
 #include "define.hpp"
 
-#include <memory>
-#include <type_traits>
-#include <optional>
-#include <thread>
+#include <tuple>
 
 NS_BEGIN
 
-namespace tasks {
 
-template<typename MessageT>
-class Response {
-	typedef std::remove_cvref_t<MessageT> MessageType;
-	typedef typename MessageType::ResultType ReplyType;
-public:
-	explicit Response(std::shared_ptr<MessageType> originIn) : origin(originIn) {}
+namespace video
+{
 
-	bool isComplete() {
-		return origin->isComplete();
-	}
+namespace detail
+{
 
-	std::optional<ReplyType> getReply() {
-		if (!isComplete()) {
-			return false;
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return false;
-	}
-
-	ReplyType waitResult() {
-		while (!isComplete()) {
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return ReplyType{};
-	}
-
-private:
-	std::shared_ptr<MessageType> origin;
+struct BaseRenderTask
+{
+	virtual inline void invoke()
+	{}
 };
 
+} // detail
+
+template<typename Arg1, typename ... Args>
+struct RenderTask: public detail::BaseRenderTask
+{
+	using ParameterTupleType = std::tuple<Arg1, Args...>;
+
+	explicit RenderTask(Arg1 first, Args... others)
+		: params(first, others...)
+	{}
+
+	void invoke() override
+	{
+		std::apply(Draw < Arg1, Args... > , params);
+	}
+
+	ParameterTupleType params;
+};
+
+} // video
+
+template<typename ... Args>
+void Draw(Args...)
+{
+	WRAP_CONSTEXPR_ASSERTION("Draw method not implemented for these arguments");
 }
 
 NS_END

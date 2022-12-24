@@ -85,9 +85,8 @@ Resource<Texture> ObjectSprite::getTexture() const
     return texture;
 }
 
-void detail::RenderFunctor<ObjectSprite>::operator()(Renderer &renderer,
-                                                     const ObjectSprite &object,
-                                                     const ObjectDrawInfo &info)
+template<>
+void Draw(const ObjectSprite& object, const ObjectDrawInfo& info)
 {
     if (!object.texture)
         return;

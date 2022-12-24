@@ -1,0 +1,43 @@
+{
+    "buildType": {
+        "default": "debug",
+        "choices": {
+            "debug": {
+                "short": "Debug",
+                "long": "Build with debugging information",
+                "buildType": "Debug",
+                "settings": {
+                    "PLATFORM": "WINDOWS",
+                    "ARCHITECTURE": "ARCH_ADM64"
+                }
+            },
+            "release": {
+                "short": "Release",
+                "long": "Build in release mode",
+                "buildType": "Release",
+                "settings": {
+                    "PLATFORM": "WINDOWS",
+                    "ARCHITECTURE": "ARCH_ADM64"
+                }
+            },
+            "reldeb": {
+                "short": "RelWithDebInfo",
+                "long": "Build in release mode with debugging information",
+                "buildType": "RelWithDebInfo",
+                "settings": {
+                    "PLATFORM": "WINDOWS",
+                    "ARCHITECTURE": "ARCH_ADM64"
+                }
+            },
+            "minrel": {
+                "short": "MinSizeRel",
+                "long": "Minimal release mode build",
+                "buildType": "MinSizeRel",
+                "settings": {
+                    "PLATFORM": "WINDOWS",
+                    "ARCHITECTURE": "ARCH_ADM64"
+                }
+            }
+        }
+    }
+}

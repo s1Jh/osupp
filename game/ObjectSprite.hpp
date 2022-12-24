@@ -24,7 +24,7 @@
 
 #include "define.hpp"
 
-#include "Renderer.hpp"
+#include "RenderTask.hpp"
 #include "Texture.hpp"
 #include "Types.hpp"
 
@@ -39,14 +39,13 @@ struct ObjectDrawInfo
 
 class ObjectSprite
 {
+	friend void Draw(const ObjectSprite&, const ObjectDrawInfo&);
 public:
-    BEFRIEND_RENDER_FUNCTOR(ObjectSprite)
-
     ObjectSprite() = default;
 
     void update(double delta);
 
-    void setTexture(const Resource<Texture> &texture);
+    void setTexture(const Resource<video::Texture> &texture);
     void setFPS(FPS_t fps);
 	void setTotalFrames(int frames);
     void setFrameTime(float frameTime);
@@ -54,11 +53,11 @@ public:
 
 	[[nodiscard]] const color &getTint() const;
 
-    [[nodiscard]] Resource<Texture> getTexture() const;
+    [[nodiscard]] Resource<video::Texture> getTexture() const;
 
-private:
+protected:
     color tint{WHITE};
-	Resource<Texture> texture{nullptr};
+	Resource<video::Texture> texture{nullptr};
     AnimationLayout layout = AnimationLayout::HORIZONTAL;
     float frameTime = 0.0f;
     float frameTimer = 0.0f;
@@ -66,7 +65,10 @@ private:
     unsigned int frameCounter = 0;
 };
 
-BEGIN_RENDER_FUNCTOR_DECL(ObjectSprite, const ObjectDrawInfo&)
-END_RENDER_FUNCTOR_DECL()
+
+using DrawObject = video::RenderTask<const ObjectSprite&, const ObjectDrawInfo&>;
+
+template<>
+void Draw(const ObjectSprite&, const ObjectDrawInfo&);
 
 NS_END

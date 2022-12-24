@@ -62,7 +62,7 @@ int State<GameState::Init>::init(GameState)
     auto skinPaths = ctx.paths.findAll("skins", Resource<Skin>::allowedExtensions);
     std::vector<std::string> skinNames;
     for (const auto &path : skinPaths) {
-        skinNames.push_back(path.stem());
+        skinNames.push_back(path.stem().string());
     }
 
     std::string skin =

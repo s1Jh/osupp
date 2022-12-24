@@ -24,38 +24,58 @@
 
 #include "define.hpp"
 
-#define USER_CONTEXT_INCLUDES
-#include "config.hpp"
+#include "Image.hpp"
+#include "Resource.hpp"
+#include "Vec2.hpp"
+#include "GLResource.hpp"
 
-#include "StateHandler.hpp"
-#include "LambdaRender.dpp"
-#include "Keyboard.hpp"
-#include "Mouse.hpp"
-#include "Timing.hpp"
-#include "Locale.hpp"
-#include "Settings.hpp"
-#include "AudioDevice.hpp"
-#include "Files.hpp"
+#include <memory>
+#include <filesystem>
 
 NS_BEGIN
 
-struct Context
+namespace video
 {
-	AudioDevice audio;
-    StateHandler state;
-	video::LambdaRenderer gfx;
-	video::Window window;
-    Keyboard keyboard;
-    Mouse mouse;
-    Timing timing;
-    Settings settings;
-    files::MultiDirectorySearch paths;
 
-#define CONTEXT_FIELD(Type, Name) Type Name;
-    USER_CONTEXT_FIELDS
-#undef CONTEXT_FIELD
+class Texture : public GLResource<unsigned int>
+{
+public:
+    Texture();
+
+    void setImage(Image &img);
+
+    [[nodiscard]] int getWidth() const;
+
+    [[nodiscard]] int getHeight() const;
+
+    [[nodiscard]] isize getSize() const;
+
+    [[nodiscard]] int getChannels() const;
+
+    void use(unsigned int index) const;
+
+    void setClipArea(const frect &rect);
+    [[nodiscard]] const Mat3f &getUVTransform() const;
+
+    static void unbind(unsigned int index);
+
+protected:
+	std::optional<unsigned int> createData() override;
+	void deleteData(const unsigned int &repr) override;
+
+private:
+    Mat3f clip;
+    Image img;
+    uint8_t channels;
+    isize pixelSize;
 };
 
-Context &GetContext();
+}
+
+template<>
+Resource<video::Texture> Load(const std::filesystem::path&);
+
+template<>
+Resource<video::Texture> Create();
 
 NS_END

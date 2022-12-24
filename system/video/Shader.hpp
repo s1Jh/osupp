@@ -31,6 +31,7 @@
 #include "Vec2.hpp"
 #include "Vec3.hpp"
 #include "Vec4.hpp"
+#include "GLResource.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -38,25 +39,23 @@
 
 NS_BEGIN
 
-class Shader
+namespace video
+{
+
+class Shader : public GLResource<unsigned int>
 {
 public:
-    Shader() noexcept;
-
-    bool fromString(
+    void fromString(
         const std::string &vert_src,
         const std::string &frag_src,
         const std::string &geom_src = ""
     );
 
-    // Calls OpenGL's glUseProgram with it's id.
+    // Calls OpenGL's glUseProgram with its id.
     void use() const;
 
     // Unbinds currently active program.
     static void unbind();
-
-    // Returns it's ID.
-    [[nodiscard]] unsigned int getID() const;
 
 #define SHADER_SETTER_METHODS                                                  \
   GENERATE_SHADER_SET_FUNC(int, 1i, int)                                       \
@@ -108,25 +107,34 @@ public:
 #endif
 
     using Textures = std::unordered_map<int, Texture *>;
-    using Uniforms = std::unordered_map<
-        std::string,
-        std::variant<int, float, unsigned int, double, fvec2d, ivec2d, uvec2d,
-                     dvec2d, fvec3d, ivec3d, uvec3d, dvec3d, fvec4d, ivec4d,
-                     uvec4d, dvec4d, fvec2d *, ivec2d *, uvec2d *, dvec2d *,
-                     fvec3d *, ivec3d *, uvec3d *, dvec3d *, fvec4d *, ivec4d *,
-                     uvec4d *, dvec4d *, Mat2f *, Mat3f *, Mat4f *, color *,
-                     Texture *>>;
+	using AnyUniform =
+		std::variant<int, float, unsigned int, double, fvec2d, ivec2d, uvec2d,
+					 dvec2d, fvec3d, ivec3d, uvec3d, dvec3d, fvec4d, ivec4d,
+					 uvec4d, dvec4d, fvec2d *, ivec2d *, uvec2d *, dvec2d *,
+					 fvec3d *, ivec3d *, uvec3d *, dvec3d *, fvec4d *, ivec4d *,
+					 uvec4d *, dvec4d *, Mat2f *, Mat3f *, Mat4f *, color *,
+					 Texture *>;
+	using TransformMatrixUniform = std::variant<Mat2f *, Mat3f *, Mat4f*>;
+    using Uniforms = std::unordered_map<std::string, AnyUniform>;
+
+protected:
+	void deleteData(const unsigned int &repr) override;
+	std::optional<unsigned int> createData() override;
 
 private:
-    static unsigned int compileShader(const std::string &file, unsigned int type);
+	std::string vertSrc;
+	std::string fragSrc;
+	std::string geomSrc;
 
-    unsigned int id;
+    static unsigned int CompileShader(const std::string &file, unsigned int type);
 };
 
-template<>
-Resource<Shader> Load(const std::filesystem::path &path);
+}
 
 template<>
-Resource<Shader> Create();
+Resource<video::Shader> Load(const std::filesystem::path &path);
+
+template<>
+Resource<video::Shader> Create();
 
 NS_END

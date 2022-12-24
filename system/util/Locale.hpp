@@ -37,7 +37,7 @@ namespace util
 
 class Locale
 {
-    friend Resource<Locale> Load<Locale>(const std::filesystem::path &path);
+    friend Resource<Locale> PROJECT_NAMESPACE::Load<Locale>(const std::filesystem::path &path);
 public:
     [[nodiscard]] const std::string &getTranslation(const std::string &key) const;
 

@@ -25,8 +25,6 @@
 #include "define.hpp"
 
 #include <iostream>
-#include <mutex>
-#include <vector>
 
 NS_BEGIN
 
@@ -35,11 +33,11 @@ namespace log
 
 enum class Severity
 {
-    DEVELOPMENT,
+    DEV,
     DBG,
-    INFO,
-    WARNING,
-    ERROR
+    INF,
+    WARN,
+    ERR
 };
 
 namespace detail
@@ -68,7 +66,7 @@ void Init();
 template<typename First, typename... Args>
 inline static void info(First f, Args... msgs)
 {
-    if (detail::BeginLogMessage(Severity::INFO)) {
+    if (detail::BeginLogMessage(Severity::INF)) {
         detail::Print("[INFO] ", f, msgs...);
         detail::EndLogMessage();
     }
@@ -86,7 +84,7 @@ inline static void debug(First f, Args... msgs)
 template<typename First, typename... Args>
 inline static void warning(First f, Args... msgs)
 {
-    if (detail::BeginLogMessage(Severity::WARNING)) {
+    if (detail::BeginLogMessage(Severity::WARN)) {
         detail::Print("[WARNING] ", f, msgs...);
         detail::EndLogMessage();
     }
@@ -95,7 +93,7 @@ inline static void warning(First f, Args... msgs)
 template<typename First, typename... Args>
 inline static void error(First f, Args... msgs)
 {
-    if (detail::BeginLogMessage(Severity::ERROR)) {
+    if (detail::BeginLogMessage(Severity::ERR)) {
         detail::Print("[ERROR] ", f, msgs...);
         detail::EndLogMessage();
     }
@@ -104,7 +102,7 @@ inline static void error(First f, Args... msgs)
 template<typename First, typename... Args>
 inline void custom(const std::string &type, First f, Args... msgs)
 {
-    if (detail::BeginLogMessage(Severity::INFO)) {
+    if (detail::BeginLogMessage(Severity::INF)) {
         detail::Print('[' + type + "] ", f, msgs...);
         detail::EndLogMessage();
     }
@@ -116,6 +114,6 @@ void Enable();
 
 void Disable();
 
-};
+}
 
 NS_END

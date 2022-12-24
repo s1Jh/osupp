@@ -23,51 +23,71 @@
 
 #include "define.hpp"
 
+#include "Size.hpp"
+#include "GraphicsContext.hpp"
+#include "imgui_internal.h"
+
+#include <atomic>
 #include <memory>
-#include <type_traits>
-#include <optional>
-#include <thread>
 
 NS_BEGIN
 
-namespace tasks {
+namespace video
+{
 
-template<typename MessageT>
-class Response {
-	typedef std::remove_cvref_t<MessageT> MessageType;
-	typedef typename MessageType::ResultType ReplyType;
+enum class WindowMode
+{
+	NONE, WINDOWED, FULLSCREEN, WINDOWED_BORDERLESS
+};
+
+enum class WindowVisibility
+{
+	NONE, VISIBLE, TASKBAR, HIDDEN
+};
+
+constexpr isize DEFAULT_WINDOW_SIZE = {640, 480};
+
+constexpr int DEFAULT_WINDOW_MONITOR = 0;
+
+constexpr int DEFAULT_WINDOW_REFRESH_RATE = 60;
+
+constexpr WindowMode DEFAULT_WINDOW_VIDEO_MODE = WindowMode::WINDOWED;
+
+constexpr WindowVisibility DEFAULT_WINDOW_VISIBILITY = WindowVisibility::HIDDEN;
+
+struct WindowConfiguration
+{
+	isize size{-1, -1};
+	int refreshRate{-1};
+	int monitorID{-1};
+	WindowMode mode{WindowMode::NONE};
+	WindowVisibility shown{WindowVisibility::NONE};
+};
+
+struct WindowImpl
+{
+	friend class LambdaRender;
 public:
-	explicit Response(std::shared_ptr<MessageType> originIn) : origin(originIn) {}
-
-	bool isComplete() {
-		return origin->isComplete();
-	}
-
-	std::optional<ReplyType> getReply() {
-		if (!isComplete()) {
-			return false;
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return false;
-	}
-
-	ReplyType waitResult() {
-		while (!isComplete()) {
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return ReplyType{};
-	}
+	[[nodiscard]] inline bool isOpen() const { return open; }
+	inline void close() { wantsToBeOpen = false; }
+	inline WindowConfiguration getConfig() { return config; }
 
 private:
-	std::shared_ptr<MessageType> origin;
+	WindowImpl() = default;
+	std::atomic<bool> open{true};
+	std::atomic<bool> wantsToBeOpen{true};
+	WindowHandle *handle{nullptr};
+	ImGuiContext *imCtx;
+	WindowConfiguration config {
+		DEFAULT_WINDOW_SIZE,
+		DEFAULT_WINDOW_REFRESH_RATE,
+		DEFAULT_WINDOW_MONITOR,
+		DEFAULT_WINDOW_VIDEO_MODE,
+		DEFAULT_WINDOW_VISIBILITY
+	};
 };
+
+typedef std::shared_ptr<WindowImpl> Window;
 
 }
 

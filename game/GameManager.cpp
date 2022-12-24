@@ -45,19 +45,19 @@ double GameManager::getCurrentTime() const
 
 void GameManager::setCurrentTime(double newTime)
 {
-    currentTime = newTime;
+	currentTime = newTime;
 
-    for (auto &obj: activeObjects) {
-        obj->reset();
-        obj->update(0.0);
-    }
+	for (auto &obj : activeObjects) {
+		obj->reset();
+		obj->update(0.0);
+	}
 
-    last = activeObjects.begin();
+	last = activeObjects.begin();
 }
 
 void GameManager::update(double delta)
 {
-    currentTime += delta;
+	currentTime += delta;
 
 	auto active = getClosestActiveObject();
 
@@ -66,14 +66,16 @@ void GameManager::update(double delta)
 	printCounter++;
 	auto start = std::chrono::high_resolution_clock::now();
 	for (auto it = last;; it++) {
-		if (it == activeObjects.end())
+		if (it == activeObjects.end()) {
 			return;
+		}
 
 		auto &obj = *it;
 
 		obj->update(delta);
-		if (it == active)
+		if (it == active) {
 			input->update();
+		}
 
 		updates++;
 		switch (obj->getState()) {
@@ -96,8 +98,7 @@ void GameManager::update(double delta)
 					// just set it without checking for time as that would
 					// cause access violation
 					last = activeObjects.end();
-				}
-				else if ((*last)->getEndTime() < (*nextIt)->getEndTime()) {
+				} else if ((*last)->getEndTime() < (*nextIt)->getEndTime()) {
 					last = nextIt;
 				}
 			}
@@ -108,8 +109,7 @@ void GameManager::update(double delta)
 			// update the object accordingly.
 			auto func = obj->getActivationFunction();
 
-			if (resolveFunction(func, *obj))
-			{
+			if (resolveFunction(func, *obj)) {
 				// We are within the object's hit window and are pressing down on the
 				// right keys, start.
 				obj->begin();
@@ -124,8 +124,7 @@ void GameManager::update(double delta)
 
 			auto func = obj->getDeactivationFunction();
 
-			if (resolveFunction(func, *obj))
-			{
+			if (resolveFunction(func, *obj)) {
 				log::debug("Raising");
 				obj->raise();
 			}
@@ -136,8 +135,7 @@ void GameManager::update(double delta)
 			// held again
 			auto func = obj->getActivationFunction();
 
-			if (resolveFunction(func, *obj))
-			{
+			if (resolveFunction(func, *obj)) {
 				log::debug("Pressing");
 				obj->press();
 			}
@@ -146,13 +144,12 @@ void GameManager::update(double delta)
 			// The object cannot be interacted with in these states
 		case HitObjectState::PICKUP: {
 			auto score = obj->finish();
-			log::info("SCORE: ", (int) score);
+			log::info("SCORE: ", (int)score);
 			break;
 		}
 		case HitObjectState::FADING:
 		case HitObjectState::APPROACHING:
-		default:
-			break;
+		default: break;
 		}
 	}
 
@@ -180,7 +177,7 @@ breakout:
 
 }
 
-void GameManager::draw(Renderer&)
+void GameManager::draw(Renderer &)
 {
 	ImGui::SetNextWindowPos({0, 0});
 	ImGui::SetNextWindowCollapsed(false);
@@ -199,8 +196,9 @@ void GameManager::draw(Renderer&)
 
 	// the "last" object should be the next visible object in line
 	// we therefore draw every object until we hit one that is invisible
-	if (last == activeObjects.end())
+	if (last == activeObjects.end()) {
 		return;
+	}
 
 	// we need to reverse the order objects are drawn in, meaning that objects which will come next will be drawn last
 	// this is done so that the most relevant objects are always on top
@@ -216,15 +214,17 @@ void GameManager::draw(Renderer&)
 	// MSVC has a hissy fit every time we decrement a begin iterator, 
 	// therefore we have to complicate things 
 #ifdef WINDOWS
-	if (end == activeObjects.begin())
+	if (end == activeObjects.begin()) {
 		return;
+	}
 
-	if (last != activeObjects.begin())
+	if (last != activeObjects.begin()) {
 		last--;
+	}
 
 	for (auto it = std::prev(end); it != last; it--) {
 #else
-	for (auto it = std::prev(end); it != std::prev(last); it--) {
+		for (auto it = std::prev(end); it != std::prev(last); it--) {
 #endif
 		auto ptr = *it;
 		ptr->draw();
@@ -236,16 +236,15 @@ void GameManager::draw(Renderer&)
 #endif
 }
 
-
 bool GameManager::setMap(Resource<MapInfo> map)
 {
-    info = std::move(map);
-    activeObjects.clear();
+	info = std::move(map);
+	activeObjects.clear();
 
 	if (info) {
-        const auto& objs = info->getObjectTemplates();
+		const auto &objs = info->getObjectTemplates();
 		lastLoadedObject = objs.begin();
-        loadObjects(objs.size());
+		loadObjects(objs.size());
 	}
 
 	return true;
@@ -255,18 +254,19 @@ void GameManager::reset()
 {
 //    log::debug("Resetting the game state");
 
-    if (info)
-        currentTime = -info->getStartOffset();
-    else
-        currentTime = 0.0;
+	if (info) {
+		currentTime = -info->getStartOffset();
+	} else {
+		currentTime = 0.0;
+	}
 
-    for (auto &object: activeObjects) {
-        object->reset();
-    }
+	for (auto &object : activeObjects) {
+		object->reset();
+	}
 
-    last = activeObjects.begin();
+	last = activeObjects.begin();
 
-	auto& skin = GetContext().activeSkin;
+	auto &skin = GetContext().activeSkin;
 
 	samples.hit = skin->getSound(HIT_SOUND);
 	samples.miss = skin->getSound(MISS_SOUND);
@@ -282,10 +282,10 @@ const frect &GameManager::getPlayField() const
 
 void GameManager::setPlayField(const frect &field)
 {
-    playField = field;
-    auto smaller = math::Min(field.size.w, field.size.h);
-    transform = math::MakeScaleMatrix(fvec2d(smaller, smaller)) *
-        math::MakeTranslationMatrix(field.position);
+	playField = field;
+	auto smaller = math::Min(field.size.w, field.size.h);
+	transform = math::MakeScaleMatrix(fvec2d(smaller, smaller)) *
+		math::MakeTranslationMatrix(field.position);
 }
 
 Resource<MapInfo> GameManager::getMap() const
@@ -296,36 +296,41 @@ const Mat3f &GameManager::getTransform() const
 
 float GameManager::getCircleSize()
 {
-	if (info)
-    	return info->getCircleSize() * csMultiplier;
+	if (info) {
+		return info->getCircleSize() * csMultiplier;
+	}
 	return 0.0f;
 }
 
 float GameManager::getApproachTime()
 {
-	if (info)
-    	return info->getApproachTime() * arMultiplier;
+	if (info) {
+		return info->getApproachTime() * arMultiplier;
+	}
 	return 0.0f;
 }
 
 float GameManager::getFadeTime()
 {
-	if (info)
-    	return info->getFadeTime() * ftMultiplier;
+	if (info) {
+		return info->getFadeTime() * ftMultiplier;
+	}
 	return 0.0f;
 }
 
 float GameManager::getHitWindow()
 {
-	if (info)
-    	return info->getHitWindow() * hwMultiplier;
+	if (info) {
+		return info->getHitWindow() * hwMultiplier;
+	}
 	return 0.0f;
 }
 
 float GameManager::getHpDrain()
 {
-	if (info)
+	if (info) {
 		return info->getHpDrain() * hpMultiplier;
+	}
 	return 0.0f;
 }
 
@@ -339,13 +344,15 @@ bool GameManager::isFinished() const
 	return last == activeObjects.end();
 }
 
-bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& object) const
+bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject &object) const
 {
-	if (!input)
+	if (!input) {
 		return false;
+	}
 
-	if (func == HitObjectFunction::NO_ACTIVATION)
+	if (func == HitObjectFunction::NO_ACTIVATION) {
 		return false;
+	}
 
 	HitObjectFunction buttonRules = func & HitObjectFunction::BUTTON_MASK;
 	HitObjectFunction cursorRules = func & HitObjectFunction::CURSOR_MASK;
@@ -357,54 +364,42 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject& o
 	auto SOF = object.getSOF();
 
 	switch (buttonRules) {
-	case HitObjectFunction::BUTTON_PRESSED:
-		buttonValid = input->isKeyPressing(InputMapper::BLOCKING);
+	case HitObjectFunction::BUTTON_PRESSED: buttonValid = input->isKeyPressing(InputMapper::BLOCKING);
 		break;
-	case HitObjectFunction::BUTTON_HELD:
-		buttonValid = input->isKeyPressed(InputMapper::BLOCKING);
+	case HitObjectFunction::BUTTON_HELD: buttonValid = input->isKeyPressed(InputMapper::BLOCKING);
 		break;
-	case HitObjectFunction::BUTTON_RELEASED:
-		buttonValid = input->isKeyReleased();
+	case HitObjectFunction::BUTTON_RELEASED: buttonValid = input->isKeyReleased();
 		break;
-	case HitObjectFunction::BUTTON_PRESSED_NO_LOCK:
-		buttonValid = input->isKeyPressing(InputMapper::NO_BLOCKING);
+	case HitObjectFunction::BUTTON_PRESSED_NO_LOCK: buttonValid = input->isKeyPressing(InputMapper::NO_BLOCKING);
 		break;
-	case HitObjectFunction::BUTTON_HELD_NO_LOCK:
-		buttonValid = input->isKeyPressed(InputMapper::NO_BLOCKING);
+	case HitObjectFunction::BUTTON_HELD_NO_LOCK: buttonValid = input->isKeyPressed(InputMapper::NO_BLOCKING);
 		break;
 	case HitObjectFunction::BUTTON_IGNORE:
-	default:
-		break;
+	default: break;
 	}
 
 	switch (cursorRules) {
-	case HitObjectFunction::CURSOR_ENTER:
-		cursorValid = math::Distance(SOF.position, input->getCursor()) <= SOF.radius;
+	case HitObjectFunction::CURSOR_ENTER: cursorValid = math::Distance(SOF.position, input->getCursor()) <= SOF.radius;
 		break;
-	case HitObjectFunction::CURSOR_LEAVE:
-		cursorValid = math::Distance(SOF.position, input->getCursor()) > SOF.radius;
+	case HitObjectFunction::CURSOR_LEAVE: cursorValid = math::Distance(SOF.position, input->getCursor()) > SOF.radius;
 		break;
 	case HitObjectFunction::CURSOR_IGNORE:
-	default:
-		break;
+	default: break;
 	}
 
 	switch (mergeRules) {
-	case HitObjectFunction::AND:
-		return buttonValid && cursorValid;
-	case HitObjectFunction::OR:
-		return buttonValid || cursorValid;
-	case HitObjectFunction::XOR:
-		return buttonValid + cursorValid;
-	default:
-		return false;
+	case HitObjectFunction::AND: return buttonValid && cursorValid;
+	case HitObjectFunction::OR: return buttonValid || cursorValid;
+	case HitObjectFunction::XOR: return buttonValid + cursorValid;
+	default: return false;
 	}
 }
 
 float GameManager::getStartOffset()
 {
-	if (info)
+	if (info) {
 		return info->getStartOffset();
+	}
 	return 0.0f;
 }
 
@@ -426,8 +421,9 @@ GameManager::StorageT::const_iterator GameManager::getClosestActiveObject() cons
 	auto it = last;
 
 	while (it != activeObjects.end()) {
-		if (!(*it)->isFinished())
+		if (!(*it)->isFinished()) {
 			return it;
+		}
 		it = std::next(it);
 	}
 	return activeObjects.end();
@@ -448,8 +444,9 @@ const GameManager::StorageT &GameManager::getStoredObjects() const
 
 fvec2d GameManager::getCursorPosition() const
 {
-	if (input)
+	if (input) {
 		return input->getCursor();
+	}
 	return {0, 0};
 }
 
@@ -465,33 +462,35 @@ unsigned int GameManager::loadObjects(unsigned int amount)
 
 	auto &templates = info->getObjectTemplates();
 
-	if (templates.end() == lastLoadedObject)
+	if (templates.end() == lastLoadedObject) {
 		return 0;
+	}
 
 	unsigned int loaded = 0;
 	auto it = lastLoadedObject;
 	for (it = lastLoadedObject; (it != templates.end()) && (loaded < amount); loaded++, it++) {
-		const auto& objectTemplate = *it;
+		const auto &objectTemplate = *it;
 
 		switch (objectTemplate->getType()) {
 		MAKE_CASE(Spinner)
 		MAKE_CASE(Slider)
 		MAKE_CASE(Note)
-		default:
-			info = nullptr;
+		default: info = nullptr;
 			log::warning("Corrupted map template: ", objectTemplate);
 			return false;
 		}
 
-		if (bool(objectTemplate->parameters & HitObjectParams::COMBO_END))
+		if (bool(objectTemplate->parameters & HitObjectParams::COMBO_END)) {
 			args.comboSeed++;
+		}
 		args.objectSeed++;
 	}
 
 	lastLoadedObject = it;
 
-	if (lastLoadedObject != templates.end())
+	if (lastLoadedObject != templates.end()) {
 		lastLoadedObject++;
+	}
 
 	log::debug("Loaded ", loaded, " objects");
 

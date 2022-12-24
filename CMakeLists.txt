@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
 set(GAME_DIRECTORY ${ROOT_DIRECTORY}/game)
-set(GFX_DIRECTORY ${SYSTEM_DIRECTORY}/gfx)
+set(VIDEO_DIRECTORY ${SYSTEM_DIRECTORY}/video)
 set(INPUT_DIRECTORY ${SYSTEM_DIRECTORY}/input)
 set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
 set(TYPES_DIRECTORY ${SYSTEM_DIRECTORY}/types)
@@ -36,7 +36,7 @@ set(MAPPERS_DIRECTORY ${GAME_DIRECTORY}/mappers)
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
         ${SYSTEM_DIRECTORY}
-        ${GFX_DIRECTORY}
+        ${VIDEO_DIRECTORY}
         ${INPUT_DIRECTORY}
         ${ANIMATORS_DIRECTORY}
         ${TYPES_DIRECTORY}
@@ -89,16 +89,15 @@ set(SOURCES
         ${AUDIO_DIRECTORY}/SoundStream.cpp
         ${AUDIO_DIRECTORY}/AudioUtil.cpp
 
-        ${GFX_DIRECTORY}/Renderer.cpp
-        ${GFX_DIRECTORY}/Shader.cpp
-        ${GFX_DIRECTORY}/Texture.cpp
-        ${GFX_DIRECTORY}/Drawables.cpp
-        ${GFX_DIRECTORY}/Sprite.cpp
-        ${GFX_DIRECTORY}/Image.cpp
-        ${GFX_DIRECTORY}/Mesh.cpp
-        ${GFX_DIRECTORY}/Camera.cpp
-        ${GFX_DIRECTORY}/GraphicsContext.cpp
-        ${GFX_DIRECTORY}/Generics.cpp
+        ${VIDEO_DIRECTORY}/LambdaRender.cpp
+		${VIDEO_DIRECTORY}/StandardDrawCalls.cpp
+        ${VIDEO_DIRECTORY}/Shader.cpp
+        ${VIDEO_DIRECTORY}/Texture.cpp
+        ${VIDEO_DIRECTORY}/Sprite.cpp
+        ${VIDEO_DIRECTORY}/Image.cpp
+        ${VIDEO_DIRECTORY}/Mesh.cpp
+        ${VIDEO_DIRECTORY}/Camera.cpp
+        ${VIDEO_DIRECTORY}/GraphicsContext.cpp
 
         ${IMGUI_DIRECTORY}/imgui.cpp
         ${IMGUI_DIRECTORY}/imgui_draw.cpp
@@ -208,6 +207,7 @@ function(ConfigureLibrary LIBRARY_NAME)
 	endif()
 	
 	if (DEFINED ${LIBRARIES})
+		string(REPLACE " " ";" ${LIBRARIES} ${${LIBRARIES}})
 		set(LIBS "${LIBS};${${LIBRARIES}}" PARENT_SCOPE)
 	else()
 		message(FATAL_ERROR "${LIBRARY_NAME} libraries not defined")

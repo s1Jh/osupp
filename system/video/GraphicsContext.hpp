@@ -19,57 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #pragma once
 
-#include "Image.hpp"
-#include "Resource.hpp"
-#include "Vec2.hpp"
 #include "define.hpp"
 
-#include <memory>
-#include <filesystem>
+#define TO_GLFW(V) ((::GLFWwindow*)(V))
+#define FROM_GLFW(V) ((WindowHandle*)(V))
 
+/***************************************************************/
+/* Defined helper functions                                    */
+/***************************************************************/
 NS_BEGIN
 
-class Texture
+namespace video
 {
-public:
-    Texture();
 
-    bool setImage(Image &img);
+constexpr const char *GL_VERSION_STR = "330 core";
 
-    [[nodiscard]] int getWidth() const;
+constexpr const char *GL_VERSION_PREPROCESSOR = "#version 330 core";
 
-    [[nodiscard]] int getHeight() const;
+typedef struct WindowHandle WindowHandle;
 
-    [[nodiscard]] isize getSize() const;
+bool IsExtensionSupported(const char *, const char *);
 
-    [[nodiscard]] int getChannels() const;
+namespace detail
+{
 
-    void use(unsigned int index) const;
+WindowHandle *CreateWindowHandle();
+void FreeWindowHandle(WindowHandle *);
+bool InitContext();
+void DestroyContext();
 
-    void setClipArea(const frect &rect);
-    [[nodiscard]] const Mat3f &getUVTransform() const;
+}
 
-    static void unbind(unsigned int index);
-
-    [[nodiscard]] unsigned int getID() const;
-
-private:
-    static void GLTexDeleter(unsigned int *ptr);
-
-    Mat3f clip;
-    std::shared_ptr<unsigned int> glTexture;
-    Image *img;
-    uint8_t channels;
-    isize pixelSize;
-};
-
-template<>
-Resource<Texture> Load(const std::filesystem::path&);
-
-template<>
-Resource<Texture> Create();
+}
 
 NS_END

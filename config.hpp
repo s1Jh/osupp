@@ -21,19 +21,10 @@
  * SOFTWARE.
  ******************************************************************************/
 
-#define GAME_TITLE NotOSU
-#define PROJECT_NAMESPACE org::sijh::NotOSU
+#define GAME_TITLE osu++
+#define PROJECT_NAMESPACE osupp
 
 #define CONFIG_FILE settings.sdf
-
-#define USER_RESOURCE_POOLS \
-    RESOURCE_POOL(MapInfo, maps) \
-    RESOURCE_POOL(Skin, skins)
-
-#ifdef USER_RESOURCE_INCLUDES
-#include "Skin.hpp"
-#include "MapInfo.hpp"
-#endif
 
 #define USER_CONTEXT_FIELDS \
     CONTEXT_FIELD(MapManager, maps) \

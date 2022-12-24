@@ -34,62 +34,61 @@ template<> const std::vector<std::string> Resource<MapInfo>::allowedExtensions =
 
 const MapInfo::StorageT &MapInfo::getObjectTemplates() const
 {
-    return objectTemplates;
+	return objectTemplates;
 }
 
 void MapInfo::addNote(const fvec2d &position, bool comboEnd, double time)
 {
-    auto object = std::make_shared<ObjectTemplateNote>();
-    object->startTime = time;
-    object->endTime = time;
-    object->position = position;
-    object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
-    insertElement(object);
+	auto object = std::make_shared<ObjectTemplateNote>();
+	object->startTime = time;
+	object->endTime = time;
+	object->position = position;
+	object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
+	insertElement(object);
 }
 
 void MapInfo::addSlider(const SliderPathT &points, bool comboEnd, double time,
-                        double endTime, math::CurveType type, unsigned int repeats)
+						double endTime, math::CurveType type, unsigned int repeats)
 {
-    auto object = std::make_shared<ObjectTemplateSlider>();
-    object->startTime = time;
-    object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
-    object->path = points;
-    object->endTime = endTime;
-    object->sliderType = type;
-    object->repeats = math::Max(repeats, 1);
-    insertElement(object);
+	auto object = std::make_shared<ObjectTemplateSlider>();
+	object->startTime = time;
+	object->parameters |= comboEnd ? HitObjectParams::COMBO_END : HitObjectParams::NONE;
+	object->path = points;
+	object->endTime = endTime;
+	object->sliderType = type;
+	object->repeats = math::Max(repeats, 1);
+	insertElement(object);
 }
 
 void MapInfo::addSpinner(float spinRequired, float spinResistance, double time,
-                         double endTime, const fvec2d &position)
+						 double endTime, const fvec2d &position)
 {
-    auto object = std::make_shared<ObjectTemplateSpinner>();
-    object->startTime = time;
-    object->spinRequired = spinRequired;
-    object->spinResistance = spinResistance;
-    object->endTime = endTime;
-    object->position = position;
-    if (position != fvec2d{0, 0}) {
-        object->free = true;
-    }
-    insertElement(object);
+	auto object = std::make_shared<ObjectTemplateSpinner>();
+	object->startTime = time;
+	object->spinRequired = spinRequired;
+	object->spinResistance = spinResistance;
+	object->endTime = endTime;
+	object->position = position;
+	if (position != fvec2d{0, 0}) {
+		object->free = true;
+	}
+	insertElement(object);
 }
 
 void MapInfo::insertElement(std::shared_ptr<BaseObjectTemplate> obj)
 {
-    auto insertPoint =
-        std::find_if(objectTemplates.begin(), objectTemplates.end(),
-                     [&obj](const std::shared_ptr<BaseObjectTemplate> &checked)
-                     {
-                         return checked->startTime > obj->startTime;
-                     });
+	auto insertPoint =
+		std::find_if(objectTemplates.begin(), objectTemplates.end(),
+					 [&obj](const std::shared_ptr<BaseObjectTemplate> &checked)
+					 {
+						 return checked->startTime > obj->startTime;
+					 });
 
-    if (insertPoint == objectTemplates.end()) {
-        objectTemplates.push_back(obj);
-    }
-    else {
-        objectTemplates.insert(std::prev(insertPoint), obj);
-    }
+	if (insertPoint == objectTemplates.end()) {
+		objectTemplates.push_back(obj);
+	} else {
+		objectTemplates.insert(std::prev(insertPoint), obj);
+	}
 
 }
 
@@ -140,7 +139,7 @@ void MapInfo::setName(const std::string &name)
 
 void MapInfo::setDescription(const std::string &description)
 {
-    MapInfo::description = description;
+	MapInfo::description = description;
 }
 
 void MapInfo::setArtist(const std::string &artist)
@@ -148,27 +147,27 @@ void MapInfo::setArtist(const std::string &artist)
 
 void MapInfo::setDifficulty(const std::string &difficulty)
 {
-    MapInfo::difficulty = difficulty;
+	MapInfo::difficulty = difficulty;
 }
 
 void MapInfo::setSongPath(const std::string &songPath)
 {
-    MapInfo::songPath = songPath;
+	MapInfo::songPath = songPath;
 }
 
 void MapInfo::setCircleSize(float circleSize)
 {
-    MapInfo::circleSize = circleSize;
+	MapInfo::circleSize = circleSize;
 }
 
 void MapInfo::setStartOffset(float startOffset)
 {
-    MapInfo::startOffset = startOffset;
+	MapInfo::startOffset = startOffset;
 }
 
 void MapInfo::setMapDuration(double mapDuration)
 {
-    MapInfo::mapDuration = mapDuration;
+	MapInfo::mapDuration = mapDuration;
 }
 
 void MapInfo::setHpDrain(float hpDrain)
@@ -176,7 +175,7 @@ void MapInfo::setHpDrain(float hpDrain)
 
 void MapInfo::setApproachTime(float approachTime)
 {
-    MapInfo::approachTime = approachTime;
+	MapInfo::approachTime = approachTime;
 }
 
 void MapInfo::setHitWindow(float hitWindow)
@@ -187,69 +186,76 @@ void MapInfo::setFadeTime(float fadeTime)
 
 void MapInfo::setOverallDifficulty(float overallDifficulty)
 {
-    MapInfo::overallDifficulty = overallDifficulty;
+	MapInfo::overallDifficulty = overallDifficulty;
 }
 
 template<>
 Resource<MapInfo> Load(const std::filesystem::path &path)
 {
-    Resource<MapInfo> r;
+	Resource<MapInfo> r;
 
 	r->directory = path.parent_path();
 
-    if (path.extension() == ".osu")
-		LoadOSU(path, *r);
-    else if (path.extension() == ".map")
-		LoadMAP(path, *r);
-    else {
-        log::error("Unrecognized file type");
-		return nullptr;
-    }
+	bool success;
 
-	return r;
+	if (path.extension() == ".osu") {
+		success = LoadOSU(path, *r);
+	} else if (path.extension() == ".map") {
+		success = LoadMAP(path, *r);
+	} else {
+		log::error("Unrecognized file type");
+		return nullptr;
+	}
+
+	if (success) {
+		return r;
+	}
+
+	log::error("Failed to load map");
+	return nullptr;
 }
 
 const std::string &MapInfo::getRomanisedName() const
 {
-    return romanisedName;
+	return romanisedName;
 }
 
 void MapInfo::setRomanisedName(const std::string &romanisedName)
 {
-    MapInfo::romanisedName = romanisedName;
+	MapInfo::romanisedName = romanisedName;
 }
 
 const std::string &MapInfo::getRomanisedArtist() const
 {
-    return romanisedArtist;
+	return romanisedArtist;
 }
 void MapInfo::setRomanisedArtist(const std::string &romanisedArtist)
 {
-    MapInfo::romanisedArtist = romanisedArtist;
+	MapInfo::romanisedArtist = romanisedArtist;
 }
 const std::string &MapInfo::getSource() const
 {
-    return source;
+	return source;
 }
 void MapInfo::setSource(const std::string &source)
 {
-    MapInfo::source = source;
+	MapInfo::source = source;
 }
 const std::vector<std::string> &MapInfo::getTags() const
 {
-    return tags;
+	return tags;
 }
 void MapInfo::setTags(const std::vector<std::string> &tags)
 {
-    MapInfo::tags = tags;
+	MapInfo::tags = tags;
 }
 const std::string &MapInfo::getAuthor() const
 {
-    return author;
+	return author;
 }
 void MapInfo::setAuthor(const std::string &author)
 {
-    MapInfo::author = author;
+	MapInfo::author = author;
 }
 const std::filesystem::path &MapInfo::getDirectory() const
 {

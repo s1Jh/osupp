@@ -1,6 +1,7 @@
 # ide stuff
 cmake*/
 .*/**
+*.kdev4
 
 # default skin - only add once we all have custom assets
 assets/skins/default

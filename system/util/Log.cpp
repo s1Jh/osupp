@@ -23,6 +23,7 @@
 #include "Log.hpp"
 
 #include <thread>
+#include <mutex>
 
 NS_BEGIN
 
@@ -31,9 +32,9 @@ namespace log
 
 static std::recursive_mutex LogMutex;
 #ifdef RELEASE
-static Severity MinimumSeverity = Severity::INFO;
+static Severity MinimumSeverity = Severity::INF;
 #else
-static Severity MinimumSeverity = Severity::DEVELOPMENT;
+static Severity MinimumSeverity = Severity::DEV;
 #endif
 static bool Enabled = true;
 

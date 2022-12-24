@@ -24,49 +24,64 @@
 #include "define.hpp"
 
 #include <memory>
-#include <type_traits>
 #include <optional>
-#include <thread>
+#include <atomic>
 
 NS_BEGIN
 
-namespace tasks {
+namespace video
+{
 
-template<typename MessageT>
-class Response {
-	typedef std::remove_cvref_t<MessageT> MessageType;
-	typedef typename MessageType::ResultType ReplyType;
+class RenderingHandler;
+
+template <typename GLRepr> requires std::is_default_constructible_v<GLRepr>
+class GLResource
+{
 public:
-	explicit Response(std::shared_ptr<MessageType> originIn) : origin(originIn) {}
-
-	bool isComplete() {
-		return origin->isComplete();
+	GLResource(const GLResource& other)
+	{
+		bool otherState = other.wasUploaded;
+		wasUploaded = otherState;
+		data = std::make_unique<GLRepr>(*other.data);
 	}
 
-	std::optional<ReplyType> getReply() {
-		if (!isComplete()) {
-			return false;
-		}
+	GLResource(GLResource&& other) noexcept
+	{
+		bool otherState = other.wasUploaded;
+		wasUploaded = otherState;
+		data = std::make_unique<GLRepr>(*other.data);
+	}
 
-		if (bool(origin->result)) {
-			return *(origin->result);
+	inline const GLRepr &getGLData() const {
+		return *data;
+	}
+	inline bool uploaded() const { return wasUploaded; }
+
+	inline bool upload() {
+		auto newData = createData();
+		if (bool(newData)) {
+			invalidate();
+			*data = newData.value();
+			wasUploaded = true;
+			return true;
 		}
 		return false;
-	}
+	};
 
-	ReplyType waitResult() {
-		while (!isComplete()) {
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-		}
+protected:
+	GLResource() : wasUploaded(false) { data = std::make_shared<GLRepr>(); }
 
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return ReplyType{};
+	virtual std::optional<GLRepr> createData() = 0;
+	virtual void deleteData(const GLRepr&) = 0;
+
+	inline void invalidate() {
+		wasUploaded = false;
+		deleteData(*data);
 	}
 
 private:
-	std::shared_ptr<MessageType> origin;
+	std::shared_ptr<GLRepr> data;
+	std::atomic<bool> wasUploaded;
 };
 
 }

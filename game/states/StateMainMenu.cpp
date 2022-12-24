@@ -74,7 +74,7 @@ void State<GameState::MainMenu>::showDebugControl()
             } else {
                 if (ImGui::BeginListBox("Select installation")) {
                     for (const auto& install : installs) {
-                        if (ImGui::Selectable(install.path.c_str())) {
+                        if (ImGui::Selectable((const char*)install.path.c_str())) {
                             log::info("Importing from ", install.path);
                             showImportDialog = false;
                             compat::ImportOsuData(install.path);

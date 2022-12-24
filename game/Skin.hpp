@@ -69,20 +69,20 @@ private:
     std::filesystem::path directory;
     struct TextureInfo
     {
-        std::string path;
+        std::filesystem::path path;
         Resource<Texture> texture;
         std::vector<color8> tints = {WHITE};
         FPS_t animationFPS = DEFAULT_TEXTURE_FPS;
         int animationFrames = -1;
     };
     struct ShaderInfo
-    {
-        std::string path;
+	{
+		std::filesystem::path path;
         Resource<Shader> shader;
     };
     struct SoundInfo
-    {
-        std::string path;
+	{
+		std::filesystem::path path;
         Resource<SoundSample> sound;
     };
 

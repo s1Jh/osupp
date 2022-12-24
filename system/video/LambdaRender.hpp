@@ -23,50 +23,69 @@
 
 #include "define.hpp"
 
+#include "GraphicsContext.hpp"
+#include "Window.hpp"
+#include "StandardDrawCalls.hpp"
+
+#include <list>
+#include <array>
 #include <memory>
-#include <type_traits>
-#include <optional>
-#include <thread>
 
 NS_BEGIN
 
-namespace tasks {
+namespace video
+{
 
-template<typename MessageT>
-class Response {
-	typedef std::remove_cvref_t<MessageT> MessageType;
-	typedef typename MessageType::ResultType ReplyType;
+constexpr size_t RENDER_QUEUE_SIZE = 1024;
+
+class LambdaRender
+{
 public:
-	explicit Response(std::shared_ptr<MessageType> originIn) : origin(originIn) {}
+	LambdaRender();
 
-	bool isComplete() {
-		return origin->isComplete();
-	}
+	struct GenericMeshCollection
+	{
+		Mesh rect;
+		Mesh circle;
+		Mesh rectMask;
+		// etc...
+	};
 
-	std::optional<ReplyType> getReply() {
-		if (!isComplete()) {
+	[[nodiscard]] const GenericMeshCollection& getMeshes() const;
+
+	Window createWindow(const WindowConfiguration& config = {});
+	static bool ConfigureWindow(Window win, const WindowConfiguration& newConfig);
+	static WindowConfiguration GetWindowConfig(const Window& win);
+
+	bool ownsWindow(const Window& win);
+	bool update();
+
+	void begin();
+	void finish(const Window& win);
+
+	template <typename Arg1, typename ... Args>
+	bool draw(RenderTask<Arg1, Args...> taskIn) {
+		renderStackSize++;
+
+		if (renderStackSize > renderQueue.size()) {
+			renderStackSize = (int)renderQueue.size();
 			return false;
 		}
 
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return false;
-	}
-
-	ReplyType waitResult() {
-		while (!isComplete()) {
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return ReplyType{};
+		renderQueue[renderStackSize - 1] = std::make_shared<RenderTask<Arg1, Args...>>(std::move(taskIn));
+		return true;
 	}
 
 private:
-	std::shared_ptr<MessageType> origin;
+	static bool ApplyWindowConfiguration(Window& win, const WindowConfiguration& config);
+	static void ContextCloser(WindowHandle*);
+	WindowHandle *createWindowHandle();
+
+	GenericMeshCollection meshes;
+	std::shared_ptr<WindowHandle> contextHolder;
+	int renderStackSize{0};
+	std::array<std::shared_ptr<detail::BaseRenderTask>, RENDER_QUEUE_SIZE> renderQueue;
+	std::list<Window> openedWindows;
 };
 
 }

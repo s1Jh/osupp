@@ -23,52 +23,31 @@
 
 #include "define.hpp"
 
-#include <memory>
-#include <type_traits>
-#include <optional>
-#include <thread>
+#include "Mesh.hpp"
+#include "Texture.hpp"
+#include "Shader.hpp"
+#include "RenderTask.hpp"
+
+#include <functional>
 
 NS_BEGIN
 
-namespace tasks {
+template<>
+void Draw(color clearColor);
 
-template<typename MessageT>
-class Response {
-	typedef std::remove_cvref_t<MessageT> MessageType;
-	typedef typename MessageType::ResultType ReplyType;
-public:
-	explicit Response(std::shared_ptr<MessageType> originIn) : origin(originIn) {}
+template<>
+void Draw(const std::function<void()> &, const std::string &, bool *, int);
 
-	bool isComplete() {
-		return origin->isComplete();
-	}
+template<>
+void Draw(const video::Mesh &, const video::Shader &, const video::Shader::Uniforms &, const video::Shader::Textures &,
+		  const video::Shader::TransformMatrixUniform &);
 
-	std::optional<ReplyType> getReply() {
-		if (!isComplete()) {
-			return false;
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return false;
-	}
-
-	ReplyType waitResult() {
-		while (!isComplete()) {
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-		}
-
-		if (bool(origin->result)) {
-			return *(origin->result);
-		}
-		return ReplyType{};
-	}
-
-private:
-	std::shared_ptr<MessageType> origin;
-};
-
-}
+using ClearScreen = video::RenderTask<color>;
+using ImGuiWindow = video::RenderTask<const std::function<void()> &, const std::string &, bool *, int>;
+using GenericMesh = video::RenderTask<const video::Mesh &,
+									  const video::Shader &,
+									  const video::Shader::Uniforms &,
+									  const video::Shader::Textures &,
+									  const video::Shader::TransformMatrixUniform &>;
 
 NS_END

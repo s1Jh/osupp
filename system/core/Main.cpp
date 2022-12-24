@@ -68,20 +68,13 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+		ctx.state.update(delta);
+
         ctx.gfx.begin();
-
-        ctx.state.update(delta);
         ctx.state.draw();
+        ctx.gfx.finish(ctx.window);
 
-        ImGui::Render();
-        auto data = ImGui::GetDrawData();
-        if (data) {
-            ImGui_ImplOpenGL3_RenderDrawData(data);
-        }
-
-        ctx.gfx.end();
-
-        if (!ctx.gfx.runTasks()) {
+        if (!ctx.gfx.update()) {
             ctx.state.exit();
         }
 
