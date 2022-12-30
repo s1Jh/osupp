@@ -25,7 +25,6 @@
 #include "define.hpp"
 #include "Circle.hpp"
 #include "Enum.hpp"
-#include "Renderer.dpp"
 #include "Context.hpp"
 
 NS_BEGIN
@@ -56,7 +55,7 @@ NS_BEGIN
  * This method will return how well the object has been hit.
  **/
 
-class BaseHitObject
+class BaseHitObject : public ContextAware
 {
 public:
     void update(double delta);
@@ -151,7 +150,6 @@ protected:
 
 	[[nodiscard]] const Mat3f& getObjectTransform() const;
 
-	Context& ctx;
 	fcircle SOF;
 
 private:

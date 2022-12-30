@@ -1,10 +1,10 @@
 // TODO: Make this readme better.
 
-# notOsu
+# osu++
 
 Another open source clone of the popular circle clicking rhythm game, Osu!
 Written in C++, it tries to offer high performance and all QOL features you could think of. Written with hindsight in
-mind and designed to be expandable, notOsu is the perfect platform for not only playing, but experiments too.
+mind and designed to be expandable, osu++ is the perfect platform for not only playing, but experiments too.
 
 ## Building
 
@@ -37,7 +37,7 @@ OpenAL
 
 ## How to play
 
-Just like the game it's replicating, the main point of notOsu is to click circles which appear on you screen at the right
+Just like the game it's replicating, the main point of osu++ is to click circles which appear on you screen at the right
 time to the rhythm of music. There are three types of gameplay objects.
 
 The simplest of these are the humble notes. They appear as circles on screen To hit a note, simply move your cursor over

@@ -276,7 +276,7 @@ const KeyState &Keyboard::get(const Key key) const
 const KeyState &Keyboard::operator[](const Key key) const
 { return get(key); }
 
-void Keyboard::setViewport(WindowHandle *windowIn)
+void Keyboard::setViewport(video::WindowHandle *windowIn)
 { window = windowIn; }
 
 NS_END

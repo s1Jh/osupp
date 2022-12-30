@@ -44,13 +44,13 @@ unsigned int CheckALErrors(const std::string &file, int line,
 						   const std::string &helper = "");
 }
 
-#define CheckGLFW detail::CheckGLFWErrors(__FILE__, __LINE__)
-#define CheckGL detail::CheckGLErrors(__FILE__, __LINE__)
-#define CheckAL detail::CheckALErrors(__FILE__, __LINE__)
+#define CheckGLFW PROJECT_NAMESPACE::detail::CheckGLFWErrors(__FILE__, __LINE__)
+#define CheckGL PROJECT_NAMESPACE::detail::CheckGLErrors(__FILE__, __LINE__)
+#define CheckAL PROJECT_NAMESPACE::detail::CheckALErrors(__FILE__, __LINE__)
 
-#define CheckGLFWh(_helper) detail::CheckGLFWErrors(__FILE__, __LINE__, _helper)
-#define CheckGLh(_helper) detail::CheckGLErrors(__FILE__, __LINE__, _helper)
-#define CheckALh(_helper) detail::CheckALErrors(__FILE__, __LINE__, _helper)
+#define CheckGLFWh(_helper) PROJECT_NAMESPACE::detail::CheckGLFWErrors(__FILE__, __LINE__, _helper)
+#define CheckGLh(_helper) PROJECT_NAMESPACE::detail::CheckGLErrors(__FILE__, __LINE__, _helper)
+#define CheckALh(_helper) PROJECT_NAMESPACE::detail::CheckALErrors(__FILE__, __LINE__, _helper)
 
 unsigned int DumpGlErrors();
 

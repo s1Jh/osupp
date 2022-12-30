@@ -36,6 +36,8 @@
 /*--------------------------------------------------------------------------------------------------------------------*/
 #include "config.hpp"
 
+#define IMGUI_USER_CONFIG "IMGuiConfig.hpp"
+
 #ifndef GAME_TITLE
 #error("No game title defined")
 #endif
@@ -130,24 +132,6 @@ constexpr int VERSION_MAJOR = 0;
 constexpr int VERSION_MINOR = 8;
 
 constexpr int VERSION_PATCH = 5;
-
-constexpr const char *GL_VERSION_STR = "330 core";
-
-constexpr const char *GL_VERSION_PREPROCESSOR = "#version 330 core";
-
-constexpr const char *GL_DEFAULT_FRAGMENT_SHADER =
-    "out vec4 fragColor;"
-    "void main()"
-    "{"
-    "    fragColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);"
-    "}";
-
-constexpr const char *GL_DEFAULT_VERTEX_SHADER =
-    "layout(location = 0) in vec3 vPos;"
-    "void main()"
-    "{"
-    "    gl_Position = vec4(vPos, 1.0f);"
-    "}";
 
 /*====================================================================================================================*/
 /*  Default settings */

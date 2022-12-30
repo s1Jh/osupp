@@ -38,14 +38,11 @@ bool InitVideo()
 {
 	Context &ctx = GetContext();
 
-	if (!ctx.gfx.create()) {
-		return false;
-	}
+	video::WindowConfiguration config;
 
-	ctx.keyboard.setViewport(ctx.gfx.getWindowHandle());
-	ctx.mouse.setViewport(ctx.gfx.getWindowHandle());
+	ctx.window = ctx.gfx.createWindow(config);
 
-	return true;
+	return ctx.window->isOpen();
 }
 
 bool InitAudio()

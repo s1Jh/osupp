@@ -47,12 +47,12 @@ public:
 
 	[[nodiscard]] fvec2d position() const;
 
-    void setViewport(WindowHandle *n);
+    void setViewport(video::WindowHandle *n);
 
     void update();
 
 protected:
-    WindowHandle *parentViewport{nullptr};
+	video::WindowHandle *parentViewport{nullptr};
     ButtonState buttons[3];
 };
 

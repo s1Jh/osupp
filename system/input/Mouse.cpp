@@ -56,7 +56,7 @@ fvec2d Mouse::position() const
     return ret;
 }
 
-void Mouse::setViewport(WindowHandle *n)
+void Mouse::setViewport(video::WindowHandle *n)
 { parentViewport = n; }
 
 void Mouse::update()

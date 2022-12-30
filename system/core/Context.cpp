@@ -31,4 +31,8 @@ Context &GetContext()
     return ctx;
 }
 
+ContextAware::ContextAware() :
+	ctx(GetContext())
+{}
+
 NS_END

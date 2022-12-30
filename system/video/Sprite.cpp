@@ -27,11 +27,13 @@
 #include "Sprite.hpp"
 #include "Math.hpp"
 #include "Resource.hpp"
-#include "Drawables.hpp"
 
 #include <algorithm>
 
 NS_BEGIN
+
+namespace video
+{
 
 namespace detail
 {
@@ -188,23 +190,21 @@ const drect &Sprite::getRect() const
     return position;
 }
 
-BEGIN_RENDER_FUNCTOR_CONSTRUCTOR_DEFINITION(Sprite)
-{
-//    shader.load("sprite.shader");
 }
 
-void detail::RenderFunctor<Sprite>::operator()(Renderer &renderer, const Sprite &sprite, const Mat3f &transform)
+template<>
+void Draw(video::LambdaRender& renderer, const video::Sprite&)
 {
 	// FIXME: actually use the sprite shader?
 
 	//    const auto &spriteShader = getData().shader;
 
-    Mat3f shape =
-        math::MakeScaleMatrix<float>(sprite.getSize()) *
-            math::MakeRotationMatrix<float>(sprite.getRotation(), sprite.getPivotPoint()) *
-            math::MakeTranslationMatrix<float>(sprite.getPosition());
-    Mat3f texture = math::MakeScaleMatrix<float>(sprite.getClipRectSize()) *
-        math::MakeTranslationMatrix<float>(sprite.getClipRectPosition());
+//    Mat3f shape =
+//        math::MakeScaleMatrix<float>(sprite.getSize()) *
+//            math::MakeRotationMatrix<float>(sprite.getRotation(), sprite.getPivotPoint()) *
+//            math::MakeTranslationMatrix<float>(sprite.getPosition());
+//    Mat3f texture = math::MakeScaleMatrix<float>(sprite.getClipRectSize()) *
+//        math::MakeTranslationMatrix<float>(sprite.getClipRectPosition());
 
 //    renderer.draw(sprite.getRect(), VisualAppearance{
 //        .texture = sprite.getTexture().get(),

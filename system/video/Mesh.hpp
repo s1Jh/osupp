@@ -26,6 +26,7 @@
 #include "Matrix.hpp"
 #include "Resource.hpp"
 #include "Shader.hpp"
+#include "GLResource.hpp"
 
 #include <memory>
 #include <vector>
@@ -56,7 +57,14 @@ enum class RenderMode
 	Polygon
 };
 
-class Mesh
+struct GLMeshObjs
+{
+	unsigned int VAO = 0;
+	unsigned int VBO = 0;
+	unsigned int EBO = 0;
+};
+
+class Mesh : public GLResource<GLMeshObjs>
 {
 public:
 	Mesh() noexcept;
@@ -87,21 +95,11 @@ public:
 	unsigned int insertTriangle(const Vertex &v1, const Vertex &v2,
 								const Vertex &v3);
 
-	[[nodiscard]] bool isValid() const;
-
-	bool upload();
-
 	void deleteMesh();
 
 	[[nodiscard]] int getVertexCount() const;
 
 	[[nodiscard]] int getElementCount() const;
-
-	[[nodiscard]] unsigned int getVAO() const;
-
-	[[nodiscard]] unsigned int getVBO() const;
-
-	[[nodiscard]] unsigned int getEBO() const;
 
 	[[nodiscard]] RenderMode getRenderMode() const;
 
@@ -110,14 +108,8 @@ public:
 	[[nodiscard]] unsigned int getAttributeDescriptorCount() const;
 
 private:
-	struct GLObjs
-	{
-		unsigned int VAO = 0;
-		unsigned int VBO = 0;
-		unsigned int EBO = 0;
-	};
-
-	static void GLObjDeleter(GLObjs *obj);
+	std::optional<GLMeshObjs> createData() override;
+	void deleteData(const GLMeshObjs &repr) override;
 
 	Mat4<float> meshTransform;
 	std::vector<AttributeType> dataDescriptors;
@@ -129,8 +121,6 @@ private:
 	int totalDataPerVertex = 0;
 	int vertexCount = 0;
 	int elementCount = 0;
-
-	std::shared_ptr<GLObjs> data;
 };
 
 }

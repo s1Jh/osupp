@@ -27,7 +27,6 @@
 #include "Keyboard.hpp"
 #include "MapInfo.hpp"
 #include "Mouse.hpp"
-#include "Renderer.hpp"
 #include "SoundStream.hpp"
 #include "Skin.hpp"
 #include "InputMapper.hpp"
@@ -57,7 +56,7 @@ public:
 
     virtual void update(double delta);
 
-    virtual void draw(Renderer &);
+    virtual void draw();
 
     [[nodiscard]] double getCurrentTime() const;
 

@@ -55,6 +55,7 @@ public:
 	inline const GLRepr &getGLData() const {
 		return *data;
 	}
+
 	inline bool uploaded() const { return wasUploaded; }
 
 	inline bool upload() {

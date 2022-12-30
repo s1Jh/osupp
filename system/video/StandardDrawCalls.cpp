@@ -33,14 +33,14 @@
 NS_BEGIN
 
 template<>
-void Draw(color clearColor)
+void Draw(video::LambdaRender&, color clearColor)
 {
 	glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 template<>
-void Draw(const std::function<void()> &func, const std::string &title, bool *open, int flags)
+void Draw(video::LambdaRender&, const std::function<void()> &func, const std::string &title, bool *open, int flags)
 {
 	if (ImGui::Begin(title.c_str(), open, flags)) {
 		func();
@@ -49,17 +49,18 @@ void Draw(const std::function<void()> &func, const std::string &title, bool *ope
 }
 
 template<>
-void Draw(const Mesh &mesh, const Shader &shader, const Shader::Uniforms &uniforms, const Shader::Textures &textures,
-		  const Shader::TransformMatrixUniform &transform)
+void Draw(video::LambdaRender&, const video::Mesh &mesh, const video::Shader &shader,
+		  const video::Shader::Uniforms &uniforms, const video::Shader::Textures &textures,
+		  const video::Shader::TransformMatrixUniform &transform)
 {
 	if (!mesh.uploaded()) {
-		if (!const_cast<Mesh&>(mesh).upload()) {
+		if (!const_cast<video::Mesh&>(mesh).upload()) {
 			return;
 		}
 	}
 
 	if (!shader.uploaded()) {
-		if (!const_cast<Shader&>(shader).upload()) {
+		if (!const_cast<video::Shader&>(shader).upload()) {
 			return;
 		}
 	}
@@ -111,7 +112,7 @@ void Draw(const Mesh &mesh, const Shader &shader, const Shader::Uniforms &unifor
 
 	for (auto &texture : textures) {
 		if (!texture.second->uploaded()) {
-			if (!const_cast<Texture*>(texture.second)->upload()) {
+			if (!const_cast<video::Texture*>(texture.second)->upload()) {
 				continue;
 			}
 		}
@@ -125,9 +126,9 @@ void Draw(const Mesh &mesh, const Shader &shader, const Shader::Uniforms &unifor
 				   mesh.getElementCount(), GL_UNSIGNED_INT, nullptr);
 	CheckGLh("Draw");
 
-	Shader::unbind();
+	video::Shader::unbind();
 	for (auto &texture : textures) {
-		Texture::unbind(texture.first);
+		video::Texture::unbind(texture.first);
 	}
 	CheckGLh("Unbound");
 

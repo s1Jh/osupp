@@ -29,7 +29,7 @@
 
 NS_BEGIN
 
-static const char *CIRCLE_VERTEX_SHADER =
+constexpr const char *CIRCLE_VERTEX_SHADER =
     "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
     "position;uniform vec2 resolution;uniform float radius;uniform float "
     "aratio;uniform vec4 fill;uniform vec4 outline;uniform uint "
@@ -40,12 +40,12 @@ static const char *CIRCLE_VERTEX_SHADER =
     "outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    "
     "pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
 
-static const char *CIRCLE_FRAGMENT_SHADER =
+constexpr const char *CIRCLE_FRAGMENT_SHADER =
     "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 "
     "oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint "
     "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
 
-static const char *RECT_VERTEX_SHADER =
+constexpr const char *RECT_VERTEX_SHADER =
     "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
     "position;uniform vec2 resolution;uniform float radius;uniform float "
     "aratio;uniform vec4 fill;uniform vec4 outline;uniform uint "
@@ -56,12 +56,12 @@ static const char *RECT_VERTEX_SHADER =
     "outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    "
     "pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
 
-static const char *RECT_FRAGMENT_SHADER =
+constexpr const char *RECT_FRAGMENT_SHADER =
     "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 "
     "oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint "
     "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
 
-static const char *CUBOID_VERTEX_SHADER =
+constexpr const char *CUBOID_VERTEX_SHADER =
     "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
     "position;uniform vec2 resolution;uniform float radius;uniform float "
     "aratio;uniform vec4 fill;uniform vec4 outline;uniform uint "
@@ -72,9 +72,27 @@ static const char *CUBOID_VERTEX_SHADER =
     "outline_thickness;oRadius = radius;vec3 pos = aPos;pos *= radius;    "
     "pos.x /= aratio;pos += vec3(position, 0.0);gl_Position = vec4(pos, 1.0);}";
 
-static const char *CUBOID_FRAGMENT_SHADER =
+constexpr const char *CUBOID_FRAGMENT_SHADER =
     "#version 330 core\nout vec4 FragColor;in vec2 oResolution;in vec2 "
     "oCenter;in vec4 oFill;in vec4 oOutline;flat in float oRadius;flat in uint "
     "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
+
+constexpr const char *DEFAULT_FRAGMENT_SHADER =
+	"out vec4 fragColor;"
+	"void main()"
+	"{"
+	"    fragColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);"
+	"}";
+
+constexpr const char *DEFAULT_VERTEX_SHADER =
+	"layout(location = 0) in vec3 vPos;"
+	"void main()"
+	"{"
+	"    gl_Position = vec4(vPos, 1.0f);"
+	"}";
+
+constexpr const char *GL_VERSION_STR = "330 core";
+
+constexpr const char *GL_VERSION_PREPROCESSOR = "#version 330 core";
 
 NS_END

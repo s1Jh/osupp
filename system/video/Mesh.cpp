@@ -132,13 +132,6 @@ const Mat4<float> &Mesh::getTransform() const
 void Mesh::setTransform(Mat4<float> mat)
 { meshTransform = std::move(mat); }
 
-bool Mesh::isValid() const
-{
-	if (data)
-		return data->VAO != 0 && data->VBO != 0 && data->EBO != 0;
-	return false;
-}
-
 void Mesh::deleteMesh()
 {
 	if (!data)
@@ -153,42 +146,57 @@ void Mesh::deleteMesh()
 	CheckGLh("Buffer deletion");
 }
 
-bool Mesh::upload()
-{
-	data.reset(new GLObjs, GLObjDeleter);
-	deleteMesh();
+int Mesh::getVertexCount() const
+{ return vertexCount; }
 
-	glGenVertexArrays(1, &data->VAO);
-	glGenBuffers(1, &data->EBO);
-	glGenBuffers(1, &data->VBO);
+int Mesh::getElementCount() const
+{ return elementCount; }
+
+RenderMode Mesh::getRenderMode() const
+{ return renderMode; }
+
+void Mesh::setRenderMode(RenderMode renderModeIn)
+{
+	Mesh::renderMode = renderModeIn;
+}
+
+unsigned int Mesh::getAttributeDescriptorCount() const
+{
+	return dataDescriptors.size();
+}
+
+std::optional<GLMeshObjs> Mesh::createData()
+{
+	GLMeshObjs data;
+
+	glGenVertexArrays(1, &data.VAO);
+	glGenBuffers(1, &data.EBO);
+	glGenBuffers(1, &data.VBO);
 	if (CheckGLh("Buffer creation") != 0) {
 		deleteMesh();
-		return false;
+		return {};
 	}
 
 	vertexCount = (int)vertices.size() / totalDataPerVertex;
 	elementCount = (int)indices.size();
 
-	glBindVertexArray(data->VAO);
+	glBindVertexArray(data.VAO);
 	if (CheckGLh("Bind") != 0) {
-		deleteMesh();
-		return false;
+		return {};
 	}
-	glBindBuffer(GL_ARRAY_BUFFER, data->VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, data.VBO);
 	glBufferData(GL_ARRAY_BUFFER, (long)vertices.size() * sizeof(float),
 				 vertices.data(), GL_STATIC_DRAW);
 	if (CheckGLh("Vertex data upload") != 0) {
-		deleteMesh();
-		return false;
+		return {};
 	}
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data->EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 				 (long)indices.size() * sizeof(unsigned int), indices.data(),
 				 GL_STATIC_DRAW);
 	if (CheckGLh("Element data upload") != 0) {
-		deleteMesh();
-		return false;
+		return {};
 	}
 
 	long offset = 0;
@@ -206,65 +214,22 @@ bool Mesh::upload()
 
 	glBindVertexArray(0);
 	if (CheckGLh("Done") != 0) {
-		deleteMesh();
-		return false;
+		return {};
 	}
 
-	clear();
-
-	return true;
+	return data;
 }
 
-int Mesh::getVertexCount() const
-{ return vertexCount; }
-
-int Mesh::getElementCount() const
-{ return elementCount; }
-
-unsigned int Mesh::getVAO() const
+void Mesh::deleteData(const GLMeshObjs &obj)
 {
-	if (data)
-		return data->VAO;
-	return 0;
-}
-
-unsigned int Mesh::getVBO() const
-{
-	if (data)
-		return data->VBO;
-	return 0;
-}
-
-unsigned int Mesh::getEBO() const
-{
-	if (data)
-		return data->EBO;
-	return 0;
-}
-
-RenderMode Mesh::getRenderMode() const
-{ return renderMode; }
-
-void Mesh::setRenderMode(RenderMode renderModeIn)
-{
-	Mesh::renderMode = renderModeIn;
-}
-
-unsigned int Mesh::getAttributeDescriptorCount() const
-{
-	return dataDescriptors.size();
-}
-
-void Mesh::GLObjDeleter(Mesh::GLObjs *obj)
-{
-//    log::debug("Deleting mesh ", obj->VAO, " (", obj, ')');
-	if (obj->VAO != 0)
-		glDeleteVertexArrays(1, &obj->VAO);
-	if (obj->VBO != 0)
-		glDeleteBuffers(1, &obj->VBO);
-	if (obj->EBO != 0)
-		glDeleteBuffers(1, &obj->EBO);
+	if (obj.VAO != 0)
+		glDeleteVertexArrays(1, &obj.VAO);
+	if (obj.VBO != 0)
+		glDeleteBuffers(1, &obj.VBO);
+	if (obj.EBO != 0)
+		glDeleteBuffers(1, &obj.EBO);
 	CheckGLh("Buffer deletion");
+
 }
 
 }
@@ -274,7 +239,7 @@ Resource<video::Mesh> Load(const std::filesystem::path &path)
 {
 	Resource<video::Mesh> r;
     if (!LoadOBJ(path, *r.held))
-		return Resource<video::Mesh>(nullptr);
+		return {nullptr};
 
 	return r;
 }
@@ -286,9 +251,6 @@ Resource<video::Mesh> Create()
     r->setAttributeDescriptors({video::AttributeType::VEC2});
 	r->insertVertices({{-1.f, -1.f}, {0.f, 1.f}, {1.f, -1.f}});
 	r->insertIndices({0, 1, 2});
-
-    if (!r->upload())
-		return {nullptr};
 
 	return r;
 

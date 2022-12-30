@@ -52,12 +52,12 @@ public:
 
     Skin() = default;
 
-    FPS_t getAnimationFramerate(const std::string &object) const;
-    Resource<Texture> getTexture(const std::string &object);
-    color getTint(const std::string &object, unsigned int seed = 0) const;
-    int getFrameCount(const std::string &object) const;
+    [[nodiscard]] FPS_t getAnimationFramerate(const std::string &object) const;
+    Resource<video::Texture> getTexture(const std::string &object);
+	[[nodiscard]] color getTint(const std::string &object, unsigned int seed = 0) const;
+	[[nodiscard]] int getFrameCount(const std::string &object) const;
 
-    Resource<Shader> getShader(const std::string &object);
+    Resource<video::Shader> getShader(const std::string &object);
 
     Resource<SoundSample> getSound(const std::string &object);
 
@@ -70,7 +70,7 @@ private:
     struct TextureInfo
     {
         std::filesystem::path path;
-        Resource<Texture> texture;
+        Resource<video::Texture> texture;
         std::vector<color8> tints = {WHITE};
         FPS_t animationFPS = DEFAULT_TEXTURE_FPS;
         int animationFrames = -1;
@@ -78,7 +78,7 @@ private:
     struct ShaderInfo
 	{
 		std::filesystem::path path;
-        Resource<Shader> shader;
+        Resource<video::Shader> shader;
     };
     struct SoundInfo
 	{

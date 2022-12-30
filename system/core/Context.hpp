@@ -28,7 +28,7 @@
 #include "config.hpp"
 
 #include "StateHandler.hpp"
-#include "LambdaRender.dpp"
+#include "LambdaRender.hpp"
 #include "Keyboard.hpp"
 #include "Mouse.hpp"
 #include "Timing.hpp"
@@ -43,7 +43,7 @@ struct Context
 {
 	AudioDevice audio;
     StateHandler state;
-	video::LambdaRenderer gfx;
+	video::LambdaRender gfx;
 	video::Window window;
     Keyboard keyboard;
     Mouse mouse;
@@ -57,5 +57,13 @@ struct Context
 };
 
 Context &GetContext();
+
+class ContextAware {
+public:
+	ContextAware();
+
+protected:
+	Context &ctx;
+};
 
 NS_END

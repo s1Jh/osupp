@@ -108,7 +108,7 @@ struct KeyState
 class Keyboard
 {
 public:
-    void setViewport(WindowHandle *window);
+    void setViewport(video::WindowHandle *window);
 
     void update();
 
@@ -120,7 +120,7 @@ public:
 
 protected:
     static const int GLFWConversionTable[KEY_COUNT];
-    WindowHandle *window{nullptr};
+	video::WindowHandle *window{nullptr};
     KeyState *lastKey{nullptr};
     KeyState falseKey;
     KeyState keys[KEY_COUNT];

@@ -32,14 +32,21 @@
 
 NS_BEGIN
 
-template<>
-void Draw(color clearColor);
+namespace video {
+
+class LambdaRender;
+
+}
 
 template<>
-void Draw(const std::function<void()> &, const std::string &, bool *, int);
+void Draw(const video::LambdaRender& renderer, color clearColor);
 
 template<>
-void Draw(const video::Mesh &, const video::Shader &, const video::Shader::Uniforms &, const video::Shader::Textures &,
+void Draw(const video::LambdaRender& renderer, const std::function<void()> &, const std::string &, bool *, int);
+
+template<>
+void Draw(const video::LambdaRender& renderer, const video::Mesh &, const video::Shader &,
+		  const video::Shader::Uniforms &, const video::Shader::Textures &,
 		  const video::Shader::TransformMatrixUniform &);
 
 using ClearScreen = video::RenderTask<color>;

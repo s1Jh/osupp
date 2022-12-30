@@ -94,8 +94,7 @@ void AutoPilot::update()
 	}
 }
 
-AutoPilot::AutoPilot() :
-	ctx(GetContext())
+AutoPilot::AutoPilot()
 {
 	minVelocity = ctx.settings.addSetting<float>(
 		"setting.input.autopilot.min_speed", 5.0f,

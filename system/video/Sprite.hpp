@@ -26,7 +26,7 @@
 #include "Texture.hpp"
 #include "define.hpp"
 #include "df2.hpp"
-#include "Renderer.dpp"
+#include "RenderTask.hpp"
 #include "Shader.hpp"
 
 #include <memory>
@@ -34,6 +34,9 @@
 #include <vector>
 
 NS_BEGIN
+
+namespace video
+{
 
 class Sprite;
 
@@ -68,7 +71,7 @@ class Sprite
 public:
     Sprite();
 
-    explicit Sprite(const Resource<Texture> &tex);
+    explicit Sprite(const Resource<video::Texture> &tex);
     // Sprite ( const df2& def );
 
     template<class Animator, class... Args>
@@ -86,7 +89,7 @@ public:
 
     void update(double delta);
 
-    void setTexture(const Resource<Texture> &tex);
+    void setTexture(const Resource<video::Texture> &tex);
 
     void setClipRectSize(const dsize &n);
 
@@ -120,7 +123,7 @@ public:
 
     [[nodiscard]] drect getClipRect() const;
 
-    [[nodiscard]] Resource<Texture> getTexture() const;
+    [[nodiscard]] Resource<video::Texture> getTexture() const;
 
     [[nodiscard]] dvec2d getPosition() const;
 
@@ -146,11 +149,12 @@ private:
     fvec2d pivotPoint;
     drect position;
     drect clippingRect;
-	Resource<Texture> texture;
+	Resource<video::Texture> texture;
 };
 
-BEGIN_RENDER_FUNCTOR_DECL(Sprite, const Mat3f& = MAT3_NO_TRANSFORM<float>)
-        Shader shader;
-END_RENDER_FUNCTOR_DECL()
+}
+
+template<>
+void Draw(video::LambdaRender& renderer, const video::Sprite&);
 
 NS_END

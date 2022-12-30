@@ -26,7 +26,6 @@
 
 #include "Random.hpp"
 #include "Resource.hpp"
-#include "Util.hpp"
 #include "Context.hpp"
 
 NS_BEGIN
@@ -164,7 +163,8 @@ Resource<Skin> Load(const std::filesystem::path &path)
         // apply settings
         const auto &fields = entry.second;
 
-        std::filesystem::path texPath = files::Get(entry.first, r->directory, Resource<Texture>::allowedExtensions);
+        std::filesystem::path texPath = files::Get(entry.first, r->directory,
+												   Resource<video::Texture>::allowedExtensions);
         if (fields.find("texturePath") != fields.end()) {
             texPath = r->directory / fields["texturePath"].str(entry.first);
         }
@@ -195,14 +195,14 @@ Resource<Skin> Load(const std::filesystem::path &path)
     log::info("Loading skin assets...");
 
     for (auto &texture : r->textures) {
-        texture.second.texture = Load<Texture>(texture.second.path);
+        texture.second.texture = Load<video::Texture>(texture.second.path);
         failed += !bool(texture.second.texture);
     }
     for (const auto &shader : Skin::StaticGameShaders) {
         const auto &vertex = shader.second.first;
         const auto &fragment = shader.second.second;
         const auto &shaderObj = r->shaders[shader.first].shader;
-        failed += !bool(shaderObj->fromString(vertex, fragment));
+        shaderObj->fromString(vertex, fragment);
     }
     for (auto &sound : r->sounds) {
         sound.second.sound = Load<SoundSample>(sound.second.path);
@@ -234,7 +234,7 @@ int Skin::getFrameCount(const std::string &object) const
     return -1;
 }
 
-Resource<Texture> Skin::getTexture(const std::string &object)
+Resource<video::Texture> Skin::getTexture(const std::string &object)
 {
     if (textures.contains(object)) {
         return textures.at(object).texture;
@@ -242,8 +242,8 @@ Resource<Texture> Skin::getTexture(const std::string &object)
 
     auto &newTexture = textures[object];
 
-    newTexture.path = files::Get(object, directory, Resource<Texture>::allowedExtensions);
-    newTexture.texture = Load<Texture>(newTexture.path);
+    newTexture.path = files::Get(object, directory, Resource<video::Texture>::allowedExtensions);
+    newTexture.texture = Load<video::Texture>(newTexture.path);
 
     return newTexture.texture;
 }
@@ -266,7 +266,7 @@ color Skin::getTint(const std::string &object, unsigned int seed) const
     return tints.at(i);
 }
 
-Resource<Shader> Skin::getShader(const std::string &object)
+Resource<video::Shader> Skin::getShader(const std::string &object)
 {
     if (shaders.contains(object)) {
         return shaders.at(object).shader;
@@ -274,8 +274,8 @@ Resource<Shader> Skin::getShader(const std::string &object)
 
     auto &newShader = shaders[object];
 
-    newShader.path = files::Get(object, directory, Resource<Shader>::allowedExtensions);
-    newShader.shader = Load<Shader>(newShader.path);
+    newShader.path = files::Get(object, directory, Resource<video::Shader>::allowedExtensions);
+    newShader.shader = Load<video::Shader>(newShader.path);
 
     return newShader.shader;
 }

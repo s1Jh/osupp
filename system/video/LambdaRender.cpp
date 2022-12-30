@@ -244,7 +244,7 @@ void LambdaRender::finish(const Window& window)
 
 	for (int i = 0; i < renderStackSize; i++) {
 		auto &task = renderQueue[i];
-		task->invoke();
+		task->invoke(*this);
 	}
 
 	ImGui::Render();

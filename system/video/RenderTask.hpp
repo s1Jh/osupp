@@ -31,12 +31,14 @@ NS_BEGIN
 namespace video
 {
 
+class LambdaRender;
+
 namespace detail
 {
 
 struct BaseRenderTask
 {
-	virtual inline void invoke()
+	virtual inline void invoke(const LambdaRender& renderer)
 	{}
 };
 
@@ -51,9 +53,9 @@ struct RenderTask: public detail::BaseRenderTask
 		: params(first, others...)
 	{}
 
-	void invoke() override
+	void invoke(const LambdaRender& renderer) override
 	{
-		std::apply(Draw < Arg1, Args... > , params);
+		std::apply(Draw < Arg1, Args... > , renderer, params);
 	}
 
 	ParameterTupleType params;
