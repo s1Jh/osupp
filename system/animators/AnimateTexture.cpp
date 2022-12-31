@@ -28,8 +28,13 @@
 
 NS_BEGIN
 
-void AnimateTexture::applyTransform(org::sijh::NotOSU::Sprite &sprite,
-                                    double delta)
+namespace video
+{
+
+void AnimateTexture::applyTransform(
+    Sprite &sprite,
+    double delta
+)
 {
     frameTimer += float(delta);
 
@@ -40,42 +45,50 @@ void AnimateTexture::applyTransform(org::sijh::NotOSU::Sprite &sprite,
     }
 
     fvec2d offset = {layout == AnimationLayout::HORIZONTAL
-                     ? start.position.x + start.size.w * float(frameCounter)
-                     : 0,
-                     layout == AnimationLayout::VERTICAL
-                     ? start.position.y + start.size.h * float(frameCounter)
-                     : 0};
+        ? start.position.x + start.size.w * float(frameCounter)
+        : 0,
+        layout == AnimationLayout::VERTICAL
+            ? start.position.y + start.size.h * float(frameCounter)
+            : 0};
     frect newClip = Translate(start, offset);
 
     sprite.setClipRect(newClip);
 }
 
-AnimateTexture::AnimateTexture(Sprite &, unsigned int frameRate,
-                               unsigned int frameCount, frect firstFrame,
-                               AnimationLayout layout)
+AnimateTexture::AnimateTexture(
+    Sprite &, unsigned int frameRate,
+    unsigned int frameCount, frect firstFrame,
+    AnimationLayout layout
+)
     : layout(layout), start(firstFrame),
       frameTime(math::Max(1.0f / float(frameRate), 0.0f)), frameTimer(0.0f), frameCount(math::Max(frameCount, 0)),
       frameCounter(0)
 {}
 
-AnimateTexture::AnimateTexture(Sprite &, float frameTime,
-                               unsigned int frameCount, frect firstFrame,
-                               AnimationLayout layout)
+AnimateTexture::AnimateTexture(
+    Sprite &, float frameTime,
+    unsigned int frameCount, frect firstFrame,
+    AnimationLayout layout
+)
     : layout(layout), start(firstFrame),
       frameTime(math::Max(frameTime, 0.0f)), frameTimer(0.0f), frameCount(math::Max(frameCount, 0)),
       frameCounter(0)
 {}
 
-AnimateTexture::AnimateTexture(Sprite &sprite, unsigned int frameRate,
-                               AnimationLayout layout)
+AnimateTexture::AnimateTexture(
+    Sprite &sprite, unsigned int frameRate,
+    AnimationLayout layout
+)
     : layout(layout), start(UNIT_RECT<float>),
       frameTime(math::Max(1.0f / float(frameRate), 0.0f)), frameTimer(0.0f), frameCount(0), frameCounter(0)
 {
     calculateRectSize(sprite.getTexture()->getSize());
 }
 
-AnimateTexture::AnimateTexture(Sprite &sprite, float frameTime,
-                               AnimationLayout layout)
+AnimateTexture::AnimateTexture(
+    Sprite &sprite, float frameTime,
+    AnimationLayout layout
+)
     : layout(layout), start(UNIT_RECT<float>), frameTime(math::Max(frameTime, 0.0f)),
       frameTimer(0.0f), frameCount(0), frameCounter(0)
 {
@@ -87,8 +100,7 @@ void AnimateTexture::calculateRectSize(const fvec2d &size)
     if (layout == AnimationLayout::HORIZONTAL) {
         frameCount =
             int(size.x / math::Max(size.y, std::numeric_limits<float>::epsilon()));
-    }
-    else {
+    } else {
         frameCount =
             int(size.y / math::Max(size.x, std::numeric_limits<float>::epsilon()));
     }
@@ -96,15 +108,17 @@ void AnimateTexture::calculateRectSize(const fvec2d &size)
 
     auto slice = 1.0f / float(frameCount);
     start = {{
-                 layout == AnimationLayout::HORIZONTAL ? slice : 1,
-                 layout == AnimationLayout::HORIZONTAL ? 1 : slice,
-             },
-             {0, 0}};
+        layout == AnimationLayout::HORIZONTAL ? slice : 1,
+        layout == AnimationLayout::HORIZONTAL ? 1 : slice,
+    },
+        {0, 0}};
 }
 
 void AnimateTexture::firstTransform(Sprite &sprite)
 {
     applyTransform(sprite, 0.0);
+}
+
 }
 
 NS_END

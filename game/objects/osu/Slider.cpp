@@ -53,11 +53,11 @@ void Slider::onLogicUpdate(double delta)
     const auto currentRepeat = (unsigned int) (timeRunning * repeats / timeLength);
     repeatsLeft = repeats - currentRepeat;
 
-	TravelDirection nextDirection = currentRepeat % 2 == 1 ? TravelDirection::Backward : TravelDirection::Forward;
-	if (currentDirection != nextDirection && repeatsLeft > 0) {
-		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce.ref());
-		currentDirection = nextDirection;
-	}
+    TravelDirection nextDirection = currentRepeat % 2 == 1 ? TravelDirection::Backward : TravelDirection::Forward;
+    if (currentDirection != nextDirection && repeatsLeft > 0) {
+        ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce.ref());
+        currentDirection = nextDirection;
+    }
 
     curvePosition = std::fmod(progression * repeats, 1.0);
 
@@ -68,57 +68,55 @@ void Slider::onLogicUpdate(double delta)
     if (repeatsLeft == 0) [[unlikely]] {
         transferToPickup();
         SOF.position = getEndPosition();
-    }
-    else {
+    } else {
         SOF.position = curve.get<math::CurveType::STRAIGHT>(curvePosition);
     }
 
-	const float maxSOFSizeMultiplier = 3.0;
-	const float SOFGrowthFactor = 6.0f;
-	auto maxSOFSize = (float)ctx.game.getCircleSize() * maxSOFSizeMultiplier;
+    const float maxSOFSizeMultiplier = 3.0;
+    const float SOFGrowthFactor = 6.0f;
+    auto maxSOFSize = (float) ctx.game.getCircleSize() * maxSOFSizeMultiplier;
 
-	auto growthChunk = float(maxSOFSize * SOFGrowthFactor * delta);
+    auto growthChunk = float(maxSOFSize * SOFGrowthFactor * delta);
 
     if (isActive()) {
-		SOF.radius = maxSOFSize;
-		visualRingSize += growthChunk;
-	}
-    else {
-		SOF.radius = ctx.game.getCircleSize();
-		visualRingSize -= growthChunk;
-	}
+        SOF.radius = maxSOFSize;
+        visualRingSize += growthChunk;
+    } else {
+        SOF.radius = ctx.game.getCircleSize();
+        visualRingSize -= growthChunk;
+    }
 
-	visualRingSize = math::Clamp(
-		visualRingSize, ctx.game.getCircleSize(),
-		ctx.game.getCircleSize() * maxSOFSizeMultiplier
-		);
+    visualRingSize = math::Clamp(
+        visualRingSize, ctx.game.getCircleSize(),
+        ctx.game.getCircleSize() * maxSOFSizeMultiplier
+    );
 }
 
 void Slider::onBegin()
 {
-	startPoint = math::Min(ctx.game.getCurrentTime(), getStartTime());
+    startPoint = math::Min(ctx.game.getCurrentTime(), getStartTime());
 
-	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
-	started = true;
+    ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
+    started = true;
 }
 
 HitResult Slider::onFinish()
 {
     if (!started) {
-		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
-		return HitResult::MISSED;
-	}
+        ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
+        return HitResult::MISSED;
+    }
     if (broken) {
-		return HitResult::HIT100;
-	}
+        return HitResult::HIT100;
+    }
 
     return HitResult::HIT300;
 }
 
 void Slider::onRaise()
 {
-	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak.ref());
-	broken = true;
+    ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak.ref());
+    broken = true;
 }
 
 void Slider::onPress()
@@ -126,18 +124,18 @@ void Slider::onPress()
     started = true;
 }
 
-Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObjectArguments& args)
+Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObjectArguments &args)
     : OsuHitObject(std::move(templateIn), args), currentDirection(TravelDirection::Forward),
       broken(false), started(false), progression(0.0), curvePosition(0.0)
 {
     const auto &skin = ctx.activeSkin;
 
-	startPoint = getStartTime();
+    startPoint = getStartTime();
 
     bodyShader = skin->getShader(SLIDER_SHADER);
     bodyTexture = skin->createObjectSprite(SLIDER_BODY_SPRITE, args);
     ball = skin->createObjectSprite(SLIDER_BALL_SPRITE, args);
-	ballRing = skin->createObjectSprite(SLIDER_BALL_RING_SPRITE, args);
+    ballRing = skin->createObjectSprite(SLIDER_BALL_RING_SPRITE, args);
     head = skin->createObjectSprite(SLIDER_HEAD_SPRITE, args);
     headRepeat = skin->createObjectSprite(SLIDER_HEAD_REPEAT_SPRITE, args);
     tail = skin->createObjectSprite(SLIDER_TAIL_SPRITE, args);
@@ -148,7 +146,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
     // Initialize the variables to their defaults.
     auto &path = objectTemplate->path;
     SOF = {ctx.game.getCircleSize(),
-           {path.front().position}};
+        {path.front().position}};
     repeatsLeft = objectTemplate->repeats;
 
     /*============================================================================================================*/
@@ -174,8 +172,8 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
         if (i >= 2) {
             middleIt = std::prev(interpolatedPath.end(), 1);
             lastIt = std::prev(interpolatedPath.end(), 2);
-			auto lastPosition = lastIt->position;
-			auto midPosition = middleIt->position;
+            auto lastPosition = lastIt->position;
+            auto midPosition = middleIt->position;
             if (lastIt != interpolatedPath.end()) {
                 // Optimization #1: If a triplet of sequential points has a small enough
                 // angle, remove the middle point of this triplet.
@@ -214,80 +212,81 @@ void Slider::onDraw()
 {
     /*============================================================================================================*/
     // Prepare some constant variables.
-    const auto& objectTransform = getObjectTransform();
+    const auto &objectTransform = getObjectTransform();
     const auto circleSize = ctx.game.getCircleSize();
     const auto alpha = getAlpha();
 
-	/*============================================================================================================*/
-	// Draw the curve body.
+    /*============================================================================================================*/
+    // Draw the curve body.
 
-	if (bodyTexture.getTexture() && bodyShader) {
+    if (bodyTexture.getTexture() && bodyShader) {
 
-		for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
-			/*========================================================================================================*/
-			// Draw the bonus point.
-			const auto &node = *it;
+        for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
+            /*========================================================================================================*/
+            // Draw the bonus point.
+            const auto &node = *it;
 
-			if (it != std::prev(interpolatedPath.end())) {
-				fline seg{node.position, std::next(it)->position};
+            if (it != std::prev(interpolatedPath.end())) {
+                fline seg{node.position, std::next(it)->position};
 
-				auto offset = circleSize;
+                auto offset = circleSize;
 
-				auto right = (float)math::Max(seg.A.x, seg.B.x) + offset;
-				auto left = (float)math::Min(seg.A.x, seg.B.x) - offset;
-				auto top = (float)math::Max(seg.A.y, seg.B.y) + offset;
-				auto bottom = (float)math::Min(seg.A.y, seg.B.y) - offset;
+                auto right = (float) math::Max(seg.A.x, seg.B.x) + offset;
+                auto left = (float) math::Min(seg.A.x, seg.B.x) - offset;
+                auto top = (float) math::Max(seg.A.y, seg.B.y) + offset;
+                auto bottom = (float) math::Min(seg.A.y, seg.B.y) - offset;
 
-				frect rect = {
-					{
-						left - right,
-						top - bottom
-					},
-					{
-						(left + right) / 2.0f,
-						(top + bottom) / 2.0f,
-					}
-				};
+                frect rect = {
+                    {
+                        left - right,
+                        top - bottom
+                    },
+                    {
+                        (left + right) / 2.0f,
+                        (top + bottom) / 2.0f,
+                    }
+                };
 
-				Mat3f shape = math::MakeScaleMatrix<float>(rect.size) *
+                Mat3f shape = math::MakeScaleMatrix<float>(rect.size) *
                     math::MakeTranslationMatrix<float>(rect.position);
 
-				auto tint = bodyTexture.getTint();
-				tint.a = alpha;
-				glDepthFunc(GL_LEQUAL);
-				glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
-				ctx.gfx.draw(
-					GetGenericMeshes().rectMask, *bodyShader,
-					Shader::Uniforms{
-						{"resolution", (fvec2d)ctx.gfx.getSize()},
-						{"A", seg.A},
-						{"B", seg.B},
-						{"thickness", offset},
-						{"fill", &tint},
-						{"shape", &shape}
-					},
-					Shader::Textures{
-						{0, bodyTexture.getTexture().get()}
-					},
-					objectTransform
-				);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glDepthFunc(GL_ALWAYS);
-			}
-		}
-		glClearDepth(1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT);
-	}
-	/*============================================================================================================*/
-	// Draw curve decorations such as bonus points.
+                auto tint = bodyTexture.getTint();
+                tint.a = alpha;
+                // TODO: Depth functions and blend functions no longer get applied since we're drawing elsewhere
+                glDepthFunc(GL_LEQUAL);
+                glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+                ctx.gfx.draw(DrawMesh{
+                    ctx.gfx.getMeshes().rectMask, *bodyShader,
+                    video::Shader::Uniforms{
+                        {"resolution", (fvec2d) ctx.gfx.getConfig().size},
+                        {"A", seg.A},
+                        {"B", seg.B},
+                        {"thickness", offset},
+                        {"fill", tint},
+                        {"shape", shape}
+                    },
+                    video::Shader::Textures{
+                        {0, bodyTexture.getTexture().get()}
+                    },
+                    &objectTransform
+                });
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                glDepthFunc(GL_ALWAYS);
+            }
+        }
+        glClearDepth(1.0f);
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }
+    /*============================================================================================================*/
+    // Draw curve decorations such as bonus points.
 
-	ObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
-	for (const auto& node : interpolatedPath) {
-		if (node.bonus) {
-			hitPointInfo.destination.position = node.position;
-			ctx.gfx.draw(hitPoint, hitPointInfo);
-		}
-	}
+    ObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
+    for (const auto &node : interpolatedPath) {
+        if (node.bonus) {
+            hitPointInfo.destination.position = node.position;
+            ctx.gfx.draw(DrawObject{hitPoint, hitPointInfo});
+        }
+    }
 
     /*============================================================================================================*/
     // Draw the start decorations.
@@ -296,17 +295,17 @@ void Slider::onDraw()
     ObjectDrawInfo headInfo = {
         {{circleSize, circleSize}, startBumperPosition},
         alpha,
-        (Mat3f) Transform2D{
+        (Mat3f) video::Transform2D{
             .rotate = startBumperAngle,
             .rotationCenter = startBumperPosition
         } * objectTransform
     };
 
-    ctx.gfx.draw(head, headInfo);
+    ctx.gfx.draw(DrawObject{head, headInfo});
 
     if (repeatsLeft >= 3) {
-		ctx.gfx.draw(headRepeat, headInfo);
-	}
+        ctx.gfx.draw(DrawObject{headRepeat, headInfo});
+    }
 
     /*============================================================================================================*/
     // Draw the end decorations.
@@ -315,19 +314,19 @@ void Slider::onDraw()
     ObjectDrawInfo tailInfo = {
         {{circleSize, circleSize}, endBumperPosition},
         alpha,
-        (Mat3f) Transform2D{.rotate = endBumperAngle,
+        (Mat3f) video::Transform2D{.rotate = endBumperAngle,
             .rotationCenter = endBumperPosition} *
             objectTransform};
 
-    ctx.gfx.draw(tail, tailInfo);
+    ctx.gfx.draw(DrawObject{tail, tailInfo});
 
     if (repeatsLeft >= 2) {
-		ctx.gfx.draw(tailRepeat, tailInfo);
-	}
+        ctx.gfx.draw(DrawObject{tailRepeat, tailInfo});
+    }
 
-	/*============================================================================================================*/
-	// Draw the approach circle underneath the ball which is our starting target
-	drawApproachCircle();
+    /*============================================================================================================*/
+    // Draw the approach circle underneath the ball which is our starting target
+    drawApproachCircle();
 
     /*============================================================================================================*/
     // Draw the ball moving across the slider.
@@ -336,17 +335,18 @@ void Slider::onDraw()
 
     ObjectDrawInfo ballInfo = {
         {{circleSize, circleSize}, SOF.position}, alpha,
-        (Mat3f) Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
+        (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
             objectTransform};
 
-    ctx.gfx.draw(ball, ballInfo);
+    ctx.gfx.draw(DrawObject{ball, ballInfo});
 
-	ObjectDrawInfo ringInfo = {
-		{{visualRingSize, visualRingSize}, SOF.position}, alpha,
-		(Mat3f) Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
-			objectTransform};
-	if (isActive())
-		ctx.gfx.draw(ballRing, ringInfo);
+    ObjectDrawInfo ringInfo = {
+        {{visualRingSize, visualRingSize}, SOF.position}, alpha,
+        (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
+            objectTransform};
+    if (isActive()) {
+        ctx.gfx.draw(DrawObject{ballRing, ringInfo});
+    }
 }
 
 void Slider::onReset()
@@ -388,17 +388,16 @@ fvec2d Slider::getEndPosition() const
 {
     if (objectTemplate->repeats % 2 == 1) {
         return interpolatedPath.back().position;
-    }
-    else {
+    } else {
         return interpolatedPath.front().position;
     }
 }
 HitObjectFunction Slider::getActivationFunction() const
 {
-	if (getState() == HitObjectState::READY && ctx.game.getCurrentTime() < getStartTime()) {
-		return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_PRESSED;
-	} else {
-		return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_HELD;
-	}
+    if (getState() == HitObjectState::READY && ctx.game.getCurrentTime() < getStartTime()) {
+        return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_PRESSED;
+    } else {
+        return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_HELD;
+    }
 }
 }

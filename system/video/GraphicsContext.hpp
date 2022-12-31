@@ -45,10 +45,7 @@ bool IsExtensionSupported(const char *, const char *);
 namespace detail
 {
 
-WindowHandle *CreateWindowHandle();
-void FreeWindowHandle(WindowHandle *);
-bool InitContext();
-void DestroyContext();
+bool InitPlatformVideo();
 
 }
 

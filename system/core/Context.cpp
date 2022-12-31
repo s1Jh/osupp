@@ -32,7 +32,7 @@ Context &GetContext()
 }
 
 ContextAware::ContextAware() :
-	ctx(GetContext())
+    ctx(GetContext())
 {}
 
 NS_END

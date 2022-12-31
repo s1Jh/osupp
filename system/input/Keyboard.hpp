@@ -23,7 +23,6 @@
 #pragma once
 
 #include "define.hpp"
-#include "GraphicsContext.hpp"
 
 #include <iostream>
 
@@ -108,8 +107,6 @@ struct KeyState
 class Keyboard
 {
 public:
-    void setViewport(video::WindowHandle *window);
-
     void update();
 
     [[nodiscard]] const KeyState &getLastKey() const;
@@ -120,7 +117,6 @@ public:
 
 protected:
     static const int GLFWConversionTable[KEY_COUNT];
-	video::WindowHandle *window{nullptr};
     KeyState *lastKey{nullptr};
     KeyState falseKey;
     KeyState keys[KEY_COUNT];

@@ -22,7 +22,6 @@
 
 #include "Mesh.hpp"
 
-#include <fstream>
 #include <sstream>
 #include <utility>
 #include <filesystem>
@@ -132,20 +131,6 @@ const Mat4<float> &Mesh::getTransform() const
 void Mesh::setTransform(Mat4<float> mat)
 { meshTransform = std::move(mat); }
 
-void Mesh::deleteMesh()
-{
-	if (!data)
-		return;
-
-	if (data->VAO != 0)
-		glDeleteVertexArrays(1, &data->VAO);
-	if (data->VBO != 0)
-		glDeleteBuffers(1, &data->VBO);
-	if (data->EBO != 0)
-		glDeleteBuffers(1, &data->EBO);
-	CheckGLh("Buffer deletion");
-}
-
 int Mesh::getVertexCount() const
 { return vertexCount; }
 
@@ -173,7 +158,6 @@ std::optional<GLMeshObjs> Mesh::createData()
 	glGenBuffers(1, &data.EBO);
 	glGenBuffers(1, &data.VBO);
 	if (CheckGLh("Buffer creation") != 0) {
-		deleteMesh();
 		return {};
 	}
 

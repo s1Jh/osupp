@@ -98,10 +98,10 @@ void Spinner::onDraw()
     ObjectDrawInfo spinnerInfo{all, alpha, objectTransform};
     ObjectDrawInfo spinnerCenterInfo{
         all, alpha,
-        (Mat3f) Transform2D{.rotate = rotation, .rotationCenter = objectTemplate->position} * objectTransform};
+        (Mat3f) video::Transform2D{.rotate = rotation, .rotationCenter = objectTemplate->position} * objectTransform};
 
-    ctx.gfx.draw(spinner, spinnerInfo);
-	ctx.gfx.draw(spinnerCenter, spinnerCenterInfo);
+    ctx.gfx.draw(DrawObject{spinner, spinnerInfo});
+	ctx.gfx.draw(DrawObject{spinnerCenter, spinnerCenterInfo});
 }
 
 void Spinner::onReset()

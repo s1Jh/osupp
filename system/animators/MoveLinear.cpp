@@ -26,6 +26,9 @@
 
 NS_BEGIN
 
+namespace video
+{
+
 void MoveLinear::applyTransform(Sprite &spr, double delta)
 {
     elapsed += float(delta);
@@ -36,9 +39,13 @@ void MoveLinear::applyTransform(Sprite &spr, double delta)
         setFinished();
 }
 
-MoveLinear::MoveLinear(Sprite &, const dvec2d &from, const dvec2d &to,
-                       float time)
+MoveLinear::MoveLinear(
+    Sprite &, const dvec2d &from, const dvec2d &to,
+    float time
+)
     : totalTime(time), elapsed(0.f), from(from), to(to)
 {}
+
+}
 
 NS_END

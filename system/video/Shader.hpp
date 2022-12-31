@@ -110,11 +110,11 @@ public:
 	using AnyUniform =
 		std::variant<int, float, unsigned int, double, fvec2d, ivec2d, uvec2d,
 					 dvec2d, fvec3d, ivec3d, uvec3d, dvec3d, fvec4d, ivec4d,
-					 uvec4d, dvec4d, fvec2d *, ivec2d *, uvec2d *, dvec2d *,
-					 fvec3d *, ivec3d *, uvec3d *, dvec3d *, fvec4d *, ivec4d *,
-					 uvec4d *, dvec4d *, Mat2f *, Mat3f *, Mat4f *, color *,
-					 Texture *>;
-	using TransformMatrixUniform = std::variant<Mat2f *, Mat3f *, Mat4f*>;
+					 uvec4d, dvec4d, Mat2f, Mat3f, Mat4f, color,
+                     fvec2d *, ivec2d *, uvec2d *, dvec2d *,
+                     fvec3d *, ivec3d *, uvec3d *, dvec3d *, fvec4d *, ivec4d *,
+                     uvec4d *, dvec4d *, Mat2f *, Mat3f *, Mat4f *, color *>;
+	using TransformMatrixUniform = std::variant<const Mat2f *, const Mat3f *, const Mat4f*>;
     using Uniforms = std::unordered_map<std::string, AnyUniform>;
 
 protected:

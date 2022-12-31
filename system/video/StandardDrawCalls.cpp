@@ -33,14 +33,14 @@
 NS_BEGIN
 
 template<>
-void Draw(video::LambdaRender&, color clearColor)
+void Draw(color clearColor)
 {
 	glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 template<>
-void Draw(video::LambdaRender&, const std::function<void()> &func, const std::string &title, bool *open, int flags)
+void Draw(const std::function<void()> &func, const std::string &title, bool *open, int flags)
 {
 	if (ImGui::Begin(title.c_str(), open, flags)) {
 		func();
@@ -49,20 +49,16 @@ void Draw(video::LambdaRender&, const std::function<void()> &func, const std::st
 }
 
 template<>
-void Draw(video::LambdaRender&, const video::Mesh &mesh, const video::Shader &shader,
+void Draw(const video::Mesh &mesh, const video::Shader &shader,
 		  const video::Shader::Uniforms &uniforms, const video::Shader::Textures &textures,
 		  const video::Shader::TransformMatrixUniform &transform)
 {
 	if (!mesh.uploaded()) {
-		if (!const_cast<video::Mesh&>(mesh).upload()) {
-			return;
-		}
+        return;
 	}
 
 	if (!shader.uploaded()) {
-		if (!const_cast<video::Shader&>(shader).upload()) {
-			return;
-		}
+        return;
 	}
 
 	shader.use();
@@ -90,13 +86,17 @@ void Draw(video::LambdaRender&, const video::Mesh &mesh, const video::Shader &sh
 				MATCH(uniform.first, fvec2d) MATCH(uniform.first, ivec2d)MATCH(uniform.first, uvec2d)
 				MATCH(uniform.first, dvec2d) MATCH(uniform.first, fvec3d) MATCH(uniform.first, ivec3d)
 				MATCH(uniform.first, uvec3d) MATCH(uniform.first, dvec3d) MATCH(uniform.first, fvec4d)
-				MATCH(uniform.first, ivec4d)MATCH(uniform.first, uvec4d) MATCH(uniform.first, dvec4d)
-				MATCH(uniform.first, color) MATCHP(uniform.first, fvec2d *)MATCHP(uniform.first, ivec2d *)
-				MATCHP(uniform.first, uvec2d *) MATCHP(uniform.first, dvec2d *)MATCHP(uniform.first, fvec3d *)
-				MATCHP(uniform.first, ivec3d *) MATCHP(uniform.first, uvec3d *)MATCHP(uniform.first, dvec3d *)
-				MATCHP(uniform.first, fvec4d *)MATCHP(uniform.first, ivec4d *) MATCHP(uniform.first, uvec4d *)
-				MATCHP(uniform.first, dvec4d *) MATCHP(uniform.first, Mat2f *)MATCHP(uniform.first, Mat3f *)
-				MATCHP(uniform.first, Mat4f *)MATCHP(uniform.first, color *) END_MATCH(uniform.first)
+				MATCH(uniform.first, ivec4d) MATCH(uniform.first, uvec4d) MATCH(uniform.first, dvec4d)
+                MATCH(uniform.first, Mat2f) MATCH(uniform.first, Mat3f) MATCH(uniform.first, Mat4f)
+				MATCH(uniform.first, color) MATCHP(uniform.first, fvec2d *)
+                MATCHP(uniform.first, ivec2d *) MATCHP(uniform.first, uvec2d *)
+                MATCHP(uniform.first, dvec2d *) MATCHP(uniform.first, fvec3d *)
+				MATCHP(uniform.first, ivec3d *) MATCHP(uniform.first, uvec3d *)
+                MATCHP(uniform.first, dvec3d *) MATCHP(uniform.first, fvec4d *)
+                MATCHP(uniform.first, ivec4d *) MATCHP(uniform.first, uvec4d *)
+				MATCHP(uniform.first, dvec4d *) MATCHP(uniform.first, Mat2f *)
+                MATCHP(uniform.first, Mat3f *) MATCHP(uniform.first, Mat4f *)
+                MATCHP(uniform.first, color *) END_MATCH(uniform.first)
 			},
 			uniform.second);
 		CheckGLh("Set shader uniform " + uniform.first);
@@ -104,7 +104,7 @@ void Draw(video::LambdaRender&, const video::Mesh &mesh, const video::Shader &sh
 
 	std::visit([&](auto&& arg) {
 		using T = std::decay_t<decltype(arg)>;
-		MATCHFP("transform", Mat2f *) MATCHP("transform", Mat3f *) MATCHP("transform", Mat4f *) END_MATCH("transform")
+		MATCHFP("transform", const Mat2f *) MATCHP("transform", const Mat3f *) MATCHP("transform", const Mat4f *) END_MATCH("transform")
 	}, transform);
 
 	// TODO: Camera
@@ -136,6 +136,30 @@ void Draw(video::LambdaRender&, const video::Mesh &mesh, const video::Shader &sh
 #undef MATCH
 #undef MATCHP
 #undef END_MATCH
+}
+
+template<>
+void osupp::Draw(const fline &, const video::VisualAppearance &, const Mat3f &)
+{
+
+}
+
+template<>
+void osupp::Draw(const frect &, const video::VisualAppearance &, const Mat3f &)
+{
+
+}
+
+template<>
+void osupp::Draw(const fcircle &, const video::VisualAppearance &, const Mat3f &)
+{
+
+}
+
+template<>
+void osupp::Draw(const fvec2d &, const video::VisualAppearance &, const Mat3f &)
+{
+
 }
 
 NS_END

@@ -49,4 +49,8 @@
 #include "StateMainMenu.hpp"
 #endif
 
+#ifdef USER_DRAW_INCLUDES
+#include "ObjectSprite.hpp"
+#endif
+
 #define INITIAL_STATE Init

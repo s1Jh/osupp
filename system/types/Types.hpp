@@ -50,16 +50,6 @@ typedef unsigned int FPS_t;
 constexpr FPS_t operator ""_fps(unsigned long long int val)
 { return val; }
 
-enum class AnimationLayout: bool
-{
-    HORIZONTAL, VERTICAL
-};
-
-enum BlendMode
-{
-    NONE, MULTIPLY, ADD, SUBTRACT
-};
-
 namespace detail
 {
 

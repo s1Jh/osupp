@@ -188,12 +188,6 @@ constexpr const char *LINE_SHADER_FRAG =
 	"}";
 
 
-Transform2D::operator Mat3f() const
-{
-    return math::MakeTranslationMatrix(translate) *
-        math::MakeRotationMatrix<float>(rotate, rotationCenter) *
-        math::MakeScaleMatrix(scale) * math::MakeShearMatrix(shear);
-}
 
 void detail::DrawGeneric2DShape(const Renderer &renderer,
                                 const Mesh &mesh, const Mat3f &shape,

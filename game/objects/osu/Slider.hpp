@@ -75,7 +75,7 @@ protected:
     void onPress() override;
 
 private:
-    Resource<Shader> bodyShader;
+    Resource<video::Shader> bodyShader;
 
     ObjectSprite bodyTexture;
 	ObjectSprite ballRing;

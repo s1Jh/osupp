@@ -64,6 +64,7 @@ public:
 			invalidate();
 			*data = newData.value();
 			wasUploaded = true;
+
 			return true;
 		}
 		return false;

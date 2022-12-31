@@ -34,7 +34,7 @@
 
 NS_BEGIN
 
-bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh)
+bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh)
 {
     std::ifstream ifs(fpath);
     if (!ifs.is_open()) {
@@ -43,9 +43,9 @@ bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh)
 
     // will also clear the current mesh
     mesh.setAttributeDescriptors({
-                                     AttributeType::VEC3, // position
-                                     AttributeType::VEC3, // uv/w coordinate
-                                     AttributeType::VEC3  // normal
+                                     video::AttributeType::VEC3, // position
+                                     video::AttributeType::VEC3, // uv/w coordinate
+                                     video::AttributeType::VEC3  // normal
                                  });
 
     std::string strline;

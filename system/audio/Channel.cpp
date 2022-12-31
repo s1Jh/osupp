@@ -32,250 +32,299 @@ NS_BEGIN
 
 void Channel::generateBuffer(unsigned int buffer, const detail::BaseSound::BufferT &data)
 {
-	ALenum alFmt;
+    ALenum alFmt;
 
-	if (auto ptr = activeSound.lock()) {
+    if (auto ptr = activeSound.lock()) {
 
-		switch (ptr->getFormat()) {
-		case SampleFormat::MONO8: alFmt = AL_FORMAT_MONO8; break;
-		case SampleFormat::MONO16: alFmt = AL_FORMAT_MONO16; break;
-		case SampleFormat::STEREO8: alFmt = AL_FORMAT_STEREO8; break;
-		case SampleFormat::STEREO16: alFmt = AL_FORMAT_STEREO16; break;
-		default: alFmt = AL_FORMAT_STEREO8; break;
-		}
-		auto size = (ALsizei)data.size() * SampleInfo<detail::BaseSound::SampleT>::size;
+        switch (ptr->getFormat()) {
+            case SampleFormat::MONO8: alFmt = AL_FORMAT_MONO8;
+                break;
+            case SampleFormat::MONO16: alFmt = AL_FORMAT_MONO16;
+                break;
+            case SampleFormat::STEREO8: alFmt = AL_FORMAT_STEREO8;
+                break;
+            case SampleFormat::STEREO16: alFmt = AL_FORMAT_STEREO16;
+                break;
+            default: alFmt = AL_FORMAT_STEREO8;
+                break;
+        }
+        auto size = (ALsizei) data.size() * SampleInfo<detail::BaseSound::SampleT>::size;
 
-		alBufferData(buffer, alFmt, data.data(), size, ptr->getSampleRate());
-	}
+        alBufferData(buffer, alFmt, data.data(), size, ptr->getSampleRate());
+    }
 }
 
 void Channel::refillBuffer(unsigned int buffer)
 {
-	detail::BaseSound::BufferT newData;
+    detail::BaseSound::BufferT newData;
 
-	if (auto ptr = activeSound.lock()) {
-		ptr->fillBuffer(newData);
-	} else {
-		return;
-	}
+    if (auto ptr = activeSound.lock()) {
+        ptr->fillBuffer(newData);
+    } else {
+        return;
+    }
 
 //	log::debug("Filling buffer ", buffer, " with ", newData.size(), " samples");
-	generateBuffer(buffer, newData);
-	CheckALh("Filled buffer");
+    generateBuffer(buffer, newData);
+    CheckALh("Filled buffer");
 }
 
 void Channel::update()
 {
-	if (!held->ALSource)
-		return;
+    if (!held) {
+        return;
+    }
 
-	if (auto ptr = activeSound.lock()) {
-		if (ptr->isStreaming() && state == ChannelState::PLAYING) {
-			int processed;
-			alGetSourcei(held->ALSource, AL_BUFFERS_PROCESSED, &processed);
+    if (!held->ALSource) {
+        return;
+    }
 
-			while (processed--) {
-				CheckALh("before");
-				unsigned int buffer;
-				alSourceUnqueueBuffers(held->ALSource, 1, &buffer);
-				CheckALh("Unqueued buffer");
-				refillBuffer(buffer);
-				alSourceQueueBuffers(held->ALSource, 1, &buffer);
-				CheckALh("Queued buffer");
-			}
-		}
+    if (auto ptr = activeSound.lock()) {
+        if (ptr->isStreaming() && state == ChannelState::PLAYING) {
+            int processed;
+            alGetSourcei(held->ALSource, AL_BUFFERS_PROCESSED, &processed);
 
-		int momentaryState;
-		alGetSourcei(held->ALSource, AL_SOURCE_STATE, &momentaryState);
+            while (processed--) {
+                CheckALh("before");
+                unsigned int buffer;
+                alSourceUnqueueBuffers(held->ALSource, 1, &buffer);
+                CheckALh("Unqueued buffer");
+                refillBuffer(buffer);
+                alSourceQueueBuffers(held->ALSource, 1, &buffer);
+                CheckALh("Queued buffer");
+            }
+        }
 
-		switch (momentaryState) {
-		case AL_PLAYING:
-			state = ChannelState::PLAYING;
-			break;
-		case AL_PAUSED:
-			state = ChannelState::PAUSED;
-			break;
-		case AL_STOPPED:
-			state = ChannelState::STOPPED;
-			break;
-		case AL_INITIAL:
-			state = ChannelState::FREE;
-			break;
-		default:
-			break;
-		}
-	}
+        int momentaryState;
+        alGetSourcei(held->ALSource, AL_SOURCE_STATE, &momentaryState);
+
+        switch (momentaryState) {
+            case AL_PLAYING: state = ChannelState::PLAYING;
+                break;
+            case AL_PAUSED: state = ChannelState::PAUSED;
+                break;
+            case AL_STOPPED: state = ChannelState::STOPPED;
+                break;
+            case AL_INITIAL: state = ChannelState::FREE;
+                break;
+            default: break;
+        }
+    }
 }
 
 void Channel::setVolume(float fraction, float transitionTime)
 {
-	alSourcef(held->ALSource, AL_GAIN, fraction);
+    if (!held) {
+        return;
+    }
+    alSourcef(held->ALSource, AL_GAIN, fraction);
 }
 
 void Channel::play()
 {
-	state = ChannelState::PLAYING;
-	alSourcePlay(held->ALSource);
+    if (!held) {
+        return;
+    }
+
+    state = ChannelState::PLAYING;
+    alSourcePlay(held->ALSource);
 }
 
 void Channel::pause()
 {
-	state = ChannelState::PAUSED;
-	alSourcePause(held->ALSource);
+    if (!held) {
+        return;
+    }
+
+    state = ChannelState::PAUSED;
+    alSourcePause(held->ALSource);
 }
 
 void Channel::stop()
 {
-	state = ChannelState::STOPPED;
-	alSourceStop(held->ALSource);
+    if (!held) {
+        return;
+    }
 
-	if (auto ptr = activeSound.lock()) {
-		ptr->reset();
-	}
+    state = ChannelState::STOPPED;
+    alSourceStop(held->ALSource);
+
+    if (auto ptr = activeSound.lock()) {
+        ptr->reset();
+    }
 }
 
 void Channel::setLooping(bool isLooping)
 {
-	alSourcei(held->ALSource, AL_LOOPING, isLooping);
+    if (!held) {
+        return;
+    }
+
+    alSourcei(held->ALSource, AL_LOOPING, isLooping);
 }
 
 float Channel::seek(float position)
 {
-	alSourcef(held->ALSource, AL_SEC_OFFSET, position);
-	return position;
+    if (!held) {
+        return 0.0f;
+    }
+
+    alSourcef(held->ALSource, AL_SEC_OFFSET, position);
+    return position;
 }
 
 ChannelState Channel::getState() const
 {
-	return state;
+    return state;
 }
 
 SoundPriority Channel::getSoundPriority() const
 {
-	return currentPriority;
+    return currentPriority;
 }
 
 bool Channel::setSound(const std::weak_ptr<detail::BaseSound> &resource, bool startPlaying, SoundPriority priority)
 {
-	if (currentPriority > priority)
-		return false;
+    if (!held) {
+        return false;
+    }
+    if (currentPriority > priority) {
+        return false;
+    }
 
-	activeSound = resource;
+    activeSound = resource;
 
-	stop();
+    stop();
 
-	if (auto ptr = activeSound.lock()) {
-		currentPriority = priority;
+    if (auto ptr = activeSound.lock()) {
+        currentPriority = priority;
 
-		int queued;
-		alGetSourcei(held->ALSource, AL_BUFFERS_QUEUED, &queued);
-		if (queued != 0) {
-			std::vector<unsigned int> trash;
-			trash.resize(queued);
-			alSourceUnqueueBuffers(held->ALSource, queued, trash.data());
-			CheckAL;
-		}
+        int queued;
+        alGetSourcei(held->ALSource, AL_BUFFERS_QUEUED, &queued);
+        if (queued != 0) {
+            std::vector<unsigned int> trash;
+            trash.resize(queued);
+            alSourceUnqueueBuffers(held->ALSource, queued, trash.data());
+            CheckAL;
+        }
 
-		if (!ptr->isStreaming()) {
-			// we only need one buffer for samples
-			setupBuffers(1);
-			auto buffer = held->buffers[0];
-			detail::BaseSound::BufferT data;
-			ptr->fillBuffer(data);
-			generateBuffer(buffer, data);
-			alSourcei(held->ALSource, AL_BUFFER, buffer);
+        if (!ptr->isStreaming()) {
+            // we only need one buffer for samples
+            setupBuffers(1);
+            auto buffer = held->buffers[0];
+            detail::BaseSound::BufferT data;
+            ptr->fillBuffer(data);
+            generateBuffer(buffer, data);
+            alSourcei(held->ALSource, AL_BUFFER, buffer);
 
-		} else {
-			setupBuffers(AUDIO_STREAMING_BUFFERS);
-			alSourcei(held->ALSource, AL_BUFFER, 0);
-			CheckAL;
+        } else {
+            setupBuffers(AUDIO_STREAMING_BUFFERS);
+            alSourcei(held->ALSource, AL_BUFFER, 0);
+            CheckAL;
 
-			for (unsigned int i = 0; i < AUDIO_STREAMING_BUFFERS; i++) {
-				refillBuffer(held->buffers[i]);
-			}
+            for (unsigned int i = 0; i < AUDIO_STREAMING_BUFFERS; i++) {
+                refillBuffer(held->buffers[i]);
+            }
 
-			alSourceQueueBuffers(held->ALSource, held->buffers.size(), held->buffers.data());
-		}
+            alSourceQueueBuffers(held->ALSource, held->buffers.size(), held->buffers.data());
+        }
 
-		if (startPlaying)
-			play();
+        if (startPlaying) {
+            play();
+        }
 
-		return true;
-	}
-	else {
-		return false;
-	}
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool Channel::forceSetSound(const std::weak_ptr<detail::BaseSound> &resource, bool startPlaying)
 {
-	activeSound = resource;
-	if (startPlaying)
-		play();
-	else
-		stop();
+    if (!held) {
+        return false;
+    }
 
-	return true;
+    activeSound = resource;
+    if (startPlaying) {
+        play();
+    } else {
+        stop();
+    }
+
+    return true;
 }
 
 void Channel::setupBuffers(int count)
 {
-	CheckAL;
-	if (!held->buffers.empty()) {
-		alDeleteBuffers((int)held->buffers.size(), held->buffers.data());
-	}
+    if (!held) {
+        return;
+    }
 
-	held->buffers.resize(count, 0);
-	alGenBuffers((int)held->buffers.size(), held->buffers.data());
-	CheckALh("Reconfigured buffers");
+    CheckAL;
+    if (!held->buffers.empty()) {
+        alDeleteBuffers((int) held->buffers.size(), held->buffers.data());
+    }
+
+    held->buffers.resize(count, 0);
+    alGenBuffers((int) held->buffers.size(), held->buffers.data());
+    CheckALh("Reconfigured buffers");
 }
 
 bool Channel::setup()
 {
-	held = std::make_shared<ALStructures>();
+    held = std::make_shared<ALStructures>();
 
-	if (alIsSource(held->ALSource)) {
-		alDeleteSources(1, &held->ALSource);
-	}
+    if (alIsSource(held->ALSource)) {
+        alDeleteSources(1, &held->ALSource);
+    }
 
-	CheckAL;
-	alGenSources(1, &held->ALSource);
+    CheckAL;
+    alGenSources(1, &held->ALSource);
 
-	alSourcef(held->ALSource, AL_PITCH, 1);
-	alSourcef(held->ALSource, AL_GAIN, 1.0f);
-	alSource3f(held->ALSource, AL_POSITION, 0, 0, 0);
-	alSource3f(held->ALSource, AL_VELOCITY, 0, 0, 0);
-	alSourcei(held->ALSource, AL_LOOPING, AL_FALSE);
-	CheckAL;
+    alSourcef(held->ALSource, AL_PITCH, 1);
+    alSourcef(held->ALSource, AL_GAIN, 1.0f);
+    alSource3f(held->ALSource, AL_POSITION, 0, 0, 0);
+    alSource3f(held->ALSource, AL_VELOCITY, 0, 0, 0);
+    alSourcei(held->ALSource, AL_LOOPING, AL_FALSE);
+    CheckAL;
 
-	setupBuffers(held->buffers.size());
+    setupBuffers(held->buffers.size());
 
-	stop();
-	return alIsSource(held->ALSource);
+    stop();
+    return alIsSource(held->ALSource);
 }
 
 void Channel::ALStructureDeleter(Channel::ALStructures *struc)
 {
-	if (alIsSource(struc->ALSource)) {
-		alDeleteSources(1, &struc->ALSource);
-	}
+    if (alIsSource(struc->ALSource)) {
+        alDeleteSources(1, &struc->ALSource);
+    }
 
-	if (!struc->buffers.empty()) {
-		alDeleteBuffers((int)struc->buffers.size(), struc->buffers.data());
-	}
+    if (!struc->buffers.empty()) {
+        alDeleteBuffers((int) struc->buffers.size(), struc->buffers.data());
+    }
 }
 
 bool Channel::playSound(const std::weak_ptr<detail::BaseSound> &resource, SoundPriority priority)
 {
-	setLooping(false);
-	return setSound(resource, true, priority);
+    if (!held) {
+        return false;
+    }
+
+    setLooping(false);
+    return setSound(resource, true, priority);
 }
 
-Channel& Channel::loopSound(const std::weak_ptr<detail::BaseSound> &resource, SoundPriority priority)
+Channel &Channel::loopSound(const std::weak_ptr<detail::BaseSound> &resource, SoundPriority priority)
 {
-	setLooping(true);
-	setSound(resource, true, priority);
-	return *this;
+    if (!held) {
+        return *this;
+    }
+
+    setLooping(true);
+    setSound(resource, true, priority);
+    return *this;
 }
 
 NS_END

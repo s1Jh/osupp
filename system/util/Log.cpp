@@ -43,19 +43,19 @@ namespace detail
 
 bool BeginLogMessage(Severity msgSeverity)
 {
-    if (msgSeverity < MinimumSeverity) {
+    if (msgSeverity <= MinimumSeverity) {
         return false;
     }
 
     LogMutex.lock();
-    std::cout << '[' << std::this_thread::get_id() << "] ";
+    std::cout << '[' << std::hex << std::this_thread::get_id()<< std::dec << "] ";
     return true;
 }
 
 void Init()
 {
-    std::cin.tie(nullptr);
-    std::cout.sync_with_stdio(false);
+//    std::cin.tie(nullptr);
+//    std::cout.sync_with_stdio(false);
 }
 
 void EndLogMessage()

@@ -149,7 +149,6 @@ const std::map<std::string, std::pair<std::string, std::string>> Skin::StaticGam
 template<>
 Resource<Skin> Load(const std::filesystem::path &path)
 {
-    Context &ctx = GetContext();
     Resource<Skin> r;
 
     r->directory = path.parent_path();
@@ -203,6 +202,7 @@ Resource<Skin> Load(const std::filesystem::path &path)
         const auto &fragment = shader.second.second;
         const auto &shaderObj = r->shaders[shader.first].shader;
         shaderObj->fromString(vertex, fragment);
+        shaderObj->upload();
     }
     for (auto &sound : r->sounds) {
         sound.second.sound = Load<SoundSample>(sound.second.path);

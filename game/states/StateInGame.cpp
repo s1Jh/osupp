@@ -75,7 +75,7 @@ int State<GameState::InGame>::update(double delta)
 
 int State<GameState::InGame>::draw()
 {
-    ctx.game.draw(ctx.gfx);
+    ctx.game.draw();
 
 	const auto& transform = ctx.game.getTransform();
 
@@ -89,17 +89,17 @@ int State<GameState::InGame>::draw()
 		auto fill = LAVENDER;
 		fill.a = float(i) / float(length);
 
-		ctx.gfx.draw(fline{last, current}, VisualAppearance{.fillColor = fill}, transform);
+		ctx.gfx.draw(DrawLine{fline{last, current}, video::VisualAppearance{.fillColor = fill}, transform});
 
 		last = current;
 	}
 
 	const float cursorSize = ctx.game.getCircleSize();
 	ObjectDrawInfo cursorInfo{{{cursorSize, cursorSize}, ctx.game.getCursorPosition()}, 1.0f, transform};
-	ctx.gfx.draw(cursor, cursorInfo);
+	ctx.gfx.draw(DrawObject{cursor, cursorInfo});
 
 	ObjectDrawInfo playFieldInfo{ctx.game.getPlayField(), 1.0f, MAT3_NO_TRANSFORM<float>};
-	ctx.gfx.draw(playField, playFieldInfo);
+	ctx.gfx.draw(DrawObject{playField, playFieldInfo});
 
     return 0;
 }

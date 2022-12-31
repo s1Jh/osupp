@@ -25,6 +25,7 @@
 #include "define.hpp"
 
 #include "RenderTask.hpp"
+#include "Video.hpp"
 #include "Texture.hpp"
 #include "Types.hpp"
 
@@ -39,7 +40,7 @@ struct ObjectDrawInfo
 
 class ObjectSprite
 {
-	friend void Draw(const ObjectSprite&, const ObjectDrawInfo&);
+	friend void PROJECT_NAMESPACE::Draw<const ObjectSprite&, const ObjectDrawInfo&>(const ObjectSprite&, const ObjectDrawInfo&);
 public:
     ObjectSprite() = default;
 
@@ -58,7 +59,7 @@ public:
 protected:
     color tint{WHITE};
 	Resource<video::Texture> texture{nullptr};
-    AnimationLayout layout = AnimationLayout::HORIZONTAL;
+    video::AnimationLayout layout = video::AnimationLayout::HORIZONTAL;
     float frameTime = 0.0f;
     float frameTimer = 0.0f;
     unsigned int frameCount = 1;

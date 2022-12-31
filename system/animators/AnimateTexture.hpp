@@ -25,26 +25,37 @@
 #include "define.hpp"
 
 #include "Sprite.hpp"
-
+#include "Video.hpp"
 #include "Types.hpp"
 
 NS_BEGIN
 
+namespace video
+{
+
 class AnimateTexture: public detail::BaseAnimator
 {
 public:
-    AnimateTexture(Sprite &, FPS_t frameRate,
-                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
-    AnimateTexture(Sprite &, float frameTime,
-                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
+    AnimateTexture(
+        Sprite &, FPS_t frameRate,
+        AnimationLayout layout = AnimationLayout::HORIZONTAL
+    );
+    AnimateTexture(
+        Sprite &, float frameTime,
+        AnimationLayout layout = AnimationLayout::HORIZONTAL
+    );
 
-    AnimateTexture(Sprite &, FPS_t frameRate, unsigned int frameCount,
-                   frect firstFrame,
-                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
+    AnimateTexture(
+        Sprite &, FPS_t frameRate, unsigned int frameCount,
+        frect firstFrame,
+        AnimationLayout layout = AnimationLayout::HORIZONTAL
+    );
 
-    AnimateTexture(Sprite &, float frameTime, unsigned int frameCount,
-                   frect firstFrame,
-                   AnimationLayout layout = AnimationLayout::HORIZONTAL);
+    AnimateTexture(
+        Sprite &, float frameTime, unsigned int frameCount,
+        frect firstFrame,
+        AnimationLayout layout = AnimationLayout::HORIZONTAL
+    );
 
     void applyTransform(Sprite &sprite, double delta) override;
 
@@ -62,5 +73,7 @@ private:
     unsigned int frameCount;
     unsigned int frameCounter;
 };
+
+}
 
 NS_END

@@ -25,8 +25,9 @@
 #include "Math.hpp"
 
 #define GLFW_DLL
-
 #include <GLFW/glfw3.h>
+
+#include "Context.hpp"
 
 NS_BEGIN
 
@@ -41,11 +42,17 @@ const ButtonState &Mouse::right() const
 
 fvec2d Mouse::position() const
 {
-    dvec2d ret;
-    glfwGetCursorPos(TO_GLFW(parentViewport), &ret.x, &ret.y);
+    auto& ctx = GetContext();
+    auto& window = ctx.gfx.getWindow();
+    auto *handle = window.getHandle();
+    if (handle == nullptr) {
+        return {0, 0};
+    }
 
-    isize size;
-    glfwGetWindowSize(TO_GLFW(parentViewport), &size.w, &size.h);
+    dvec2d ret;
+    glfwGetCursorPos(TO_GLFW(handle), &ret.x, &ret.y);
+
+    isize size = window.size();
 
     auto shorter = double(math::Min(size.w, size.h)) / 2.0;
 
@@ -56,13 +63,15 @@ fvec2d Mouse::position() const
     return ret;
 }
 
-void Mouse::setViewport(video::WindowHandle *n)
-{ parentViewport = n; }
-
 void Mouse::update()
 {
+    auto& ctx = GetContext();
+    auto *handle = ctx.gfx.getWindow().getHandle();
+    if (handle == nullptr) {
+        return;
+    }
     for (size_t i = 0; i < 3; i++) {
-        bool state = glfwGetMouseButton(TO_GLFW(parentViewport), GLFW_MOUSE_BUTTON_1 + i);
+        bool state = glfwGetMouseButton(TO_GLFW(handle), GLFW_MOUSE_BUTTON_1 + i);
 
         auto &button = buttons[i];
 

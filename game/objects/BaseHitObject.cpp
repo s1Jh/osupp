@@ -50,7 +50,7 @@ fcircle BaseHitObject::getSOF() const
 { return SOF; }
 
 BaseHitObject::BaseHitObject()
-    : ctx(GetContext()), finished(false), timeStarted(0.0), timeFinished(0.0),
+    : finished(false), timeStarted(0.0), timeFinished(0.0),
 	  state(HitObjectState::INVISIBLE)
 {
     reset();

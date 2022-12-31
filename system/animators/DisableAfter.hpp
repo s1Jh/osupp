@@ -26,6 +26,9 @@
 
 NS_BEGIN
 
+namespace video
+{
+
 class DisableAfter: public detail::BaseAnimator
 {
 public:
@@ -39,5 +42,7 @@ private:
     float disableTime;
     float timer;
 };
+
+}
 
 NS_END

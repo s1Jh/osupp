@@ -29,6 +29,9 @@
 
 NS_BEGIN
 
+namespace video
+{
+
 constexpr const char *CIRCLE_VERTEX_SHADER =
     "#version 330 core\nlayout (location = 0) in vec3 aPos;uniform vec2 "
     "position;uniform vec2 resolution;uniform float radius;uniform float "
@@ -78,21 +81,19 @@ constexpr const char *CUBOID_FRAGMENT_SHADER =
     "oOutlineThickness;void main(){FragColor = oFill, 0.0;}";
 
 constexpr const char *DEFAULT_FRAGMENT_SHADER =
-	"out vec4 fragColor;"
-	"void main()"
-	"{"
-	"    fragColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);"
-	"}";
+    "out vec4 fragColor;"
+    "void main()"
+    "{"
+    "    fragColor = vec4(1.0f, 0.0f, 1.0f, 1.0f);"
+    "}";
 
 constexpr const char *DEFAULT_VERTEX_SHADER =
-	"layout(location = 0) in vec3 vPos;"
-	"void main()"
-	"{"
-	"    gl_Position = vec4(vPos, 1.0f);"
-	"}";
+    "layout(location = 0) in vec3 vPos;"
+    "void main()"
+    "{"
+    "    gl_Position = vec4(vPos, 1.0f);"
+    "}";
 
-constexpr const char *GL_VERSION_STR = "330 core";
-
-constexpr const char *GL_VERSION_PREPROCESSOR = "#version 330 core";
+}
 
 NS_END

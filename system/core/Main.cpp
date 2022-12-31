@@ -64,15 +64,10 @@ int main()
             ctx.state.setState(GameState::EXIT);
         }
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-		ctx.state.update(delta);
-
         ctx.gfx.begin();
+		ctx.state.update(delta);
         ctx.state.draw();
-        ctx.gfx.finish(ctx.window);
+        ctx.gfx.finish();
 
         if (!ctx.gfx.update()) {
             ctx.state.exit();

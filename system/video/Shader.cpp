@@ -172,7 +172,7 @@ std::optional<unsigned int> Shader::createData()
 
 void Shader::deleteData(const unsigned int &repr)
 {
-	//glDeleteProgram(repr);
+	glDeleteProgram(repr);
 }
 
 }

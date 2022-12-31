@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(PROJECT_NAME notOSUProj)
-set(TARGET_NAME notOSU)
+set(PROJECT_NAME osuppproject)
+set(TARGET_NAME osupp)
 
 project(${PROJECT_NAME})
 
@@ -176,7 +176,9 @@ else()
 
 	if (${FFMPEG_FOUND})
 		set(FFMPEG_HEADERS "${FFMPEG_INCLUDE_DIR}")
+		string(REPLACE ".so" ".so " FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES})
 		set(FFMPEG_LIBS "${FFMPEG_LIBRARIES}")
+		message(${FFMPEG_LIBRARIES})
 	else()
 		message(FATAL_ERROR "FFMPEG could not be located")
 	endif()
@@ -215,9 +217,9 @@ function(ConfigureLibrary LIBRARY_NAME)
 
 endfunction()
 
+ConfigureLibrary(OGL)
 ConfigureLibrary(GLFW)
 ConfigureLibrary(OAL)
-ConfigureLibrary(OGL)
 ConfigureLibrary(FFMPEG)
 ConfigureLibrary(FT2)
 
@@ -258,6 +260,7 @@ target_compile_definitions(${TARGET_NAME} PRIVATE
         $<$<CONFIG:Release>:RELEASE=1>
         $<$<CONFIG:RelWithDebInfo>:RELDEB=1>
         $<$<CONFIG:MinSizeRel>:MINREL=1>
+		IMGUI_USER_CONFIG="IMGuiConfig.hpp"
         )
 
 target_link_libraries(${TARGET_NAME} ${LIBS})

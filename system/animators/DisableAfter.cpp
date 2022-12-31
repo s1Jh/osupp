@@ -24,6 +24,9 @@
 
 NS_BEGIN
 
+namespace video
+{
+
 void DisableAfter::applyTransform(Sprite &, double delta)
 {
     timer += delta;
@@ -38,5 +41,7 @@ DisableAfter::DisableAfter(Sprite &, float time)
 
 void DisableAfter::finalTransform(Sprite &spr)
 { spr.disable(); }
+
+}
 
 NS_END

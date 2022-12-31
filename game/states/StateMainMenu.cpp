@@ -99,7 +99,7 @@ void State<GameState::MainMenu>::showDebugControl()
     if (showImGuiStack)
         ImGui::ShowStackToolWindow(&showImGuiStack);
 
-    auto size = (fsize) GetContext().gfx.getSize();
+    auto size = (fsize) GetContext().gfx.getConfig().size;
     ImGui::SetNextWindowSize({size.w, size.h});
     ImGui::SetNextWindowPos({0, 0});
     if (!ImGui::Begin("ui.main.title"_i18n.c_str(), nullptr,
@@ -178,7 +178,7 @@ int State<GameState::MainMenu>::update(double)
 
 int State<GameState::MainMenu>::draw()
 {
-    showDebugControl();
+    ctx.gfx.draw(ImGuiWindow {[&]() { showDebugControl(); }, "mm", nullptr, 0});
     return 0;
 }
 
@@ -208,7 +208,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
     static ImGuiTextFilter filter;
 
     const float playButtonWidth = 60.f;
-    auto size = (fsize) GetContext().gfx.getSize();
+    auto size = (fsize) GetContext().gfx.getConfig().size;
 
 
     ImGui::SameLine();
@@ -264,7 +264,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
                 char starRating[8] = "???";
                 ImGui::Text("%s", starRating);
                 ImGui::SameLine();
-                ImGui::Image(star->getID(), {iconSize, iconSize}, {0, 1}, {1, 0}, {0.8, 0.8, 0, 1});
+                ImGui::Image(star->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0}, {0.8, 0.8, 0, 1});
 
                 // Song name and selectable field
                 ImGui::TableNextColumn();
@@ -285,7 +285,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song overall difficulty
                 ImGui::TableNextColumn();
-                ImGui::Image(difficulty->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(difficulty->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char overallDiff[8];
                 sprintf(overallDiff, "%.1f", map->getOverallDifficulty());
@@ -293,7 +293,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song approach time
                 ImGui::TableNextColumn();
-                ImGui::Image(approach->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(approach->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char approachTime[8];
                 sprintf(approachTime, "%.1f", map->getApproachTime());
@@ -301,7 +301,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song circle size
                 ImGui::TableNextColumn();
-                ImGui::Image(circle->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(circle->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char circleSize[8];
                 sprintf(circleSize, "%.2f", map->getCircleSize());
@@ -309,7 +309,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song hit window time
                 ImGui::TableNextColumn();
-                ImGui::Image(window->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(window->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hitWindow[8];
                 sprintf(hitWindow, "%.1f", map->getHitWindow());
@@ -317,7 +317,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song HP drain
                 ImGui::TableNextColumn();
-                ImGui::Image(drain->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(drain->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
                 char hpDrain[8];
                 sprintf(hpDrain, "%.1f", map->getHpDrain());
@@ -325,7 +325,7 @@ void State<GameState::MainMenu>::showMainMenuTab()
 
                 // Song duration
                 ImGui::TableNextColumn();
-                ImGui::Image(duration->getID(), {iconSize, iconSize}, {0, 1}, {1, 0});
+                ImGui::Image(duration->getGLData(), {iconSize, iconSize}, {0, 1}, {1, 0});
                 ImGui::SameLine();
 
                 auto secsTotal = (int) map->getMapDuration();

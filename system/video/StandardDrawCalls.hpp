@@ -27,34 +27,56 @@
 #include "Texture.hpp"
 #include "Shader.hpp"
 #include "RenderTask.hpp"
+#include "Video.hpp"
+#include "Circle.hpp"
+#include "Line.hpp"
+#include "Rect.hpp"
+#include "Vec2.hpp"
 
 #include <functional>
 
 NS_BEGIN
 
-namespace video {
+namespace video
+{
 
 class LambdaRender;
 
 }
 
 template<>
-void Draw(const video::LambdaRender& renderer, color clearColor);
+void Draw(color clearColor);
 
 template<>
-void Draw(const video::LambdaRender& renderer, const std::function<void()> &, const std::string &, bool *, int);
+void Draw(const std::function<void()> &, const std::string &, bool *, int);
 
 template<>
-void Draw(const video::LambdaRender& renderer, const video::Mesh &, const video::Shader &,
-		  const video::Shader::Uniforms &, const video::Shader::Textures &,
+void Draw(const video::Mesh &, const video::Shader &,
+          const video::Shader::Uniforms &, const video::Shader::Textures &,
 		  const video::Shader::TransformMatrixUniform &);
+
+template<>
+void Draw(const fline &, const video::VisualAppearance&, const Mat3f&);
+
+template<>
+void Draw(const frect &, const video::VisualAppearance&, const Mat3f&);
+
+template<>
+void Draw(const fcircle &, const video::VisualAppearance&, const Mat3f&);
+
+template<>
+void Draw(const fvec2d &, const video::VisualAppearance&, const Mat3f&);
 
 using ClearScreen = video::RenderTask<color>;
 using ImGuiWindow = video::RenderTask<const std::function<void()> &, const std::string &, bool *, int>;
-using GenericMesh = video::RenderTask<const video::Mesh &,
+using DrawMesh    = video::RenderTask<const video::Mesh &,
 									  const video::Shader &,
 									  const video::Shader::Uniforms &,
 									  const video::Shader::Textures &,
 									  const video::Shader::TransformMatrixUniform &>;
+using DrawLine = video::RenderTask<const fline&, const video::VisualAppearance&, const Mat3f&>;
+using DrawRect = video::RenderTask<const frect&, const video::VisualAppearance&, const Mat3f&>;
+using DrawCircle = video::RenderTask<const fcircle&, const video::VisualAppearance&, const Mat3f&>;
+using DrawPoint = video::RenderTask<const fvec2d&, const video::VisualAppearance&, const Mat3f&>;
 
 NS_END

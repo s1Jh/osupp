@@ -27,7 +27,7 @@
 /* Common OpenGL configuration and includes                    */
 /***************************************************************/
 
-typedef unsigned char* GLubyteptr;
+typedef unsigned char *GLubyteptr;
 
 /***************************************************************/
 /* Linux OpenGL configuration and includes                     */
@@ -185,8 +185,8 @@ typedef ptrdiff_t GLsizeiptr;
     GLEXT ( void, VertexAttribIPointer, GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer ) \
     GLEXT ( void, DeleteBuffers, GLsizei n, const GLuint *buffers ) \
     GLEXT ( void, DeleteVertexArrays, GLsizei n, const GLuint *arrays ) \
-	GLEXT ( void, GenerateMipmap, GLenum target ) \
-	GLEXT ( void, GenerateTextureMipmap, GLuint texture ) \
+    GLEXT ( void, GenerateMipmap, GLenum target ) \
+    GLEXT ( void, GenerateTextureMipmap, GLuint texture ) \
     GLEXT ( GLubyteptr, GetStringi, GLenum value, GLuint index) \
     GLEXT( void, BlendFuncSeparate, GLenum dstRGB, GLenum dstAlpha, GLenum srcRGB, GLenum srcAlpha ) \
     GLEXT( void, BlendEquationSeparate, GLenum rgbMode, GLenum alphaMode ) \
@@ -196,8 +196,8 @@ typedef ptrdiff_t GLsizeiptr;
 #ifdef LINUX
 #   define GL_FUNC_LIST_WIN32
 #   define GL_FUNC_LIST_LINUX \
-	GLEXT( void, BindSampler, GLuint unit, GLuint sampler ) \
-	GLEXT( void, DrawElementsBaseVertex, GLenum mode, GLsizei count, GLenum type, void *indices, GLint basevertex )
+    GLEXT( void, BindSampler, GLuint unit, GLuint sampler ) \
+    GLEXT( void, DrawElementsBaseVertex, GLenum mode, GLsizei count, GLenum type, void *indices, GLint basevertex )
 #endif // LINUX
 
 #ifdef WIN32
@@ -220,7 +220,9 @@ GL_FUNC_LIST_WIN32
 #endif
 
 #ifdef LINUX
+
 GL_FUNC_LIST_LINUX
+
 #endif
 
 GL_FUNC_LIST_SHARED

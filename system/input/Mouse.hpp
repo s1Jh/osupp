@@ -24,7 +24,6 @@
 
 #include "define.hpp"
 #include "Vec2.hpp"
-#include "GraphicsContext.hpp"
 
 NS_BEGIN
 
@@ -47,12 +46,9 @@ public:
 
 	[[nodiscard]] fvec2d position() const;
 
-    void setViewport(video::WindowHandle *n);
-
     void update();
 
 protected:
-	video::WindowHandle *parentViewport{nullptr};
     ButtonState buttons[3];
 };
 

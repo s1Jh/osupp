@@ -33,16 +33,25 @@
 
 NS_BEGIN
 
+class ObjectSprite;
+class ObjectDrawInfo;
+
+namespace video {
+class LambdaRender;
+}
+
+template<>
+void Draw(video::LambdaRender& renderer, const ObjectSprite&, const ObjectDrawInfo&);
+
 namespace video
 {
+
 
 constexpr size_t RENDER_QUEUE_SIZE = 1024;
 
 class LambdaRender
 {
 public:
-	LambdaRender();
-
 	struct GenericMeshCollection
 	{
 		Mesh rect;
@@ -51,41 +60,42 @@ public:
 		// etc...
 	};
 
+    ~LambdaRender();
+
+    bool init();
+    bool initImGui();
+
 	[[nodiscard]] const GenericMeshCollection& getMeshes() const;
+	bool configure(const WindowConfiguration& newConfig);
+	[[nodiscard]] const WindowConfiguration& getConfig() const;
+    [[nodiscard]] const Window& getWindow() const;
 
-	Window createWindow(const WindowConfiguration& config = {});
-	static bool ConfigureWindow(Window win, const WindowConfiguration& newConfig);
-	static WindowConfiguration GetWindowConfig(const Window& win);
-
-	bool ownsWindow(const Window& win);
 	bool update();
 
 	void begin();
-	void finish(const Window& win);
+	void finish();
 
 	template <typename Arg1, typename ... Args>
-	bool draw(RenderTask<Arg1, Args...> taskIn) {
-		renderStackSize++;
+    bool draw(RenderTask<Arg1, Args...> taskIn) {
+        renderStackSize++;
 
-		if (renderStackSize > renderQueue.size()) {
-			renderStackSize = (int)renderQueue.size();
-			return false;
-		}
+        if (renderStackSize > renderQueue.size()) {
+            renderStackSize = (int)renderQueue.size();
+            return false;
+        }
 
-		renderQueue[renderStackSize - 1] = std::make_shared<RenderTask<Arg1, Args...>>(std::move(taskIn));
-		return true;
-	}
+        renderQueue[renderStackSize - 1] = std::make_shared<RenderTask<Arg1, Args...>>(std::move(taskIn));
+        return true;
+    }
 
 private:
 	static bool ApplyWindowConfiguration(Window& win, const WindowConfiguration& config);
-	static void ContextCloser(WindowHandle*);
-	WindowHandle *createWindowHandle();
+    static bool GenerateStaticGeometry(GenericMeshCollection& meshes);
 
 	GenericMeshCollection meshes;
-	std::shared_ptr<WindowHandle> contextHolder;
-	int renderStackSize{0};
+    Window window;
+	size_t renderStackSize{0};
 	std::array<std::shared_ptr<detail::BaseRenderTask>, RENDER_QUEUE_SIZE> renderQueue;
-	std::list<Window> openedWindows;
 };
 
 }

@@ -30,6 +30,6 @@
 
 NS_BEGIN
 
-bool LoadOBJ(const std::filesystem::path &fpath, Mesh &mesh);
+bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh);
 
 NS_END

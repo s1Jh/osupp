@@ -36,8 +36,6 @@
 /*--------------------------------------------------------------------------------------------------------------------*/
 #include "config.hpp"
 
-#define IMGUI_USER_CONFIG "IMGuiConfig.hpp"
-
 #ifndef GAME_TITLE
 #error("No game title defined")
 #endif
@@ -131,7 +129,7 @@ constexpr int VERSION_MAJOR = 0;
 
 constexpr int VERSION_MINOR = 8;
 
-constexpr int VERSION_PATCH = 5;
+constexpr int VERSION_PATCH = 6;
 
 /*====================================================================================================================*/
 /*  Default settings */

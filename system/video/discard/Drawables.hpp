@@ -33,42 +33,6 @@
 
 NS_BEGIN
 
-struct Transform2D
-{
-    operator Mat3f() const;
-
-    fvec2d translate = {0.f, 0.f};
-    float rotate = 0.f;
-    fvec2d rotationCenter = {0.0f, 0.0f};
-    fvec2d scale = {1.f, 1.f};
-    fvec2d shear = {0.f, 0.f};
-    bool reflectX = false;
-    bool reflectY = false;
-};
-
-// TODO: Transform3D
-
-struct VisualAppearance
-{
-    const Texture *texture = nullptr;
-    const Mat3f *uvTransform = nullptr;
-    BlendMode blendMode = BlendMode::MULTIPLY;
-    color fillColor = WHITE;
-    float outlineWidth = 0.01f;
-    color outlineColor = BLACK;
-    float zIndex = 0.0f;
-};
-
-constexpr VisualAppearance DEFAULT_APPEARANCE =
-    VisualAppearance{
-        .texture = nullptr,
-        .uvTransform = nullptr,
-        .blendMode = BlendMode::NONE,
-        .fillColor = WHITE,
-        .outlineWidth = 0.01f,
-        .outlineColor = BLACK,
-        .zIndex = 0.0f
-    };
 
 namespace detail
 {

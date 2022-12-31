@@ -64,20 +64,22 @@ struct WindowConfiguration
 	WindowVisibility shown{WindowVisibility::NONE};
 };
 
-struct WindowImpl
+struct Window
 {
 	friend class LambdaRender;
 public:
 	[[nodiscard]] inline bool isOpen() const { return open; }
 	inline void close() { wantsToBeOpen = false; }
-	inline WindowConfiguration getConfig() { return config; }
+	[[nodiscard]] inline const WindowConfiguration& getConfig() const { return config; }
+    [[nodiscard]] inline const isize& size() const { return config.size; }
+    [[nodiscard]] inline const WindowHandle* getHandle() const { return handle; }
 
 private:
-	WindowImpl() = default;
-	std::atomic<bool> open{true};
+	Window() = default;
+	std::atomic<bool> open{false};
 	std::atomic<bool> wantsToBeOpen{true};
 	WindowHandle *handle{nullptr};
-	ImGuiContext *imCtx;
+	ImGuiContext *imCtx{nullptr};
 	WindowConfiguration config {
 		DEFAULT_WINDOW_SIZE,
 		DEFAULT_WINDOW_REFRESH_RATE,
@@ -86,8 +88,6 @@ private:
 		DEFAULT_WINDOW_VISIBILITY
 	};
 };
-
-typedef std::shared_ptr<WindowImpl> Window;
 
 }
 

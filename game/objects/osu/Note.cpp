@@ -72,9 +72,9 @@ void Note::onDraw()
 
     ObjectDrawInfo info{SOF, getAlpha(), objectTransform};
 
-    ctx.gfx.draw(noteUnderlay, info);
-    ctx.gfx.draw(noteBase, info);
-	ctx.gfx.draw(noteOverlay, info);
+    ctx.gfx.draw(DrawObject{noteUnderlay, info});
+    ctx.gfx.draw(DrawObject{noteBase, info});
+	ctx.gfx.draw(DrawObject{noteOverlay, info});
 }
 
 void Note::onUpdate(double delta)

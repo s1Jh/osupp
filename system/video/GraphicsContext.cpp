@@ -25,36 +25,41 @@
 #include <GLFW/glfw3.h>
 #include <cstring>
 
-#include "Math.hpp"
 #include "GL.hpp"
 #include "Log.hpp"
-#include "Util.hpp"
 #include "Error.hpp"
-#include "NamedTask.hpp"
-#include "Tasks.hpp"
 
+#define GLEXT(ret, name, ...) \
+name##proc * gl##name;
 
-#include "backends/imgui_impl_glfw.h"
+#ifdef WIN32
+GL_FUNC_LIST_WIN32
+#endif
+
+#ifdef LINUX
+
+GL_FUNC_LIST_LINUX
+
+#endif
+
+GL_FUNC_LIST_SHARED
+
+#undef GLEXT
 
 NS_BEGIN
 
 namespace video
 {
 
-static WindowHandle *GLContextHandle = nullptr;
-static bool IsInit = false;
-
-
 namespace detail
 {
 
-bool InitContext()
-{
-	if (IsInit) {
-        return true;
-    }
+void OnGLFWError(int code, const char* description) {
+    log::custom("GLFW", description, " (", code, ")");
+}
 
-    IsInit = true;
+bool InitPlatformVideo()
+{
     log::info("Initializing GLFW");
     glfwSetErrorCallback(OnGLFWError);
 
@@ -64,9 +69,6 @@ bool InitContext()
     }
 
     log::info("GLFW version: ", glfwGetVersionString());
-
-    GLContextHandle = CreateWindowHandle();
-    glfwMakeContextCurrent(TO_GLFW(GLContextHandle));
 
     log::info("Loading OpenGL functions");
 #if defined(LINUX)
@@ -116,70 +118,12 @@ bool InitContext()
 #error "OpenGL loading for this platform is not implemented yet."
 #endif
 
-    log::info("OpenGL version: ", glGetString(GL_VERSION));
-    log::info("GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    log::info("Renderer: ", glGetString(GL_RENDERER));
-    log::info("Vendor: ", glGetString(GL_VENDOR));
+//    log::info("OpenGL version: ", glGetString(GL_VERSION));
+//    log::info("GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
+//    log::info("Renderer: ", glGetString(GL_RENDERER));
+//    log::info("Vendor: ", glGetString(GL_VENDOR));
 
-    log::debug("Generating standard meshes");
-
-    bool success = true;
-
-    GenericMeshes.rectMask.setAttributeDescriptors({
-                                                       AttributeType::VEC2 // position
-                                                   });
-    GenericMeshes.rectMask.insertVertices({{1.f, 1.f},
-                                              {1.f, -1.f},
-                                              {-1.f, -1.f},
-                                              {-1.f, 1.f}});
-    GenericMeshes.rectMask.insertIndices({0, 1, 2, 0, 3, 2});
-
-    // Create geometry for rectangular meshes
-    GenericMeshes.rect.setAttributeDescriptors({
-                                                   AttributeType::VEC2, // position
-                                                   AttributeType::VEC2  // uv
-                                               });
-    GenericMeshes.rect.insertVertices({{1.f, 1.f, 1.f, 1.f},
-                                          {1.f, -1.f, 1.f, 0.f},
-                                          {-1.f, -1.f, 0.f, 0.f},
-                                          {-1.f, 1.f, 0.f, 1.f}});
-    GenericMeshes.rect.insertIndices({0, 1, 2, 0, 3, 2});
-
-    const unsigned int resolution = 32;
-
-    double circle_rotation = 2.0_pi / (resolution - 1);
-    fvec2d circle_vec = {1.f, 0.f};
-
-    GenericMeshes.circle.setAttributeDescriptors({
-                                                     AttributeType::VEC2, // position
-                                                     AttributeType::VEC2  // uv
-                                                 });
-    GenericMeshes.circle.insertVertex({0.0, 0.0, 0.5f, 0.5f});
-
-    for (unsigned int i = 0; i < resolution; i++) {
-        fvec2d vec = {circle_vec.x, circle_vec.y};
-        fvec2d uv = (vec + 1.0f) / 2.0f;
-        GenericMeshes.circle.insertVertex({vec.x, vec.y, uv.x, uv.y});
-        GenericMeshes.circle.insertIndice(i);
-        circle_vec = math::Rotate(circle_vec, circle_rotation);
-    }
-    GenericMeshes.circle.insertIndice(1);
-
-    if (!success)
-        log::error("Failed to generate static geometry");
-
-    return success;
-}
-
-void DestroyContext()
-{
-	if (IsInit) {
-		log::info("Closing GLFW");
-        FreeWindowHandle(GLContextHandle);
-        GLContextHandle = nullptr;
-		glfwTerminate();
-		IsInit = false;
-	}
+    return true;
 }
 
 }

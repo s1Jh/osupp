@@ -44,7 +44,6 @@ struct Context
 	AudioDevice audio;
     StateHandler state;
 	video::LambdaRender gfx;
-	video::Window window;
     Keyboard keyboard;
     Mouse mouse;
     Timing timing;
@@ -60,10 +59,10 @@ Context &GetContext();
 
 class ContextAware {
 public:
-	ContextAware();
+    ContextAware();
 
 protected:
-	Context &ctx;
+    Context &ctx;
 };
 
 NS_END

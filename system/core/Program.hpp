@@ -24,6 +24,7 @@ constexpr InitLayers INIT_ALL_LAYERS = static_cast<InitLayers>(std::numeric_limi
 
 InitLayers Init(InitLayers layers = INIT_ALL_LAYERS);
 void Exit(int exitCode = 0);
+InitLayers GetInitializedLayers();
 
 }
 

@@ -29,6 +29,9 @@
 
 NS_BEGIN
 
+namespace video
+{
+
 class MoveLinear: public detail::BaseAnimator
 {
 public:
@@ -42,5 +45,7 @@ private:
     dvec2d from;
     dvec2d to;
 };
+
+}
 
 NS_END

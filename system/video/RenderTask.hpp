@@ -27,6 +27,11 @@
 
 NS_BEGIN
 
+template<typename ... Args>
+void Draw(Args...)
+{
+    WRAP_CONSTEXPR_ASSERTION("Draw method not implemented for these arguments");
+}
 
 namespace video
 {
@@ -38,8 +43,8 @@ namespace detail
 
 struct BaseRenderTask
 {
-	virtual inline void invoke(const LambdaRender& renderer)
-	{}
+    virtual inline void invoke()
+    {}
 };
 
 } // detail
@@ -47,26 +52,21 @@ struct BaseRenderTask
 template<typename Arg1, typename ... Args>
 struct RenderTask: public detail::BaseRenderTask
 {
-	using ParameterTupleType = std::tuple<Arg1, Args...>;
+    using ParameterTupleType = std::tuple<std::remove_cvref_t<Arg1>,
+                                          std::remove_cvref_t<Args>...>;
 
-	explicit RenderTask(Arg1 first, Args... others)
-		: params(first, others...)
-	{}
+    explicit RenderTask(Arg1 first, Args... others)
+        : params(first, others...)
+    {}
 
-	void invoke(const LambdaRender& renderer) override
-	{
-		std::apply(Draw < Arg1, Args... > , renderer, params);
-	}
+    void invoke() override
+    {
+        std::apply(Draw<Arg1, Args...>, params);
+    }
 
-	ParameterTupleType params;
+    ParameterTupleType params;
 };
 
 } // video
-
-template<typename ... Args>
-void Draw(Args...)
-{
-	WRAP_CONSTEXPR_ASSERTION("Draw method not implemented for these arguments");
-}
 
 NS_END

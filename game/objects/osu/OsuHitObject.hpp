@@ -74,10 +74,10 @@ protected:
 			float acSize = this->ctx.game.getCircleSize() * y;
 			acSize = math::Max(acSize, 0.0);
 
-			this->ctx.gfx.draw(approachCircle, ObjectDrawInfo{
+			this->ctx.gfx.draw(DrawObject{approachCircle, ObjectDrawInfo{
 				{{acSize, acSize}, this->SOF.position},
 				this->getAlpha(), transform
-			});
+			}});
 		}
 	}
 
