@@ -200,7 +200,8 @@ bool Channel::setSound(const std::weak_ptr<detail::BaseSound> &resource, bool st
         currentPriority = priority;
 
         int queued;
-        alGetSourcei(held->ALSource, AL_BUFFERS_QUEUED, &queued);
+        alGetSourcei(held->ALSource, AL_BUFFERS_PROCESSED, &queued);
+
         if (queued != 0) {
             std::vector<unsigned int> trash;
             trash.resize(queued);
@@ -262,13 +263,19 @@ void Channel::setupBuffers(int count)
     }
 
     CheckAL;
+
+    alSourceStop(held->ALSource);
+    alSourcei(held->ALSource, AL_BUFFER, 0);
+    CheckALh("Unqueued");
+
     if (!held->buffers.empty()) {
         alDeleteBuffers((int) held->buffers.size(), held->buffers.data());
+        CheckALh("Deleted old buffers");
     }
 
     held->buffers.resize(count, 0);
     alGenBuffers((int) held->buffers.size(), held->buffers.data());
-    CheckALh("Reconfigured buffers");
+    CheckALh("Generated new buffers");
 }
 
 bool Channel::setup()

@@ -34,14 +34,20 @@ NS_BEGIN
 
 namespace detail
 {
-int CheckGLFWErrors(const std::string &file, int line,
-                    const std::string &helper = "");
+int CheckGLFWErrors(
+    const std::string &file, int line,
+    const std::string &helper = ""
+);
 
-unsigned int CheckGLErrors(const std::string &file, int line,
-                         const std::string &helper = "");
+unsigned int CheckGLErrors(
+    const std::string &file, int line,
+    const std::string &helper = ""
+);
 
-unsigned int CheckALErrors(const std::string &file, int line,
-						   const std::string &helper = "");
+unsigned int CheckALErrors(
+    const std::string &file, int line,
+    const std::string &helper = ""
+);
 }
 
 #define CheckGLFW PROJECT_NAMESPACE::detail::CheckGLFWErrors(__FILE__, __LINE__)
@@ -59,16 +65,27 @@ std::vector<std::string> GetCharacterSeparatedValues(const std::string &in, char
 template<typename T>
 static T GetParam(const std::vector<std::string> &params, unsigned int param, T backup) noexcept
 {
-    if (param >= params.size())
+    if (param >= params.size()) {
         return backup;
+    }
 
-    if constexpr (std::is_same_v<T, std::string>)
+    if constexpr (std::is_same_v<T, std::string>) {
         return params[param];
-    else if constexpr (std::is_arithmetic_v<T>)
-        return static_cast<T>(std::strtod(params[param].c_str(), nullptr));
+    } else if constexpr (std::is_arithmetic_v<T>) {
+        const auto& p = params[param];
+        char *end;
+        T value = std::strtod(p.c_str(), &end);
+        if (end == p.c_str()) {
+            return backup;
+        }
+        return value;
+    }
 
     return backup;
 }
+
+std::size_t ReplaceAll(std::string& inout, std::string_view what, std::string_view with);
+std::size_t RemoveAll(std::string& inout, std::string_view what);
 
 /**
  * String trimming functions from https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring/217605#217605

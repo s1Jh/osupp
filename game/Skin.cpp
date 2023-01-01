@@ -165,8 +165,8 @@ Resource<Skin> Load(const std::filesystem::path &path)
 
         std::filesystem::path texPath = files::Get(entry.first, r->directory,
 												   Resource<video::Texture>::allowedExtensions);
-        if (fields.find("texturePath") != fields.end()) {
-            texPath = r->directory / fields["texturePath"].str(entry.first);
+        if (fields.find("path") != fields.end()) {
+            texPath = r->directory / fields["path"].str(entry.first);
         }
         object.path = texPath.string();
 

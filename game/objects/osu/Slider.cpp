@@ -37,6 +37,8 @@ void Slider::onUpdate(double delta)
     tail.update(delta);
     tailRepeat.update(delta);
     hitPoint.update(delta);
+    ballOverlay.update(delta);
+    ballUnderlay.update(delta);
 }
 
 void Slider::onLogicUpdate(double delta)
@@ -134,6 +136,8 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
     bodyShader = skin->getShader(SLIDER_SHADER);
     bodyTexture = skin->createObjectSprite(SLIDER_BODY_SPRITE, args);
     ball = skin->createObjectSprite(SLIDER_BALL_SPRITE, args);
+    ballOverlay = skin->createObjectSprite(SLIDER_BALL_OVERLAY_SPRITE, args);
+    ballUnderlay = skin->createObjectSprite(SLIDER_BALL_UNDERLAY_SPRITE, args);
     ballRing = skin->createObjectSprite(SLIDER_BALL_RING_SPRITE, args);
     head = skin->createObjectSprite(SLIDER_HEAD_SPRITE, args);
     headRepeat = skin->createObjectSprite(SLIDER_HEAD_REPEAT_SPRITE, args);
@@ -245,7 +249,7 @@ void Slider::onDraw()
             .thickness = circleSize,
             .bakedTexture = nullptr,
             .shader = bodyShader,
-            .alpha = alpha,
+            .alpha = alpha * 0.9f,
             .sprite = &bodyTexture,
             .transform = objectTransform
         };
@@ -312,7 +316,9 @@ void Slider::onDraw()
         (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
             objectTransform};
 
+    ctx.gfx.draw(DrawObject{ballUnderlay, ballInfo});
     ctx.gfx.draw(DrawObject{ball, ballInfo});
+    ctx.gfx.draw(DrawObject{ballOverlay, ballInfo});
 
     ObjectDrawInfo ringInfo = {
         {{visualRingSize, visualRingSize}, SOF.position}, alpha,

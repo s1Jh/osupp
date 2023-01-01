@@ -132,62 +132,6 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
 
 void ReadMeta(char type, std::stringstream &line, MapInfo &map)
 {
-    std::string buffer;
-    float fbuffer;
-    switch (type) {
-        case '0':
-            ReadString(line, buffer);
-            log::info("Map name: ", buffer);
-            map.setName(buffer);
-            break;
-        case '1':
-            ReadString(line, buffer);
-            log::info("Map description: ", buffer);
-            map.setDescription(buffer);
-            break;
-        case '2':
-            ReadString(line, buffer);
-            log::info("Song artist: ", buffer);
-            map.setArtist(buffer);
-            break;
-        case '3':
-            ReadString(line, buffer);
-            log::info("Difficulty description: ", buffer);
-            map.setDifficulty(buffer);
-            break;
-        case '4':
-            line >> fbuffer;
-            log::info("Applying start offset of ", fbuffer);
-            map.setStartOffset(fbuffer);
-            break;
-        case '5':
-            line >> fbuffer;
-            log::info("Applying approach time of ", fbuffer);
-            map.setApproachTime(fbuffer);
-            break;
-        case '6':
-            line >> fbuffer;
-            log::info("Applying circle size of ", fbuffer);
-            map.setCircleSize(fbuffer);
-            break;
-        case '7':
-            line >> fbuffer;
-            log::info("Applying HP drain of ", fbuffer);
-            map.setHpDrain(fbuffer);
-            break;
-        case '8':
-            line >> fbuffer;
-            log::info("Applying overall difficulty of ", fbuffer);
-            map.setOverallDifficulty(fbuffer);
-            break;
-        case '9':
-            ReadString(line, buffer);
-            log::info("Song path: ", buffer);
-            map.setSongPath(buffer);
-            break;
-        default:
-            break;
-    }
 }
 
 void ReadEvent(float &elementTime, char type, std::stringstream &line,

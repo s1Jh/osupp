@@ -47,6 +47,7 @@ public:
 
 private:
 	std::vector<fvec2d> cursorTrail;
+    Resource<video::Texture> background;
 	int trailIndex{0};
 	ObjectSprite playField;
 	ObjectSprite cursor;

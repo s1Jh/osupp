@@ -33,82 +33,104 @@ NS_BEGIN
 
 int State<GameState::InGame>::update(double delta)
 {
-	if (ctx.keyboard[Key::ESC].releasing || (endTimer.isDone())) {
-		ctx.state.setState(GameState::MainMenu);
-	}
+    if (ctx.keyboard[Key::ESC].releasing || (endTimer.isDone())) {
+        ctx.state.setState(GameState::MainMenu);
+    }
 
-	playField.update(delta);
-	cursor.update(delta);
+    playField.update(delta);
+    cursor.update(delta);
 
-	ctx.game.update(delta);
+    ctx.game.update(delta);
 
-	// Timers are too unreliable to control when music should start, so we use the actual game time to start it instead
-	if ((ctx.game.getCurrentTime() >= (-ctx.game.getStartOffset())) && !musicStarted) {
-		musicStarted = true;
+    // Timers are too unreliable to control when music should start, so we use the actual game time to start it instead
+    if ((ctx.game.getCurrentTime() >= (-ctx.game.getStartOffset())) && !musicStarted) {
+        musicStarted = true;
 
-		auto info = ctx.game.getMap();
-		auto& channel = ctx.audio.getMusicChannel();
-		musicTrack = Load<SoundStream>(info->getDirectory() / info->getSongPath());
-		channel.setSound(musicTrack.ref(), true);
-	}
+        auto info = ctx.game.getMap();
+        auto &channel = ctx.audio.getMusicChannel();
+        musicTrack = Load<SoundStream>(info->getDirectory() / info->songPath);
+        channel.setSound(musicTrack.ref(), true);
+    }
 
-	if (ctx.game.isFinished() && !endTimer.isRunning()) {
-		endTimer.setTime(2.5);
-		endTimer.setMode(TimerMode::SINGLE);
-		endTimer.start();
-	}
+    if (ctx.game.isFinished() && !endTimer.isRunning()) {
+        endTimer.setTime(2.5);
+        endTimer.setMode(TimerMode::SINGLE);
+        endTimer.start();
+    }
 
-	cursorTrail[trailIndex] = ctx.game.getCursorPosition();
-	trailIndex++;
-	trailIndex %= cursorTrail.size();
+    cursorTrail[trailIndex] = ctx.game.getCursorPosition();
+    trailIndex++;
+    trailIndex %= cursorTrail.size();
 
-	if (ctx.keyboard[Key::F1].releasing)
-		ctx.game.setInputMapper(std::make_unique<HumanInput>());
-	if (ctx.keyboard[Key::F2].releasing)
-		ctx.game.setInputMapper(std::make_unique<AutoPilot>());
+    if (ctx.keyboard[Key::F1].releasing) {
+        ctx.game.setInputMapper(std::make_unique<HumanInput>());
+    }
+    if (ctx.keyboard[Key::F2].releasing) {
+        ctx.game.setInputMapper(std::make_unique<AutoPilot>());
+    }
 
-	if (ctx.keyboard[Key::SPACE].releasing)
-		ctx.game.skipToFirst();
+    if (ctx.keyboard[Key::SPACE].releasing) {
+        ctx.game.skipToFirst();
+    }
 
     return 0;
 }
 
 int State<GameState::InGame>::draw()
 {
+    float oppacity = 0.5;
+    color bgTint;
+    bgTint.r = oppacity;
+    bgTint.g = oppacity;
+    bgTint.b = oppacity;
+    bgTint.a = oppacity;
+    if (background) {
+        ctx.gfx.draw(
+            DrawRect {
+                UNIT_RECT<float>,
+                video::VisualAppearance {
+                    .texture = background.get(),
+                    .fillColor = bgTint,
+                    .flags = video::AppearanceFlags::IGNORE_CAMERA
+                },
+                MAT3_NO_TRANSFORM<float>
+            }
+        );
+    }
     ctx.game.draw();
 
-	const auto& transform = ctx.game.getTransform();
+    const auto &transform = ctx.game.getTransform();
 
-	fvec2d last = cursorTrail[trailIndex];
-	auto length = (int) cursorTrail.size();
+    fvec2d last = cursorTrail[trailIndex];
+    auto length = (int) cursorTrail.size();
 
-	for (int i = 1; i < length; i++) {
-		int realIndex = (trailIndex + i) % length;
-		fvec2d current = cursorTrail[realIndex];
+    for (int i = 1; i < length; i++) {
+        int realIndex = (trailIndex + i) % length;
+        fvec2d current = cursorTrail[realIndex];
 
-		auto fill = LAVENDER;
-		fill.a = float(i) / float(length);
+        auto fill = LAVENDER;
+        fill.a = float(i) / float(length);
 
-		ctx.gfx.draw(DrawLine{fline{last, current}, video::VisualAppearance{.fillColor = fill}, transform});
+        ctx.gfx.draw(DrawLine{fline{last, current}, video::VisualAppearance{.fillColor = fill}, transform});
 
-		last = current;
-	}
+        last = current;
+    }
 
-	const float cursorSize = ctx.game.getCircleSize();
-	ObjectDrawInfo cursorInfo{{{cursorSize, cursorSize}, ctx.game.getCursorPosition()}, 1.0f, transform};
-	ctx.gfx.draw(DrawObject{cursor, cursorInfo});
+    const float cursorSize = ctx.game.getCircleSize();
+    ObjectDrawInfo cursorInfo{{{cursorSize, cursorSize}, ctx.game.getCursorPosition()}, 1.0f, transform};
+    ctx.gfx.draw(DrawObject{cursor, cursorInfo});
 
-	ObjectDrawInfo playFieldInfo{ctx.game.getPlayField(), 1.0f, MAT3_NO_TRANSFORM<float>};
-	ctx.gfx.draw(DrawObject{playField, playFieldInfo});
+    ObjectDrawInfo playFieldInfo{ctx.game.getPlayField(), 1.0f, MAT3_NO_TRANSFORM<float>};
+    ctx.gfx.draw(DrawObject{playField, playFieldInfo});
 
     return 0;
 }
 
 int State<GameState::InGame>::exit()
 {
-	ctx.audio.getMusicChannel().stop();
-	ctx.game.setMap(nullptr);
-	return 0;
+    ctx.audio.getMusicChannel().stop();
+    ctx.game.setMap(nullptr);
+    return 0;
 }
 
 int State<GameState::InGame>::init(GameState)
@@ -119,17 +141,27 @@ int State<GameState::InGame>::init(GameState)
     field = {{base * ratio, base}, {0.0f, 0.0f}};
     ctx.game.setPlayField(field);
 
-	// give the player some time before the game starts
-	const float startDelay = 5.0f;
-	ctx.game.reset();
-	ctx.game.scrobble(-startDelay);
+    // give the player some time before the game starts
+    const float startDelay = 5.0f;
+    ctx.game.reset();
+    ctx.game.scrobble(-startDelay);
 
-	ctx.game.setInputMapper(std::make_unique<HumanInput>());
-	ctx.audio.getMusicChannel().stop();
+    ctx.game.setInputMapper(std::make_unique<HumanInput>());
+    ctx.audio.getMusicChannel().stop();
 
-	const auto& skin = ctx.activeSkin;
-	cursor = skin->createObjectSprite(CURSOR_SPRITE, HitObjectArguments{});
-	playField = skin->createObjectSprite(PLAY_FIELD_SPRITE, HitObjectArguments{});
+    const auto &skin = ctx.activeSkin;
+    cursor = skin->createObjectSprite(CURSOR_SPRITE, HitObjectArguments{});
+    playField = skin->createObjectSprite(PLAY_FIELD_SPRITE, HitObjectArguments{});
+    const auto &bgPath = ctx.game.getMap()->backgroundPath;
+    if (!bgPath.empty()) {
+        auto path = ctx.game.getMap()->getDirectory() / bgPath;
+        log::debug("Loading background ", path);
+        background = Load<video::Texture>(path);
+        if (!background) {
+            log::warning("Failed to load background ", path);
+        }
+        background->upload();
+    }
 
     return 0;
 }
@@ -137,7 +169,7 @@ int State<GameState::InGame>::init(GameState)
 State<GameState::InGame>::State()
     : ctx(GetContext())
 {
-	cursorTrail.resize(64, {0, 0});
+    cursorTrail.resize(64, {0, 0});
 }
 
 NS_END

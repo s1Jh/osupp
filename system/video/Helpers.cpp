@@ -33,7 +33,11 @@ void DrawGeneric2DShape(
     shader.set("z", appearance.zIndex);
 
     shader.set("transform", transform);
-    shader.set("camera", renderer.camera.getMatrix());
+    if (bool(appearance.flags & video::AppearanceFlags::IGNORE_CAMERA)) {
+        shader.set("camera", MAT3_NO_TRANSFORM<float>);
+    } else {
+        shader.set("camera", renderer.camera.getMatrix());
+    }
     CheckGLh("Set shader matrices");
 
     shader.set("shape", shape);
@@ -93,7 +97,11 @@ void DrawLineSegment(
 
     lineShader.set("resolution", (fvec2d) renderer.getWindow().size());
     lineShader.set("transform", transform);
-    lineShader.set("camera", renderer.camera.getMatrix());
+    if (bool(appearance.flags & video::AppearanceFlags::IGNORE_CAMERA)) {
+        lineShader.set("camera", MAT3_NO_TRANSFORM<float>);
+    } else {
+        lineShader.set("camera", renderer.camera.getMatrix());
+    }
     CheckGLh("Set shader matrices");
 
     auto offset = appearance.outlineWidth;

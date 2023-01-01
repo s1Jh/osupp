@@ -191,7 +191,18 @@ typedef ptrdiff_t GLsizeiptr;
     GLEXT( void, BlendFuncSeparate, GLenum dstRGB, GLenum dstAlpha, GLenum srcRGB, GLenum srcAlpha ) \
     GLEXT( void, BlendEquationSeparate, GLenum rgbMode, GLenum alphaMode ) \
     GLEXT( void, BufferSubData, GLenum target,GLintptr offset, GLsizeiptr size, const void* data) \
-    GLEXT( GLint, GetAttribLocation, GLuint program, const GLchar *name)
+    GLEXT( GLint, GetAttribLocation, GLuint program, const GLchar *name)      \
+    GLEXT( void, BindRenderbuffer, GLenum target, GLuint renderbuffer)        \
+    GLEXT( void, RenderbufferStorage, GLenum target, GLenum internalformat, GLsizei width, GLsizei height) \
+    GLEXT( void, FramebufferRenderbuffer, GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) \
+    GLEXT( void, FramebufferTexture, GLenum target, GLenum attachment, GLuint texture, GLint level)       \
+    GLEXT( void, DrawBuffers, GLsizei n, const GLenum *bufs)                  \
+    GLEXT( GLenum, CheckFramebufferStatus, GLenum target)                       \
+    GLEXT( void, BindFramebuffer, GLenum target, GLuint framebuffer ) \
+    GLEXT( void, GenFramebuffers, GLsizei n, GLuint *ids)                     \
+    GLEXT( void, GenRenderbuffers, GLsizei n, GLuint *renderbuffers)\
+    GLEXT( void, DeleteRenderbuffers, GLsizei n, GLuint *renderbuffers)                     \
+    GLEXT( void, DeleteFramebuffers, GLsizei n, GLuint *ids)
 
 #ifdef LINUX
 #   define GL_FUNC_LIST_WIN32

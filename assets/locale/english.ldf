@@ -4,11 +4,10 @@
     "credits" = "s1Jh"
 
     "translations" {
-        "setting.gfx.width" = "Window width"
-        "setting.gfx.height" = "Window height"
-        "setting.gfx.fullscreen" = "Fullscreen"
-        "setting.gfx.refresh_rate" = "Window refresh rate"
-        "setting.gfx.resolution" = "Rendering resolution"
+        "setting.gfx.window.monitor" = "Display monitor"
+        "setting.gfx.window.fullscreen" = "Fullscreen"
+        "setting.gfx.window.refresh_rate" = "Window refresh rate"
+        "setting.gfx.window.resolution" = "Rendering resolution"
         "setting.paths" = "Search paths"
         "setting.user.skin" = "Skin"
         "setting.user.locale" = "Language"

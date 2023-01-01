@@ -41,6 +41,7 @@ class Texture : public GLResource<unsigned int>
 {
 public:
     Texture();
+    explicit Texture(unsigned int existing);
 
     void setImage(Image &img);
 
@@ -55,6 +56,7 @@ public:
     void use(unsigned int index) const;
 
     void setClipArea(const frect &rect);
+
     [[nodiscard]] const Mat3f &getUVTransform() const;
 
     static void unbind(unsigned int index);

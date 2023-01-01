@@ -49,6 +49,13 @@ public:
         std::vector<std::string> hitSample;
     };
 
+    struct Event
+    {
+        int type;
+        double time;
+        std::vector<std::string> params;
+    };
+
     struct TimingPoint
     {
         double time;
@@ -205,24 +212,25 @@ public:
                     }
                     break;
                 }
-                    // TODO:
                 case EVENTS: {
                     auto params = GetCharacterSeparatedValues(strLine, ',');
-
-                    int type = GetParam<int>(params, 0, -1);
-                    if (type == -1) {
+                    Event ev;
+                    ev.type = GetParam<int>(params, 0, -1);
+                    if (ev.type == -1) {
                         // the event type, might be a string
                         auto videoException = GetParam<std::string>(params, 0, "");
                         if (videoException == "Video") {
-                            type = 1;
+                            ev.type = 1;
                         } else {
-                            log::error("Event type could not be determined");
+                            break;
                         }
                     }
-                    double startTime = TimeConversion(GetParam<int>(params, 1, 0));
+                    ev.time = TimeConversion(GetParam<int>(params, 1, 0));
                     if (params.size() > 2) {
-                        auto extraParams = std::vector(std::next(params.begin(), 2), std::prev(params.end()));
+                        ev.params = std::vector(std::next(params.begin(), 2), std::prev(params.end()));
                     }
+                    events.push_back(ev);
+                    break;
                 }
                 case EDITOR:break;
 
@@ -315,32 +323,30 @@ public:
             ------------------------------------------------------------------------------------------------------------
          */
 
-        map.setHpDrain(getField("HPDrainRate", 10.0f));
+        map.HPDrain = getField("HPDrainRate", 10.0f);
 
         double circleSizeLevel = getField("CircleSize", 5.0f);
-        auto circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
-        map.setCircleSize(circleSize);
+        map.circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
 
-        map.setOverallDifficulty(getField("OverallDifficulty", 5.0f));
+        map.overallDifficulty = getField("OverallDifficulty", 5.0f);
 
         float approachLevel = getField("ApproachRate", 5.0f);
-        float approachTime =
+        map.approachTime =
             1.8f - math::Min(approachLevel, 5) * 0.12f - (approachLevel > 5 ? (approachLevel - 5) * 0.15f : 0);
-        map.setApproachTime(approachTime);
 
         sliderMultiplier = getField("SliderMultiplier", 1.0f);
 
-        map.setSongPath(getField("AudioFilename", "audio.mp3"));
-        map.setStartOffset(TimeConversion(getField("AudioLeadIn", 0)));
-        map.setName(getField("TitleUnicode", ""));
-        map.setRomanisedName(getField("Title", ""));
-        map.setArtist(getField("ArtistUnicode", ""));
-        map.setRomanisedArtist(getField("Artist", ""));
-        map.setSource(getField("Source", ""));
-        map.setAuthor(getField("Creator", ""));
-        map.setDifficulty(getField("Version", ""));
+        map.songPath = getField("AudioFilename", "audio.mp3");
+        map.startOffset = TimeConversion(getField("AudioLeadIn", 0));
+        map.name = getField("TitleUnicode", "");
+        map.romanisedName = getField("Title", "");
+        map.artist = getField("ArtistUnicode", "");
+        map.romanisedArtist = getField("Artist", "");
+        map.source = getField("Source", "");
+        map.author = getField("Creator", "");
+        map.difficulty = getField("Version", "");
         std::string tags = getField("Tags", "");
-        map.setTags(GetCharacterSeparatedValues(tags, ' '));
+        map.tags = GetCharacterSeparatedValues(tags, ' ');
 
         for (auto it = hitObjectParams.begin(); it != hitObjectParams.end(); it++) {
             const auto &object = *it;
@@ -408,7 +414,20 @@ public:
                     0, 0, object.time,
                     TimeConversion(GetParam<int>(object.objectParams, 0, int(object.time * 1000.0))));
             }
+        }
 
+        for (const auto& ev : events) {
+            switch (ev.type) {
+            case 0: {// map background is the only one we care about
+                // TODO: Read the background offset as well
+                auto arg = GetParam<std::string>(ev.params, 0, "");
+                RemoveAll(arg, "\"");
+                map.backgroundPath = arg;
+                break;
+            }
+            default:
+                break;
+            }
         }
     }
 
@@ -445,6 +464,7 @@ private:
     std::vector<HitObject> hitObjectParams;
     std::vector<TimingPoint> inheritedTimingPoints;
     std::vector<TimingPoint> uninheritedTimingPoints;
+    std::vector<Event> events;
     std::map<std::string, std::string> meta;
 };
 

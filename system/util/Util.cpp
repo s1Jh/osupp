@@ -123,6 +123,21 @@ unsigned int CheckALErrors(const std::string& file, int line, const std::string&
 unsigned int DumpGlErrors()
 { return glGetError(); }
 
+std::size_t ReplaceAll(std::string& inout, std::string_view what, std::string_view with)
+{
+    std::size_t count{};
+    for (std::string::size_type pos{};
+         std::string::npos != (pos = inout.find(what.data(), pos, what.length()));
+         pos += with.length(), ++count) {
+        inout.replace(pos, what.length(), with.data(), with.length());
+    }
+    return count;
+}
+
+std::size_t RemoveAll(std::string& inout, std::string_view what) {
+    return ReplaceAll(inout, what, "");
+}
+
 /**
  * String trimming functions from https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring/217605#217605
  */

@@ -13,6 +13,49 @@ void Draw(
     const SliderTrailDrawInfo &info
 )
 {
+    CheckGLh("start");
+    static bool Init = false;
+    static unsigned int frame = 0, color = 0, depth = 0;
+    auto size = renderer.getWindow().size();
+    static isize initSize = {0, 0};
+    if (size != initSize) {
+        log::debug("Recreating slider buffer texture");
+        glDeleteTextures(1, &frame);
+        glDeleteRenderbuffers(1, &depth);
+        glDeleteFramebuffers(1, &frame);
+        Init = false;
+    }
+    if (!Init) {
+        initSize = size;
+        glGenFramebuffers(1, &frame);
+        glBindFramebuffer(GL_FRAMEBUFFER, frame);
+
+        glGenTextures(1, &color);
+        glBindTexture(GL_TEXTURE_2D, color);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.w, size.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+        glGenRenderbuffers(1, &depth);
+        glBindRenderbuffer(GL_RENDERBUFFER, depth);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.w, size.h);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color, 0);
+
+        unsigned int buffers = {GL_COLOR_ATTACHMENT0};
+        glDrawBuffers(1, &buffers);
+        CheckGLh("glDrawBuffers");
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            return;
+        }
+
+        CheckGLh("created framebuffers");
+        Init = true;
+    }
+
     auto DrawSegment = [&](const fline &seg)
     {
         auto offset = info.thickness;
@@ -37,7 +80,7 @@ void Draw(
             math::MakeTranslationMatrix<float>(rect.position);
 
         auto tint = info.sprite->getTint();
-        tint.a = info.alpha;
+        tint.a = 1.0f;
 
         DrawMesh::Call(
             renderer, renderer.getMeshes().rectMask, *info.shader,
@@ -54,32 +97,18 @@ void Draw(
             },
             &info.transform
         );
-
-        // FIXME: Create some helper for calling draw functions on their own, this is ridiculous.
-//        Draw<video::LambdaRender &, const video::Mesh &, const video::Shader &,
-//             const video::Shader::Uniforms &, const video::Shader::Textures &,
-//             const video::Shader::TransformMatrixUniform &>(
-//            renderer, renderer.getMeshes().rectMask, *info.shader,
-//            video::Shader::Uniforms{
-//                {"resolution", (fvec2d) renderer.getWindow().size()},
-//                {"A", seg.A},
-//                {"B", seg.B},
-//                {"thickness", offset},
-//                {"fill", tint},
-//                {"shape", shape}
-//            },
-//            video::Shader::Textures{
-//                {0, info.sprite->getTexture().get()}
-//            },
-//            &info.transform
-//        );
     };
 
-    glDepthFunc(GL_LEQUAL);
-    glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
+    glBindFramebuffer(GL_FRAMEBUFFER, frame);
+    CheckGLh("glBindFramebuffer");
+    glViewport(0, 0, size.w, size.h);
 
+    glDepthFunc(GL_LEQUAL);
+    glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
     glClearDepth(1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     if (info.useTexture) {
         // TODO: use the pre-baked texture ... once we have them
@@ -123,11 +152,26 @@ void Draw(
             prev = it;
         }
     }
+    CheckGLh("post draw");
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // restore framebuffer
+    CheckGLh("glBindFramebuffer 0");
+    glViewport(0, 0, size.w, size.h);     // restore size
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthFunc(GL_ALWAYS);
-    glClearDepth(1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT);
+
+    video::Texture tex(color);
+    auto fill = WHITE;
+    fill.a = info.alpha;
+    DrawRect::Call(
+        renderer, UNIT_RECT < float >,
+        video::VisualAppearance{
+            .texture = &tex,
+            .fillColor = fill,
+            .flags = video::AppearanceFlags::IGNORE_CAMERA
+        },
+        MAT3_NO_TRANSFORM<float>
+    );
 }
 
 NS_END

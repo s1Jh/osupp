@@ -125,7 +125,6 @@ void GameManager::update(double delta)
                 auto func = obj->getDeactivationFunction();
 
                 if (resolveFunction(func, *obj)) {
-                    log::debug("Raising");
                     obj->raise();
                 }
                 break;
@@ -136,7 +135,6 @@ void GameManager::update(double delta)
                 auto func = obj->getActivationFunction();
 
                 if (resolveFunction(func, *obj)) {
-                    log::debug("Pressing");
                     obj->press();
                 }
                 break;
@@ -255,7 +253,7 @@ void GameManager::reset()
 //    log::debug("Resetting the game state");
 
     if (info) {
-        currentTime = -info->getStartOffset();
+        currentTime = -info->startOffset;
     } else {
         currentTime = 0.0;
     }
@@ -297,7 +295,7 @@ const Mat3f &GameManager::getTransform() const
 float GameManager::getCircleSize()
 {
     if (info) {
-        return info->getCircleSize() * csMultiplier;
+        return info->circleSize * csMultiplier;
     }
     return 0.0f;
 }
@@ -305,7 +303,7 @@ float GameManager::getCircleSize()
 float GameManager::getApproachTime()
 {
     if (info) {
-        return info->getApproachTime() * arMultiplier;
+        return info->approachTime * arMultiplier;
     }
     return 0.0f;
 }
@@ -313,7 +311,7 @@ float GameManager::getApproachTime()
 float GameManager::getFadeTime()
 {
     if (info) {
-        return info->getFadeTime() * ftMultiplier;
+        return info->fadeTime * ftMultiplier;
     }
     return 0.0f;
 }
@@ -321,7 +319,7 @@ float GameManager::getFadeTime()
 float GameManager::getHitWindow()
 {
     if (info) {
-        return info->getHitWindow() * hwMultiplier;
+        return info->hitWindow * hwMultiplier;
     }
     return 0.0f;
 }
@@ -329,7 +327,7 @@ float GameManager::getHitWindow()
 float GameManager::getHpDrain()
 {
     if (info) {
-        return info->getHpDrain() * hpMultiplier;
+        return info->HPDrain * hpMultiplier;
     }
     return 0.0f;
 }
@@ -400,7 +398,7 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject &o
 float GameManager::getStartOffset()
 {
     if (info) {
-        return info->getStartOffset();
+        return info->startOffset;
     }
     return 0.0f;
 }

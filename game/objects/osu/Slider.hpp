@@ -42,6 +42,10 @@ constexpr const char *SLIDER_BODY_SPRITE = "slider_body";
 
 constexpr const char *SLIDER_BALL_SPRITE = "slider_ball";
 
+constexpr const char *SLIDER_BALL_OVERLAY_SPRITE = "slider_ball_overlay";
+
+constexpr const char *SLIDER_BALL_UNDERLAY_SPRITE = "slider_ball_underlay";
+
 constexpr const char *SLIDER_BALL_RING_SPRITE = "slider_ring";
 
 constexpr const char *SLIDER_HIT_POINT_SPRITE = "slider_hitpoint";
@@ -105,6 +109,8 @@ private:
     ObjectSprite bodyTexture;
 	ObjectSprite ballRing;
     ObjectSprite ball;
+    ObjectSprite ballOverlay;
+    ObjectSprite ballUnderlay;
     ObjectSprite head;
     ObjectSprite headRepeat;
     ObjectSprite tail;

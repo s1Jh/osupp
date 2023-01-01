@@ -33,7 +33,9 @@ namespace video
 {
 
 Texture::Texture() : channels(-1), pixelSize({-1, -1})
-{}
+{
+    clip = MAT3_NO_TRANSFORM<float>;
+}
 
 void Texture::use(unsigned int index) const
 {
@@ -128,6 +130,12 @@ std::optional<unsigned int> Texture::createData()
 void Texture::deleteData(const unsigned int &repr)
 {
 	glDeleteTextures(1, &repr);
+}
+
+Texture::Texture(unsigned int existing) : channels(-1), pixelSize({-1, -1})
+{
+    overrideData(existing);
+    clip = MAT3_NO_TRANSFORM<float>;
 }
 
 }

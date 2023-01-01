@@ -81,6 +81,12 @@ protected:
 		deleteData(*data);
 	}
 
+    inline void overrideData(GLRepr newData) {
+        deleteData(*data);
+        *data = newData;
+        wasUploaded = true;
+    }
+
 private:
 	std::shared_ptr<GLRepr> data;
 	std::atomic<bool> wasUploaded;
