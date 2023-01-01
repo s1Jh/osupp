@@ -35,11 +35,24 @@
 
 NS_BEGIN
 
+constexpr const char *APPROACH_CIRCLE_SPRITE = "approach_circle";
+
+constexpr const char *PLAY_FIELD_SPRITE = "play_field";
+
+constexpr const char *CURSOR_SPRITE = "cursor";
+
+constexpr const char *HIT_SOUND = "hit_sound";
+
+constexpr const char *MISS_SOUND = "miss_sound";
+
+constexpr const char *COMBO_BREAK_SOUND = "combo_break_sound";
+
 class BaseHitObject;
 
 struct SampleSet {
 	Resource<SoundSample> hit;
 	Resource<SoundSample> miss;
+    Resource<SoundSample> comboBreak;
 	Resource<SoundSample> sliderBounce;
 	Resource<SoundSample> sliderSlide;
 	Resource<SoundSample> sliderBreak;

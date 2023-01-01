@@ -80,8 +80,6 @@ bool ImportOsuData(const std::filesystem::path &path)
         return false;
     }
 
-    Context &ctx = GetContext();
-
     auto songPath = path / "Songs";
     auto localSongPath = std::filesystem::current_path() / "songs";
 
@@ -110,7 +108,7 @@ bool ImportOsuData(const std::filesystem::path &path)
     return allGood;
 }
 
-bool ConvertSkin(const std::filesystem::path &sourcePath)
+bool ConvertSkin(const std::filesystem::path &)
 {
 
     return true;

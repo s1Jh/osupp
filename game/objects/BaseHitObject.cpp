@@ -51,7 +51,7 @@ fcircle BaseHitObject::getSOF() const
 
 BaseHitObject::BaseHitObject()
     : finished(false), timeStarted(0.0), timeFinished(0.0),
-	  state(HitObjectState::INVISIBLE)
+      state(HitObjectState::INVISIBLE)
 {
     reset();
 }
@@ -175,14 +175,13 @@ double BaseHitObject::getTimeStarted() const
 
 HitObjectFunction BaseHitObject::getActivationFunction() const
 {
-	return HitObjectFunction::NO_ACTIVATION;
+    return HitObjectFunction::NO_ACTIVATION;
 }
 
 HitObjectFunction BaseHitObject::getDeactivationFunction() const
 {
-	return HitObjectFunction::CURSOR_LEAVE | HitObjectFunction::OR | HitObjectFunction::BUTTON_RELEASED;
+    return HitObjectFunction::CURSOR_LEAVE | HitObjectFunction::OR | HitObjectFunction::BUTTON_RELEASED;
 }
-
 
 /**
  * Each object will circle through these states in the following order:
@@ -212,112 +211,112 @@ HitObjectFunction BaseHitObject::getDeactivationFunction() const
  */
 void BaseHitObject::update(double delta)
 {
-	objectTransform = this->calculateObjectTransform() * ctx.game.getTransform();
+    objectTransform = this->calculateObjectTransform() * ctx.game.getTransform();
 
-	// gather transfer times
-	auto currentTime = ctx.game.getCurrentTime();
+    // gather transfer times
+    auto currentTime = ctx.game.getCurrentTime();
 
-	auto alphaTime = getStartTime() - ctx.game.getApproachTime();
-	auto betaTime = getStartTime() - ctx.game.getHitWindow();
-	auto epsilonTime = getEndTime() + ctx.game.getHitWindow();
-	auto etaTime = timeFinished + ctx.game.getFadeTime();
+    auto alphaTime = getStartTime() - ctx.game.getApproachTime();
+    auto betaTime = getStartTime() - ctx.game.getHitWindow();
+    auto epsilonTime = getEndTime() + ctx.game.getHitWindow();
+    auto etaTime = timeFinished + ctx.game.getFadeTime();
 
-	// update the object
-	this->onUpdate(delta);
+    // update the object
+    this->onUpdate(delta);
 
-	// perform all timed state transfers
-	if (state == HitObjectState::INVISIBLE && !finished) {
-		// check if we've gone past the closer edge of the approach window,
-		// α-transition
-		if (currentTime >= alphaTime) {
-			transferApproaching();
-		}
-	}
-	if (state == HitObjectState::APPROACHING) {
-		// β-transition
-		if (currentTime >= betaTime) {
-			// We're now in the hit window, we are ready to be hit
-			transferReady();
-		}
-	}
-	if (isUpdating()) {
-		// update the object's functions
-		this->onLogicUpdate(delta);
+    // perform all timed state transfers
+    if (state == HitObjectState::INVISIBLE && !finished) {
+        // check if we've gone past the closer edge of the approach window,
+        // α-transition
+        if (currentTime >= alphaTime) {
+            transferApproaching();
+        }
+    }
+    if (state == HitObjectState::APPROACHING) {
+        // β-transition
+        if (currentTime >= betaTime) {
+            // We're now in the hit window, we are ready to be hit
+            transferReady();
+        }
+    }
+    if (isUpdating()) {
+        // update the object's functions
+        this->onLogicUpdate(delta);
 
-		// 𝜀-transition
-		if (currentTime >= epsilonTime) {
-			// We've gone past the object's hit window and are still in the ready
-			// state (ie. not hit), consider this object missed.
-			transferToPickup();
-		}
-	}
-	if (state == HitObjectState::FADING) {
-		// 𝜁-transition
-		if (currentTime >= etaTime) {
-			transferToInvisibleComplete();
-		}
-	}
+        // 𝜀-transition
+        if (currentTime >= epsilonTime) {
+            // We've gone past the object's hit window and are still in the ready
+            // state (ie. not hit), consider this object missed.
+            transferToPickup();
+        }
+    }
+    if (state == HitObjectState::FADING) {
+        // 𝜁-transition
+        if (currentTime >= etaTime) {
+            transferToInvisibleComplete();
+        }
+    }
 }
 
 void BaseHitObject::begin()
 {
-	if (getState() == HitObjectState::READY) {
-		transferActive();
-		this->onBegin();
-	}
+    if (getState() == HitObjectState::READY) {
+        transferActive();
+        this->onBegin();
+    }
 }
 
 HitResult BaseHitObject::finish()
 {
-	// η-transition
-	if (getState() == HitObjectState::PICKUP) {
-		transferToFading();
-		return this->onFinish();
-	}
-	log::error(this, " tried invalid state change (pickup->finish)");
-	return HitResult::MISSED;
+    // η-transition
+    if (getState() == HitObjectState::PICKUP) {
+        transferToFading();
+        return this->onFinish();
+    }
+    log::error(this, " tried invalid state change (pickup->finish)");
+    return HitResult::MISSED;
 }
 
 void BaseHitObject::raise()
 {
-	if (getState() == HitObjectState::ACTIVE) {
-		transferActiveInactive();
-		this->onRaise();
-	}
+    if (getState() == HitObjectState::ACTIVE) {
+        transferActiveInactive();
+        this->onRaise();
+    }
 }
 void BaseHitObject::press()
 {
-	if (getState() == HitObjectState::INACTIVE) {
-		transferInactiveActive();
-		this->onPress();
-	}
+    if (getState() == HitObjectState::INACTIVE) {
+        transferInactiveActive();
+        this->onPress();
+    }
 }
 
 void BaseHitObject::draw()
 {
-	if (getState() != HitObjectState::INVISIBLE)
-		this->onDraw();
+    if (getState() != HitObjectState::INVISIBLE) {
+        this->onDraw();
+    }
 }
 
 float BaseHitObject::getAlpha() const
 {
-	if (isFadingIn()) {
-		auto x = float(ctx.game.getCurrentTime() - this->getStartTime());
-		auto a = x > 0 ? ctx.game.getHitWindow() : ctx.game.getApproachTime();
-		return math::Lerp(0.0f, 1.0f, math::QuadRR(x, a));
-	}
-	else if (isFadingOut()) {
-		auto x = float(ctx.game.getCurrentTime() - this->getTimeFinished());
-		auto a = ctx.game.getFadeTime();
-		return math::Lerp(0.0f, 1.0f, math::LinearUD(x, a));
-	}
-	else
-		return 1.0f;
+    if (isFadingIn()) {
+        auto x = float(ctx.game.getCurrentTime() - this->getStartTime());
+        auto a = x > 0 ? ctx.game.getHitWindow() : ctx.game.getApproachTime();
+        return math::Lerp(0.0f, 1.0f, math::QuadRR(x, a));
+    } else if (isFadingOut()) {
+        auto x = float(ctx.game.getCurrentTime() - this->getTimeFinished());
+        auto a = ctx.game.getFadeTime();
+        return math::Lerp(0.0f, 1.0f, math::LinearUD(x, a));
+    } else {
+        return 1.0f;
+    }
 }
 
 const Mat3f &BaseHitObject::getObjectTransform() const
 {
-	return objectTransform;
+    return objectTransform;
 }
 
 NS_END

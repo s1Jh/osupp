@@ -23,11 +23,36 @@
 #pragma once
 
 #include "define.hpp"
+
 #include "OsuHitObject.hpp"
 #include "SliderTemplate.hpp"
 #include "HitObjectArguments.hpp"
 
 NS_BEGIN
+
+constexpr const char *SLIDER_HEAD_SPRITE = "slider_head";
+
+constexpr const char *SLIDER_TAIL_SPRITE = "slider_tail";
+
+constexpr const char *SLIDER_HEAD_REPEAT_SPRITE = "slider_head_repeat";
+
+constexpr const char *SLIDER_TAIL_REPEAT_SPRITE = "slider_tail_repeat";
+
+constexpr const char *SLIDER_BODY_SPRITE = "slider_body";
+
+constexpr const char *SLIDER_BALL_SPRITE = "slider_ball";
+
+constexpr const char *SLIDER_BALL_RING_SPRITE = "slider_ring";
+
+constexpr const char *SLIDER_HIT_POINT_SPRITE = "slider_hitpoint";
+
+constexpr const char *SLIDER_SHADER = "slider";
+
+constexpr const char *SLIDER_BOUNCE_SOUND = "slider_bounce";
+
+constexpr const char *SLIDER_SLIDE_SOUND = "slider_slide";
+
+constexpr const char *SLIDER_BREAK_SOUND = "slider_break";
 
 constexpr double SLIDER_DIRECTION_EPSILON = 0.01;
 
@@ -94,7 +119,6 @@ private:
     float endBumperAngle;
     float startBumperAngle;
 	float visualRingSize;
-
     // state
 	double startPoint;
     TravelDirection currentDirection;

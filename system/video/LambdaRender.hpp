@@ -26,6 +26,7 @@
 #include "GraphicsContext.hpp"
 #include "Window.hpp"
 #include "StandardDrawCalls.hpp"
+#include "Camera.hpp"
 
 #include <list>
 #include <array>
@@ -33,22 +34,13 @@
 
 NS_BEGIN
 
-class ObjectSprite;
-class ObjectDrawInfo;
-
-namespace video {
-class LambdaRender;
-}
-
-template<>
-void Draw(video::LambdaRender& renderer, const ObjectSprite&, const ObjectDrawInfo&);
-
 namespace video
 {
 
 
 constexpr size_t RENDER_QUEUE_SIZE = 1024;
 
+// TODO: Camera
 class LambdaRender
 {
 public:
@@ -87,6 +79,8 @@ public:
         renderQueue[renderStackSize - 1] = std::make_shared<RenderTask<Arg1, Args...>>(std::move(taskIn));
         return true;
     }
+
+    Camera2D camera;
 
 private:
 	static bool ApplyWindowConfiguration(Window& win, const WindowConfiguration& config);

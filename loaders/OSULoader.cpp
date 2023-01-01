@@ -103,44 +103,37 @@ public:
 
         Section section = DONT_CARE;
 
-		std::stringstream slurped;
-		slurped << ifs.rdbuf();
-		ifs.close();
+        std::stringstream slurped;
+        slurped << ifs.rdbuf();
+        ifs.close();
 
         while (!slurped.eof()) {
             std::getline(slurped, strLine);
             Trim(strLine);
 
-            if (strLine.empty())
+            if (strLine.empty()) {
                 continue;
+            }
 
             if (strLine.starts_with('[')) {
                 Trim(strLine);
                 if (strLine == "[HitObjects]") {
                     section = HIT_OBJECTS;
-                }
-                else if (strLine == "[General]") {
+                } else if (strLine == "[General]") {
                     section = GENERAL;
-                }
-                else if (strLine == "[Metadata]") {
+                } else if (strLine == "[Metadata]") {
                     section = METADATA;
-                }
-                else if (strLine == "[TimingPoints]") {
+                } else if (strLine == "[TimingPoints]") {
                     section = TIMING_POINTS;
-                }
-                else if (strLine == "[Editor]") {
+                } else if (strLine == "[Editor]") {
                     section = EDITOR;
-                }
-                else if (strLine == "[Difficulty]") {
+                } else if (strLine == "[Difficulty]") {
                     section = DIFFICULTY;
-                }
-                else if (strLine == "[Events]") {
+                } else if (strLine == "[Events]") {
                     section = EVENTS;
-                }
-                else if (strLine == "[Colours]") {
+                } else if (strLine == "[Colours]") {
                     section = COLOURS;
-                }
-                else {
+                } else {
                     section = DONT_CARE;
                 }
                 continue;
@@ -164,9 +157,9 @@ public:
                         if (params.back().find(':') != std::string::npos) {
                             object.hitSample = GetCharacterSeparatedValues(params.back(), ':');
                             object.objectParams = std::vector(std::next(params.begin(), 5), std::prev(params.end()));
-                        }
-                        else
+                        } else {
                             object.objectParams = std::vector(std::next(params.begin(), 5), params.end());
+                        }
                     }
 
                     hitObjectParams.push_back(std::move(object));
@@ -186,14 +179,14 @@ public:
                     point.volume = GetParam<int>(params, 5, 100);
                     point.effects = GetParam<int>(params, 7, 0);
 
-					bool unInherited = GetParam<int>(params, 6, 1);
+                    bool unInherited = GetParam<int>(params, 6, 1);
 
-					if (unInherited) {
-						point.beatLength = TimeConversion((int)point.beatLength);
-						uninheritedTimingPoints.push_back(point);
-					} else {
-						inheritedTimingPoints.push_back(point);
-					}
+                    if (unInherited) {
+                        point.beatLength = TimeConversion((int) point.beatLength);
+                        uninheritedTimingPoints.push_back(point);
+                    } else {
+                        inheritedTimingPoints.push_back(point);
+                    }
 
                     break;
                 }
@@ -214,28 +207,27 @@ public:
                 }
                     // TODO:
                 case EVENTS: {
-					auto params = GetCharacterSeparatedValues(strLine, ',');
+                    auto params = GetCharacterSeparatedValues(strLine, ',');
 
-					int type = GetParam<int>(params, 0, -1);
-					if (type == -1) {
-						// the event type, might be a string
-						auto videoException = GetParam<std::string>(params, 0, "");
-						if (videoException == "Video") {
-							type = 1;
-						} else {
-							log::error("Event type could not be determined");
-						}
-					}
-					double startTime = TimeConversion(GetParam<int>(params, 1, 0));
-					if (params.size() > 2)
-						auto extraParams = std::vector(std::next(params.begin(), 2), std::prev(params.end()));
-				}
-                case EDITOR:
-                    break;
+                    int type = GetParam<int>(params, 0, -1);
+                    if (type == -1) {
+                        // the event type, might be a string
+                        auto videoException = GetParam<std::string>(params, 0, "");
+                        if (videoException == "Video") {
+                            type = 1;
+                        } else {
+                            log::error("Event type could not be determined");
+                        }
+                    }
+                    double startTime = TimeConversion(GetParam<int>(params, 1, 0));
+                    if (params.size() > 2) {
+                        auto extraParams = std::vector(std::next(params.begin(), 2), std::prev(params.end()));
+                    }
+                }
+                case EDITOR:break;
 
                 case DONT_CARE:
-                default:
-                    break;
+                default:break;
             }
         }
 
@@ -246,14 +238,15 @@ public:
     T getField(const std::string &name, T backup)
     {
         if (meta.contains(name)) {
-            if constexpr (std::is_same_v<T, std::string>)
+            if constexpr (std::is_same_v<T, std::string>) {
                 return meta[name];
-            else if constexpr (std::is_same_v<T, const char *>)
+            } else if constexpr (std::is_same_v<T, const char *>) {
                 return meta[name].c_str();
-            else if constexpr (std::is_arithmetic_v<T>)
+            } else if constexpr (std::is_arithmetic_v<T>) {
                 return static_cast<T>(std::strtod(meta[name].c_str(), nullptr));
-            else
+            } else {
                 return backup;
+            }
         }
 
         return backup;
@@ -361,8 +354,7 @@ public:
             if (object.type & 1 << 0) {
                 // note
                 map.addNote(object.position, comboEnd, object.time);
-            }
-            else if (object.type & 1 << 1) {
+            } else if (object.type & 1 << 1) {
                 // slider
                 SliderPathT path;
                 path.push_back(SliderNode{object.position, false});
@@ -380,15 +372,15 @@ public:
                     path.push_back(SliderNode{position, false});
                 }
 
-				auto length = GetParam<double>(object.objectParams, 2, 0);
+                auto length = GetParam<double>(object.objectParams, 2, 0);
 
-				int repeats = math::Max(GetParam<int>(object.objectParams, 1, 1), 1);
+                int repeats = math::Max(GetParam<int>(object.objectParams, 1, 1), 1);
 
-				double SV = getSliderVelocity(object.time);
-				double beat = getBeatLength(object.time);
-				double duration = length / (sliderMultiplier * 100.0 * SV) * beat;
-				duration *= repeats;
-				double endTime = object.time + duration;
+                double SV = getSliderVelocity(object.time);
+                double beat = getBeatLength(object.time);
+                double duration = length / (sliderMultiplier * 100.0 * SV) * beat;
+                duration *= repeats;
+                double endTime = object.time + duration;
 
                 math::CurveType type;
 
@@ -396,30 +388,25 @@ public:
 
                 // TODO: uncomment once all types of curve interpolation are finished
                 switch (curveType.front()) {
-                    case 'B':
-                        type = math::CurveType::BEZIER;
+                    case 'B':type = math::CurveType::BEZIER;
                         break;
-                    case 'C':
-                        type = math::CurveType::BEZIER;
+                    case 'C':type = math::CurveType::BEZIER;
                         break;
-                    case 'L':
-                        type = math::CurveType::STRAIGHT;
+                    case 'L':type = math::CurveType::STRAIGHT;
                         break;
-                    case 'P':
-                        type = math::CurveType::BEZIER;
+                    case 'P':type = math::CurveType::BEZIER;
                         break;
-                    default:
-                        type = math::CurveType::STRAIGHT;
+                    default:type = math::CurveType::STRAIGHT;
                         break;
                 }
 
                 map.addSlider(path, comboEnd, object.time, endTime, type, repeats);
-            }
-            else if (object.type & 1 << 3) {
+            } else if (object.type & 1 << 3) {
                 // spinner
                 // x,y,time,type,hitSound,endTime,hitSample
-                map.addSpinner(0, 0, object.time,
-                               TimeConversion(GetParam<int>(object.objectParams, 0, int(object.time * 1000.0))));
+                map.addSpinner(
+                    0, 0, object.time,
+                    TimeConversion(GetParam<int>(object.objectParams, 0, int(object.time * 1000.0))));
             }
 
         }
@@ -428,36 +415,36 @@ public:
 private:
     float getSliderVelocity(double time)
     {
-		for (auto it = inheritedTimingPoints.begin(); it != inheritedTimingPoints.end(); it++) {
-			if (it != std::prev(inheritedTimingPoints.end())) {
-				if (math::InRangeIE(time, it->time, std::next(it)->time)) {
-					return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
-				}
-			} else {
-				return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
-			}
-		}
-		return 1.0f;
+        for (auto it = inheritedTimingPoints.begin(); it != inheritedTimingPoints.end(); it++) {
+            if (it != std::prev(inheritedTimingPoints.end())) {
+                if (math::InRangeIE(time, it->time, std::next(it)->time)) {
+                    return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
+                }
+            } else {
+                return 1.f / ((float(it->beatLength) * -1.f) / 100.f);
+            }
+        }
+        return 1.0f;
     }
 
     double getBeatLength(double time)
     {
-		for (auto it = uninheritedTimingPoints.begin(); it != uninheritedTimingPoints.end(); it++) {
-			if (it != std::prev(uninheritedTimingPoints.end())) {
-				if (math::InRangeIE(time, it->time, std::next(it)->time)) {
-					return it->beatLength;
-				}
-			} else {
-				return it->beatLength;
-			}
-		}
-		return 0.1f;
+        for (auto it = uninheritedTimingPoints.begin(); it != uninheritedTimingPoints.end(); it++) {
+            if (it != std::prev(uninheritedTimingPoints.end())) {
+                if (math::InRangeIE(time, it->time, std::next(it)->time)) {
+                    return it->beatLength;
+                }
+            } else {
+                return it->beatLength;
+            }
+        }
+        return 0.1f;
     }
 
     float sliderMultiplier = 1.0f;
     std::vector<HitObject> hitObjectParams;
     std::vector<TimingPoint> inheritedTimingPoints;
-	std::vector<TimingPoint> uninheritedTimingPoints;
+    std::vector<TimingPoint> uninheritedTimingPoints;
     std::map<std::string, std::string> meta;
 };
 

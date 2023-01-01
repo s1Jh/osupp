@@ -25,7 +25,7 @@
 #include "Util.hpp"
 
 #include <AL/al.h>
-
+#include <cmath>
 #include <fstream>
 
 NS_BEGIN
@@ -112,12 +112,12 @@ void Channel::update()
     }
 }
 
-void Channel::setVolume(float fraction, float transitionTime)
+void Channel::setVolume(float fraction, float)
 {
     if (!held) {
         return;
     }
-    alSourcef(held->ALSource, AL_GAIN, fraction);
+    alSourcef(held->ALSource, AL_GAIN, std::log10(fraction + 1.0f));
 }
 
 void Channel::play()

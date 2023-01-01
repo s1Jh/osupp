@@ -23,6 +23,7 @@
 #include "ObjectSprite.hpp"
 
 #include "Math.hpp"
+#include "Helpers.hpp"
 
 NS_BEGIN
 
@@ -47,8 +48,8 @@ void ObjectSprite::setTexture(const Resource<video::Texture> &textureIn)
         auto longerSide = (float) math::Max(texture->getHeight(), texture->getWidth());
         auto shorterSide = (float) math::Min(texture->getHeight(), texture->getWidth());
         layout = texture->getWidth() >= texture->getHeight()
-                 ? video::AnimationLayout::HORIZONTAL
-                 : video::AnimationLayout::VERTICAL;
+            ? video::AnimationLayout::HORIZONTAL
+            : video::AnimationLayout::VERTICAL;
         frameCount = math::Max(int(longerSide / shorterSide), 1);
 
         // advance the animation by one frame upon construction
@@ -67,8 +68,9 @@ void ObjectSprite::setFrameTime(float frameTimeIn)
 
 void ObjectSprite::setTotalFrames(int framesIn)
 {
-	if (framesIn > 0)
-		frameCount = framesIn;
+    if (framesIn > 0) {
+        frameCount = framesIn;
+    }
 }
 
 void ObjectSprite::setTint(const color &tintIn)
@@ -76,7 +78,7 @@ void ObjectSprite::setTint(const color &tintIn)
 
 const color &ObjectSprite::getTint() const
 {
-	return tint;
+    return tint;
 }
 
 Resource<video::Texture> ObjectSprite::getTexture() const
@@ -85,36 +87,37 @@ Resource<video::Texture> ObjectSprite::getTexture() const
 }
 
 template<>
-void Draw(const ObjectSprite& object, const ObjectDrawInfo& info)
+void Draw(video::LambdaRender &renderer, const ObjectSprite &object, const ObjectDrawInfo &info)
 {
-    if (!object.texture)
+    if (!object.texture || !object.texture->uploaded()) {
         return;
+    }
 
     auto slice = 1.0f / float(object.frameCount);
     auto offset = slice * float(object.frameCounter);
 
     frect clip = {{
-                      object.layout == video::AnimationLayout::HORIZONTAL ? slice : 1.0f,
-                      object.layout == video::AnimationLayout::HORIZONTAL ? 1.0f : slice,
-                  },
-                  {
-                      object.layout == video::AnimationLayout::HORIZONTAL ? offset : 0.0f,
-                      object.layout == video::AnimationLayout::HORIZONTAL ? 0.0f : offset,
-                  }};
+        object.layout == video::AnimationLayout::HORIZONTAL ? slice : 1.0f,
+        object.layout == video::AnimationLayout::HORIZONTAL ? 1.0f : slice,
+    },
+        {
+            object.layout == video::AnimationLayout::HORIZONTAL ? offset : 0.0f,
+            object.layout == video::AnimationLayout::HORIZONTAL ? 0.0f : offset,
+        }};
 
     object.texture->setClipArea(clip);
 
     color tint = object.tint;
     tint.a = info.alpha;
 
-//    renderer.draw(
-//        info.destination,
-//        VisualAppearance{.texture = object.texture.get(), .fillColor = tint},
-//        info.transform
-//    );
+    DrawRect::Call(
+        renderer,
+        info.destination,
+        video::VisualAppearance{.texture = object.texture.get(), .fillColor = tint},
+        info.transform
+    );
 
     object.texture->setClipArea(UNIT_RECT<float>);
 }
-
 
 NS_END

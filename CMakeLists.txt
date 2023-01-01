@@ -89,6 +89,7 @@ set(SOURCES
         ${AUDIO_DIRECTORY}/SoundStream.cpp
         ${AUDIO_DIRECTORY}/AudioUtil.cpp
 
+		${VIDEO_DIRECTORY}/Helpers.cpp
         ${VIDEO_DIRECTORY}/LambdaRender.cpp
 		${VIDEO_DIRECTORY}/StandardDrawCalls.cpp
         ${VIDEO_DIRECTORY}/Shader.cpp
@@ -143,6 +144,7 @@ set(SOURCES
         ${GAME_DIRECTORY}/ObjectSprite.cpp
         ${GAME_DIRECTORY}/MapInfo.cpp
         ${GAME_DIRECTORY}/Skin.cpp
+		${GAME_DIRECTORY}/SliderTrail.cpp
 )
 
 set(OpenGL_GL_PREFERENCE GLVND)

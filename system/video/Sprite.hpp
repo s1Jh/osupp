@@ -155,6 +155,6 @@ private:
 }
 
 template<>
-void Draw(video::LambdaRender& renderer, const video::Sprite&);
+void Draw(const video::Sprite&);
 
 NS_END

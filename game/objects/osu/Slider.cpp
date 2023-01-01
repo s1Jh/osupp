@@ -19,12 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-
 #include "Slider.hpp"
 
-#include <utility>
+#include "SliderTrail.hpp"
 
-#include "GL.hpp"
+#include <utility>
 
 NS_BEGIN
 
@@ -59,7 +58,7 @@ void Slider::onLogicUpdate(double delta)
         currentDirection = nextDirection;
     }
 
-    curvePosition = std::fmod(progression * repeats, 1.0);
+    curvePosition = std::fmod(progression * repeats, 1.0 + std::numeric_limits<float>::epsilon());
 
     if (currentDirection == TravelDirection::Backward) {
         curvePosition = 1 - curvePosition;
@@ -72,7 +71,7 @@ void Slider::onLogicUpdate(double delta)
         SOF.position = curve.get<math::CurveType::STRAIGHT>(curvePosition);
     }
 
-    const float maxSOFSizeMultiplier = 3.0;
+    const float maxSOFSizeMultiplier = 2.0;
     const float SOFGrowthFactor = 6.0f;
     auto maxSOFSize = (float) ctx.game.getCircleSize() * maxSOFSizeMultiplier;
 
@@ -220,62 +219,37 @@ void Slider::onDraw()
     // Draw the curve body.
 
     if (bodyTexture.getTexture() && bodyShader) {
+        float end = 1.0f, start = 0.0f;
+        bool useTexture = true;
 
-        for (auto it = interpolatedPath.begin(); it != interpolatedPath.end(); it++) {
-            /*========================================================================================================*/
-            // Draw the bonus point.
-            const auto &node = *it;
-
-            if (it != std::prev(interpolatedPath.end())) {
-                fline seg{node.position, std::next(it)->position};
-
-                auto offset = circleSize;
-
-                auto right = (float) math::Max(seg.A.x, seg.B.x) + offset;
-                auto left = (float) math::Min(seg.A.x, seg.B.x) - offset;
-                auto top = (float) math::Max(seg.A.y, seg.B.y) + offset;
-                auto bottom = (float) math::Min(seg.A.y, seg.B.y) - offset;
-
-                frect rect = {
-                    {
-                        left - right,
-                        top - bottom
-                    },
-                    {
-                        (left + right) / 2.0f,
-                        (top + bottom) / 2.0f,
-                    }
-                };
-
-                Mat3f shape = math::MakeScaleMatrix<float>(rect.size) *
-                    math::MakeTranslationMatrix<float>(rect.position);
-
-                auto tint = bodyTexture.getTint();
-                tint.a = alpha;
-                // TODO: Depth functions and blend functions no longer get applied since we're drawing elsewhere
-                glDepthFunc(GL_LEQUAL);
-                glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
-                ctx.gfx.draw(DrawMesh{
-                    ctx.gfx.getMeshes().rectMask, *bodyShader,
-                    video::Shader::Uniforms{
-                        {"resolution", (fvec2d) ctx.gfx.getConfig().size},
-                        {"A", seg.A},
-                        {"B", seg.B},
-                        {"thickness", offset},
-                        {"fill", tint},
-                        {"shape", shape}
-                    },
-                    video::Shader::Textures{
-                        {0, bodyTexture.getTexture().get()}
-                    },
-                    &objectTransform
-                });
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                glDepthFunc(GL_ALWAYS);
-            }
+        // TODO: customization of fade in/out animations
+        if (isFadingIn()) {
+            useTexture = false;
+            auto hw = ctx.game.getHitWindow();
+            auto snakeInPeriod = float(ctx.game.getApproachTime() - hw);
+            auto snakeInEnd = float(getStartTime() - hw);
+            end = 1.0f + float((ctx.game.getCurrentTime() - snakeInEnd) / snakeInPeriod);
+            end = math::SmoothStep(end);
         }
-        glClearDepth(1.0f);
-        glClear(GL_DEPTH_BUFFER_BIT);
+
+        if (repeatsLeft <= 1 && objectTemplate->repeats != 1) {
+            useTexture = false;
+            end = (float) curvePosition;
+        }
+
+        // TODO: customization of slider trail oppacity
+        SliderTrailDrawInfo sliderInfo = {
+            .start = start,
+            .end = end,
+            .useTexture = useTexture,
+            .thickness = circleSize,
+            .bakedTexture = nullptr,
+            .shader = bodyShader,
+            .alpha = alpha,
+            .sprite = &bodyTexture,
+            .transform = objectTransform
+        };
+        ctx.gfx.draw(DrawSliderTrail{curve, sliderInfo});
     }
     /*============================================================================================================*/
     // Draw curve decorations such as bonus points.

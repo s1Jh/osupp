@@ -27,6 +27,17 @@
 #include "define.hpp"
 
 NS_BEGIN
+
+constexpr const char *SPINNER_SPRITE = "spinner";
+
+constexpr const char *SPINNER_CENTER_SPRITE = "spinner_center";
+
+constexpr const char *SPINNER_METER_SPRITE = "spinner_meter";
+
+constexpr const char *SPINNER_SWOOSH_SOUND = "spinner_swoosh";
+
+constexpr const char *SPINNER_DING_SOUND = "spinner_ding";
+
 class Spinner: public OsuHitObject<ObjectTemplateSpinner,
 	OsuHitObjectFlags::NO_APPROACH_CIRCLE |
 	OsuHitObjectFlags::NO_FADEOUT_ANIMATION>

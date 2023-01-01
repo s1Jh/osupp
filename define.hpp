@@ -129,7 +129,7 @@ constexpr int VERSION_MAJOR = 0;
 
 constexpr int VERSION_MINOR = 8;
 
-constexpr int VERSION_PATCH = 6;
+constexpr int VERSION_PATCH = 7;
 
 /*====================================================================================================================*/
 /*  Default settings */
@@ -141,55 +141,5 @@ constexpr int DEFAULT_SOUND_CHANNEL_COUNT = 16;
 /*====================================================================================================================*/
 /*  Constant asset name definitions */
 /*--------------------------------------------------------------------------------------------------------------------*/
-constexpr const char *NOTE_BASE_SPRITE = "note";
-
-constexpr const char *NOTE_OVERLAY_SPRITE = "note_overlay";
-
-constexpr const char *NOTE_UNDERLAY_SPRITE = "note_underlay";
-
-constexpr const char *APPROACH_CIRCLE_SPRITE = "approach_circle";
-
-constexpr const char *SLIDER_HEAD_SPRITE = "slider_head";
-
-constexpr const char *SLIDER_TAIL_SPRITE = "slider_tail";
-
-constexpr const char *SLIDER_HEAD_REPEAT_SPRITE = "slider_head_repeat";
-
-constexpr const char *SLIDER_TAIL_REPEAT_SPRITE = "slider_tail_repeat";
-
-constexpr const char *SLIDER_BODY_SPRITE = "slider_body";
-
-constexpr const char *SLIDER_HIT_POINT_SPRITE = "slider_hitpoint";
-
-constexpr const char *SPINNER_SPRITE = "spinner";
-
-constexpr const char *SPINNER_CENTER_SPRITE = "spinner_center";
-
-constexpr const char *SPINNER_METER_SPRITE = "spinner_meter";
-
-constexpr const char *SLIDER_BALL_SPRITE = "slider_ball";
-
-constexpr const char *SLIDER_BALL_RING_SPRITE = "slider_ring";
-
-constexpr const char *PLAY_FIELD_SPRITE = "play_field";
-
-constexpr const char *CURSOR_SPRITE = "cursor";
-
-constexpr const char *SLIDER_SHADER = "slider";
-
-constexpr const char *HIT_SOUND = "hit_sound";
-
-constexpr const char *MISS_SOUND = "miss_sound";
-
-constexpr const char *SLIDER_BOUNCE_SOUND = "slider_bounce";
-
-constexpr const char *SLIDER_SLIDE_SOUND = "slider_slide";
-
-constexpr const char *SLIDER_BREAK_SOUND = "slider_break";
-
-constexpr const char *SPINNER_SWOOSH_SOUND = "spinner_swoosh";
-
-constexpr const char *SPINNER_DING_SOUND = "spinner_ding";
-
 NS_END
 /*====================================================================================================================*/

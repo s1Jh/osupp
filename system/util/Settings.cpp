@@ -51,7 +51,7 @@ void Settings::iterateSettingsSearch(
         std::string strRepr;
         switch (setting.second.getType()) {
             case df2::EntryType::CLUMP:
-                iterateSettingsSearch(entries, setting.second, thisName);
+                iterateSettingsSearch(entries, setting.second, thisName + '.');
                 break;
             case df2::EntryType::COLOR:
                 push(std::to_string(value.col().r) + ','
@@ -79,8 +79,6 @@ void Settings::iterateSettingsSearch(
                 break;
         }
     }
-
-    apply();
 }
 
 bool Settings::write(const std::filesystem::path &path) const
@@ -92,7 +90,7 @@ bool Settings::write(const std::filesystem::path &path) const
 bool Settings::read(const std::filesystem::path &path)
 {
     auto read = df2::read(path);
-    iterateSettingsSearch(savedValues, read, "setting.");
+    iterateSettingsSearch(savedValues, read, "setting");
     return !read.isEmpty();
 }
 

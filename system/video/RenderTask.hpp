@@ -43,7 +43,7 @@ namespace detail
 
 struct BaseRenderTask
 {
-    virtual inline void invoke()
+    virtual inline void invoke(video::LambdaRender&)
     {}
 };
 
@@ -55,13 +55,17 @@ struct RenderTask: public detail::BaseRenderTask
     using ParameterTupleType = std::tuple<std::remove_cvref_t<Arg1>,
                                           std::remove_cvref_t<Args>...>;
 
+    static void Call(video::LambdaRender& renderer, Arg1 arg1, Args ... args) {
+        Draw<LambdaRender&, Arg1, Args...>(renderer, arg1, args...);
+    }
+
     explicit RenderTask(Arg1 first, Args... others)
         : params(first, others...)
     {}
 
-    void invoke() override
+    void invoke(video::LambdaRender& renderer) override
     {
-        std::apply(Draw<Arg1, Args...>, params);
+        std::apply([&](Arg1 arg1, Args ... args) { Draw<LambdaRender&, Arg1, Args...>(renderer, arg1, args...); }, params);
     }
 
     ParameterTupleType params;

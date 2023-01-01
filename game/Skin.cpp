@@ -27,6 +27,7 @@
 #include "Random.hpp"
 #include "Resource.hpp"
 #include "Context.hpp"
+#include "Slider.hpp"
 
 NS_BEGIN
 
@@ -195,14 +196,15 @@ Resource<Skin> Load(const std::filesystem::path &path)
 
     for (auto &texture : r->textures) {
         texture.second.texture = Load<video::Texture>(texture.second.path);
-        failed += !bool(texture.second.texture);
+        texture.second.texture->upload();
+        failed += !bool(texture.second.texture && texture.second.texture->uploaded());
     }
     for (const auto &shader : Skin::StaticGameShaders) {
         const auto &vertex = shader.second.first;
         const auto &fragment = shader.second.second;
         const auto &shaderObj = r->shaders[shader.first].shader;
         shaderObj->fromString(vertex, fragment);
-        shaderObj->upload();
+        failed += !shaderObj->upload();
     }
     for (auto &sound : r->sounds) {
         sound.second.sound = Load<SoundSample>(sound.second.path);
@@ -244,6 +246,12 @@ Resource<video::Texture> Skin::getTexture(const std::string &object)
 
     newTexture.path = files::Get(object, directory, Resource<video::Texture>::allowedExtensions);
     newTexture.texture = Load<video::Texture>(newTexture.path);
+    if (!newTexture.texture) {
+        log::error("Failed to load texture ", object);
+    }
+    if (!newTexture.texture->upload()) {
+        log::error("Failed to upload texture ", object);
+    }
 
     return newTexture.texture;
 }

@@ -30,6 +30,12 @@
 
 NS_BEGIN
 
+constexpr const char *NOTE_BASE_SPRITE = "note";
+
+constexpr const char *NOTE_OVERLAY_SPRITE = "note_overlay";
+
+constexpr const char *NOTE_UNDERLAY_SPRITE = "note_underlay";
+
 class Note: public OsuHitObject<ObjectTemplateNote>
 {
 public:

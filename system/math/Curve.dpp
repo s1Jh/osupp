@@ -177,6 +177,29 @@ struct CurveCalculationFunctor<CurveType::SEMI_CIRCLE>
 /*  Specializations of the Curve struct. */
 /*--------------------------------------------------------------------------------------------------------------------*/
 
+template<CurveType Type, typename TType, typename IteratorT, typename LengthT = double>
+[[nodiscard]] fvec2d Direction(double t, Curve<IteratorT, LengthT> curve)
+{
+    auto epsilon = std::numeric_limits<TType>::epsillon();
+    // Clamp the parameter to <0; t-ε>.
+    // This is done so that if t=1, calling curve.get(t+ε) would yield the same
+    // result as calling curve.get(t). because the value of t is clamped in the
+    // calculation.
+    t = Clamp(t, 0.0, 1.0 - epsilon);
+
+    // We find the direction vector by pointing a vector from the requested
+    // parametric position t and another position equal to t + ε, with ε being a
+    // small positive offset. We normalize this vector and return.
+    auto targetPosition = curve.get<Type>(t);
+    auto offsetPosition = curve.get<Type>(t + epsilon);
+    return Normalize(offsetPosition - targetPosition);
+}
+
+template<CurveType Type, typename TType, typename IteratorT, typename LengthT = double>
+[[nodiscard]] fvec2d Normal(double t, Curve<IteratorT, LengthT> curve) {
+    return Normal(Direction<IteratorT, Type, TType, LengthT>(t, curve));
+}
+
 } // math
 
 NS_END

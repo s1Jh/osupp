@@ -28,6 +28,8 @@
 #include "Video.hpp"
 #include "Texture.hpp"
 #include "Types.hpp"
+#include "Shader.hpp"
+#include "SliderTypes.hpp"
 
 NS_BEGIN
 
@@ -35,12 +37,16 @@ struct ObjectDrawInfo
 {
     frect destination = UNIT_RECT<float>;
     float alpha = 1.0f;
-    const Mat3f &transform = MAT3_NO_TRANSFORM<float>;
+    Mat3f transform = MAT3_NO_TRANSFORM<float>;
 };
 
 class ObjectSprite
 {
-	friend void PROJECT_NAMESPACE::Draw<const ObjectSprite&, const ObjectDrawInfo&>(const ObjectSprite&, const ObjectDrawInfo&);
+    friend void PROJECT_NAMESPACE::Draw<video::LambdaRender &, const ObjectSprite &, const ObjectDrawInfo &>(
+        video::LambdaRender &renderer,
+        const ObjectSprite &,
+        const ObjectDrawInfo &
+    );
 public:
     ObjectSprite() = default;
 
@@ -48,17 +54,17 @@ public:
 
     void setTexture(const Resource<video::Texture> &texture);
     void setFPS(FPS_t fps);
-	void setTotalFrames(int frames);
+    void setTotalFrames(int frames);
     void setFrameTime(float frameTime);
     void setTint(const color &tint);
 
-	[[nodiscard]] const color &getTint() const;
+    [[nodiscard]] const color &getTint() const;
 
     [[nodiscard]] Resource<video::Texture> getTexture() const;
 
 protected:
     color tint{WHITE};
-	Resource<video::Texture> texture{nullptr};
+    Resource<video::Texture> texture{nullptr};
     video::AnimationLayout layout = video::AnimationLayout::HORIZONTAL;
     float frameTime = 0.0f;
     float frameTimer = 0.0f;
@@ -66,10 +72,9 @@ protected:
     unsigned int frameCounter = 0;
 };
 
-
-using DrawObject = video::RenderTask<const ObjectSprite&, const ObjectDrawInfo&>;
+using DrawObject = video::RenderTask<const ObjectSprite &, const ObjectDrawInfo &>;
 
 template<>
-void Draw(const ObjectSprite&, const ObjectDrawInfo&);
+void Draw(video::LambdaRender &renderer, const ObjectSprite &, const ObjectDrawInfo &);
 
 NS_END

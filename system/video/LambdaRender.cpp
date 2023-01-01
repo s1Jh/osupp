@@ -51,6 +51,7 @@ void OnGLFWResize(WindowHandle *window, int width, int height)
 
 bool LambdaRender::update()
 {
+    camera.recalculateMatrix();
     if (!window.isOpen()) {
         return false;
     }
@@ -73,6 +74,8 @@ bool LambdaRender::configure(const WindowConfiguration &newConfig)
     if (!window.handle) {
         return false;
     }
+
+    camera.setAspectRatio(float(newConfig.size.h) / float(newConfig.size.w));
 
     return ApplyWindowConfiguration(window, newConfig);
 }
@@ -158,7 +161,7 @@ void LambdaRender::finish()
 
 	for (size_t i = 0; i < renderStackSize; i++) {
 		auto &task = renderQueue[i];
-		task->invoke();
+		task->invoke(*this);
 	}
 
 // #ifdef IMGUI

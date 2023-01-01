@@ -221,6 +221,7 @@ InitLayers Init(InitLayers layers)
     }
 
     ctx.settings.read();
+    ctx.settings.apply();
     ctx.state.setState(GameState::INITIAL_STATE);
 
     return GetInitializedLayers();

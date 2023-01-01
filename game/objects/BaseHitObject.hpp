@@ -23,6 +23,7 @@
 #pragma once
 
 #include "define.hpp"
+
 #include "Circle.hpp"
 #include "Enum.hpp"
 #include "Context.hpp"

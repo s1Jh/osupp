@@ -193,7 +193,7 @@ const drect &Sprite::getRect() const
 }
 
 template<>
-void Draw(video::LambdaRender& renderer, const video::Sprite&)
+void Draw(const video::Sprite&)
 {
 	// FIXME: actually use the sprite shader?
 

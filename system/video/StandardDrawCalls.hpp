@@ -45,27 +45,27 @@ class LambdaRender;
 }
 
 template<>
-void Draw(color clearColor);
+void Draw(video::LambdaRender&, color clearColor);
 
 template<>
-void Draw(const std::function<void()> &, const std::string &, bool *, int);
+void Draw(video::LambdaRender& renderer, const std::function<void()> &, const std::string &, bool *, int);
 
 template<>
-void Draw(const video::Mesh &, const video::Shader &,
+void Draw(video::LambdaRender& renderer, const video::Mesh &, const video::Shader &,
           const video::Shader::Uniforms &, const video::Shader::Textures &,
 		  const video::Shader::TransformMatrixUniform &);
 
 template<>
-void Draw(const fline &, const video::VisualAppearance&, const Mat3f&);
+void Draw(video::LambdaRender& renderer, const fline &, const video::VisualAppearance&, const Mat3f&);
 
 template<>
-void Draw(const frect &, const video::VisualAppearance&, const Mat3f&);
+void Draw(video::LambdaRender& renderer, const frect &, const video::VisualAppearance&, const Mat3f&);
 
 template<>
-void Draw(const fcircle &, const video::VisualAppearance&, const Mat3f&);
+void Draw(video::LambdaRender& renderer, const fcircle &, const video::VisualAppearance&, const Mat3f&);
 
 template<>
-void Draw(const fvec2d &, const video::VisualAppearance&, const Mat3f&);
+void Draw(video::LambdaRender& renderer, const fvec2d &, float size, const video::VisualAppearance&, const Mat3f&);
 
 using ClearScreen = video::RenderTask<color>;
 using ImGuiWindow = video::RenderTask<const std::function<void()> &, const std::string &, bool *, int>;

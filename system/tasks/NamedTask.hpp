@@ -38,6 +38,7 @@ enum class TaskID
 #define JOB(ID, ...) ID,
 	PERSISTENT_JOBS
 #undef JOB
+    DUMMY,
 	COUNT
 };
 

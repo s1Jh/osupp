@@ -25,44 +25,52 @@
 
 #include "Color.hpp"
 #include "GL.hpp"
-#include "imgui.h"
 #include "Util.hpp"
+#include "LambdaRender.hpp"
+#include "Helpers.hpp"
 
+#include "imgui.h"
+#include "MatrixMath.hpp"
 #include <functional>
 
 NS_BEGIN
 
 template<>
-void Draw(color clearColor)
+void Draw(video::LambdaRender &, color clearColor)
 {
-	glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
-	glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(DECOMPOSE_COLOR_RGBA(clearColor));
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 template<>
-void Draw(const std::function<void()> &func, const std::string &title, bool *open, int flags)
+void Draw(
+    video::LambdaRender &, const std::function<void()> &func,
+    const std::string &title, bool *open, int flags
+)
 {
-	if (ImGui::Begin(title.c_str(), open, flags)) {
-		func();
-		ImGui::End();
-	}
+    if (ImGui::Begin(title.c_str(), open, flags)) {
+        func();
+        ImGui::End();
+    }
 }
 
 template<>
-void Draw(const video::Mesh &mesh, const video::Shader &shader,
-		  const video::Shader::Uniforms &uniforms, const video::Shader::Textures &textures,
-		  const video::Shader::TransformMatrixUniform &transform)
+void Draw(
+    video::LambdaRender &renderer, const video::Mesh &mesh, const video::Shader &shader,
+    const video::Shader::Uniforms &uniforms, const video::Shader::Textures &textures,
+    const video::Shader::TransformMatrixUniform &transform
+)
 {
-	if (!mesh.uploaded()) {
+    if (!mesh.uploaded()) {
         return;
-	}
+    }
 
-	if (!shader.uploaded()) {
+    if (!shader.uploaded()) {
         return;
-	}
+    }
 
-	shader.use();
-	CheckGLh("Bound shader");
+    shader.use();
+    CheckGLh("Bound shader");
 
 #define MATCHF(src, type)                                                           \
   if constexpr (std::is_same_v<T, type>)                                       \
@@ -76,61 +84,82 @@ void Draw(const video::Mesh &mesh, const video::Shader &shader,
 #define END_MATCH(src)                                                            \
   else log::warning("Unable to deduce type for shader uniform ", src);
 
-	for (auto &uniform : uniforms) {
-		std::visit(
-			[&](auto &&arg)
-			{
-				using T = std::decay_t<decltype(arg)>;
-				MATCHF(uniform.first, float)
-				MATCH(uniform.first, int)MATCH(uniform.first, unsigned int) MATCH(uniform.first, double)
-				MATCH(uniform.first, fvec2d) MATCH(uniform.first, ivec2d)MATCH(uniform.first, uvec2d)
-				MATCH(uniform.first, dvec2d) MATCH(uniform.first, fvec3d) MATCH(uniform.first, ivec3d)
-				MATCH(uniform.first, uvec3d) MATCH(uniform.first, dvec3d) MATCH(uniform.first, fvec4d)
-				MATCH(uniform.first, ivec4d) MATCH(uniform.first, uvec4d) MATCH(uniform.first, dvec4d)
-                MATCH(uniform.first, Mat2f) MATCH(uniform.first, Mat3f) MATCH(uniform.first, Mat4f)
-				MATCH(uniform.first, color) MATCHP(uniform.first, fvec2d *)
-                MATCHP(uniform.first, ivec2d *) MATCHP(uniform.first, uvec2d *)
-                MATCHP(uniform.first, dvec2d *) MATCHP(uniform.first, fvec3d *)
-				MATCHP(uniform.first, ivec3d *) MATCHP(uniform.first, uvec3d *)
-                MATCHP(uniform.first, dvec3d *) MATCHP(uniform.first, fvec4d *)
-                MATCHP(uniform.first, ivec4d *) MATCHP(uniform.first, uvec4d *)
-				MATCHP(uniform.first, dvec4d *) MATCHP(uniform.first, Mat2f *)
-                MATCHP(uniform.first, Mat3f *) MATCHP(uniform.first, Mat4f *)
-                MATCHP(uniform.first, color *) END_MATCH(uniform.first)
-			},
-			uniform.second);
-		CheckGLh("Set shader uniform " + uniform.first);
-	}
+    for (auto &uniform : uniforms) {
+        std::visit(
+            [&](auto &&arg)
+            {
+                using T = std::decay_t<decltype(arg)>;
+                MATCHF(uniform.first, float)
+                MATCH(uniform.first, int)MATCH(uniform.first, unsigned int) MATCH(uniform.first, double) MATCH(uniform
+                                                                                                                   .first,
+                                                                                                               fvec2d) MATCH(
+                    uniform.first,
+                    ivec2d)MATCH(uniform.first, uvec2d) MATCH(uniform.first, dvec2d) MATCH(uniform.first, fvec3d) MATCH(
+                    uniform.first,
+                    ivec3d) MATCH(uniform.first, uvec3d) MATCH(uniform.first, dvec3d) MATCH(uniform.first,
+                                                                                            fvec4d) MATCH(uniform.first,
+                                                                                                          ivec4d) MATCH(
+                    uniform.first,
+                    uvec4d) MATCH(uniform.first, dvec4d)MATCH(uniform.first, Mat2f) MATCH(uniform.first, Mat3f) MATCH(
+                    uniform.first,
+                    Mat4f) MATCH(uniform.first, color) MATCHP(uniform.first, fvec2d *)MATCHP(uniform.first,
+                                                                                             ivec2d *) MATCHP(uniform
+                                                                                                                  .first,
+                                                                                                              uvec2d *)MATCHP(
+                    uniform.first,
+                    dvec2d *) MATCHP(uniform.first, fvec3d *) MATCHP(uniform.first, ivec3d *) MATCHP(uniform.first,
+                                                                                                     uvec3d *)MATCHP(
+                    uniform.first,
+                    dvec3d *) MATCHP(uniform.first, fvec4d *)MATCHP(uniform.first, ivec4d *) MATCHP(uniform.first,
+                                                                                                    uvec4d *) MATCHP(
+                    uniform.first,
+                    dvec4d *) MATCHP(uniform.first, Mat2f *)MATCHP(uniform.first, Mat3f *) MATCHP(uniform.first,
+                                                                                                  Mat4f *)MATCHP(uniform
+                                                                                                                     .first,
+                                                                                                                 color *) END_MATCH(
+                        uniform.first)
+            },
+            uniform.second
+        );
+        CheckGLh("Set shader uniform " + uniform.first);
+    }
 
-	std::visit([&](auto&& arg) {
-		using T = std::decay_t<decltype(arg)>;
-		MATCHFP("transform", const Mat2f *) MATCHP("transform", const Mat3f *) MATCHP("transform", const Mat4f *) END_MATCH("transform")
-	}, transform);
+    std::visit(
+        [&](auto &&arg)
+        {
+            using T = std::decay_t<decltype(arg)>;
+            MATCHFP("transform", const Mat2f *) MATCHP("transform", const Mat3f *) MATCHP("transform",
+                                                                                          const Mat4f *) END_MATCH(
+                    "transform")
+        }, transform
+    );
 
-	// TODO: Camera
-	shader.set("camera", MAT3_NO_TRANSFORM<float>);
+    // TODO: Camera
+    shader.set("camera", renderer.camera.getMatrix());
 
-	for (auto &texture : textures) {
-		if (!texture.second->uploaded()) {
-			if (!const_cast<video::Texture*>(texture.second)->upload()) {
-				continue;
-			}
-		}
-		texture.second->use(texture.first);
-	}
-	CheckGLh("Bound textures");
+    for (auto &texture : textures) {
+        if (!texture.second->uploaded()) {
+            if (!const_cast<video::Texture *>(texture.second)->upload()) {
+                continue;
+            }
+        }
+        texture.second->use(texture.first);
+    }
+    CheckGLh("Bound textures");
 
-	glBindVertexArray(mesh.getGLData().VAO);
+    glBindVertexArray(mesh.getGLData().VAO);
     CheckGLh("Bound VAO");
-	glDrawElements(static_cast<unsigned int>(mesh.getRenderMode()),
-				   mesh.getElementCount(), GL_UNSIGNED_INT, nullptr);
-	CheckGLh("Draw");
+    glDrawElements(
+        static_cast<unsigned int>(mesh.getRenderMode()),
+        mesh.getElementCount(), GL_UNSIGNED_INT, nullptr
+    );
+    CheckGLh("Draw");
 
-	video::Shader::unbind();
-	for (auto &texture : textures) {
-		video::Texture::unbind(texture.first);
-	}
-	CheckGLh("Unbound");
+    video::Shader::unbind();
+    for (auto &texture : textures) {
+        video::Texture::unbind(texture.first);
+    }
+    CheckGLh("Unbound");
 
 #undef MATCHF
 #undef MATCH
@@ -139,27 +168,57 @@ void Draw(const video::Mesh &mesh, const video::Shader &shader,
 }
 
 template<>
-void osupp::Draw(const fline &, const video::VisualAppearance &, const Mat3f &)
+void Draw(
+    video::LambdaRender &renderer,
+    const fline &seg,
+    const video::VisualAppearance &appearance,
+    const Mat3f &transform
+)
 {
-
+    video::helpers::DrawLineSegment(renderer, seg, appearance, transform);
 }
 
 template<>
-void osupp::Draw(const frect &, const video::VisualAppearance &, const Mat3f &)
+void Draw(
+    video::LambdaRender &renderer,
+    const frect &object,
+    const video::VisualAppearance &appearance,
+    const Mat3f &transform
+)
 {
-
+    Mat3f shape = math::MakeScaleMatrix<float>(object.size) * math::MakeTranslationMatrix<float>(object.position);
+    const auto &mesh = renderer.getMeshes().rect;
+    video::helpers::DrawGeneric2DShape(renderer, mesh, shape, appearance, transform, video::RenderMode::Triangles);
 }
 
 template<>
-void osupp::Draw(const fcircle &, const video::VisualAppearance &, const Mat3f &)
+void Draw(
+    video::LambdaRender &renderer,
+    const fcircle &object,
+    const video::VisualAppearance &appearance,
+    const Mat3f &transform
+)
 {
-
+    Mat3f shape = math::MakeScaleMatrix<float>(dvec2d{object.radius, object.radius})
+        * math::MakeTranslationMatrix<float>(object.position);
+    const auto &mesh = renderer.getMeshes().circle;
+    video::helpers::DrawGeneric2DShape(renderer, mesh, shape, appearance, transform, video::RenderMode::Triangles);
 }
 
 template<>
-void osupp::Draw(const fvec2d &, const video::VisualAppearance &, const Mat3f &)
+void Draw(
+    video::LambdaRender &renderer,
+    const fvec2d &pos,
+    float size,
+    const video::VisualAppearance &appearance,
+    const Mat3f &transform
+)
 {
-
+    size = size / 2.0f;
+    dline a = {pos + fvec2d{size, size}, pos + fvec2d{-size, -size}};
+    dline b = {pos + fvec2d{-size, size}, pos + fvec2d{size, -size}};
+    video::helpers::DrawLineSegment(renderer, a, appearance, transform);
+    video::helpers::DrawLineSegment(renderer, b, appearance, transform);
 }
 
 NS_END
