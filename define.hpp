@@ -129,7 +129,7 @@ constexpr int VERSION_MAJOR = 0;
 
 constexpr int VERSION_MINOR = 8;
 
-constexpr int VERSION_PATCH = 8;
+constexpr int VERSION_PATCH = 9;
 
 /*====================================================================================================================*/
 /*  Default settings */

@@ -218,12 +218,21 @@ void Slider::onDraw()
     const auto &objectTransform = getObjectTransform();
     const auto circleSize = ctx.game.getCircleSize();
     const auto alpha = getAlpha();
-
+    
+    float snakeInEnd;
     /*============================================================================================================*/
     // Draw the curve body.
 
+    if (!preBakedTexture.uploaded()) {
+        SliderTrailDrawInfo info{
+            .trailTexture = bodyTexture.getTexture().get(),
+            .thickness = circleSize
+        };
+        preBakedTexture = DrawTrailToTexture(ctx.gfx, curve, info);
+    }
+
     if (bodyTexture.getTexture() && bodyShader) {
-        float end = 1.0f, start = 0.0f;
+        float start = 0.0f;
         bool useTexture = true;
 
         // TODO: customization of fade in/out animations
@@ -231,26 +240,35 @@ void Slider::onDraw()
             useTexture = false;
             auto hw = ctx.game.getHitWindow();
             auto snakeInPeriod = float(ctx.game.getApproachTime() - hw);
-            auto snakeInEnd = float(getStartTime() - hw);
-            end = 1.0f + float((ctx.game.getCurrentTime() - snakeInEnd) / snakeInPeriod);
-            end = math::SmoothStep(end);
+            auto end = float(getStartTime() - hw);
+            snakeInEnd = 1.0f + float((ctx.game.getCurrentTime() - end) / snakeInPeriod);
+            snakeInEnd = math::SmoothStep(snakeInEnd);
         }
 
-        if (repeatsLeft <= 1 && objectTemplate->repeats != 1) {
+        if (repeatsLeft <= 1 && objectTemplate->repeats > 1) {
             useTexture = false;
-            end = (float) curvePosition;
+            snakeInEnd = (float) curvePosition;
         }
 
+        auto tint = bodyTexture.getTint();
         // TODO: customization of slider trail oppacity
+        tint.a = alpha * 0.8f;
+        // uncomment for rainbow sliders :D
+//        tint.r = float(math::Cos(ctx.game.getCurrentTime())) / 2.0f + 0.5f;
+//        tint.g = float(math::Cos(ctx.game.getCurrentTime() + math::PI * 1/3)) / 2.0f + 0.5f;
+//        tint.b = float(math::Cos(ctx.game.getCurrentTime() + math::PI * 2/3)) / 2.0f + 0.5f;
+
         SliderTrailDrawInfo sliderInfo = {
-            .start = start,
-            .end = end,
             .useTexture = useTexture,
+            .bakedTexture = &preBakedTexture,
+
+            .trailTexture = bodyTexture.getTexture().get(),
+
+            .start = start,
+            .end = snakeInEnd,
             .thickness = circleSize,
-            .bakedTexture = nullptr,
-            .shader = bodyShader,
-            .alpha = alpha * 0.9f,
-            .sprite = &bodyTexture,
+            .tint = tint,
+
             .transform = objectTransform
         };
         ctx.gfx.draw(DrawSliderTrail{curve, sliderInfo});
@@ -287,7 +305,11 @@ void Slider::onDraw()
 
     /*============================================================================================================*/
     // Draw the end decorations.
-    const auto &endBumperPosition = interpolatedPath.back().position;
+    auto endBumperPosition = interpolatedPath.back().position;
+
+    if (isFadingIn()) {
+        endBumperPosition = curve.get<math::CurveType::STRAIGHT>(snakeInEnd);
+    }
 
     ObjectDrawInfo tailInfo = {
         {{circleSize, circleSize}, endBumperPosition},

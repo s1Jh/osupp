@@ -37,9 +37,6 @@ bool InitVideo()
     video::detail::InitPlatformVideo();
 
     Context &ctx = GetContext();
-    if (!ctx.gfx.init()) {
-        return false;
-    }
 
     const std::vector<std::string> StandardResolutions = {
         "720x480",
@@ -52,6 +49,8 @@ bool InitVideo()
         "3200x1800",
         "3840x2160",
     };
+    auto
+        msLevels = ctx.settings.addSetting<int>("setting.gfx.ms_levels", 0, SettingFlags::WRITE_TO_FILE, 0, 4);
 
     auto resolution = ctx.settings.addSetting<std::string>(
         "setting.gfx.window.resolution", "1920x1080", SettingFlags::WRITE_TO_FILE,
@@ -65,6 +64,23 @@ bool InitVideo()
         refreshRate =
         ctx.settings.addSetting<int>("setting.gfx.window.refresh_rate", 60, SettingFlags::WRITE_TO_FILE, 0, 120);
 
+    if (!ctx.gfx.init(msLevels.get())) {
+        return false;
+    }
+// TODO: We can't change MS levels at runtime yet for the following reasons:
+// - All OpenGL objects will get destroyed alongside the window and it's context.
+// - A SIGSEGV occurs, most likely related to ImGui.
+//    ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(
+//        wrap([msLevels](const std::string& setting) {
+//            if (setting == "setting.gfx.ms_levels") {
+//                auto &ctx = GetContext();
+//                if (!ctx.gfx.init(msLevels.get())) {
+//                    log::error("Failed to initialize renderer with the new MS level");
+//                }
+//            }
+//            return CallbackReturn::OK;
+//        })
+//        );
 
     ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(
         wrap(
@@ -210,6 +226,8 @@ InitLayers Init(InitLayers layers)
         return false;
     };
 
+    ctx.settings.read();
+
     InitHelper(InitLayers::ERROR, InitErrors);
     InitHelper(InitLayers::TASKS, InitTasks);
     InitHelper(InitLayers::LOCALE, InitLocale);
@@ -220,7 +238,6 @@ InitLayers Init(InitLayers layers)
         InitHelper(InitLayers::IMGUI, InitImGui);
     }
 
-    ctx.settings.read();
     ctx.settings.apply();
     ctx.state.setState(GameState::INITIAL_STATE);
 

@@ -238,8 +238,13 @@ bool LambdaRender::GenerateStaticGeometry(GenericMeshCollection& meshes)
     return success;
 }
 
-bool LambdaRender::init()
+bool LambdaRender::init(uint8_t msLevels)
 {
+    if (window.handle != nullptr) {
+        glfwDestroyWindow(TO_GLFW(window.handle));
+        window.open = false;
+    }
+
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 #ifdef APPLE
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -254,14 +259,24 @@ bool LambdaRender::init()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
 
+    if (msLevels != 0) {
+        glfwWindowHint(GLFW_SAMPLES, msLevels);
+    }
+
     window.handle = FROM_GLFW(glfwCreateWindow(1, 1, TOSTRING(GAME_TITLE), nullptr, nullptr));
     if (!window.handle) {
         log::error("Failed to open window");
         return false;
     }
     glfwMakeContextCurrent(TO_GLFW(window.handle));
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+
+    if (msLevels != 0) {
+        glEnable(GL_MULTISAMPLE);
+    }
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -270,6 +285,8 @@ bool LambdaRender::init()
 
     glfwSetWindowSizeCallback(TO_GLFW(window.handle), reinterpret_cast<GLFWwindowsizefun>(OnGLFWResize));
     window.open = true;
+
+    ApplyWindowConfiguration(window, window.config);
 
     return GenerateStaticGeometry(meshes);
 }

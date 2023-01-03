@@ -106,6 +106,8 @@ protected:
 private:
     Resource<video::Shader> bodyShader;
 
+    video::Texture preBakedTexture;
+
     ObjectSprite bodyTexture;
 	ObjectSprite ballRing;
     ObjectSprite ball;

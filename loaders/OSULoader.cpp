@@ -477,4 +477,5 @@ bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map)
     }
     return false;
 }
+
 NS_END

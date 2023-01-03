@@ -54,7 +54,7 @@ public:
 
     ~LambdaRender();
 
-    bool init();
+    bool init(uint8_t msLevels = 0);
     bool initImGui();
 
 	[[nodiscard]] const GenericMeshCollection& getMeshes() const;

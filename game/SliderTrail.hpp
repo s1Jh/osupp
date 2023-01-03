@@ -11,16 +11,25 @@
 NS_BEGIN
 
 struct SliderTrailDrawInfo {
+    bool useTexture;
+    video::Texture *bakedTexture;
+
+    video::Texture *trailTexture;
+
     float start;
     float end;
-    bool useTexture;
+
     float thickness;
-    video::Texture *bakedTexture;
-    Resource<video::Shader> shader;
-    float alpha;
-    ObjectSprite *sprite;
-    Mat3f transform;
+    color tint;
+
+    Mat3f transform{};
 };
+
+video::Texture DrawTrailToTexture(
+    video::LambdaRender &renderer,
+    math::Curve<SliderPathT::iterator> &trail,
+    SliderTrailDrawInfo info
+);
 
 template<>
 void Draw(

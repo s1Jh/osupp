@@ -38,7 +38,7 @@ template <typename GLRepr> requires std::is_default_constructible_v<GLRepr>
 class GLResource
 {
 public:
-	GLResource(const GLResource& other)
+	GLResource(const GLResource& other) noexcept
 	{
 		bool otherState = other.wasUploaded;
 		wasUploaded = otherState;
@@ -51,6 +51,20 @@ public:
 		wasUploaded = otherState;
 		data = std::make_unique<GLRepr>(*other.data);
 	}
+
+    GLResource & operator= (const GLResource& other) noexcept
+    {
+        bool otherState = other.wasUploaded;
+        wasUploaded = otherState;
+        data = std::make_unique<GLRepr>(*other.data);
+    }
+
+    GLResource & operator= (GLResource&& other) noexcept
+    {
+        bool otherState = other.wasUploaded;
+        wasUploaded = otherState;
+        data = std::make_unique<GLRepr>(*other.data);
+    }
 
 	inline const GLRepr &getGLData() const {
 		return *data;
