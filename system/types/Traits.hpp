@@ -28,15 +28,26 @@
 namespace PROJECT_NAMESPACE
 {
 
-    // https://stackoverflow.com/a/57812868
-    template <typename T>
-    struct is_string
-        : public std::disjunction<
-              std::is_same<char *, typename std::decay_t<T>>,
-              std::is_same<const char *, typename std::decay_t<T>>,
-              std::is_same<const char *, typename std::decay_t<T>>,
-              std::is_same<std::string, typename std::decay_t<T>>>
-    {
-    };
+// https://stackoverflow.com/a/57812868
+template<typename T>
+struct is_string
+    : public std::disjunction<
+        std::is_same<char *, typename std::decay_t<T>>,
+        std::is_same<const char *, typename std::decay_t<T>>,
+        std::is_same<const char *, typename std::decay_t<T>>,
+        std::is_same<std::string, typename std::decay_t<T>>>
+{
+};
+
+// https://stackoverflow.com/a/31763111
+template<class T, template<class...> class Template>
+struct is_specialization: std::false_type
+{
+};
+
+template<template<class...> class Template, class... Args>
+struct is_specialization<Template<Args...>, Template>: std::true_type
+{
+};
 
 }

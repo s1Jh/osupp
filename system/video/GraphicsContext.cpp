@@ -22,7 +22,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_main.h>
-#include <cstring>
 
 #include "GL.hpp"
 #include "Log.hpp"
@@ -51,20 +50,16 @@ namespace PROJECT_NAMESPACE::video {
 class GraphicsApi
 {
 public:
-	GraphicsApi();
+	GraphicsApi() noexcept;
+    ~GraphicsApi();
+private:
+    log::Logger logger{"GFX", log::Severity::INF};
 };
 
-static GraphicsApi Api;
+[[maybe_unused]] static GraphicsApi Api;
 
-void OnGLFWError(int code, const char* description)
+GraphicsApi::GraphicsApi() noexcept
 {
-	log::Custom(log::Severity::ERR, "GLFW", description, " (", code, ")");
-}
-
-GraphicsApi::GraphicsApi()
-{
-	log::Logger logger("GFX", log::Severity::INF);
-
 	logger("Initializing SDL2");
 
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -120,6 +115,11 @@ GraphicsApi::GraphicsApi()
 #else
 #error "OpenGL loading for this platform is not implemented yet."
 #endif
+}
+GraphicsApi::~GraphicsApi()
+{
+    logger("Closing SDL2");
+    SDL_Quit();
 }
 
 }

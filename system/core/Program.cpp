@@ -54,11 +54,11 @@ void EntryPoint()
     Exit(0);
 }
 
-void Exit(unsigned int code)
+void Exit(int code)
 {
     log::Custom(log::Severity::INF, "TOAST", "Goodbye world!");
     // Here we should perform all library cleanup, as this is a single choke for all exit calls.
-
+    tasks::Stop();
     std::exit(code);
 }
 

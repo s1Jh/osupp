@@ -36,6 +36,6 @@ namespace PROJECT_NAMESPACE::core
 
 /// @brief Exits the program with the given exit code.
 /// @param code The exit code.
-void Exit(unsigned int code);
+void Exit(int code);
 
 }

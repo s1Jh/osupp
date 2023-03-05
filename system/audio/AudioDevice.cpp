@@ -128,7 +128,7 @@ void AudioDevice::process()
 
 void AudioDevice::ALContextDeleter(AudioDevice::ALContainer *container)
 {
-    log::Debug("Closing audio device ", container);
+//    log::Debug("Closing audio device ", container);
     alcDestroyContext((ALCcontext *) container->context);
     alcCloseDevice((ALCdevice *) container->device);
 }

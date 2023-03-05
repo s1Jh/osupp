@@ -25,6 +25,7 @@
 #include "Log.hpp"
 
 #include "Import.hpp"
+#include "Rect.hpp"
 #include "Tasks.hpp"
 
 #include "imgui/imgui.h"
@@ -242,6 +243,8 @@ int State<GameState::MainMenu>::update(double)
         ctx->activeSkin = Load<Skin>(path);
         ctx->gui.create(ctx->activeSkin->getGuiMarkup());
     }
+
+    log::Info(ctx->gfx.getWindowRect());
 
     return 0;
 }

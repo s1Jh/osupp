@@ -27,11 +27,13 @@
 #include "Size.hpp"
 #include "Vector.hpp"
 #include "ToFromString.hpp"
+#include "Traits.hpp"
 
 namespace PROJECT_NAMESPACE
 {
 
 template<typename T>
+    requires std::is_arithmetic_v<T>
 struct rect
 {
     constexpr rect()
@@ -55,13 +57,6 @@ struct rect
 template<typename T> constexpr rect<T> UNIT_RECT{};
 template<typename T> constexpr rect<T> SCREEN_RECT{{2, 2}, {0, 0}};
 
-template<typename T>
-std::ostream &operator<<(std::ostream &os, const rect<T> &dt)
-{
-    os << dt.size << "@" << dt.position;
-
-    return os;
-}
 
 template<typename T>
 inline rect<T> Scale(rect<T> rect, float amount)
@@ -80,5 +75,12 @@ using frect = rect<float>;
 using irect = rect<int>;
 using urect = rect<unsigned int>;
 using drect = rect<double>;
+
+template<typename T> requires
+    is_specialization<T, rect>::value
+std::string ToString(const T& rect)
+{
+    return ToString(rect.size) + '@' + ToString(rect.position);
+}
 
 }

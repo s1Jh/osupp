@@ -25,8 +25,8 @@
 #include "define.hpp"
 
 #include "Vector.hpp"
-
 #include "ToFromString.hpp"
+#include "Traits.hpp"
 
 namespace PROJECT_NAMESPACE
 {
@@ -134,6 +134,13 @@ requires std::is_arithmetic_v<T2>
 inline size<T1> operator/=(size<T1> &in, T2 scaler)
 {
     return size<T1>{in.w /= (T1) scaler, in.h /= (T1) scaler};
+}
+
+template<typename T> requires
+is_specialization<T, size>::value
+std::string ToString(const T& size)
+{
+    return ToString(size.w) + ';' + ToString(size.h);
 }
 
 }
