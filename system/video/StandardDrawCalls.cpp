@@ -33,7 +33,7 @@
 #include "MatrixMath.hpp"
 #include <functional>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<>
 void Draw(video::LambdaRender &, color clearColor)
@@ -50,8 +50,8 @@ void Draw(
 {
     if (ImGui::Begin(title.c_str(), open, flags)) {
         func();
-        ImGui::End();
     }
+    ImGui::End();
 }
 
 template<>
@@ -82,7 +82,7 @@ void Draw(
 #define MATCHP(src, type)                                                           \
   else if constexpr (std::is_same_v<T, type>) shader.set(src, *arg);
 #define END_MATCH(src)                                                            \
-  else log::warning("Unable to deduce type for shader uniform ", src);
+  else log::Warning("Unable to deduce type for shader uniform ", src);
 
     for (auto &uniform : uniforms) {
         std::visit(
@@ -139,9 +139,7 @@ void Draw(
 
     for (auto &texture : textures) {
         if (!texture.second->uploaded()) {
-            if (!const_cast<video::Texture *>(texture.second)->upload()) {
-                continue;
-            }
+            continue;
         }
         texture.second->use(texture.first);
     }
@@ -221,4 +219,4 @@ void Draw(
     video::helpers::DrawLineSegment(renderer, b, appearance, transform);
 }
 
-NS_END
+}

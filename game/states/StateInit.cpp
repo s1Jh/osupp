@@ -26,11 +26,11 @@
 
 #include "imgui/imgui.h"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 int State<GameState::Init>::update(double)
 {
-    return (int) GameState::MainMenu;
+    setState(GameState::MainMenu);
 }
 
 int State<GameState::Init>::draw()
@@ -40,39 +40,45 @@ int State<GameState::Init>::draw()
 
 int State<GameState::Init>::exit()
 {
+    ctx->gfx.configure(video::WindowConfiguration{.shown = video::WindowVisibility::VISIBLE});
     return 0;
 }
 
 int State<GameState::Init>::init(GameState)
 {
-    log::info("Initiating game...");
+    log::Info("Initiating game...");
 
-    auto &ctx = GetContext();
-
-    auto pathStr = ctx.settings.addSetting<std::string>("setting.paths", "", SettingFlags::WRITE_TO_FILE).get();
+    auto pathStr = ctx->settings.addSetting<std::string>("setting.paths", "", SettingFlags::WRITE_TO_FILE).get();
     const auto &paths = GetCharacterSeparatedValues(pathStr, ',');
 
     for (const auto &path : paths) {
         std::filesystem::path p(path);
-        ctx.paths.addPath(p);
+        ctx->paths.addPath(p);
     }
 
-    ctx.maps.load(ctx.paths);
+    log::Info("Searching these paths:");
+    for (const auto& p : ctx->paths) {
+        log::Info('\t', p);
+    }
 
-    auto skinPaths = ctx.paths.findAll("skins", Resource<Skin>::allowedExtensions);
+    ctx->maps.load(ctx->paths);
+
+    auto skinPaths = ctx->paths.findAll("skins", Resource<Skin>::allowedExtensions);
     std::vector<std::string> skinNames;
     for (const auto &path : skinPaths) {
         skinNames.push_back(path.stem().string());
     }
 
     std::string skin =
-        ctx.settings.addSetting<std::string>("setting.user.skin", "default", DEFAULT_SETTING_FLAGS, skinNames).get();
+        ctx->settings.addSetting<std::string>("setting.user.skin", "default", DEFAULT_SETTING_FLAGS, skinNames).get();
 
-    auto path = ctx.paths.find(skin, Resource<Skin>::allowedExtensions);
+    auto path = ctx->paths.find(skin, Resource<Skin>::allowedExtensions);
 
-    ctx.activeSkin = Load<Skin>(path);
+    ctx->activeSkin = Load<Skin>(path);
+
+    ctx->gui.create(ctx->activeSkin->getGuiMarkup());
 
     return 0;
 }
 
-NS_END
+}

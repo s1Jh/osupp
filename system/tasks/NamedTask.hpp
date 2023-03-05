@@ -26,19 +26,21 @@
 #include "Holder.hpp"
 #include "Result.hpp"
 
-NS_BEGIN
+#ifndef PERSISTENT_JOBS
+#define PERSISTENT_JOBS
+#endif
 
-namespace tasks
+namespace osupp::tasks
 {
 
-#define PERSISTENT_JOBS 
 
 enum class TaskID
 {
 #define JOB(ID, ...) ID,
 	PERSISTENT_JOBS
 #undef JOB
-    DUMMY,
+    GUI,
+    STATE,
 	COUNT
 };
 
@@ -65,5 +67,3 @@ template<> struct tasks::NamedTaskInfo<tasks::TaskID::ThisID> {     \
 };
 
 }
-
-NS_END

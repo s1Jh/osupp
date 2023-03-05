@@ -28,7 +28,7 @@
 #include <cmath>
 #include <fstream>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 void Channel::generateBuffer(unsigned int buffer, const detail::BaseSound::BufferT &data)
 {
@@ -64,7 +64,7 @@ void Channel::refillBuffer(unsigned int buffer)
         return;
     }
 
-//	log::debug("Filling buffer ", buffer, " with ", newData.size(), " samples");
+//	log::Debug("Filling buffer ", buffer, " with ", newData.size(), " samples");
     generateBuffer(buffer, newData);
     CheckALh("Filled buffer");
 }
@@ -334,4 +334,4 @@ Channel &Channel::loopSound(const std::weak_ptr<detail::BaseSound> &resource, So
     return *this;
 }
 
-NS_END
+}

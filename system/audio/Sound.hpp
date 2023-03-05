@@ -30,7 +30,7 @@
 #include <vector>
 #include <list>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr unsigned int DEFAULT_SOUND_BUFFER_CHUNKS = 4;
 constexpr unsigned int DEFAULT_SOUND_BUFFER_SIZE = 1024;
@@ -66,4 +66,4 @@ private:
 
 }
 
-NS_END
+}

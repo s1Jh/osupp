@@ -24,10 +24,10 @@
 
 #include "BaseObjectTemplate.hpp"
 #include "SliderTypes.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 BEGIN_OBJECT_TEMPLATE(Slider)
 

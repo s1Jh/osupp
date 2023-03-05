@@ -23,41 +23,36 @@
 
 #include "define.hpp"
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
+	template <typename A, typename B, typename X>
+	X Lerp(A a, B b, X x)
+	{
+		return (1 - x) * a + x * b;
+	}
 
-template<typename A, typename B, typename X>
-X Lerp(A a, B b, X x)
-{
-	return (1 - x) * a + x * b;
+	template <typename T>
+	T BiLerp(T a, T b, T c, T d, T x, T y)
+	{
+		T i0 = Lerp(a, b, x);
+		T i1 = Lerp(c, d, x);
+
+		T value = Lerp(i0, i1, y);
+		return value;
+	}
+
+	template <typename T1, typename T2, typename T3>
+		requires std::floating_point<T1> and std::floating_point<T2> and
+				 std::floating_point<T3>
+	vec2d<T1> BiLerp(vec2d<T1> a, vec2d<T2> b, T3 x)
+	{
+		vec2d<T1> v;
+
+		v[0] = Lerp(a[0], b[0], x);
+		v[1] = Lerp(a[1], b[1], x);
+
+		return v;
+	}
+
 }
-
-template<typename T>
-T BiLerp(T a, T b, T c, T d, T x, T y)
-{
-	T i0 = Lerp(a, b, x);
-	T i1 = Lerp(c, d, x);
-
-	T value = Lerp(i0, i1, y);
-	return value;
-}
-
-template<typename T1, typename T2, typename T3>
-requires std::floating_point<T1> and std::floating_point<T2> and
-	std::floating_point<T3>
-vec2d<T1> BiLerp(vec2d<T1> a, vec2d<T2> b, T3 x)
-{
-	vec2d<T1> v;
-
-	v.x = Lerp(a.x, b.x, x);
-	v.y = Lerp(a.y, b.y, x);
-
-	return v;
-}
-
-}
-
-NS_END

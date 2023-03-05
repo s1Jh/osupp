@@ -22,7 +22,7 @@
 
 #include "DisableAfter.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -44,4 +44,4 @@ void DisableAfter::finalTransform(Sprite &spr)
 
 }
 
-NS_END
+}

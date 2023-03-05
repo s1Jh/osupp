@@ -27,7 +27,8 @@
 #include "Util.hpp"
 #include "Context.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 bool BaseHitObject::isFinished() const
 { return finished; }
@@ -70,7 +71,7 @@ void BaseHitObject::transferReady()
 
 void BaseHitObject::transferActive()
 {
-    timeStarted = ctx.game.getCurrentTime();
+    timeStarted = game->getCurrentTime();
     state = HitObjectState::ACTIVE;
     finished = false;
 }
@@ -91,7 +92,7 @@ void BaseHitObject::transferToPickup()
 {
     state = HitObjectState::PICKUP;
     finished = true;
-    timeFinished = ctx.game.getCurrentTime();
+    timeFinished = game->getCurrentTime();
 }
 
 void BaseHitObject::transferToFading()
@@ -111,7 +112,7 @@ void BaseHitObject::transferToInvisibleComplete()
 {
     state = HitObjectState::INVISIBLE;
     finished = true;
-    timeFinished = ctx.game.getCurrentTime();
+    timeFinished = game->getCurrentTime();
 }
 
 bool BaseHitObject::isApproachCircleDrawn() const
@@ -137,36 +138,6 @@ bool BaseHitObject::isUpdating() const
 
 bool BaseHitObject::isActive() const
 { return state == HitObjectState::ACTIVE; }
-
-void BaseHitObject::onDraw()
-{}
-
-void BaseHitObject::onLogicUpdate(double)
-{}
-
-void BaseHitObject::onBegin()
-{}
-
-void BaseHitObject::onPress()
-{}
-
-void BaseHitObject::onRaise()
-{}
-
-void BaseHitObject::onReset()
-{}
-
-HitResult BaseHitObject::onFinish()
-{ return HitResult::MISSED; }
-
-void BaseHitObject::onUpdate(double)
-{}
-
-fvec2d BaseHitObject::getStartPosition() const
-{ return {0, 0}; }
-
-fvec2d BaseHitObject::getEndPosition() const
-{ return this->getStartPosition(); }
 
 double BaseHitObject::getTimeStarted() const
 {
@@ -209,20 +180,20 @@ HitObjectFunction BaseHitObject::getDeactivationFunction() const
  * [UPDATE] currentTime >= endTime + hitWindow (fading time). η - [TIMED]
  * finish() called to get the object rank.
  */
-void BaseHitObject::update(double delta)
+void BaseHitObject::update()
 {
-    objectTransform = this->calculateObjectTransform() * ctx.game.getTransform();
+    objectTransform = this->calculateObjectTransform() * game->getTransform();
 
     // gather transfer times
-    auto currentTime = ctx.game.getCurrentTime();
+    auto currentTime = game->getCurrentTime();
 
-    auto alphaTime = getStartTime() - ctx.game.getApproachTime();
-    auto betaTime = getStartTime() - ctx.game.getHitWindow();
-    auto epsilonTime = getEndTime() + ctx.game.getHitWindow();
-    auto etaTime = timeFinished + ctx.game.getFadeTime();
+    auto alphaTime = getStartTime() - game->getApproachTime();
+    auto betaTime = getStartTime() - game->getHitWindow();
+    auto epsilonTime = getEndTime() + game->getHitWindow();
+    auto etaTime = timeFinished + game->getFadeTime();
 
     // update the object
-    this->onUpdate(delta);
+    this->onUpdate();
 
     // perform all timed state transfers
     if (state == HitObjectState::INVISIBLE && !finished) {
@@ -241,7 +212,7 @@ void BaseHitObject::update(double delta)
     }
     if (isUpdating()) {
         // update the object's functions
-        this->onLogicUpdate(delta);
+        this->onLogicUpdate();
 
         // 𝜀-transition
         if (currentTime >= epsilonTime) {
@@ -273,7 +244,7 @@ HitResult BaseHitObject::finish()
         transferToFading();
         return this->onFinish();
     }
-    log::error(this, " tried invalid state change (pickup->finish)");
+    log::Error(this, " tried invalid state change (pickup->finish)");
     return HitResult::MISSED;
 }
 
@@ -292,22 +263,22 @@ void BaseHitObject::press()
     }
 }
 
-void BaseHitObject::draw()
+void BaseHitObject::draw(video::LambdaRender &gfx)
 {
     if (getState() != HitObjectState::INVISIBLE) {
-        this->onDraw();
+        this->onDraw(gfx);
     }
 }
 
 float BaseHitObject::getAlpha() const
 {
     if (isFadingIn()) {
-        auto x = float(ctx.game.getCurrentTime() - this->getStartTime());
-        auto a = x > 0 ? ctx.game.getHitWindow() : ctx.game.getApproachTime();
+        auto x = float(game->getCurrentTime() - this->getStartTime());
+        auto a = x > 0 ? game->getHitWindow() : game->getApproachTime();
         return math::Lerp(0.0f, 1.0f, math::QuadRR(x, a));
     } else if (isFadingOut()) {
-        auto x = float(ctx.game.getCurrentTime() - this->getTimeFinished());
-        auto a = ctx.game.getFadeTime();
+        auto x = float(game->getCurrentTime() - this->getTimeFinished());
+        auto a = game->getFadeTime();
         return math::Lerp(0.0f, 1.0f, math::LinearUD(x, a));
     } else {
         return 1.0f;
@@ -319,4 +290,42 @@ const Mat3f &BaseHitObject::getObjectTransform() const
     return objectTransform;
 }
 
-NS_END
+GameManager &BaseHitObject::getGame()
+{
+    return *game;
+}
+
+const GameManager &BaseHitObject::getGame() const
+{
+    return *game;
+}
+
+void BaseHitObject::create(Resource<Skin> &skin)
+{
+    onCreate(skin);
+}
+
+void BaseHitObject::onDraw(video::LambdaRender &)
+{}
+void BaseHitObject::onCreate(Resource<Skin> &)
+{}
+void BaseHitObject::onLogicUpdate()
+{}
+void BaseHitObject::onBegin()
+{}
+void BaseHitObject::onPress()
+{}
+void BaseHitObject::onRaise()
+{}
+void BaseHitObject::onReset()
+{}
+HitResult BaseHitObject::onFinish()
+{ return HitResult::MISSED; }
+void BaseHitObject::onUpdate()
+{}
+fvec2d BaseHitObject::getStartPosition() const
+{ return {0, 0}; }
+fvec2d BaseHitObject::getEndPosition() const
+{ return this->getStartPosition(); }
+
+}

@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include <iostream>
-#include <type_traits>
-
-#include "Vec3.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+#include "Vector.hpp"
+
+#include <type_traits>
+
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T> requires std::is_arithmetic_v<T>
 struct size3
@@ -45,13 +46,13 @@ struct size3
     {}
 
     template<typename C>
-    operator size3<C>() const
+    constexpr operator size3<C>() const noexcept
     {
         return size3<C>{(C) w, (C) h, (C) l};
     }
 
     template<typename C>
-    explicit operator vec3d<C>() const
+    constexpr operator vec3d<C>() const noexcept
     {
         return vec3d<C>{(C) w, (C) h, (C) l};
     }
@@ -59,12 +60,17 @@ struct size3
     T w, h, l;
 };
 
-template<typename T>
-std::ostream &operator<<(std::ostream &os, const size3<T> &dt)
+template <typename T>
+std::string ToString(const size3<T>& size)
 {
-    os << dt.w << 'x' << dt.h << 'x' << dt.l;
+    return std::string("(") + ToString(size.w) + ',' + ToString(size.h) + ',' + ToString(size.l) + ')';
+}
 
-    return os;
+template <typename T>
+std::optional<size3<T>> FromString(const std::string& str)
+{
+    WRAP_CONSTEXPR_ASSERTION("Not implemented!");
+    return {};
 }
 
 using isize3 = size3<int>;
@@ -136,4 +142,4 @@ inline size3<T1> operator/=(size3<T1> &in, T2 scaler)
     return size3<T1>{in.w /= (T1) scaler, in.h /= (T1) scaler, in.l /= (T1) scaler};
 }
 
-NS_END
+}

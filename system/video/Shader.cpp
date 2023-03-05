@@ -29,9 +29,9 @@
 #include "GL.hpp"
 #include "Util.hpp"
 #include "Shaders.hpp"
-#include "GraphicsContext.hpp"
+#include "Video.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -64,7 +64,7 @@ unsigned int Shader::CompileShader(const std::string &file, unsigned int type)
 
     if (!compile_state) {
         glGetShaderInfoLog(shader, 512, nullptr, info_log);
-        log::error("Shader compilation error:\n", info_log);
+        log::Error("Shader compilation error:\n", info_log);
     }
 
     return shader;
@@ -163,7 +163,7 @@ std::optional<unsigned int> Shader::createData()
 	glGetProgramiv(id, GL_LINK_STATUS, &link_state);
 	if (!link_state) {
 		glGetProgramInfoLog(id, 512, nullptr, info_log);
-		log::error("Warning, an error occurred during Shader program linking:\n",
+		log::Error("Warning, an error occurred during Shader program linking:\n",
 				   info_log, '\n');
 		return {};
 	}
@@ -250,4 +250,4 @@ Resource<video::Shader> Load(const std::filesystem::path &path)
 #undef INCLUDE_SHADER_METHOD_DEFINITIONS // make sure the macros don't get
 // included inside of other stuff
 
-NS_END
+}

@@ -4,7 +4,7 @@
 
 #include <array>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace compat
 {
@@ -94,7 +94,7 @@ bool ImportOsuData(const std::filesystem::path &path)
     );
     if (!ec) {
         allGood = false;
-        log::error("Failed to copy song: ", ec.message());
+        log::Error("Failed to copy song: ", ec.message());
     }
 
     auto skinPath = path / "Skins";
@@ -102,7 +102,7 @@ bool ImportOsuData(const std::filesystem::path &path)
     for (const auto& skin : std::filesystem::directory_iterator(skinPath)) {
         if (!ConvertSkin(skin)) {
             allGood = false;
-            log::error("Failed to import skin ", skin);
+            log::Error("Failed to import skin ", skin);
         }
     }
     return allGood;
@@ -116,4 +116,4 @@ bool ConvertSkin(const std::filesystem::path &)
 
 }
 
-NS_END
+}

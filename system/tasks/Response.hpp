@@ -28,7 +28,7 @@
 #include <optional>
 #include <thread>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace tasks {
 
@@ -71,4 +71,4 @@ private:
 
 }
 
-NS_END
+}

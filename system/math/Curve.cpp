@@ -24,12 +24,7 @@
 
 #include "define.hpp"
 
-#include "Util.hpp"
-#include <vector>
-
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
 CurveNode::CurveNode(fvec2d _position)
@@ -40,8 +35,6 @@ fvec2d CurveNode::getPosition() const
 { return position; }
 
 fvec2d BaseCurveNode::getPosition() const
-{ return {0.0, 0.0}; }
+{ return fvec2d{0.0, 0.0}; }
 
 } // math
-
-NS_END

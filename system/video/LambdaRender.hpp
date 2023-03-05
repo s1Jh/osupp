@@ -23,75 +23,101 @@
 
 #include "define.hpp"
 
-#include "GraphicsContext.hpp"
-#include "Window.hpp"
 #include "StandardDrawCalls.hpp"
 #include "Camera.hpp"
+#include "Matrix.hpp"
 
 #include <list>
 #include <array>
+#include <vector>
 #include <memory>
 
-NS_BEGIN
-
-namespace video
+namespace osupp::video
 {
+    // TODO: Camera
+    class LambdaRender
+    {
+        typedef void* WindowHandle;
+        typedef void* GLContext;
+        typedef void* ImHandle;
+    public:
+        struct GenericMeshCollection
+        {
+            Mesh rect;
+            Mesh circle;
+            Mesh rectMask;
+            Mesh screenRect;
+            Mesh screenRectMask;
+            // etc...
+        };
 
+        ~LambdaRender();
 
-constexpr size_t RENDER_QUEUE_SIZE = 1024;
+        bool init(uint8_t msLevels = 0);
+        bool initImGui();
 
-// TODO: Camera
-class LambdaRender
-{
-public:
-	struct GenericMeshCollection
-	{
-		Mesh rect;
-		Mesh circle;
-		Mesh rectMask;
-		// etc...
-	};
+        bool configure(const WindowConfiguration &newConfig);
 
-    ~LambdaRender();
+        [[nodiscard]] const GenericMeshCollection &getMeshes() const;
+        [[nodiscard]] const WindowConfiguration &getConfig() const;
+        [[nodiscard]] const isize& getSize() const;
 
-    bool init(uint8_t msLevels = 0);
-    bool initImGui();
+        [[nodiscard]] bool isOpen() const;
+        [[nodiscard]] irect getWindowRect();
+        [[nodiscard]] Mat3f getWindowMatrix();
 
-	[[nodiscard]] const GenericMeshCollection& getMeshes() const;
-	bool configure(const WindowConfiguration& newConfig);
-	[[nodiscard]] const WindowConfiguration& getConfig() const;
-    [[nodiscard]] const Window& getWindow() const;
+        bool update();
 
-	bool update();
+        void begin();
+        void finish();
 
-	void begin();
-	void finish();
+        template <typename Arg1, typename... Args>
+        bool draw(RenderTask<Arg1, Args...> taskIn, uint8_t layer = DEFAULT_RENDER_LAYER)
+        {
+            renderStackSize++;
 
-	template <typename Arg1, typename ... Args>
-    bool draw(RenderTask<Arg1, Args...> taskIn) {
-        renderStackSize++;
+            if (renderStackSize > renderQueue.size())
+            {
+                renderStackSize = (int)renderQueue.size();
+                return false;
+            }
 
-        if (renderStackSize > renderQueue.size()) {
-            renderStackSize = (int)renderQueue.size();
-            return false;
+            taskIn.layer = layer;
+
+            renderQueue[renderStackSize - 1] = std::make_shared<RenderTask<Arg1, Args...>>(std::move(taskIn));
+            return true;
         }
 
-        renderQueue[renderStackSize - 1] = std::make_shared<RenderTask<Arg1, Args...>>(std::move(taskIn));
-        return true;
-    }
+        Camera2D camera;
 
-    Camera2D camera;
+    private:
+        struct RenderLayer
+        {
+        public:
+            ~RenderLayer();
 
-private:
-	static bool ApplyWindowConfiguration(Window& win, const WindowConfiguration& config);
-    static bool GenerateStaticGeometry(GenericMeshCollection& meshes);
+            bool initialize(const isize &resolution);
 
-	GenericMeshCollection meshes;
-    Window window;
-	size_t renderStackSize{0};
-	std::array<std::shared_ptr<detail::BaseRenderTask>, RENDER_QUEUE_SIZE> renderQueue;
-};
+            bool bind();
+
+            static bool unbind();
+
+            bool init = false;
+            bool used = false;
+            unsigned int frame = 0, color = 0, depth = 0;
+        };
+
+        bool generateStaticGeometry();
+
+        Shader layerShader{};
+        GenericMeshCollection meshes{};
+        WindowConfiguration currentConfig{};
+        GLContext glContext;
+        ImHandle imCtx{nullptr};
+        WindowHandle window{nullptr};
+        size_t renderStackSize{0};
+        std::array<std::shared_ptr<detail::BaseRenderTask>, RENDER_QUEUE_SIZE> renderQueue{};
+        std::array<RenderLayer, RENDER_LAYERS> layers{};
+    };
 
 }
-
-NS_END

@@ -27,7 +27,7 @@
 #include <memory>
 #include <atomic>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace tasks
 {
@@ -82,4 +82,4 @@ struct MessageHolder: public BaseMessageHolder
 
 }
 
-NS_END
+}

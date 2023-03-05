@@ -23,57 +23,65 @@
 
 #include "define.hpp"
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-template<typename XT, typename MaxT, typename MinT>
-bool InRangeII(XT x, MaxT a, MinT b)
-{
-	if (b > a) {
-		return (x >= a) && (x <= b);
-	} else {
-		return (x >= b) && (x <= a);
+	template <typename XT, typename MaxT, typename MinT>
+	bool InRangeII(XT x, MaxT a, MinT b)
+	{
+		if (b > a)
+		{
+			return (x >= a) && (x <= b);
+		}
+		else
+		{
+			return (x >= b) && (x <= a);
+		}
 	}
-}
 
-template<typename XT, typename MaxT, typename MinT>
-bool InRangeEE(XT x, MaxT a, MinT b)
-{
-	if (b > a) {
-		return (x > a) && (x < b);
-	} else {
-		return (x > b) && (x < a);
+	template <typename XT, typename MaxT, typename MinT>
+	bool InRangeEE(XT x, MaxT a, MinT b)
+	{
+		if (b > a)
+		{
+			return (x > a) && (x < b);
+		}
+		else
+		{
+			return (x > b) && (x < a);
+		}
 	}
-}
 
-template<typename XT, typename MaxT, typename MinT>
-bool InRangeIE(XT x, MaxT a, MinT b)
-{
-	if (b > a) {
-		return (x >= a) && (x < b);
-	} else {
-		return (x >= b) && (x < a);
+	template <typename XT, typename MaxT, typename MinT>
+	bool InRangeIE(XT x, MaxT a, MinT b)
+	{
+		if (b > a)
+		{
+			return (x >= a) && (x < b);
+		}
+		else
+		{
+			return (x >= b) && (x < a);
+		}
 	}
-}
 
-template<typename XT, typename MaxT, typename MinT>
-bool InRangeEI(XT x, MaxT a, MinT b)
-{
-	if (b > a) {
-		return (x > a) && (x <= b);
-	} else {
-		return (x > b) && (x <= a);
+	template <typename XT, typename MaxT, typename MinT>
+	bool InRangeEI(XT x, MaxT a, MinT b)
+	{
+		if (b > a)
+		{
+			return (x > a) && (x <= b);
+		}
+		else
+		{
+			return (x > b) && (x <= a);
+		}
 	}
-}
 
-template<typename XT, typename MaxT, typename MinT>
-bool InRange(XT x, MaxT a, MinT b)
-{
-	return InRangeII(x, a, b);
-}
+	template <typename XT, typename MaxT, typename MinT>
+	bool InRange(XT x, MaxT a, MinT b)
+	{
+		return InRangeII(x, a, b);
+	}
 
 }
-
-NS_END

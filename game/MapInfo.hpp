@@ -27,13 +27,13 @@
 #include "BaseObjectTemplate.hpp"
 #include "Resource.hpp"
 #include "SliderTypes.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 
 #include <filesystem>
 #include <list>
 #include <memory>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class MapInfo
 {
@@ -111,4 +111,4 @@ Resource<MapInfo> Load(const std::filesystem::path &);
 
 template<> const std::vector<std::string> Resource<MapInfo>::allowedExtensions;
 
-NS_END
+}

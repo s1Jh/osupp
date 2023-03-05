@@ -35,7 +35,7 @@
   }                                                                            \
   ;
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 struct BaseObjectTemplate
 {
@@ -59,4 +59,4 @@ struct IsTemplate
 
 template<class T> inline constexpr bool IsTemplateV = IsTemplate<T>::value;
 
-NS_END
+}

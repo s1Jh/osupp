@@ -29,11 +29,11 @@
 
 #include "Channel.hpp"
 #include "Audio.hpp"
-#include "Setting.hpp"
+#include "Settings.hpp"
 
 #include <AL/al.h>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace detail {
 typedef struct ALCdevice ALCdevice;
@@ -42,8 +42,8 @@ typedef struct ALCcontext ALCcontext;
 
 class AudioDevice {
 public:
-	explicit AudioDevice(unsigned int sfxChannelsIn = DEFAULT_SFX_CHANNELS);
-	explicit AudioDevice(const AudioDeviceSpec&, unsigned int sfxChannelsIn = DEFAULT_SFX_CHANNELS);
+	explicit AudioDevice();
+	explicit AudioDevice(const AudioDeviceSpec&, Settings& settings);
 
 	void process();
 
@@ -68,4 +68,4 @@ private:
 	std::vector<Channel> sfxChannels;
 };
 
-NS_END
+}

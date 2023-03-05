@@ -27,7 +27,7 @@
 #include <optional>
 #include <atomic>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -57,6 +57,7 @@ public:
         bool otherState = other.wasUploaded;
         wasUploaded = otherState;
         data = std::make_unique<GLRepr>(*other.data);
+        return *this;
     }
 
     GLResource & operator= (GLResource&& other) noexcept
@@ -64,6 +65,7 @@ public:
         bool otherState = other.wasUploaded;
         wasUploaded = otherState;
         data = std::make_unique<GLRepr>(*other.data);
+        return *this;
     }
 
 	inline const GLRepr &getGLData() const {
@@ -108,4 +110,4 @@ private:
 
 }
 
-NS_END
+}

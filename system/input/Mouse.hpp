@@ -23,9 +23,9 @@
 #pragma once
 
 #include "define.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE::input {
 
 struct ButtonState
 {
@@ -52,4 +52,4 @@ protected:
     ButtonState buttons[3];
 };
 
-NS_END
+}

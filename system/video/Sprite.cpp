@@ -30,7 +30,7 @@
 
 #include <algorithm>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -213,4 +213,4 @@ void Draw(const video::Sprite&)
 //    }, transform * shape);
 }
 
-NS_END
+}

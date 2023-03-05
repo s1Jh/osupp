@@ -24,9 +24,15 @@
 
 #include "define.hpp"
 
+#include "ToFromString.hpp"
+#include "EnumOperators.hpp"
+
 #include <iostream>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
+
+namespace input
+{
 
 /**
  * The key enum defines basic codes for valid _physical_ keys
@@ -54,7 +60,6 @@ NS_BEGIN
 
 enum class Key
 {
-
 #define KEY(name) name,
 
     KEY_LIST
@@ -77,7 +82,13 @@ enum class Key
     RSHIFT = 1 << 15,
 };
 
-std::ostream &operator<<(std::ostream &os, const Key &key);
+}
+
+
+ENABLE_BITMASK_OPERATORS(input::Key);
+
+namespace input
+{
 
 /**
  * Total number of different recognizable keys.
@@ -86,8 +97,7 @@ constexpr unsigned int KEY_COUNT = (unsigned int) Key::UNKNOWN;
 
 constexpr Key operator+(const Key &mod, const Key &key)
 {
-    return static_cast<Key>(static_cast<unsigned int>(mod) |
-        static_cast<unsigned int>(key));
+    return static_cast<Key>(mod | key);
 }
 
 /**
@@ -116,10 +126,17 @@ public:
     const KeyState &operator[](Key key) const;
 
 protected:
-    static const int GLFWConversionTable[KEY_COUNT];
     KeyState *lastKey{nullptr};
     KeyState falseKey;
     KeyState keys[KEY_COUNT];
 };
 
-NS_END
+}
+
+template<>
+std::optional<input::Key> FromString<input::Key>(const std::string& str);
+
+template<>
+std::string ToString<input::Key>(const input::Key& key);
+
+}

@@ -24,13 +24,20 @@
 #include "Log.hpp"
 #include "Video.hpp"
 #include "Math.hpp"
+#include "Util.hpp"
+#include "Error.hpp"
 
-#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_sdl.h"
 #include "backends/imgui_impl_opengl3.h"
-#define GLFW_DLL
-#include <GLFW/glfw3.h>
 
-NS_BEGIN
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_error.h>
+
+#include "Shaders.hpp"
+
+namespace PROJECT_NAMESPACE
+{
 
 namespace video
 {
@@ -40,132 +47,174 @@ Transform2D::operator Mat3f() const
 {
     return math::MakeTranslationMatrix(translate) *
         math::MakeRotationMatrix<float>(rotate, rotationCenter) *
-        math::MakeScaleMatrix(scale) * math::MakeShearMatrix(shear);
-}
-
-void OnGLFWResize(WindowHandle *window, int width, int height)
-{
-	glfwMakeContextCurrent(TO_GLFW(window));
-	glViewport(0, 0, width, height);
+        math::MakeScaleMatrix(scale, translate) * math::MakeShearMatrix(shear);
 }
 
 bool LambdaRender::update()
 {
     camera.recalculateMatrix();
-    if (!window.isOpen()) {
+    if (!isOpen()) {
         return false;
     }
 
-	// ImGui installs its callbacks which rely on a ImGui state being set
-    ImGui::SetCurrentContext(window.imCtx);
-    glfwPollEvents();
+    // ImGui installs its callbacks which rely on a ImGui state being set
+    ImGui::SetCurrentContext(TO_IMGUI(imCtx));
+
+    SDL_Event evt;
+
+    while (SDL_PollEvent(&evt)) {
+        ImGui_ImplSDL2_ProcessEvent(&evt);
+        switch (evt.type) {
+            case SDL_QUIT:SDL_DestroyWindow(TO_SDL(window));
+                return false;
+        }
+    }
+
     ImGui::SetCurrentContext(nullptr);
 
-    if (!window.wantsToBeOpen || glfwWindowShouldClose(TO_GLFW(window.handle))) {
-        glfwDestroyWindow(TO_GLFW(window.handle));
-        window.open = false;
-    }
-
-	return window.open;
+    return true;
 }
 
-bool LambdaRender::configure(const WindowConfiguration &newConfig)
+bool LambdaRender::configure(const WindowConfiguration &newCfg)
 {
-    if (!window.handle) {
+    if (!window) {
         return false;
     }
 
-    camera.setAspectRatio(float(newConfig.size.h) / float(newConfig.size.w));
+    auto *oldCtx = ImGui::GetCurrentContext();
+    ImGui::SetCurrentContext(TO_IMGUI(imCtx)); // resizing windows will cause callbacks to ImGui
 
-    return ApplyWindowConfiguration(window, newConfig);
-}
+    auto &winCfg = currentConfig;
 
-const WindowConfiguration& LambdaRender::getConfig() const
-{
-	return window.config;
-}
+    winCfg.size.w = math::Max(newCfg.size.w != -1 ? newCfg.size.w : winCfg.size.w, 1);
+    winCfg.size.h = math::Max(newCfg.size.h != -1 ? newCfg.size.h : winCfg.size.h, 1);
 
-bool LambdaRender::ApplyWindowConfiguration(Window &win, const WindowConfiguration &config)
-{
-	if (!win.handle) {
-		return false;
-	}
+    if ((newCfg.size.w != 1) && (newCfg.size.h != -1)) {
+        camera.setAspectRatio(float(newCfg.size.h) / float(newCfg.size.w));
+    }
 
-    auto* oldCtx = ImGui::GetCurrentContext();
-	ImGui::SetCurrentContext(win.imCtx); // resizing windows will cause callbacks to ImGui
+    winCfg.refreshRate = math::Max(newCfg.refreshRate != -1 ? newCfg.refreshRate : winCfg.refreshRate, 1);
+    winCfg.mode = newCfg.mode != WindowMode::NONE ? newCfg.mode : winCfg.mode;
+    winCfg.shown = newCfg.shown != WindowVisibility::NONE ? newCfg.shown : winCfg.shown;
 
-	auto &winCfg = win.config;
-	const auto &newCfg = config;
+    SDL_SetWindowSize(TO_SDL(window), winCfg.size.w, winCfg.size.h);
+    int mode;
+    switch (winCfg.mode) {
+        case WindowMode::NONE:
+        case WindowMode::WINDOWED:
+            mode = 0;
+            break;
+        case WindowMode::FULLSCREEN:
+            mode = SDL_WINDOW_FULLSCREEN;
+            break;
+        case WindowMode::WINDOWED_BORDERLESS:
+            mode = SDL_WINDOW_FULLSCREEN_DESKTOP;
+            break;
+    }
+    SDL_SetWindowFullscreen(TO_SDL(window), mode);
 
-	winCfg.size.w = math::Max(newCfg.size.w != -1 ? newCfg.size.w : winCfg.size.w, 1);
-	winCfg.size.h = math::Max(newCfg.size.h != -1 ? newCfg.size.h : winCfg.size.h, 1);
+    winCfg.shown = newCfg.shown;
 
-	winCfg.refreshRate = math::Max(newCfg.refreshRate != -1 ? newCfg.refreshRate : winCfg.refreshRate, 1);
-	winCfg.mode = newCfg.mode != WindowMode::NONE ? newCfg.mode : winCfg.mode;
-	winCfg.shown = newCfg.shown != WindowVisibility::NONE ? newCfg.shown : winCfg.shown;
-
-	glfwSetWindowMonitor(TO_GLFW(win.handle),
-						 winCfg.mode == WindowMode::FULLSCREEN ? glfwGetPrimaryMonitor() : nullptr,
-						 50,
-						 50,
-						 winCfg.size.w,
-						 winCfg.size.h,
-						 winCfg.refreshRate);
-
-	winCfg.shown = newCfg.shown;
-
-	switch (winCfg.shown) {
-	case WindowVisibility::VISIBLE: glfwShowWindow(TO_GLFW(win.handle));
-		break;
-	case WindowVisibility::HIDDEN: glfwHideWindow(TO_GLFW(win.handle));
-		break;
-	default: break;
-	}
+    switch (winCfg.shown) {
+        case WindowVisibility::VISIBLE:
+            SDL_ShowWindow(TO_SDL(window));
+            break;
+        case WindowVisibility::HIDDEN:
+            SDL_HideWindow(TO_SDL(window));
+            break;
+        default: break;
+    }
 
     ImGui::SetCurrentContext(oldCtx);
 
-	return true;
+    for (auto &layer : layers) {
+        layer.initialize(winCfg.size);
+    }
+
+    return true;
+}
+
+const WindowConfiguration &LambdaRender::getConfig() const
+{
+    return currentConfig;
 }
 
 void LambdaRender::begin()
 {
-    if (!window.isOpen()) {
+    if (!window) {
         return;
     }
-	renderStackSize = 0;
+    renderStackSize = 0;
 }
 
 void LambdaRender::finish()
 {
-    if (!window.isOpen()) {
+    if (!window) {
         return;
     }
 
-	glfwMakeContextCurrent(TO_GLFW(window.handle));
-	glViewport(0, 0, window.config.size.w, window.config.size.h);
+    SDL_GL_MakeCurrent(TO_SDL(window), glContext);
+    glViewport(0, 0, currentConfig.size.w, currentConfig.size.h);
 
-	glClearColor(DECOMPOSE_COLOR_RGBA(BLACK));
-	glClearDepth(0.0f);
-	glClearStencil(0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClearColor(DECOMPOSE_COLOR_RGBA(BLACK));
+    glClearDepth(0.0f);
+    glClearStencil(0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    for (auto &layer : layers) {
+        layer.bind();
+        layer.used = false;
+        glClearDepth(1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthFunc(GL_ALWAYS);
+    }
+
+    RenderLayer::unbind();
 
 // #ifdef IMGUI
-    if (window.imCtx) {
-        ImGui::SetCurrentContext(window.imCtx);
+    if (imCtx) {
+
+        ImGui::SetCurrentContext(TO_IMGUI(imCtx));
 
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
     }
 // #endif
 
-	for (size_t i = 0; i < renderStackSize; i++) {
-		auto &task = renderQueue[i];
-		task->invoke(*this);
-	}
+    for (size_t i = 0; i < renderStackSize; i++) {
+        auto &task = renderQueue[i];
+        auto &l = layers[task->layer % layers.size()];
+
+        l.bind();
+        l.used = true;
+
+        task->invoke(*this);
+    }
+
+    RenderLayer::unbind();
+
+    layerShader.use();
+
+    glBindVertexArray(meshes.rect.getGLData().VAO);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthFunc(GL_ALWAYS);
+    for (const auto &layer : layers) {
+        if (layer.used) {
+            glBindTexture(GL_TEXTURE_2D, layer.color);
+            glDrawElements(
+                static_cast<unsigned int>(GL_TRIANGLES), meshes.rect.getElementCount(),
+                GL_UNSIGNED_INT, nullptr
+            );
+        }
+    }
+
+    Shader::unbind();
 
 // #ifdef IMGUI
-    if (window.imCtx) {
+    if (imCtx) {
         ImGui::Render();
         auto data = ImGui::GetDrawData();
         if (data) {
@@ -174,57 +223,97 @@ void LambdaRender::finish()
     }
 // #endif
 
-	glfwSwapBuffers(TO_GLFW(window.handle));
+    SDL_GL_SwapWindow(TO_SDL(window));
 }
 
 const LambdaRender::GenericMeshCollection &LambdaRender::getMeshes() const
 {
-	return meshes;
+    return meshes;
 }
 
-bool LambdaRender::GenerateStaticGeometry(GenericMeshCollection& meshes)
+bool LambdaRender::generateStaticGeometry()
 {
-    log::debug("Generating standard meshes");
+    log::Debug("Generating standard meshes");
 
     bool success = true;
 
-    meshes.rectMask.setAttributeDescriptors({
-        AttributeType::VEC2 // position
-    });
-    meshes.rectMask.insertVertices({{1.f, 1.f},
-                                              {1.f, -1.f},
-                                              {-1.f, -1.f},
-                                              {-1.f, 1.f}});
+    meshes.rectMask.setAttributeDescriptors(
+        {
+            AttributeType::VEC2 // position
+        }
+    );
+    meshes.rectMask.insertVertices(
+        {{0.5f, 0.5f},
+            {0.5f, -0.5f},
+            {-0.5f, -0.5f},
+            {-0.5f, 0.5f}}
+    );
     meshes.rectMask.insertIndices({0, 1, 2, 0, 3, 2});
     success &= meshes.rectMask.upload();
 
     // Create geometry for rectangular meshes
-    meshes.rect.setAttributeDescriptors({
-                                                   AttributeType::VEC2, // position
-                                                   AttributeType::VEC2  // uv
-                                               });
-    meshes.rect.insertVertices({{1.f, 1.f, 1.f, 1.f},
-                                          {1.f, -1.f, 1.f, 0.f},
-                                          {-1.f, -1.f, 0.f, 0.f},
-                                          {-1.f, 1.f, 0.f, 1.f}});
+    meshes.rect.setAttributeDescriptors(
+        {
+            AttributeType::VEC2, // position
+            AttributeType::VEC2  // uv
+        }
+    );
+    meshes.rect.insertVertices(
+        {{0.5f, 0.5f, 1.f, 1.f},
+            {0.5f, -0.5f, 1.f, 0.f},
+            {-0.5f, -0.5f, 0.f, 0.f},
+            {-0.5f, 0.5f, 0.f, 1.f}}
+    );
     meshes.rect.insertIndices({0, 1, 2, 0, 3, 2});
     success &= meshes.rect.upload();
+
+    meshes.screenRectMask.setAttributeDescriptors(
+        {
+            AttributeType::VEC2 // position
+        }
+    );
+    meshes.screenRectMask.insertVertices(
+        {{1.0f, 1.0f},
+            {1.0f, -1.0f},
+            {-1.0f, -1.0f},
+            {-1.0f, 1.0f}}
+    );
+    meshes.screenRectMask.insertIndices({0, 1, 2, 0, 3, 2});
+    success &= meshes.screenRectMask.upload();
+
+    // Create geometry for rectangular meshes
+    meshes.screenRect.setAttributeDescriptors(
+        {
+            AttributeType::VEC2, // position
+            AttributeType::VEC2  // uv
+        }
+    );
+    meshes.screenRect.insertVertices(
+        {{1.0f, 1.0f, 1.f, 1.f},
+            {1.0f, -1.0f, 1.f, 0.f},
+            {-1.0f, -1.0f, 0.f, 0.f},
+            {-1.0f, 1.0f, 0.f, 1.f}}
+    );
+    meshes.screenRect.insertIndices({0, 1, 2, 0, 3, 2});
+    success &= meshes.screenRect.upload();
 
     const unsigned int resolution = 32;
 
     double circle_rotation = 2.0_pi / (resolution - 1);
     fvec2d circle_vec = {1.f, 0.f};
 
-    meshes.circle.setAttributeDescriptors({
-                                                     AttributeType::VEC2, // position
-                                                     AttributeType::VEC2  // uv
-                                                 });
+    meshes.circle.setAttributeDescriptors(
+        {
+            AttributeType::VEC2, // position
+            AttributeType::VEC2  // uv
+        }
+    );
     meshes.circle.insertVertex({0.0, 0.0, 0.5f, 0.5f});
 
     for (unsigned int i = 0; i < resolution; i++) {
-        fvec2d vec = {circle_vec.x, circle_vec.y};
+        fvec2d vec = {circle_vec[0], circle_vec[1]};
         fvec2d uv = (vec + 1.0f) / 2.0f;
-        meshes.circle.insertVertex({vec.x, vec.y, uv.x, uv.y});
+        meshes.circle.insertVertex({vec[0], vec[1], uv[0], uv[1]});
         meshes.circle.insertIndice(i);
         circle_vec = math::Rotate(circle_vec, circle_rotation);
     }
@@ -232,7 +321,7 @@ bool LambdaRender::GenerateStaticGeometry(GenericMeshCollection& meshes)
     success &= meshes.circle.upload();
 
     if (!success) {
-        log::error("Failed to generate static geometry");
+        log::Error("Failed to generate static geometry");
     }
 
     return success;
@@ -240,35 +329,48 @@ bool LambdaRender::GenerateStaticGeometry(GenericMeshCollection& meshes)
 
 bool LambdaRender::init(uint8_t msLevels)
 {
-    if (window.handle != nullptr) {
-        glfwDestroyWindow(TO_GLFW(window.handle));
-        window.open = false;
+    log::Logger logger("RENDER", log::Severity::INF);
+
+    if (window != nullptr) {
+        SDL_DestroyWindow(TO_SDL(window));
     }
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-#ifdef APPLE
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-#ifdef DEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif // DEBUG
-    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GL_TRUE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-    if (msLevels != 0) {
-        glfwWindowHint(GLFW_SAMPLES, msLevels);
-    }
+    window = FROM_SDL(SDL_CreateWindow(
+        TOSTRING(GAME_TITLE),
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+        1, 1,
+        SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL
+    ));
 
-    window.handle = FROM_GLFW(glfwCreateWindow(1, 1, TOSTRING(GAME_TITLE), nullptr, nullptr));
-    if (!window.handle) {
-        log::error("Failed to open window");
+    if (!window) {
+        const char *err = SDL_GetError();
+        error::Raise(error::Code::API_FAIL_FATAL, std::string("Failed to open a window") + err);
         return false;
     }
-    glfwMakeContextCurrent(TO_GLFW(window.handle));
+
+    glContext = SDL_GL_CreateContext(TO_SDL(window));
+
+    if (!glContext) {
+        const char *err = SDL_GetError();
+        error::Raise(error::Code::API_FAIL_FATAL, std::string("Failed to create an OpenGL context") + err);
+        return false;
+    }
+
+    SDL_GL_MakeCurrent(TO_SDL(window), glContext);
+
+    logger("OpenGL version: ", (char*)glGetString(GL_VERSION));
+    logger("GLSL version: ", (char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
+    logger("Renderer: ", (char*)glGetString(GL_RENDERER));
+    logger("Vendor: ", (char*)glGetString(GL_VENDOR));
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
@@ -280,49 +382,136 @@ bool LambdaRender::init(uint8_t msLevels)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glfwSwapInterval(0);
-    glfwSetInputMode(TO_GLFW(window.handle), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    SDL_GL_SetSwapInterval(0);
 
-    glfwSetWindowSizeCallback(TO_GLFW(window.handle), reinterpret_cast<GLFWwindowsizefun>(OnGLFWResize));
-    window.open = true;
+    layerShader.fromString(LAYER_VERTEX_SHADER, LAYER_FRAGMENT_SHADER);
+    layerShader.upload();
+    if (!layerShader.uploaded()) {
+        error::Raise(error::Code::API_FAIL_FATAL, "Failed to create multilayer blend shader");
+        return false;
+    }
 
-    ApplyWindowConfiguration(window, window.config);
-
-    return GenerateStaticGeometry(meshes);
+    return generateStaticGeometry();
 }
 
 LambdaRender::~LambdaRender()
 {
-    if (window.handle) {
-        window.open = false;
-        glfwDestroyWindow(TO_GLFW(window.handle));
+    if (window) {
+        SDL_DestroyWindow(TO_SDL(window));
     }
-}
-
-const Window &LambdaRender::getWindow() const
-{
-    return window;
 }
 
 bool LambdaRender::initImGui()
 {
     IMGUI_CHECKVERSION();
 
-    glfwMakeContextCurrent(TO_GLFW(window.handle));
-    window.imCtx = ImGui::CreateContext();
-    ImGui::SetCurrentContext(window.imCtx);
+    SDL_GL_MakeCurrent(TO_SDL(window), glContext);
+    imCtx = FROM_IMGUI(ImGui::CreateContext());
     ImGuiIO &io = ImGui::GetIO();
-    (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    (void) io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
     ImGui::StyleColorsClassic();
-    ImGui_ImplGlfw_InitForOpenGL(TO_GLFW(window.handle), true);
+    ImGui_ImplSDL2_InitForOpenGL(TO_SDL(window), glContext);
     ImGui_ImplOpenGL3_Init(video::GL_VERSION_PREPROCESSOR);
 
     return true;
 }
 
+bool LambdaRender::isOpen() const
+{
+    return window != nullptr;
 }
 
-NS_END
+const isize &LambdaRender::getSize() const
+{
+    return currentConfig.size;
+}
+
+irect LambdaRender::getWindowRect()
+{
+    if (!isOpen()) {
+        return UNIT_RECT<int>;
+    }
+    ivec2d pos;
+    SDL_GetWindowPosition(TO_SDL(window), &pos[0], &pos[1]);
+    ivec2d size = currentConfig.size;
+
+    return {size, pos};
+}
+
+Mat3f LambdaRender::getWindowMatrix()
+{
+    if (!isOpen()) {
+        return MAT3_NO_TRANSFORM<float>;
+    }
+    ivec2d pos;
+    SDL_GetWindowPosition(TO_SDL(window), &pos[0], &pos[1]);
+    ivec2d size = currentConfig.size;
+
+    // TODO:
+    return MAT3_NO_TRANSFORM<float>;
+}
+
+LambdaRender::RenderLayer::~RenderLayer()
+{
+    glDeleteTextures(1, &color);
+    glDeleteRenderbuffers(1, &depth);
+    glDeleteFramebuffers(1, &frame);
+}
+
+bool LambdaRender::RenderLayer::initialize(const isize &size)
+{
+    if (init) {
+        glDeleteTextures(1, &color);
+        glDeleteRenderbuffers(1, &depth);
+        glDeleteFramebuffers(1, &frame);
+    }
+
+    glGenFramebuffers(1, &frame);
+    glBindFramebuffer(GL_FRAMEBUFFER, frame);
+
+    glGenTextures(1, &color);
+    glBindTexture(GL_TEXTURE_2D, color);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.w, size.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    glGenRenderbuffers(1, &depth);
+    glBindRenderbuffer(GL_RENDERBUFFER, depth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.w, size.h);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color, 0);
+
+    unsigned int buffers = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, &buffers);
+    CheckGLh("glDrawBuffers");
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        return false;
+    }
+
+    CheckGLh("created framebuffers");
+    init = true;
+    return true;
+}
+
+bool LambdaRender::RenderLayer::bind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, frame);
+
+    return true;
+}
+
+bool LambdaRender::RenderLayer::unbind()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return true;
+}
+
+}
+
+}

@@ -27,7 +27,7 @@
 
 #include <mutex>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<> const std::vector<std::string> Resource<util::Locale>::allowedExtensions = {".ldf"};
 
@@ -119,4 +119,4 @@ Resource<util::Locale> Load(const std::filesystem::path& path)
 	return r;
 }
 
-NS_END
+}

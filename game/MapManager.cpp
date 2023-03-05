@@ -23,7 +23,9 @@
 
 #include "Tasks.hpp"
 
-NS_BEGIN
+#include <algorithm>
+
+namespace PROJECT_NAMESPACE {
 
 int MapManager::load(const files::MultiDirectorySearch &source)
 {
@@ -47,7 +49,7 @@ int MapManager::update()
 
 		auto result = task.getResult();
 		if (!result) {
-			log::warning("Load task marked complete had incomplete result.");
+			log::Warning("Load task marked complete had incomplete result.");
 			continue;
 		}
 
@@ -96,6 +98,12 @@ Resource<MapInfo> MapManager::at(unsigned int i)
 void MapManager::clear()
 {
     maps.clear();
+    results.clear();
 }
 
-NS_END
+size_t MapManager::remaining() const
+{
+    return results.size();
+}
+
+}

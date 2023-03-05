@@ -27,13 +27,14 @@
 #include "Audio.hpp"
 #include "AudioDevice.hpp"
 
+#include <string>
 #include <mutex>
 #include <vector>
 #include <algorithm>
 #include <AL/al.h>
 #include <AL/alc.h>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 static std::mutex DeviceMutex;
 static std::vector<AudioDeviceSpec> DeviceListing;
@@ -86,7 +87,7 @@ std::vector<AudioDeviceSpec> GetAudioDevices()
 	return DeviceListing;
 }
 
-AudioDevice GetAudioDevice(const std::string& name)
+AudioDevice GetAudioDevice(const std::string& name, Settings& settings)
 {
 	decltype(DeviceListing)::iterator found;
 	{
@@ -104,7 +105,7 @@ AudioDevice GetAudioDevice(const std::string& name)
 		spec = *found;
 	}
 
-	return AudioDevice{spec};
+	return AudioDevice{spec, settings};
 }
 
-NS_END
+}

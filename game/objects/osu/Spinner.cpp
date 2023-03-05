@@ -24,15 +24,16 @@
 
 #include "Math.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
-void Spinner::onLogicUpdate(double delta)
+void Spinner::onLogicUpdate()
 {
+    auto& game = getGame();
     if (isActive()) {
-        auto cursor = math::Normalize(ctx.game.getCursorPosition() - objectTemplate->position);
+        auto cursor = math::Normalize(game.getCursorPosition() - objectTemplate->position);
         auto alpha = (float) math::Cross(lastVector, cursor);
 
-        RPM = float(double(math::Abs(alpha) / 2.0_pi) / delta * 60.0);
+        RPM = float(double(math::Abs(alpha) / 2.0_pi) / game.getDelta() * 60.0);
         rotation += (float) alpha;
 
         if (math::Abs(rotation) > 2.0_pi) {
@@ -43,14 +44,15 @@ void Spinner::onLogicUpdate(double delta)
         lastVector = cursor;
     }
 
-	float x = float(ctx.timing.getTime()) * 30.f;
+	float x = float(time::SinceStart()) * 30.f;
 	const float outset = 0.25f;
-	SOF.position = {std::cos(x) * outset, std::sin(x) * outset};
+	SOF.position = fvec2d{std::cos(x) * outset, std::sin(x) * outset};
 }
 
-void Spinner::onUpdate(double delta)
+void Spinner::onUpdate()
 {
     // update texture animations
+    double delta = getGame().getDelta();
     spinner.update(delta);
     spinnerCenter.update(delta);
     spinnerMeter.update(delta);
@@ -58,7 +60,7 @@ void Spinner::onUpdate(double delta)
 
 void Spinner::onBegin()
 {
-    lastVector = math::Normalize(ctx.game.getCursorPosition() - objectTemplate->position);
+    lastVector = math::Normalize(getGame().getCursorPosition() - objectTemplate->position);
 }
 
 HitResult Spinner::onFinish()
@@ -72,26 +74,19 @@ HitResult Spinner::onFinish()
 Spinner::Spinner(std::shared_ptr<ObjectTemplateSpinner> t, const HitObjectArguments& args)
     : OsuHitObject(std::move(t), args), RPM(0.0), rotationAccum(0.0f), rotationsCompleted(0), rotation(0.0f)
 {
-    const auto &skin = ctx.activeSkin;
-
-    spinner = skin->createObjectSprite(SPINNER_SPRITE, args);
-    spinnerCenter = skin->createObjectSprite(SPINNER_CENTER_SPRITE, args);
-    spinnerMeter = skin->createObjectSprite(SPINNER_METER_SPRITE, args);
-
-    SOF = {objectTemplate->free ? ctx.game.getCircleSize() : 2.0f, objectTemplate->position};
 }
 
 void Spinner::onPress()
 {
-    lastVector = math::Normalize(ctx.game.getCursorPosition());
+    lastVector = math::Normalize(getGame().getCursorPosition());
 }
 
-void Spinner::onDraw()
+void Spinner::onDraw(video::LambdaRender& gfx)
 {
     auto alpha = getAlpha();
 	const auto& objectTransform = getObjectTransform();
 
-    auto size = objectTemplate->free ? ctx.game.getCircleSize() : 0.8f;
+    auto size = objectTemplate->free ? getGame().getCircleSize() : 0.8f;
 
     frect all = {{size, size}, objectTemplate->position};
 
@@ -100,8 +95,8 @@ void Spinner::onDraw()
         all, alpha,
         (Mat3f) video::Transform2D{.rotate = rotation, .rotationCenter = objectTemplate->position} * objectTransform};
 
-    ctx.gfx.draw(DrawObject{spinner, spinnerInfo});
-	ctx.gfx.draw(DrawObject{spinnerCenter, spinnerCenterInfo});
+    gfx.draw(DrawObject{spinner, spinnerInfo});
+	gfx.draw(DrawObject{spinnerCenter, spinnerCenterInfo});
 }
 
 void Spinner::onReset()
@@ -120,5 +115,15 @@ HitObjectFunction Spinner::getDeactivationFunction() const
 {
 	return HitObjectFunction::BUTTON_RELEASED | HitObjectFunction::CURSOR_IGNORE;
 }
+void Spinner::onCreate(Resource<Skin> &skin)
+{
+    auto& args = getArguments();
 
-NS_END
+    spinner = skin->createObjectSprite(SPINNER_SPRITE, args);
+    spinnerCenter = skin->createObjectSprite(SPINNER_CENTER_SPRITE, args);
+    spinnerMeter = skin->createObjectSprite(SPINNER_METER_SPRITE, args);
+
+    SOF = {objectTemplate->free ? getGame().getCircleSize() : 2.0f, objectTemplate->position};
+}
+
+}

@@ -31,7 +31,7 @@
 
 #include "Util.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 bool df2::enableSpam;
 
@@ -51,7 +51,7 @@ df2 df2::read(const std::filesystem::path &path)
     std::ifstream ifs(path, std::ios::in | std::ios::ate);
     if (!ifs.is_open()) {
         // Check if it exists, if not, tell the user and return.
-        log::info("Failed to open file: ", path);
+        log::Info("Failed to open file: ", path);
         return null;
     }
     // get the file size.
@@ -132,7 +132,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                    int debug_level)
 {
     if (enableSpam)
-        log::debug("[PARSE] Level ", debug_level, " starting at ", resume);
+        log::Debug("[PARSE] Level ", debug_level, " starting at ", resume);
 
     if (end == -1) {
         end = (int) chunk.size();
@@ -143,7 +143,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
             case '$': {
                 std::string token_name = getToken(chunk, i, SearchDirection::FORWARDS);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", i, " level ", debug_level,
+                    log::Debug("[PARSE] Character ", i, " level ", debug_level,
                                " found tag \"", token_name, '\"');
                 parent[token_name].boolean() = true;
                 break;
@@ -153,7 +153,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                 token_name = getToken(chunk, i, SearchDirection::BACKWARDS);
                 token_value = getToken(chunk, i, SearchDirection::FORWARDS);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", i, " level ", debug_level,
+                    log::Debug("[PARSE] Character ", i, " level ", debug_level,
                                " found value \"", token_name, "\" with value \"",
                                token_value, '\"');
 
@@ -161,7 +161,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                 auto vec_delim = token_value.find(';');
                 if (vec_delim != std::string::npos) {
                     if (enableSpam)
-                        log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+                        log::Debug("[PARSE] Deduced key \"", token_name, "\" (\"",
                                    token_value, "\") to be a vector type ");
 
                     std::string x_part = token_value.substr(0, vec_delim);
@@ -174,11 +174,11 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                         x = std::stof(x_part);
                     }
                     catch (std::invalid_argument &e) {
-                        log::warning("[PARSE] Token \"", token_name,
+                        log::Warning("[PARSE] Token \"", token_name,
                                      "\" has malformed vector x component: \"", x_part, "\"");
                     }
                     catch (std::out_of_range &e) {
-                        log::warning("[PARSE] Token \"", token_name,
+                        log::Warning("[PARSE] Token \"", token_name,
                                      "\" has x component which is out of range of a double "
                                      "precision floating point number");
                     }
@@ -187,16 +187,16 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                         y = std::stof(y_part);
                     }
                     catch (std::invalid_argument &e) {
-                        log::warning("[PARSE] Token \"", token_name,
+                        log::Warning("[PARSE] Token \"", token_name,
                                      "\" has malformed vector y component: \"", y_part, "\"");
                     }
                     catch (std::out_of_range &e) {
-                        log::warning("[PARSE] Token \"", token_name,
+                        log::Warning("[PARSE] Token \"", token_name,
                                      "\" has y component which is out of range of a double "
                                      "precision floating point number");
                     }
 
-                    parent[token_name].vec() = {x, y};
+                    parent[token_name].vec() = fvec2d{x, y};
                     break;
                 }
 
@@ -217,11 +217,11 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
                                 iValue = std::stoi(fields[c]);
                             }
                             catch (std::invalid_argument &e) {
-                                log::warning("[PARSE] Color value ", token_name, ", channel ", c, " has invalid form");
+                                log::Warning("[PARSE] Color value ", token_name, ", channel ", c, " has invalid form");
                                 iValue = 255;
                             }
                             catch (std::out_of_range &e) {
-                                log::warning("[PARSE] Color value ", token_name, ", channel ", c, " is out of range");
+                                log::Warning("[PARSE] Color value ", token_name, ", channel ", c, " is out of range");
                                 iValue = 255;
                             }
                         }
@@ -258,28 +258,28 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
 
 					if (std::modf(result, &integral) == 0.0) {
 						if (enableSpam)
-							log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+							log::Debug("[PARSE] Deduced key \"", token_name, "\" (\"",
 									   token_value, "\") to be a integer type ");
 
 						parent[token_name].integer() = (int) result;
 						break;
 					}
 					if (enableSpam)
-						log::debug("[PARSE] Deduced key \"", token_name, "\" (\"",
+						log::Debug("[PARSE] Deduced key \"", token_name, "\" (\"",
 								   token_value, "\") to be a floating point type ");
 
 					parent[token_name].real() = result;
 					break;
 
 				} else if (errno == ERANGE) {
-					log::warning("[PARSE] Numeric key \"", token_name,
+					log::Warning("[PARSE] Numeric key \"", token_name,
 								 "\" has a value out of range of a double precision float");
 					parent[token_name].real() = 0;
 					break;
 				}
 
                 if (enableSpam)
-                    log::debug("[PARSE] Deduced key \"", token_name, "\" (\"", token_value,
+                    log::Debug("[PARSE] Deduced key \"", token_name, "\" (\"", token_value,
                                "\") to be a string type ");
 
                 parent[token_name].str() = token_value;
@@ -291,14 +291,14 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
 
                 i = getEndOfClump(chunk, '(', ')', i);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", old_i, " level ", debug_level,
+                    log::Debug("[PARSE] Character ", old_i, " level ", debug_level,
                                " found comment going to ", i);
                 break;
             }
             case '{': {
                 std::string token_name = getToken(chunk, i, SearchDirection::BACKWARDS);
                 if (enableSpam)
-                    log::debug("[PARSE] Character ", i, " level ", debug_level,
+                    log::Debug("[PARSE] Character ", i, " level ", debug_level,
                                " found clump \"", token_name, '\"');
 
                 auto &next_clump = parent[token_name];
@@ -309,7 +309,7 @@ void df2::getClump(const std::string &chunk, df2 &parent, int end, int resume,
 
                 getClump(chunk, next_clump, i - 1, next_start + 1, debug_level + 1);
                 if (enableSpam)
-                    log::debug("[PARSE] Returned to ", debug_level, " resuming at ", i);
+                    log::Debug("[PARSE] Returned to ", debug_level, " resuming at ", i);
                 break;
             }
         }
@@ -340,7 +340,7 @@ bool df2::write(df2 &def, const std::filesystem::path&path)
     std::ofstream ofs(path, std::ios::out | std::ios::ate);
     if (!ofs.is_open()) {
         // Check if it exists, if not, tell the user and return.
-        log::info("Failed to write file: ", path);
+        log::Info("Failed to write file: ", path);
         return false;
     }
 
@@ -406,7 +406,7 @@ void df2::writeClump(std::stringstream &accum, df2 &clump, size_t level)
                 // "name" = "x;y"
             case df2::EntryType::VECTOR:
                 accum << '"' << entry.first << "\" = \""
-                      << "\"" << entry.second.vec().x << ";" << entry.second.vec().y
+                      << "\"" << entry.second.vec()[0] << ";" << entry.second.vec()[1]
                       << "\"\n";
                 break;
             default:
@@ -437,7 +437,7 @@ int df2::getEndOfClump(const std::string &str, char left, char right,
     }
     // we will always end up on the last } symbol
     if (lb != rb) {
-        log::warning("Brace misscount detected in a df file: rb=", rb, "lb=", lb);
+        log::Warning("Brace misscount detected in a df file: rb=", rb, "lb=", lb);
     }
     return i;
 }
@@ -716,4 +716,4 @@ void df2::removeAlias(std::string target)
     }
 }
 
-NS_END
+}

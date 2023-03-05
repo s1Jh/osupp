@@ -26,7 +26,7 @@
 #include "SpinnerTemplate.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr const char *SPINNER_SPRITE = "spinner";
 
@@ -49,16 +49,16 @@ public:
 	[[nodiscard]] HitObjectFunction getActivationFunction() const override;
 
 protected:
-    void onDraw() override;
+    void onDraw(video::LambdaRender& gfx) override;
 
-    void onLogicUpdate(double delta) override;
+    void onLogicUpdate() override;
 
-    void onUpdate(double delta) override;
+    void onUpdate() override;
 
     void onBegin() override;
 
     void onPress() override;
-
+    void onCreate(Resource<Skin> &resource) override;
     HitResult onFinish() override;
 
     void onReset() override;

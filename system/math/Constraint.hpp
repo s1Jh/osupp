@@ -25,9 +25,7 @@
 
 #include <concepts>
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
 template<typename T1, typename T2>
@@ -39,6 +37,14 @@ template<typename T1, typename T2>
 requires std::is_arithmetic_v<T1> and std::is_arithmetic_v<T2>
 constexpr T1 Max(T1 a, T2 b)
 { return a > (T1)b ? a : (T1)b; }
+
+template<typename T1, typename T2, typename T3, typename ... Others>
+constexpr T1 Max(T1 a, T2 b, T3 c, Others ... others)
+{ return Max(a, Max(b, c, others...)); }
+
+template<typename T1, typename T2, typename T3, typename ... Others>
+constexpr T1 Min(T1 a, T2 b, T3 c, Others ... others)
+{ return Min(a, Min(b, c, others...)); }
 
 template<typename XT, typename MinT, typename MaxT>
 XT Clamp(XT x, MinT min, MaxT max)
@@ -52,5 +58,3 @@ XT Clamp(XT x, MinT min, MaxT max)
 }
 
 }
-
-NS_END

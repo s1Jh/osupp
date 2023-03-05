@@ -24,7 +24,7 @@
 
 #include "Sprite.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -45,4 +45,4 @@ private:
 
 }
 
-NS_END
+}

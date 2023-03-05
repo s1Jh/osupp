@@ -23,65 +23,63 @@
 
 #include "define.hpp"
 
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "Exponential.hpp"
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-template<typename T>
-inline T Mag(const vec2d<T> &v)
-{
-	return Sqrt(Pow(v.x, 2) + Pow(v.y, 2));
+	template <typename T>
+	inline T Mag(const vec2d<T> &v)
+	{
+		return Sqrt(Pow(v[0], 2) + Pow(v[1], 2));
+	}
+
+	template <typename T>
+	inline T Mag2(const vec2d<T> &v)
+	{
+		return Pow(v[0], 2) + Pow(v[1], 2);
+	}
+
+	template <typename T>
+	inline vec2d<T> Normalize(const vec2d<T> &v)
+	{
+		return v / Mag(v);
+	}
+
+	template <typename T1>
+	inline vec2d<T1> Negate(const vec2d<T1> &A)
+	{
+		return vec2d<T1>{-A[0], -A[1]};
+	}
+
+	template <typename T1, typename T2>
+	inline T1 Distance(const vec2d<T1> &a, const vec2d<T2> &b)
+	{
+		return Mag(a - b);
+	}
+
+	template <typename T1, typename T2>
+	double Cross(const vec2d<T1> &a, const vec2d<T2> &b)
+	{
+		return a[0] * b[1] - b[0] * a[1];
+	}
+
+	template <typename T>
+	vec2d<T> Normal(const vec2d<T> &vec)
+	{
+		return {vec[1], -vec[0]};
+	}
+
+	template <typename T>
+	inline vec2d<T> Rotate(const vec2d<T> &vec, double angle)
+	{
+		vec2d<T> rotated;
+
+		rotated[0] = vec[0] * std::cos(angle) - vec[1] * std::sin(angle);
+		rotated[1] = vec[0] * std::sin(angle) + vec[1] * std::cos(angle);
+
+		return rotated;
+	}
+
 }
-
-template<typename T>
-inline T Mag2(const vec2d<T> &v)
-{
-	return Pow(v.x, 2) + Pow(v.y, 2);
-}
-
-template<typename T>
-inline vec2d<T> Normalize(const vec2d<T> &v)
-{
-	return v / Mag(v);
-}
-
-template<typename T1>
-inline vec2d<T1> Negate(const vec2d<T1> &A)
-{
-	return vec2d<T1>{-A.x, -A.y};
-}
-
-template<typename T1, typename T2>
-inline T1 Distance(const vec2d<T1> &a, const vec2d<T2> &b)
-{
-	return Mag(a - b);
-}
-
-template<typename T1, typename T2>
-double Cross(vec2d<T1> a, vec2d<T2> b)
-{
-	return a.x * b.y - b.x * a.y;
-}
-
-template<typename T>
-vec2d<T> Normal(vec2d<T> vec)
-{ return {vec.y, -vec.x}; }
-
-template<typename T>
-inline vec2d<T> Rotate(vec2d<T> vec, double angle)
-{
-	vec2d<T> rotated;
-
-	rotated.x = vec.x * std::cos(angle) - vec.y * std::sin(angle);
-	rotated.y = vec.x * std::sin(angle) + vec.y * std::cos(angle);
-
-	return rotated;
-}
-
-}
-
-NS_END

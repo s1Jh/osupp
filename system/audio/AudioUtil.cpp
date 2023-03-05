@@ -23,7 +23,7 @@
 
 #include "Log.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 {
@@ -37,7 +37,7 @@ FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 		if (err != 0) {
 			char buf[128];
 			av_make_error_string(buf, 128, err);
-			log::error("Failed creating a FFMPEG context: ", message, ", ", buf);
+			log::Error("Failed creating a FFMPEG context: ", message, ", ", buf);
 		}
 		FreeFFmpegContext(ctx);
 		ctx.valid = false;
@@ -167,7 +167,7 @@ bool IsPlanar(AVSampleFormat fmt)
 
 void FreeFFmpegContext(FFmpegCtx &ctx)
 {
-//	log::debug("Destroying context ", &ctx);
+//	log::Debug("Destroying context ", &ctx);
 	av_frame_free(&ctx.frame);
 	avformat_free_context(ctx.format);
 	avcodec_free_context(&ctx.codecCtx);
@@ -175,5 +175,5 @@ void FreeFFmpegContext(FFmpegCtx &ctx)
 }
 
 
-NS_END
+}
 

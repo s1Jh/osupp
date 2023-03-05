@@ -22,193 +22,159 @@
 
 #include "Keyboard.hpp"
 
-#define GLFW_DLL
-
-#include <GLFW/glfw3.h>
+#include <SDL2/SDL_keyboard.h>
 #include <string>
+#include <sstream>
 
-#include "Context.hpp"
+#include "Util.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
+
+namespace input
+{
 
 // FIXME: two keys are bound to apostrophe
-const int Keyboard::GLFWConversionTable[KEY_COUNT] = {GLFW_KEY_LEFT_CONTROL,
-    GLFW_KEY_RIGHT_CONTROL,
-    GLFW_KEY_LEFT_ALT,
-    GLFW_KEY_RIGHT_ALT,
-    GLFW_KEY_LEFT_SUPER,
-    GLFW_KEY_RIGHT_SUPER,
-    GLFW_KEY_LEFT_SHIFT,
-    GLFW_KEY_RIGHT_SHIFT,
+static const int SDLConversionTable[KEY_COUNT] = {
+    SDL_SCANCODE_LCTRL,
+    SDL_SCANCODE_RCTRL, 
+    SDL_SCANCODE_LALT,
+    SDL_SCANCODE_RALT,
+    SDL_SCANCODE_LGUI,
+    SDL_SCANCODE_RGUI,
+    SDL_SCANCODE_LSHIFT,
+    SDL_SCANCODE_RSHIFT,
 
-    GLFW_KEY_ESCAPE,
-    GLFW_KEY_BACKSPACE,
 
-    GLFW_KEY_TAB,
-    GLFW_KEY_UNKNOWN,
-    GLFW_KEY_ENTER,
-    GLFW_KEY_SPACE,
-    GLFW_KEY_INSERT,
-    GLFW_KEY_DELETE,
-    GLFW_KEY_HOME,
-    GLFW_KEY_END,
-    GLFW_KEY_PAGE_UP,
-    GLFW_KEY_PAGE_DOWN,
-    GLFW_KEY_PRINT_SCREEN,
-    GLFW_KEY_UNKNOWN,
-    GLFW_KEY_SCROLL_LOCK,
-    GLFW_KEY_PAUSE,
-    GLFW_KEY_UNKNOWN,
-    GLFW_KEY_MENU,
-    GLFW_KEY_LEFT,
-    GLFW_KEY_UP,
-    GLFW_KEY_DOWN,
-    GLFW_KEY_RIGHT,
-    GLFW_KEY_F1,
-    GLFW_KEY_F2,
-    GLFW_KEY_F3,
-    GLFW_KEY_F4,
-    GLFW_KEY_F5,
-    GLFW_KEY_F6,
-    GLFW_KEY_F7,
-    GLFW_KEY_F8,
-    GLFW_KEY_F9,
-    GLFW_KEY_F10,
-    GLFW_KEY_F11,
-    GLFW_KEY_F12,
-    GLFW_KEY_F13,
-    GLFW_KEY_F14,
-    GLFW_KEY_F15,
-    GLFW_KEY_F16,
-    GLFW_KEY_F17,
-    GLFW_KEY_F18,
-    GLFW_KEY_F19,
-    GLFW_KEY_F20,
-    GLFW_KEY_F21,
-    GLFW_KEY_F22,
-    GLFW_KEY_F23,
-    GLFW_KEY_F24,
-    GLFW_KEY_A,
-    GLFW_KEY_B,
-    GLFW_KEY_C,
-    GLFW_KEY_D,
-    GLFW_KEY_E,
-    GLFW_KEY_F,
-    GLFW_KEY_G,
-    GLFW_KEY_H,
-    GLFW_KEY_I,
-    GLFW_KEY_J,
-    GLFW_KEY_K,
-    GLFW_KEY_L,
-    GLFW_KEY_M,
-    GLFW_KEY_N,
-    GLFW_KEY_O,
-    GLFW_KEY_P,
-    GLFW_KEY_Q,
-    GLFW_KEY_R,
-    GLFW_KEY_S,
-    GLFW_KEY_T,
-    GLFW_KEY_U,
-    GLFW_KEY_V,
-    GLFW_KEY_W,
-    GLFW_KEY_X,
-    GLFW_KEY_Y,
-    GLFW_KEY_Z,
-    GLFW_KEY_0,
-    GLFW_KEY_1,
-    GLFW_KEY_2,
-    GLFW_KEY_3,
-    GLFW_KEY_4,
-    GLFW_KEY_5,
-    GLFW_KEY_6,
-    GLFW_KEY_7,
-    GLFW_KEY_8,
-    GLFW_KEY_9,
-    GLFW_KEY_APOSTROPHE,
-    GLFW_KEY_KP_SUBTRACT,
-    GLFW_KEY_EQUAL,
-    GLFW_KEY_LEFT_BRACKET,
-    GLFW_KEY_RIGHT_BRACKET,
-    GLFW_KEY_BACKSLASH,
-    GLFW_KEY_SEMICOLON,
-    GLFW_KEY_APOSTROPHE,
-    GLFW_KEY_COMMA,
-    GLFW_KEY_PERIOD,
-    GLFW_KEY_SLASH,
-    GLFW_KEY_NUM_LOCK,
-    GLFW_KEY_KP_DIVIDE,
-    GLFW_KEY_KP_MULTIPLY,
-    GLFW_KEY_KP_SUBTRACT,
-    GLFW_KEY_KP_ADD,
-    GLFW_KEY_KP_ENTER,
-    GLFW_KEY_KP_EQUAL,
-    GLFW_KEY_PERIOD,
-    GLFW_KEY_KP_0,
-    GLFW_KEY_KP_0,
-    GLFW_KEY_KP_2,
-    GLFW_KEY_KP_3,
-    GLFW_KEY_KP_4,
-    GLFW_KEY_KP_5,
-    GLFW_KEY_KP_6,
-    GLFW_KEY_KP_7,
-    GLFW_KEY_KP_8,
-    GLFW_KEY_KP_9};
+    SDL_SCANCODE_ESCAPE,
+    SDL_SCANCODE_BACKSPACE,
 
-std::ostream &operator<<(std::ostream &os, const Key &key)
-{
-    if ((unsigned int) key & (unsigned int) Key::CTRL) {
-        os << "Ctrl + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::RCTRL) {
-        os << "RCtrl + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::ALT) {
-        os << "Alt + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::RALT) {
-        os << "RAlt + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::SHIFT) {
-        os << "Shift + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::RSHIFT) {
-        os << "RShift + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::META) {
-        os << "Meta + ";
-    }
-    if ((unsigned int) key & (unsigned int) Key::RMETA) {
-        os << "RMeta + ";
-    }
+    SDL_SCANCODE_TAB,
+    SDL_SCANCODE_CAPSLOCK,
 
-    Key code = Key((int) key & 0xff);
-    switch (code) {
-#define KEY(name)                                                              \
-  case Key::name:                                                              \
-    os << #name;                                                               \
-    break;
-        KEY_LIST
-#undef KEY
-        default: os << "Unknown (" << std::to_string((int) code) << ')';
-            break;
-    }
-    return os;
-}
+    SDL_SCANCODE_RETURN,
+    SDL_SCANCODE_SPACE,
+
+    SDL_SCANCODE_INSERT,
+    SDL_SCANCODE_DELETE,
+    SDL_SCANCODE_HOME,
+    SDL_SCANCODE_END,
+    SDL_SCANCODE_PAGEUP,
+    SDL_SCANCODE_PAGEDOWN,
+    SDL_SCANCODE_PRINTSCREEN,
+    SDL_SCANCODE_UNKNOWN,
+    SDL_SCANCODE_SCROLLLOCK,
+    SDL_SCANCODE_PAUSE,
+    SDL_SCANCODE_UNKNOWN,
+    SDL_SCANCODE_MENU,
+    SDL_SCANCODE_LEFT,
+    SDL_SCANCODE_UP,
+    SDL_SCANCODE_DOWN,
+    SDL_SCANCODE_RIGHT,
+    SDL_SCANCODE_F1,
+    SDL_SCANCODE_F2,
+    SDL_SCANCODE_F3,
+    SDL_SCANCODE_F4,
+    SDL_SCANCODE_F5,
+    SDL_SCANCODE_F6,
+    SDL_SCANCODE_F7,
+    SDL_SCANCODE_F8,
+    SDL_SCANCODE_F9,
+    SDL_SCANCODE_F10,
+    SDL_SCANCODE_F11,
+    SDL_SCANCODE_F12,
+    SDL_SCANCODE_F13,
+    SDL_SCANCODE_F14,
+    SDL_SCANCODE_F15,
+    SDL_SCANCODE_F16,
+    SDL_SCANCODE_F17,
+    SDL_SCANCODE_F18,
+    SDL_SCANCODE_F19,
+    SDL_SCANCODE_F20,
+    SDL_SCANCODE_F21,
+    SDL_SCANCODE_F22,
+    SDL_SCANCODE_F23,
+    SDL_SCANCODE_F24,
+    SDL_SCANCODE_A,
+    SDL_SCANCODE_B,
+    SDL_SCANCODE_C,
+    SDL_SCANCODE_D,
+    SDL_SCANCODE_E,
+    SDL_SCANCODE_F,
+    SDL_SCANCODE_G,
+    SDL_SCANCODE_H,
+    SDL_SCANCODE_I,
+    SDL_SCANCODE_J,
+    SDL_SCANCODE_K,
+    SDL_SCANCODE_L,
+    SDL_SCANCODE_M,
+    SDL_SCANCODE_N,
+    SDL_SCANCODE_O,
+    SDL_SCANCODE_P,
+    SDL_SCANCODE_Q,
+    SDL_SCANCODE_R,
+    SDL_SCANCODE_S,
+    SDL_SCANCODE_T,
+    SDL_SCANCODE_U,
+    SDL_SCANCODE_V,
+    SDL_SCANCODE_W,
+    SDL_SCANCODE_X,
+    SDL_SCANCODE_Y,
+    SDL_SCANCODE_Z,
+    SDL_SCANCODE_0,
+    SDL_SCANCODE_1,
+    SDL_SCANCODE_2,
+    SDL_SCANCODE_3,
+    SDL_SCANCODE_4,
+    SDL_SCANCODE_5,
+    SDL_SCANCODE_6,
+    SDL_SCANCODE_7,
+    SDL_SCANCODE_8,
+    SDL_SCANCODE_9,
+    SDL_SCANCODE_APOSTROPHE,
+    SDL_SCANCODE_MINUS,
+    SDL_SCANCODE_EQUALS,
+    SDL_SCANCODE_LEFTBRACKET,
+    SDL_SCANCODE_RIGHTBRACKET,
+    SDL_SCANCODE_BACKSLASH,
+    SDL_SCANCODE_SEMICOLON,
+    SDL_SCANCODE_APOSTROPHE,
+    SDL_SCANCODE_COMMA,
+    SDL_SCANCODE_PERIOD,
+    SDL_SCANCODE_SLASH,
+    SDL_SCANCODE_NUMLOCKCLEAR,
+    SDL_SCANCODE_KP_DIVIDE,
+    SDL_SCANCODE_KP_MULTIPLY,
+    SDL_SCANCODE_KP_MINUS,
+    SDL_SCANCODE_KP_PLUS,
+    SDL_SCANCODE_KP_ENTER,
+    SDL_SCANCODE_KP_EQUALS,
+    SDL_SCANCODE_PERIOD,
+    SDL_SCANCODE_KP_0,
+    SDL_SCANCODE_KP_0,
+    SDL_SCANCODE_KP_2,
+    SDL_SCANCODE_KP_3,
+    SDL_SCANCODE_KP_4,
+    SDL_SCANCODE_KP_5,
+    SDL_SCANCODE_KP_6,
+    SDL_SCANCODE_KP_7,
+    SDL_SCANCODE_KP_8,
+    SDL_SCANCODE_KP_9};
 
 void Keyboard::update()
 {
-    auto& ctx = GetContext();
-    auto *handle = ctx.gfx.getWindow().getHandle();
-    if (handle == nullptr) {
-        return;
-    }
+//    auto &ctx = GetContext();
+//    auto *handle = ctx.gfx.getWindow().getHandle();
+//    if (handle == nullptr) {
+//        return;
+//    }
+    int keyCount;
+    auto* kbd = SDL_GetKeyboardState(&keyCount);
     for (unsigned int i = 0; i < KEY_COUNT; i++) {
-        int code = GLFWConversionTable[i]; // the GLFW code
+        int scanCode = SDLConversionTable[i]; // the GLFW code
 
         bool state = false;
-        if (code != -1) {
-            state = glfwGetKey(TO_GLFW(handle), code);
-        }
+        state = kbd[scanCode % keyCount];
 
         auto &current = keys[i];
 
@@ -301,4 +267,104 @@ const KeyState &Keyboard::get(const Key key) const
 const KeyState &Keyboard::operator[](const Key key) const
 { return get(key); }
 
-NS_END
+}
+
+template<>
+std::optional<input::Key> FromString<input::Key>(const std::string &str)
+{
+    auto parts = GetCharacterSeparatedValues(str, '+');
+    auto ret = static_cast<input::Key>(0);
+    bool keyFound = false;
+    for (auto &part : parts) {
+        Trim(part);
+        UpperCase(part);
+
+        if (part == "CTRL") {
+            ret |= input::Key::CTRL;
+        }
+        if (part == "RCTRL") {
+            ret |= input::Key::RCTRL;
+        }
+        if (part == "ALT") {
+            ret |= input::Key::ALT;
+        }
+        if (part == "RALT") {
+            ret |= input::Key::RALT;
+        }
+        if (part == "SHIFT") {
+            ret |= input::Key::SHIFT;
+        }
+        if (part == "RSHIFT") {
+            ret |= input::Key::RSHIFT;
+        }
+        if (part == "META") {
+            ret |= input::Key::META;
+        }
+        if (part == "RMETA") {
+            ret |= input::Key::RMETA;
+        }
+
+        if (!keyFound) {
+            // Assume it's an actual key and
+            // not a modifier.
+            // Use the keyFound to indicate that a key name
+            // has already been located in the key combination,
+            // otherwise we could end up OR-ing multiple
+            // keycodes together.
+#define KEY(k) if (part == #k) { ret |= input::Key::k; keyFound = true; }
+            KEY_LIST
+#undef KEY
+        }
+    }
+
+    if (keyFound) {
+        return ret;
+    }
+    return {};
+}
+
+template<>
+std::string ToString<input::Key>(const input::Key &key)
+{
+    std::stringstream os;
+
+    if ((unsigned int) key & (unsigned int) input::Key::CTRL) {
+        os << "Ctrl + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::RCTRL) {
+        os << "RCtrl + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::ALT) {
+        os << "Alt + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::RALT) {
+        os << "RAlt + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::SHIFT) {
+        os << "Shift + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::RSHIFT) {
+        os << "RShift + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::META) {
+        os << "Meta + ";
+    }
+    if ((unsigned int) key & (unsigned int) input::Key::RMETA) {
+        os << "RMeta + ";
+    }
+
+    input::Key code = input::Key((int) key & 0xff);
+    switch (code) {
+#define KEY(name)                                                              \
+  case input::Key::name:                                                              \
+    os << #name;                                                               \
+    break;
+        KEY_LIST
+#undef KEY
+        default: os << "Unknown (" << std::to_string((int) code) << ')';
+            break;
+    }
+    return os.str();
+}
+
+}

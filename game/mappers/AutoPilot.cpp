@@ -22,7 +22,9 @@
 #include "AutoPilot.hpp"
 #include "BaseHitObject.hpp"
 
-NS_BEGIN
+#include "GameManager.hpp"
+
+namespace PROJECT_NAMESPACE {
 
 bool AutoPilot::isKeyPressed(InputMapper::BlockMode) const
 {
@@ -44,17 +46,17 @@ fvec2d AutoPilot::getCursor() const
 	return position;
 }
 
-void AutoPilot::update()
+void AutoPilot::update(const GameManager& game)
 {
-	auto next = ctx.game.getClosestActiveObject();
-	auto& objects = ctx.game.getStoredObjects();
+	auto next = game.getClosestActiveObject();
+	auto& objects = game.getStoredObjects();
 	if (next == objects.end())
 		return;
 
-	auto thisPtr = *next;
+	const auto& thisPtr = *next;
 
 	target = thisPtr->getSOF().position;
-	held = ctx.game.getCurrentTime() >= thisPtr->getStartTime();
+	held = game.getCurrentTime() >= thisPtr->getStartTime();
 
 	auto direction = target - position;
 	auto normalized = math::Normalize(direction);
@@ -62,7 +64,7 @@ void AutoPilot::update()
 	auto currentObjectStart = next->get()->getStartTime();
 	fvec2d nextObjectPosition = {0.0f, 0.0f};
 	auto previousObjectEnd = currentObjectStart - 1.0;
-	BaseHitObject *from = nullptr;
+	BaseHitObject *from;
 	if (next != objects.begin()) {
 		from = std::prev(next)->get();
 		previousObjectEnd = from->getEndTime();
@@ -79,16 +81,16 @@ void AutoPilot::update()
 		velocity = math::Clamp(float(distance / time), minVelocity.get(), maxVelocity.get());
 	}
 
-	auto move = normalized * velocity * ctx.timing.getDelta();
+	auto move = normalized * velocity * game.getDelta();
 
-	move.x = math::Clamp(move.x, direction.x, -direction.x);
-	move.y = math::Clamp(move.y, direction.y, -direction.y);
+	move[0] = math::Clamp(move[0], direction[0], -direction[0]);
+	move[1] = math::Clamp(move[1], direction[1], -direction[1]);
 
 	position += move;
 
 	if (math::Distance(position, thisPtr->getSOF().position) >= thisPtr->getSOF().radius) {
 		if (held) {
-			log::debug("Lagged behind!");
+			log::Debug("Lagged behind!");
 			position = target;
 		}
 	}
@@ -96,12 +98,12 @@ void AutoPilot::update()
 
 AutoPilot::AutoPilot()
 {
-	minVelocity = ctx.settings.addSetting<float>(
-		"setting.input.autopilot.min_speed", 5.0f,
-		SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY, 0.0f, 20.f);
-	maxVelocity = ctx.settings.addSetting<float>(
-		"setting.input.autopilot.max_speed", 100.0f,
-		SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY, 20.f, 100.f);
+//	minVelocity = ctx.settings.addSetting<float>(
+//		"setting.input.autopilot.min_speed", 5.0f,
+//		SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY, 0.0f, 20.f);
+//	maxVelocity = ctx.settings.addSetting<float>(
+//		"setting.input.autopilot.max_speed", 100.0f,
+//		SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE | SettingFlags::READONLY, 20.f, 100.f);
 }
 
-NS_END
+}

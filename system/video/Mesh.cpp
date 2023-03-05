@@ -30,9 +30,9 @@
 #include "Math.hpp"
 #include "MeshLoaders.hpp"
 #include "Util.hpp"
-#include "Vec3.hpp"
+#include "Vector.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -240,4 +240,4 @@ Resource<video::Mesh> Create()
 
 }
 
-NS_END
+}

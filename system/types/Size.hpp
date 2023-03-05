@@ -22,12 +22,14 @@
 
 #pragma once
 
-#include <iostream>
-
-#include "Vec2.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+#include "Vector.hpp"
+
+#include "ToFromString.hpp"
+
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T> requires std::is_arithmetic_v<T>
 struct size
@@ -40,31 +42,23 @@ struct size
 
     template<typename C>
     constexpr size(vec2d<C> v)
-        : w((C) v.x), h((C) v.y)
+        : w((C) v[0]), h((C) v[1])
     {}
 
     template<typename C>
-    constexpr operator size<C>() const
+    constexpr operator size<C>() const noexcept
     {
         return size<C>{(C) w, (C) h};
     }
 
     template<typename C>
-    constexpr explicit operator vec2d<C>() const
+    constexpr operator vec2d<C>() const noexcept
     {
         return vec2d<C>{(C) w, (C) h};
     }
 
     T w, h;
 };
-
-template<typename T>
-std::ostream &operator<<(std::ostream &os, const size<T> &dt)
-{
-    os << dt.w << "x" << dt.h;
-
-    return os;
-}
 
 using isize = size<int>;
 using usize = size<unsigned int>;
@@ -142,4 +136,4 @@ inline size<T1> operator/=(size<T1> &in, T2 scaler)
     return size<T1>{in.w /= (T1) scaler, in.h /= (T1) scaler};
 }
 
-NS_END
+}

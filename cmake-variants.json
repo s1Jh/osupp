@@ -5,37 +5,55 @@
             "debug": {
                 "short": "Debug",
                 "long": "Build with debugging information",
-                "buildType": "Debug",
-                "settings": {
-                    "PLATFORM": "WINDOWS",
-                    "ARCHITECTURE": "ARCH_ADM64"
-                }
+                "buildType": "Debug"
             },
             "release": {
                 "short": "Release",
                 "long": "Build in release mode",
-                "buildType": "Release",
-                "settings": {
-                    "PLATFORM": "WINDOWS",
-                    "ARCHITECTURE": "ARCH_ADM64"
-                }
+                "buildType": "Release"
             },
             "reldeb": {
                 "short": "RelWithDebInfo",
                 "long": "Build in release mode with debugging information",
-                "buildType": "RelWithDebInfo",
-                "settings": {
-                    "PLATFORM": "WINDOWS",
-                    "ARCHITECTURE": "ARCH_ADM64"
-                }
+                "buildType": "RelWithDebInfo"
             },
             "minrel": {
                 "short": "MinSizeRel",
                 "long": "Minimal release mode build",
-                "buildType": "MinSizeRel",
+                "buildType": "MinSizeRel"
+            }
+        }
+    },
+    "platform" : {
+        "default": "linux",
+        "choices": {
+            "windows" : {
+                "short": "Windows",
                 "settings": {
-                    "PLATFORM": "WINDOWS",
-                    "ARCHITECTURE": "ARCH_ADM64"
+                    "PLATFORM": "WINDOWS"
+                }
+            },
+            "linux" : {
+                "short": "Linux",
+                "settings": {
+                    "PLATFORM": "LINUX"
+                }
+            }
+        }
+    },
+    "architecture" : {
+        "default": "amd64",
+        "choices": {
+            "amd64" : {
+                "short": "AMD64 (x86_64)",
+                "settings": {
+                    "ARCHITECTURE": "ARCH_AMD64"
+                }
+            },
+            "arm" : {
+                "short": "Arm",
+                "settings": {
+                    "ARCHITECTURE": "ARM"
                 }
             }
         }

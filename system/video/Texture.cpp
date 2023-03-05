@@ -24,10 +24,9 @@
 
 #include "Math.hpp"
 #include "Util.hpp"
-#include "GraphicsContext.hpp"
 #include "GL.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -40,7 +39,7 @@ Texture::Texture() : channels(-1), pixelSize({-1, -1})
 void Texture::use(unsigned int index) const
 {
 	if (index > 31) {
-		log::warning("Tried to set texture beyond index");
+		log::Warning("Tried to set texture beyond index");
 		return;
 	}
 	if (uploaded()) {
@@ -52,7 +51,7 @@ void Texture::use(unsigned int index) const
 void Texture::unbind(unsigned int index)
 {
 	if (index > 31) {
-		log::warning("Tried to set texture beyond index");
+		log::Warning("Tried to set texture beyond index");
 		return;
 	}
 
@@ -171,4 +170,4 @@ Resource<video::Texture> Create()
 	return tex;
 }
 
-NS_END
+}

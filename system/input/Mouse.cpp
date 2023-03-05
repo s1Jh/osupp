@@ -24,58 +24,51 @@
 
 #include "Math.hpp"
 
-#define GLFW_DLL
-#include <GLFW/glfw3.h>
+#include <SDL2/SDL_mouse.h>
 
 #include "Context.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE::input {
 
 const ButtonState &Mouse::left() const
 { return buttons[0]; }
 
 const ButtonState &Mouse::middle() const
-{ return buttons[2]; }
+{ return buttons[1]; }
 
 const ButtonState &Mouse::right() const
-{ return buttons[1]; }
+{ return buttons[2]; }
+
 
 fvec2d Mouse::position() const
 {
-    auto& ctx = GetContext();
-    auto& window = ctx.gfx.getWindow();
-    auto *handle = window.getHandle();
-    if (handle == nullptr) {
-        return {0, 0};
-    }
-
-    dvec2d ret;
-    glfwGetCursorPos(TO_GLFW(handle), &ret.x, &ret.y);
-
-    isize size = window.size();
+    ivec2d ret;
+    SDL_GetMouseState(&ret[0], &ret[1]);
+    auto* window = SDL_GetMouseFocus();
+    isize size;
+    SDL_GetWindowSize(window, &size.w, &size.h);
 
     auto shorter = double(math::Min(size.w, size.h)) / 2.0;
 
     ret -= dvec2d(size / 2);
     ret /= dvec2d{shorter, shorter};
-    ret.y *= -1.0f;
+    ret[1] *= -1.0f;
 
     return ret;
 }
 
 void Mouse::update()
 {
-    auto& ctx = GetContext();
-    auto *handle = ctx.gfx.getWindow().getHandle();
-    if (handle == nullptr) {
-        return;
-    }
+    ivec2d ret;
+    auto buttonStates = SDL_GetMouseState(&ret[0], &ret[1]);
+
     for (size_t i = 0; i < 3; i++) {
-        bool state = glfwGetMouseButton(TO_GLFW(handle), GLFW_MOUSE_BUTTON_1 + i);
+
+        bool state = SDL_BUTTON(i+1) & buttonStates;
 
         auto &button = buttons[i];
 
-        // onFinish previous pressing/releasing ops
+        // finish previous pressing/releasing ops
         if (button.releasing) {
             button.releasing = false;
             button.released = true;
@@ -97,4 +90,4 @@ void Mouse::update()
     }
 }
 
-NS_END
+}

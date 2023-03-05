@@ -25,7 +25,7 @@
 
 #include "Holder.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace tasks {
 
@@ -58,4 +58,4 @@ struct SimpleTaskHolder : public WrappedTaskHolder<TaskT, TaskArgsT...> {
 
 }
 
-NS_END
+}

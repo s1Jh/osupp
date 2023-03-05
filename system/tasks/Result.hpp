@@ -30,7 +30,7 @@
 #include <type_traits>
 #include <optional>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace tasks {
 
@@ -97,4 +97,4 @@ private:
 
 }
 
-NS_END
+}

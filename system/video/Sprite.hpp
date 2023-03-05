@@ -33,7 +33,7 @@
 #include <type_traits>
 #include <vector>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -157,4 +157,4 @@ private:
 template<>
 void Draw(const video::Sprite&);
 
-NS_END
+}

@@ -1,3 +1,29 @@
+/*
+ Copyright (c) 2023 sijh
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ the Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+/*
+    Program.hpp
+
+    Exposes most basic program functions.
+ */
 
 #pragma once
 
@@ -5,29 +31,11 @@
 
 #include "EnumOperators.hpp"
 
-#include <limits>
+namespace PROJECT_NAMESPACE::core
+{
 
-NS_BEGIN
-
-namespace program {
-
-enum class InitLayers : uint32_t {
-    ERROR = 1 << 0,
-    TASKS = 1 << 1,
-    LOCALE = 1 << 2,
-    AUDIO = 1 << 3,
-    VIDEO = 1 << 4,
-    IMGUI = 1 << 5
-};
-
-constexpr InitLayers INIT_ALL_LAYERS = static_cast<InitLayers>(std::numeric_limits<uint32_t>::max());
-
-InitLayers Init(InitLayers layers = INIT_ALL_LAYERS);
-void Exit(int exitCode = 0);
-InitLayers GetInitializedLayers();
+/// @brief Exits the program with the given exit code.
+/// @param code The exit code.
+void Exit(unsigned int code);
 
 }
-
-ENABLE_BITMASK_OPERATORS(program::InitLayers)
-
-NS_END

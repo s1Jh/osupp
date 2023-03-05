@@ -34,7 +34,7 @@
 #include <filesystem>
 #include <cstddef>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 class Resources;
 
 template <typename T> class Resource;
@@ -50,42 +50,50 @@ class Resource
 	friend Resource<T> Create <T>();
 	friend Resource<T> Default <T>();
 public:
-	Resource()
+
+    template <typename ...Args>
+    requires std::is_constructible_v<T, Args...>
+    Resource(Args ... args)
+    {
+        held = std::make_shared<T>(args...);
+    }
+
+	constexpr Resource()
 	{
 		held = std::make_shared<T>();
 	}
 
-	Resource(std::nullptr_t)
+    constexpr Resource(std::nullptr_t)
 	{
 		held = Default<T>().held;
 	}
 
-	operator bool () const
+    constexpr operator bool () const
 	{
 		return (held != defaultValue.held) && held;
 	}
 
-	std::weak_ptr<T> ref () const
+    constexpr std::weak_ptr<T> ref () const
 	{
 		return {held};
 	}
 
-	T* operator -> () const
+    constexpr T* operator -> () const
 	{
 		return held.get();
 	}
 
-	T* get () const
+    constexpr T* get () const
 	{
 		return held.get();
 	}
 
-	T& operator* () const
+    constexpr T& operator* () const
 	{
 		return *held;
 	}
 
-	auto useCount() const
+    constexpr auto useCount() const
 	{
 		return held.use_count();
 	}
@@ -149,4 +157,4 @@ struct LoadTask {
 	}
 };
 
-NS_END
+}

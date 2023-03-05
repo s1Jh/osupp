@@ -23,7 +23,7 @@
 #include "MapLoaders.hpp"
 
 #include "MapInfo.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "define.hpp"
 #include "Util.hpp"
 
@@ -34,7 +34,7 @@
 #include <string>
 #include <map>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class OSUMapLoader
 {
@@ -74,11 +74,11 @@ public:
 
     static fvec2d PosConversion(fvec2d v)
     {
-        fvec2d coord = {(float) v.x / 512.f, (float) v.y / 384.f};
+        fvec2d coord = {(float) v[0] / 512.f, (float) v[1] / 384.f};
         coord *= 2.f;
         coord -= 1.0f;
-        coord.y *= -1;
-        coord.x *= (512.f / 384.f);
+        coord[1] *= -1;
+        coord[0] *= (512.f / 384.f);
         return coord;
     }
 
@@ -101,7 +101,7 @@ public:
         std::ifstream ifs(path);
 
         if (!ifs.is_open()) {
-            log::error("Unable to open file");
+            log::Error("Unable to open file");
             return false;
         }
 
@@ -154,8 +154,8 @@ public:
 
                     // x, y, time, type, hitSound, objectParams, hitSample
                     auto params = GetCharacterSeparatedValues(strLine, ',');
-                    object.position.x = GetParam<float>(params, 0, 0);
-                    object.position.y = GetParam<float>(params, 1, 0);
+                    object.position[0] = GetParam<float>(params, 0, 0);
+                    object.position[1] = GetParam<float>(params, 1, 0);
                     object.position = PosConversion(object.position);
                     object.time = TimeConversion(GetParam<int>(params, 2, 0));
                     object.type = GetParam<int>(params, 3, 1);
@@ -326,7 +326,7 @@ public:
         map.HPDrain = getField("HPDrainRate", 10.0f);
 
         double circleSizeLevel = getField("CircleSize", 5.0f);
-        map.circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745);
+        map.circleSize = float(-0.0179411764705882 * circleSizeLevel + 0.220392156862745f) * 2.f;
 
         map.overallDifficulty = getField("OverallDifficulty", 5.0f);
 
@@ -478,4 +478,4 @@ bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map)
     return false;
 }
 
-NS_END
+}

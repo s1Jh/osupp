@@ -23,11 +23,11 @@
 #pragma once
 
 #include "Matrix.hpp"
-#include "Vec2.hpp"
-#include "Vec3.hpp"
+#include "Vector.hpp"
+#include "Vector.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class Camera2D
 {
@@ -53,6 +53,8 @@ public:
 
     void setAspectRatio(float ratio);
 
+    [[nodiscard]] float getAspectRatio() const;
+
     [[nodiscard]] const Mat3f &getMatrix() const;
 
     void recalculateMatrix();
@@ -65,4 +67,4 @@ private:
     Mat3f cameraMatrix;
 };
 
-NS_END
+}

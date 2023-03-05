@@ -23,69 +23,79 @@
 
 #include "define.hpp"
 
+#include "Constants.hpp"
+
 #include <type_traits>
 #include <cmath>
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T Sin(T x)
-{
-	return static_cast<T>(std::sin(static_cast<double>(x)));
-}
+	template <typename T>
+	constexpr T DegreeToRad(T deg)
+	{
+		return deg * (PI / 180.0);
+	}
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T Cos(T x)
-{
-	return static_cast<T>(std::cos(static_cast<double>(x)));
-}
+	template <typename T>
+	constexpr T RadToDegree(T rad)
+	{
+		return rad * (180.0 / PI);
+	}
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T Tan(T x)
-{
-	return static_cast<T>(std::tan(static_cast<double>(x)));
-}
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T Sin(T x)
+	{
+		return static_cast<T>(std::sin(static_cast<double>(x)));
+	}
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T Cot(T x)
-{
-	return static_cast<T>(1.0 / std::tan(static_cast<double>(x)));
-}
-template<typename T>
-requires std::is_floating_point_v<T>
-T ArcSin(T x)
-{
-	return static_cast<T>(std::asin(static_cast<double>(x)));
-}
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T Cos(T x)
+	{
+		return static_cast<T>(std::cos(static_cast<double>(x)));
+	}
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T ArcCos(T x)
-{
-	return static_cast<T>(std::acos(static_cast<double>(x)));
-}
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T Tan(T x)
+	{
+		return static_cast<T>(std::tan(static_cast<double>(x)));
+	}
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T ArcTan(T x)
-{
-	return static_cast<T>(std::atan(static_cast<double>(x)));
-}
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T Cot(T x)
+	{
+		return static_cast<T>(1.0 / std::tan(static_cast<double>(x)));
+	}
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T ArcSin(T x)
+	{
+		return static_cast<T>(std::asin(static_cast<double>(x)));
+	}
 
-template<typename T>
-requires std::is_floating_point_v<T>
-T ArcCot(T x)
-{
-	return static_cast<T>(1.0 / std::atan(static_cast<double>(x)));
-}
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T ArcCos(T x)
+	{
+		return static_cast<T>(std::acos(static_cast<double>(x)));
+	}
+
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T ArcTan(T x)
+	{
+		return static_cast<T>(std::atan(static_cast<double>(x)));
+	}
+
+	template <typename T>
+		requires std::is_floating_point_v<T>
+	T ArcCot(T x)
+	{
+		return static_cast<T>(1.0 / std::atan(static_cast<double>(x)));
+	}
 
 }
-
-NS_END

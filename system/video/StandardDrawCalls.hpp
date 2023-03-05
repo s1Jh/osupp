@@ -31,11 +31,11 @@
 #include "Circle.hpp"
 #include "Line.hpp"
 #include "Rect.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 
 #include <functional>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -77,6 +77,6 @@ using DrawMesh    = video::RenderTask<const video::Mesh &,
 using DrawLine = video::RenderTask<const fline&, const video::VisualAppearance&, const Mat3f&>;
 using DrawRect = video::RenderTask<const frect&, const video::VisualAppearance&, const Mat3f&>;
 using DrawCircle = video::RenderTask<const fcircle&, const video::VisualAppearance&, const Mat3f&>;
-using DrawPoint = video::RenderTask<const fvec2d&, const video::VisualAppearance&, const Mat3f&>;
+using DrawPoint = video::RenderTask<const fvec2d&, float, const video::VisualAppearance&, const Mat3f&>;
 
-NS_END
+}

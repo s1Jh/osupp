@@ -28,7 +28,7 @@
 #include "NoteTemplate.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr const char *NOTE_BASE_SPRITE = "note";
 
@@ -48,14 +48,14 @@ public:
 protected:
     void onReset() override;
 
-    void onUpdate(double delta) override;
+    void onUpdate() override;
 
-    void onDraw() override;
+    void onDraw(video::LambdaRender& gfx) override;
 
     void onBegin() override;
 
     HitResult onFinish() override;
-
+    void onCreate(Resource<Skin> &resource) override;
 private:
     bool wasHit = false;
     ObjectSprite noteBase;
@@ -63,4 +63,4 @@ private:
     ObjectSprite noteUnderlay;
 };
 
-NS_END
+}

@@ -23,9 +23,11 @@
 
 #include "define.hpp"
 
-#include "Vec2.hpp"
+#include "Vector.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
+
+class GameManager;
 
 class InputMapper
 {
@@ -40,7 +42,7 @@ public:
 
 	[[nodiscard]] virtual bool isKeyPressing(BlockMode) const = 0;
 	[[nodiscard]] virtual fvec2d getCursor() const = 0;
-	virtual void update() = 0;
+	virtual void update(const GameManager&) = 0;
 };
 
-NS_END
+}

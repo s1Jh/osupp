@@ -30,7 +30,7 @@
 #include <string>
 #include <unordered_map>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace util
 {
@@ -52,6 +52,9 @@ public:
     [[nodiscard]] const std::string &getLocName() const;
 
     [[nodiscard]] const std::string &getLocCredits() const;
+
+    inline std::unordered_map<std::string, std::string>::iterator begin() { return translations.begin(); }
+    inline std::unordered_map<std::string, std::string>::iterator end() { return translations.end(); }
 
 private:
     std::string timeLocale{"HH:mm:ss"};
@@ -78,4 +81,4 @@ std::string operator "" _i18n(const char *key, unsigned long long);
 std::string operator "" _i18n(const char *key, unsigned long);
 #endif
 
-NS_END
+}

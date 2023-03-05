@@ -27,7 +27,7 @@
 #include <vector>
 #include <optional>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace files
 {
@@ -62,10 +62,16 @@ public:
 							   const std::vector<std::string> &allowedExts = {},
 							   bool caseSensitive = false) const;
 
+	inline PathCollectionType::iterator begin() { return searchPaths.begin(); }
+	inline PathCollectionType::iterator end() { return searchPaths.end(); }
+
+	inline PathCollectionType::const_iterator cbegin() { return searchPaths.cbegin(); }
+	inline PathCollectionType::const_iterator cend() { return searchPaths.cend(); }
+
 private:
 	PathCollectionType searchPaths;
 };
 
 }
 
-NS_END
+}

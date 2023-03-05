@@ -23,57 +23,53 @@
 
 #include "define.hpp"
 
-#include "Vec3.hpp"
+#include "Vector.hpp"
 #include "Exponential.hpp"
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-template<typename T>
-inline T Mag(const vec3d<T> &v)
-{
-	return Sqrt(Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2));
-}
+	template <typename T>
+	inline T Mag(const vec3d<T> &v)
+	{
+		return Sqrt(Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2));
+	}
 
-template<typename T>
-inline T Mag2(const vec3d<T> &v)
-{
-	return Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2);
-}
+	template <typename T>
+	inline T Mag2(const vec3d<T> &v)
+	{
+		return Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2);
+	}
 
-template<typename T>
-inline vec3d<T> Normalize(const vec3d<T> &v)
-{
-	return v / Mag(v);
-}
+	template <typename T>
+	inline vec3d<T> Normalize(const vec3d<T> &v)
+	{
+		return v / Mag(v);
+	}
 
-template<typename T1>
-inline vec3d<T1> Negate(const vec3d<T1> &A)
-{
-	return vec3d<T1>{-A.x, -A.y, -A.z};
-}
+	template <typename T1>
+	inline vec3d<T1> Negate(const vec3d<T1> &A)
+	{
+		return vec3d<T1>{-A.x, -A.y, -A.z};
+	}
 
-template<typename T1, typename T2>
-inline T1 Distance(const vec3d<T1> &a, const vec3d<T2> &b)
-{
-	return Mag(a - b);
-}
+	template <typename T1, typename T2>
+	inline T1 Distance(const vec3d<T1> &a, const vec3d<T2> &b)
+	{
+		return Mag(a - b);
+	}
 
-template<typename T1, typename T2>
-inline vec3d<T1> Cross(const vec3d<T1> &A, const vec3d<T2> &B)
-{
-	return vec3d<T1>{A.y * (T1)B.z - A.z * (T1)B.y, A.z * (T1)B.x - A.x * (T1)B.z,
-					 A.x * (T1)B.y - A.y * (T1)B.x};
-}
+	template <typename T1, typename T2>
+	inline vec3d<T1> Cross(const vec3d<T1> &A, const vec3d<T2> &B)
+	{
+		return vec3d<T1>{A.y * (T1)B.z - A.z * (T1)B.y, A.z * (T1)B.x - A.x * (T1)B.z,
+						 A.x * (T1)B.y - A.y * (T1)B.x};
+	}
 
-template<typename T1, typename T2>
-inline T1 Dot(const vec3d<T1> &A, const vec3d<T2> &B)
-{
-	return A.x * B.x + A.y * B.y + A.z * B.z;
-}
+	template <typename T1, typename T2>
+	inline T1 Dot(const vec3d<T1> &A, const vec3d<T2> &B)
+	{
+		return A.x * B.x + A.y * B.y + A.z * B.z;
+	}
 
 }
-
-NS_END

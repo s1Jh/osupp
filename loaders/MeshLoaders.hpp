@@ -28,8 +28,8 @@
 
 #include <filesystem>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh);
 
-NS_END
+}

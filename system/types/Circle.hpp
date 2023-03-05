@@ -22,14 +22,16 @@
 
 #pragma once
 
-#include "Rect.hpp"
-#include "Traits.hpp"
-#include "Vec2.hpp"
-
 #include "define.hpp"
+
+#include "Vector.hpp"
+#include "ToFromString.hpp"
+#include "Rect.hpp"
+
 #include <type_traits>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T> requires std::is_arithmetic_v<T>
 struct circle
@@ -46,10 +48,10 @@ struct circle
         return circle<C>{(C) radius, (vec2d<C>) position};
     }
 
-    template<typename C>
+    template <typename C>
     inline operator rect<C>() const
     {
-        return rect<C>{{(C) radius, (C) radius}, (vec2d<C>) position};
+        return rect<C>{{radius, radius}, position};
     }
 
     T radius;
@@ -57,25 +59,16 @@ struct circle
 };
 
 template<typename T>
-std::ostream &operator<<(std::ostream &os, const circle<T> &dt)
+std::string ToString(const circle<T>& circle)
 {
-    os << dt.radius << "@" << dt.position;
-
-    return os;
-}
-
-template<typename T, typename C>
-requires std::is_arithmetic_v<C>
-inline circle<T> Scale(circle<T> circle, C amount)
-{
-    return {circle.position, circle.size * amount};
+    return std::to_string(circle.radius) + '@' + ToString(circle.position);
 }
 
 template<typename T>
-inline circle<T> Translate(circle<T> circle, vec2d <T> amount)
+std::optional<circle<T>> FromString(const std::string& str)
 {
-    circle.position += amount;
-    return circle;
+    WRAP_CONSTEXPR_ASSERTION("Not implemented!");
+    return {};
 }
 
 using fcircle = circle<float>;
@@ -83,11 +76,4 @@ using icircle = circle<int>;
 using ucircle = circle<unsigned int>;
 using dcircle = circle<double>;
 
-template<typename T>
-struct IsShape<circle<T>>
-{
-    static const bool enable = true;
-    static const ShapeType type = ShapeType::CIRCLE;
-};
-
-NS_END
+}

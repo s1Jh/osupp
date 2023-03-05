@@ -33,173 +33,177 @@
 /*====================================================================================================================*/
 /*  Depends on project config, the types library and C++20+ */
 /*--------------------------------------------------------------------------------------------------------------------*/
-#include "Vec2.hpp"
 #include "define.hpp"
+#include "Vector.hpp"
 
 #include <concepts>
 #include <type_traits>
+#include <limits>
 
 /*====================================================================================================================*/
 /*  Begin declarations */
 /*--------------------------------------------------------------------------------------------------------------------*/
-NS_BEGIN
 
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-enum class CurveType
-{
-    BEZIER, STRAIGHT, CATMULL, SEMI_CIRCLE, CIRCLE
-};
+    enum class CurveType
+    {
+        BEZIER,
+        STRAIGHT,
+        CATMULL,
+        SEMI_CIRCLE,
+        CIRCLE
+    };
 
-/*====================================================================================================================*/
-/*  The curve node type which will be used in calculations. A virtual
- * getPosition() method is declared.               */
-/*  All types which the user wants to be recognized as valid curve points must
- * implement this method.                 */
-/*  This is done instead of declaring a position variable to let the user decide
- * how they wish to store               */
-/*  their node position. */
-/*--------------------------------------------------------------------------------------------------------------------*/
-struct BaseCurveNode
-{
-    [[nodiscard]] virtual fvec2d getPosition() const;
-};
+    /*====================================================================================================================*/
+    /*  The curve node type which will be used in calculations. A virtual
+     * getPosition() method is declared.               */
+    /*  All types which the user wants to be recognized as valid curve points must
+     * implement this method.                 */
+    /*  This is done instead of declaring a position variable to let the user decide
+     * how they wish to store               */
+    /*  their node position. */
+    /*--------------------------------------------------------------------------------------------------------------------*/
+    struct BaseCurveNode
+    {
+        [[nodiscard]] virtual fvec2d getPosition() const;
+    };
 
-/*====================================================================================================================*/
-/*  Helper concept used to determine whether a type is inherited from
- * BaseCurveNode, but is not BaseCurveNode itself. */
-/*--------------------------------------------------------------------------------------------------------------------*/
-template<typename T>
-concept IsInheritedCurve = std::is_base_of_v<BaseCurveNode, T> and
-    not std::is_same_v<T, BaseCurveNode>;
+    /*====================================================================================================================*/
+    /*  Helper concept used to determine whether a type is inherited from
+     * BaseCurveNode, but is not BaseCurveNode itself. */
+    /*--------------------------------------------------------------------------------------------------------------------*/
+    template <typename T>
+    concept IsInheritedCurve = std::is_base_of_v<BaseCurveNode, T> and
+                               not
+    std::is_same_v<T, BaseCurveNode>;
 
-template<typename T>
-concept IsCurveIterator = std::forward_iterator<T> and
-    IsInheritedCurve<typename std::iterator_traits<T>::value_type>;
+    template <typename T>
+    concept IsCurveIterator = std::forward_iterator<T> and
+                              IsInheritedCurve<typename std::iterator_traits<T>::value_type>;
 
-struct CurveNode: public BaseCurveNode
-{
-    CurveNode(fvec2d _position);
+    struct CurveNode : public BaseCurveNode
+    {
+        CurveNode(fvec2d _position);
 
-    fvec2d position;
+        fvec2d position;
 
-    [[nodiscard]] fvec2d getPosition() const override;
-};
+        [[nodiscard]] fvec2d getPosition() const override;
+    };
 
-template<CurveType CType>
-struct CurveCalculationFunctor
-{
-};
+    template <CurveType CType>
+    struct CurveCalculationFunctor
+    {
+    };
 
-template<typename IteratorT, typename LengthT = double> requires IsCurveIterator<IteratorT>
-    and std::floating_point<LengthT>
-struct Curve
-{
-    explicit Curve();
+    template <typename IteratorT, typename LengthT = double>
+        requires IsCurveIterator<IteratorT> and std::floating_point<LengthT>
+    struct Curve
+    {
+        explicit Curve();
 
-    Curve(IteratorT _begin, IteratorT _end);
+        Curve(IteratorT _begin, IteratorT _end);
 
-    void setIteratorRange(IteratorT _begin, IteratorT _end);
+        void setIteratorRange(IteratorT _begin, IteratorT _end);
 
-    void update();
+        void update();
 
-    template<CurveType Type, typename TType>
-    requires std::floating_point<TType>
-    [[nodiscard]] vec2d<TType> get(TType t) const;
+        template <CurveType Type, typename TType>
+            requires std::floating_point<TType>
+        [[nodiscard]] vec2d<TType> get(TType t) const;
 
-    template<typename TType>
-    requires std::floating_point<TType>
-    [[nodiscard]] vec2d<TType> get(CurveType type, TType t) const;
+        template <typename TType>
+            requires std::floating_point<TType>
+        [[nodiscard]] vec2d<TType> get(CurveType type, TType t) const;
 
-    [[nodiscard]] IteratorT getBegin() const;
+        [[nodiscard]] IteratorT getBegin() const;
 
-    [[nodiscard]] IteratorT getEnd() const;
+        [[nodiscard]] IteratorT getEnd() const;
 
-    [[nodiscard]] LengthT getLength() const;
+        [[nodiscard]] LengthT getLength() const;
 
-protected:
-    IteratorT begin, end;
-    LengthT length;
-};
+    protected:
+        IteratorT begin, end;
+        LengthT length;
+    };
 
-template<>
-struct CurveCalculationFunctor<CurveType::STRAIGHT>
-{
-    template<typename TType, typename IteratorT, typename LengthT = double>
-    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
-        std::floating_point<LengthT>
-    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
-                                  TType t);
-};
+    template <>
+    struct CurveCalculationFunctor<CurveType::STRAIGHT>
+    {
+        template <typename TType, typename IteratorT, typename LengthT = double>
+            requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+                     std::floating_point<LengthT>
+        static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                      TType t);
+    };
 
-template<>
-struct CurveCalculationFunctor<CurveType::BEZIER>
-{
-    template<typename TType, typename IteratorT, typename LengthT = double>
-    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
-        std::floating_point<LengthT>
-    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
-                                  TType t);
-};
+    template <>
+    struct CurveCalculationFunctor<CurveType::BEZIER>
+    {
+        template <typename TType, typename IteratorT, typename LengthT = double>
+            requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+                     std::floating_point<LengthT>
+        static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                      TType t);
+    };
 
-template<>
-struct CurveCalculationFunctor<CurveType::CATMULL>
-{
-    template<typename TType, typename IteratorT, typename LengthT = double>
-    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
-        std::floating_point<LengthT>
-    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
-                                  TType t);
-};
+    template <>
+    struct CurveCalculationFunctor<CurveType::CATMULL>
+    {
+        template <typename TType, typename IteratorT, typename LengthT = double>
+            requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+                     std::floating_point<LengthT>
+        static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                      TType t);
+    };
 
-template<>
-struct CurveCalculationFunctor<CurveType::CIRCLE>
-{
-    template<typename TType, typename IteratorT, typename LengthT = double>
-    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
-        std::floating_point<LengthT>
-    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
-                                  TType t);
-};
+    template <>
+    struct CurveCalculationFunctor<CurveType::CIRCLE>
+    {
+        template <typename TType, typename IteratorT, typename LengthT = double>
+            requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+                     std::floating_point<LengthT>
+        static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                      TType t);
+    };
 
-template<>
-struct CurveCalculationFunctor<CurveType::SEMI_CIRCLE>
-{
-    template<typename TType, typename IteratorT, typename LengthT = double>
-    requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
-        std::floating_point<LengthT>
-    static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
-                                  TType t);
-};
+    template <>
+    struct CurveCalculationFunctor<CurveType::SEMI_CIRCLE>
+    {
+        template <typename TType, typename IteratorT, typename LengthT = double>
+            requires std::floating_point<TType> and IsCurveIterator<IteratorT> and
+                     std::floating_point<LengthT>
+        static vec2d<TType> calculate(const Curve<IteratorT, LengthT> &curve,
+                                      TType t);
+    };
 
-/*====================================================================================================================*/
-/*  Specializations of the Curve struct. */
-/*--------------------------------------------------------------------------------------------------------------------*/
+    /*====================================================================================================================*/
+    /*  Specializations of the Curve struct. */
+    /*--------------------------------------------------------------------------------------------------------------------*/
 
-template<CurveType Type, typename TType, typename IteratorT, typename LengthT = double>
-[[nodiscard]] fvec2d Direction(double t, Curve<IteratorT, LengthT> curve)
-{
-    auto epsilon = std::numeric_limits<TType>::epsillon();
-    // Clamp the parameter to <0; t-ε>.
-    // This is done so that if t=1, calling curve.get(t+ε) would yield the same
-    // result as calling curve.get(t). because the value of t is clamped in the
-    // calculation.
-    t = Clamp(t, 0.0, 1.0 - epsilon);
+    template <CurveType Type, typename TType, typename IteratorT, typename LengthT = double>
+    [[nodiscard]] fvec2d Direction(double t, Curve<IteratorT, LengthT> curve)
+    {
+        auto epsilon = std::numeric_limits<TType>::epsillon();
+        // Clamp the parameter to <0; t-ε>.
+        // This is done so that if t=1, calling curve.get(t+ε) would yield the same
+        // result as calling curve.get(t). because the value of t is clamped in the
+        // calculation.
+        t = Clamp(t, 0.0, 1.0 - epsilon);
 
-    // We find the direction vector by pointing a vector from the requested
-    // parametric position t and another position equal to t + ε, with ε being a
-    // small positive offset. We normalize this vector and return.
-    auto targetPosition = curve.get<Type>(t);
-    auto offsetPosition = curve.get<Type>(t + epsilon);
-    return Normalize(offsetPosition - targetPosition);
-}
+        // We find the direction vector by pointing a vector from the requested
+        // parametric position t and another position equal to t + ε, with ε being a
+        // small positive offset. We normalize this vector and return.
+        TType targetPosition = curve.template get<Type>(t);
+        TType offsetPosition = curve.template get<Type>(t + epsilon);
+        return Normalize(offsetPosition - targetPosition);
+    }
 
-template<CurveType Type, typename TType, typename IteratorT, typename LengthT = double>
-[[nodiscard]] fvec2d Normal(double t, Curve<IteratorT, LengthT> curve) {
-    return Normal(Direction<IteratorT, Type, TType, LengthT>(t, curve));
-}
+    template <CurveType Type, typename TType, typename IteratorT, typename LengthT = double>
+    [[nodiscard]] fvec2d Normal(double t, Curve<IteratorT, LengthT> curve)
+    {
+        return Normal(Direction<IteratorT, Type, TType, LengthT>(t, curve));
+    }
 
 } // math
-
-NS_END

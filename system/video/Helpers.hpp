@@ -7,7 +7,7 @@
 #include "Line.hpp"
 #include "LambdaRender.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video::helpers
 {
@@ -26,4 +26,4 @@ void DrawLineSegment(
 
 }
 
-NS_END
+}

@@ -22,18 +22,16 @@
 
 #include "Tasks.hpp"
 #include "Math.hpp"
+#include "Log.hpp"
 
 #include <queue>
 #include <thread>
 #include <memory>
+#include <algorithm>
 #include <array>
 
-NS_BEGIN
-
-namespace tasks
+namespace PROJECT_NAMESPACE::tasks
 {
-
-constexpr unsigned int BASE_TASK_THREAD_COUNT = 16;
 
 struct ThreadHolder
 {
@@ -96,7 +94,7 @@ void TaskRunner(std::reference_wrapper<ThreadHolder> wrappedSelf)
 		self.paused = true;
 		lastExecTP = Clock::now();
 	}
-	log::debug("Stopping");
+	log::Debug("Stopping");
 }
 
 ThreadHolder::ThreadHolder(const ThreadHolder &)
@@ -151,7 +149,7 @@ std::shared_ptr<detail::BaseTaskHolder> detail::GetNamed(unsigned int id)
 void Stop()
 {
 	std::lock_guard<std::mutex> lock(TaskQueueMutex);
-	log::info("Stopping all threads");
+	log::Info("Stopping all threads");
 	while (!TaskQueue.empty()) {
 		TaskQueue.pop();
 	}
@@ -179,7 +177,7 @@ void Start()
         persistentThreads++;
 	}
 
-	log::info("Started ", taskThreads, " task threads and ", persistentThreads, " persistent threads.");
+	log::Info("Started ", taskThreads, " task threads and ", persistentThreads, " persistent threads.");
 }
 
 int Update()
@@ -208,6 +206,42 @@ bool Running()
 	});
 }
 
+size_t GetTaskQueueLength()
+{
+    std::lock_guard<std::mutex> lock(TaskQueueMutex);
+    return TaskQueue.size();
+}
+size_t GetTaskThreadCount()
+{
+    return Threads.size();
 }
 
-NS_END
+std::vector<ThreadInfo> GetThreadStates()
+{
+    std::vector<ThreadInfo> infos;
+
+    for (const auto& thread : Threads) {
+        ThreadInfo inf{
+            .id = thread.theThread.get_id(),
+            .taskPtr = thread.task.get()
+        };
+
+        if (!thread.run) {
+            inf.state = ThreadState::Dead;
+        } else {
+            if (thread.executing) {
+                inf.state = ThreadState::Running;
+            } else {
+                if (thread.paused) {
+                    inf.state = ThreadState::Sleeping;
+                } else {
+                    inf.state = ThreadState::Inactive;
+                }
+            }
+        }
+        infos.push_back(inf);
+    }
+    return infos;
+}
+
+}

@@ -25,7 +25,7 @@
 #include "HitObject.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 BEGIN_OBJECT_TEMPLATE(Spinner)
     fvec2d position = {0, 0};
@@ -34,4 +34,4 @@ BEGIN_OBJECT_TEMPLATE(Spinner)
     float spinRequired = 1.f;
 END_OBJECT_TEMPLATE()
 
-NS_END
+}

@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <vector>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace compat
 {
@@ -22,4 +22,4 @@ bool ConvertSkin(const std::filesystem::path& sourcePath);
 
 }
 
-NS_END
+}

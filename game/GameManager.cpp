@@ -33,12 +33,14 @@
 #define MAKE_CASE(TYPE)                                                         \
   case HitObjectType::TYPE: {                                                   \
     auto object = std::make_shared<TYPE>(                                       \
-        std::static_pointer_cast<ObjectTemplate##TYPE>(objectTemplate), args); \
-    activeObjects.push_back(object);                                           \
+        std::static_pointer_cast<ObjectTemplate##TYPE>(objectTemplate), args);  \
+    object->create(skin);                                                       \
+    activeObjects.push_back(object);                                            \
     break;                                                                      \
   }
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 double GameManager::getCurrentTime() const
 { return currentTime; }
@@ -49,14 +51,15 @@ void GameManager::setCurrentTime(double newTime)
 
     for (auto &obj : activeObjects) {
         obj->reset();
-        obj->update(0.0);
+        obj->update();
     }
 
     last = activeObjects.begin();
 }
 
-void GameManager::update(double delta)
+void GameManager::update(double deltaIn)
 {
+    delta = deltaIn;
     currentTime += delta;
 
     auto active = getClosestActiveObject();
@@ -65,6 +68,7 @@ void GameManager::update(double delta)
     int updates = 0;
     printCounter++;
     auto start = std::chrono::high_resolution_clock::now();
+
     for (auto it = last;; it++) {
         if (it == activeObjects.end()) {
             return;
@@ -72,9 +76,9 @@ void GameManager::update(double delta)
 
         auto &obj = *it;
 
-        obj->update(delta);
+        obj->update();
         if (it == active) {
-            input->update();
+            input->update(*this);
         }
 
         updates++;
@@ -142,7 +146,7 @@ void GameManager::update(double delta)
                 // The object cannot be interacted with in these states
             case HitObjectState::PICKUP: {
                 auto score = obj->finish();
-                log::info("SCORE: ", (int) score);
+                log::Info("SCORE: ", (int) score);
                 break;
             }
             case HitObjectState::FADING:
@@ -175,10 +179,9 @@ void GameManager::update(double delta)
 
 }
 
-void GameManager::draw()
+void GameManager::draw(video::LambdaRender &gfx)
 {
-    Context &ctx = GetContext();
-    ctx.gfx.draw(
+    gfx.draw(
         ImGuiWindow{[&]()
         {
             ImGui::Text("UPF: %f, (%f us)", averageUPF, averageUT);
@@ -225,7 +228,7 @@ void GameManager::draw()
     for (auto it = std::prev(end); it != std::prev(last); it--) {
 #endif
         auto ptr = *it;
-        ptr->draw();
+        ptr->draw(gfx);
     }
 #ifdef WINDOWS
     if (last == activeObjects.begin()) {
@@ -250,7 +253,7 @@ bool GameManager::setMap(Resource<MapInfo> map)
 
 void GameManager::reset()
 {
-//    log::debug("Resetting the game state");
+    log::Debug("Resetting the game state");
 
     if (info) {
         currentTime = -info->startOffset;
@@ -263,8 +266,6 @@ void GameManager::reset()
     }
 
     last = activeObjects.begin();
-
-    auto &skin = GetContext().activeSkin;
 
     samples.hit = skin->getSound(HIT_SOUND);
     samples.miss = skin->getSound(MISS_SOUND);
@@ -281,8 +282,8 @@ const frect &GameManager::getPlayField() const
 void GameManager::setPlayField(const frect &field)
 {
     playField = field;
-    auto smaller = math::Min(field.size.w, field.size.h);
-    transform = math::MakeScaleMatrix(fvec2d(smaller, smaller)) *
+    auto smaller = math::Min(field.size.w, field.size.h) / 2.f;
+    transform = math::MakeScaleMatrix(fvec2d{smaller, smaller}) *
         math::MakeTranslationMatrix(field.position);
 }
 
@@ -292,7 +293,7 @@ Resource<MapInfo> GameManager::getMap() const
 const Mat3f &GameManager::getTransform() const
 { return transform; }
 
-float GameManager::getCircleSize()
+float GameManager::getCircleSize() const
 {
     if (info) {
         return info->circleSize * csMultiplier;
@@ -300,7 +301,7 @@ float GameManager::getCircleSize()
     return 0.0f;
 }
 
-float GameManager::getApproachTime()
+float GameManager::getApproachTime() const
 {
     if (info) {
         return info->approachTime * arMultiplier;
@@ -308,7 +309,7 @@ float GameManager::getApproachTime()
     return 0.0f;
 }
 
-float GameManager::getFadeTime()
+float GameManager::getFadeTime() const
 {
     if (info) {
         return info->fadeTime * ftMultiplier;
@@ -316,7 +317,7 @@ float GameManager::getFadeTime()
     return 0.0f;
 }
 
-float GameManager::getHitWindow()
+float GameManager::getHitWindow() const
 {
     if (info) {
         return info->hitWindow * hwMultiplier;
@@ -324,7 +325,7 @@ float GameManager::getHitWindow()
     return 0.0f;
 }
 
-float GameManager::getHpDrain()
+float GameManager::getHpDrain() const
 {
     if (info) {
         return info->HPDrain * hpMultiplier;
@@ -395,7 +396,7 @@ bool GameManager::resolveFunction(HitObjectFunction func, const BaseHitObject &o
     }
 }
 
-float GameManager::getStartOffset()
+float GameManager::getStartOffset() const
 {
     if (info) {
         return info->startOffset;
@@ -466,6 +467,7 @@ unsigned int GameManager::loadObjects(unsigned int amount)
         return 0;
     }
 
+
     unsigned int loaded = 0;
     auto it = lastLoadedObject;
     for (it = lastLoadedObject; (it != templates.end()) && (loaded < amount); loaded++, it++) {
@@ -476,7 +478,7 @@ unsigned int GameManager::loadObjects(unsigned int amount)
             MAKE_CASE(Slider)
             MAKE_CASE(Note)
             default: info = nullptr;
-                log::warning("Corrupted map template: ", objectTemplate);
+                log::Warning("Corrupted map template: ", objectTemplate);
                 return false;
         }
 
@@ -492,7 +494,7 @@ unsigned int GameManager::loadObjects(unsigned int amount)
         lastLoadedObject++;
     }
 
-    log::debug("Loaded ", loaded, " objects");
+    log::Debug("Loaded ", loaded, " objects");
 
     return loaded;
 }
@@ -507,4 +509,9 @@ void GameManager::scrobble(double amount)
     setCurrentTime(currentTime + amount);
 }
 
-NS_END
+double GameManager::getDelta() const
+{
+    return delta;
+}
+
+}

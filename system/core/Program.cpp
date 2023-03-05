@@ -1,266 +1,75 @@
+/*
+ Copyright (c) 2023 sijh
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ the Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 #include "Program.hpp"
 
 #include "Log.hpp"
-#include "Locale.hpp"
-#include "Context.hpp"
+#include "State.hpp"
 #include "Error.hpp"
 #include "Tasks.hpp"
 
-#include "imgui/imgui.h"
-#include "imgui/backends/imgui_impl_glfw.h"
-#include "imgui/backends/imgui_impl_opengl3.h"
+#include <cstdlib>
 
-#include <atomic>
-
-NS_BEGIN
-
-namespace program
+namespace PROJECT_NAMESPACE::core
 {
 
-static std::atomic<InitLayers> InitiatedLayers;
-
-bool InitImGui()
+/// Serves as the real entry point to the program, gets called from main.
+void EntryPoint()
 {
-// #ifdef USE_IMGUI
-
-    if (!GetContext().gfx.initImGui()) {
-        log::error("Couldn't initiate ImGui");
-        return false;
-    }
-
-// #endif // USE_IMGUI
-    return true;
-}
-
-bool InitVideo()
-{
-    video::detail::InitPlatformVideo();
-
-    Context &ctx = GetContext();
-
-    const std::vector<std::string> StandardResolutions = {
-        "720x480",
-        "960x540",
-        "1280x720",
-        "1366x768",
-        "1600x900",
-        "1920x1080",
-        "2560x1440",
-        "3200x1800",
-        "3840x2160",
-    };
-    auto
-        msLevels = ctx.settings.addSetting<int>("setting.gfx.ms_levels", 0, SettingFlags::WRITE_TO_FILE, 0, 4);
-
-    auto resolution = ctx.settings.addSetting<std::string>(
-        "setting.gfx.window.resolution", "1920x1080", SettingFlags::WRITE_TO_FILE,
-        StandardResolutions
-    );
-    auto
-        fullscreen = ctx.settings.addSetting<bool>("setting.gfx.window.fullscreen", false, SettingFlags::WRITE_TO_FILE);
-    auto
-        monitor = ctx.settings.addSetting<int>("setting.gfx.window.monitor", 1, SettingFlags::WRITE_TO_FILE);
-    auto
-        refreshRate =
-        ctx.settings.addSetting<int>("setting.gfx.window.refresh_rate", 60, SettingFlags::WRITE_TO_FILE, 0, 120);
-
-    if (!ctx.gfx.init(msLevels.get())) {
-        return false;
-    }
-// TODO: We can't change MS levels at runtime yet for the following reasons:
-// - All OpenGL objects will get destroyed alongside the window and it's context.
-// - A SIGSEGV occurs, most likely related to ImGui.
-//    ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(
-//        wrap([msLevels](const std::string& setting) {
-//            if (setting == "setting.gfx.ms_levels") {
-//                auto &ctx = GetContext();
-//                if (!ctx.gfx.init(msLevels.get())) {
-//                    log::error("Failed to initialize renderer with the new MS level");
-//                }
-//            }
-//            return CallbackReturn::OK;
-//        })
-//        );
-
-    ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(
-        wrap(
-            [resolution, fullscreen, refreshRate, monitor](const std::string &setting)
-            {
-                if (!setting.starts_with("setting.gfx.window")) {
-                    return CallbackReturn::OK;
-                }
-
-                auto &ctx = GetContext();
-
-                auto dimensions = GetCharacterSeparatedValues(resolution.get(), 'x');
-                auto width = GetParam(dimensions, 0, video::DEFAULT_WINDOW_SIZE.w);
-                auto height = GetParam(dimensions, 1, video::DEFAULT_WINDOW_SIZE.h);
-
-                video::WindowConfiguration config;
-                config.size = {width, height};
-                config.refreshRate = refreshRate.get();
-                config.monitorID = monitor.get();
-                config.mode = fullscreen.get() ? video::WindowMode::FULLSCREEN : video::WindowMode::WINDOWED;
-                config.shown = video::WindowVisibility::VISIBLE;
-
-                if (!ctx.gfx.configure(config)) {
-                    log::error("Failed to configure window!");
-                }
-
-                return CallbackReturn::OK;
-            }
-        ));
-
-
-    log::info("Started video");
-    return true;
-}
-
-bool InitAudio()
-{
-    Context &ctx = GetContext();
-
-    auto devices = GetAudioDevices();
-    std::vector<std::string> deviceNames;
-    for (const auto &dev : devices) {
-        deviceNames.push_back(dev.name);
-    }
-    auto audioDev =
-        ctx.settings.addSetting<std::string>("setting.audio.device", "", SettingFlags::WRITE_TO_FILE, deviceNames);
-
-    ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(
-        wrap(
-            [audioDev](const std::string &setting)
-            {
-                Context &ctx = GetContext();
-                if (setting == "setting.audio.device") {
-                    ctx.audio = GetAudioDevice(audioDev.get());
-                }
-                return CallbackReturn::OK;
-            }
-        ));
-
-    log::info("Configured audio");
-    return true;
-}
-
-bool InitErrors()
-{
+    // First initialize all the APIs we rely on.
     error::detail::InstallHandler();
-    log::info("Installed error handler");
-    return true;
-}
-
-bool InitTasks()
-{
     tasks::Start();
-    log::info("Started task system");
-    return true;
-}
-
-bool InitLocale()
-{
-    auto &ctx = GetContext();
-
-    auto locales = ctx.paths.findAll("locale", Resource<util::Locale>::allowedExtensions);
-    std::vector<std::string> localeNames;
-    for (const auto &locale : locales) {
-        auto name = locale.stem();
-        if (std::find(localeNames.begin(), localeNames.end(), name) == localeNames.end()) {
-            localeNames.push_back(name.string());
-        }
-    }
-    auto locale = ctx.settings.addSetting<std::string>(
-        "setting.user.locale",
-        std::string("english"),
-        SettingFlags::WRITE_TO_FILE,
-        localeNames
-    );
-
-    ctx.settings.subscribeCallback<SettingCallbacks::SETTING_CHANGED>(
-        wrap(
-            [locale](const std::string &setting)
-            {
-                Context &ctx = GetContext();
-                if (setting == "setting.user.locale") {
-                    auto locPath = ctx.paths.find(locale.get(), Resource<util::Locale>::allowedExtensions);
-                    auto loc = Load<util::Locale>(locPath);
-                    SetDefaultLocale(loc);
-                    log::info("Set locale ", loc->getLocName());
-                }
-                return CallbackReturn::OK;
-            }
-        ));
-
-    log::info("Initiated locale");
-
-    return true;
-}
-
-InitLayers Init(InitLayers layers)
-{
-    log::custom("GREETING", "Hello, world!");
-
     log::detail::Init();
+    log::Custom(log::Severity::INF, "TOAST", "Hello world!");
 
-    log::info("Initializing ", TOSTRING(GAME_TITLE), " ver.", VERSION_MAJOR, '.', VERSION_MINOR, '.', VERSION_PATCH);
-    log::info("Build: ", BUILD_TYPE, " (", BUILD_DATE, ' ', BUILD_TIME, ')');
-    log::info("Target: ", PLATFORM, ", ", ARCH);
+    // SDL2, OpenGL and FreeType get initiated by the video module during static initialization.
 
-    Context &ctx = GetContext();
+    // Keep creating states and running them as long as they return RESTART, otherwise quit.
+    StateHandler::StateReturn status = StateHandler::StateReturn::RESTART;
 
-    auto currentPath = std::filesystem::current_path();
-//    ctx.paths.addPath(currentPath); -- added automatically with default constructor
-    df2::addAlias("GAMEDIR", currentPath.string());
-
-    auto InitHelper = [&](InitLayers layer, const std::function<bool()> &f) -> bool
-    {
-        if (bool(layers & layer)) {
-            if (f()) {
-                InitLayers old = InitiatedLayers;
-                old |= layer;
-                InitiatedLayers = old;
-                return true;
-            }
-        }
-        return false;
-    };
-
-    ctx.settings.read();
-
-    InitHelper(InitLayers::ERROR, InitErrors);
-    InitHelper(InitLayers::TASKS, InitTasks);
-    InitHelper(InitLayers::LOCALE, InitLocale);
-    InitHelper(InitLayers::AUDIO, InitAudio);
-
-    if (InitHelper(InitLayers::VIDEO, InitVideo)) {
-        // Only init imgui if video has been initated
-        InitHelper(InitLayers::IMGUI, InitImGui);
+    while (status == StateHandler::StateReturn::RESTART) {
+        StateHandler state;
+        status = state.enter();
     }
 
-    ctx.settings.apply();
-    ctx.state.setState(GameState::INITIAL_STATE);
-
-    return GetInitializedLayers();
+    // We're done here...
+    Exit(0);
 }
 
-InitLayers GetInitializedLayers()
+void Exit(unsigned int code)
 {
-    return InitiatedLayers;
+    log::Custom(log::Severity::INF, "TOAST", "Goodbye world!");
+    // Here we should perform all library cleanup, as this is a single choke for all exit calls.
+
+    std::exit(code);
 }
 
-void Exit(int exitCode)
+}
+
+#if defined(WINDOWS) && defined(RELEASE)
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                    PWSTR pCmdLine, int nCmdShow)
+#else
+int main()
+#endif
 {
-    log::custom("GREETING", "Goodbye, world!");
-    if (exitCode == 0) {
-        Context &ctx = GetContext();
-        ctx.settings.write();
-    }
-
-    tasks::Stop();
-    std::exit(exitCode);
+    PROJECT_NAMESPACE::core::EntryPoint();
 }
-
-}
-
-NS_END

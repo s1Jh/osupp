@@ -26,7 +26,7 @@
 
 #include "Sound.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class SoundSample : public detail::BaseSound
 {
@@ -48,4 +48,4 @@ Resource<SoundSample> Load(const std::filesystem::path &path);
 
 template<> const std::vector<std::string> Resource<SoundSample>::allowedExtensions;
 
-NS_END
+}

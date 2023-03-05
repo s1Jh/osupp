@@ -25,13 +25,12 @@
 #include "define.hpp"
 
 #include "Rect.hpp"
-#include "State.hpp"
-#include "Timer.hpp"
+#include "BaseState.hpp"
 #include "ObjectSprite.hpp"
 #include "SoundStream.hpp"
 #include "MapInfo.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class Context;
 
@@ -53,9 +52,7 @@ private:
 	ObjectSprite cursor;
     Resource<SoundStream> musicTrack;
 	bool musicStarted{false};
-	Timer endTimer;
     frect field;
-    Context &ctx;
 };
 
-NS_END
+}

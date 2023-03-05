@@ -27,7 +27,7 @@
 
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -238,6 +238,7 @@ constexpr const char *LINE_SHADER_FRAG =
     "}";
 
 constexpr const char *DEFAULT_FRAGMENT_SHADER =
+    "#version 330 core\n"
     "out vec4 fragColor;"
     "void main()"
     "{"
@@ -245,12 +246,34 @@ constexpr const char *DEFAULT_FRAGMENT_SHADER =
     "}";
 
 constexpr const char *DEFAULT_VERTEX_SHADER =
+    "#version 330 core\n"
     "layout(location = 0) in vec3 vPos;"
     "void main()"
     "{"
     "    gl_Position = vec4(vPos, 1.0f);"
     "}";
 
+constexpr const char *LAYER_VERTEX_SHADER =
+    "#version 330 core\n"
+    "layout(location = 0) in vec3 vPos;"
+    "layout(location = 1) in vec2 vUV;"
+    "out vec2 aUV;"
+    "void main()"
+    "{"
+    "    aUV = vUV;"
+    "    gl_Position = vec4(vPos * 2.0f, 1.0f);"
+    "}";
+
+constexpr const char *LAYER_FRAGMENT_SHADER =
+    "#version 330 core\n"
+    "in vec2 aUV;"
+    "out vec4 fragColor;"
+    "uniform sampler2D fillTexture;"
+    "void main()"
+    "{"
+    "    fragColor = texture(fillTexture, aUV);"
+    "}";
+
 }
 
-NS_END
+}

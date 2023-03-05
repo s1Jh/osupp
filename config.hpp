@@ -50,3 +50,18 @@
 #endif
 
 #define INITIAL_STATE Init
+
+#define USER_LAYER_DEFINITIONS \
+    LAYER(GAME_OBJECTS, DEFAULT_RENDER_LAYER+1) \
+    LAYER(APPROACH_CIRCLES, GAME_OBJECTS+1) 
+
+#define PERSISTENT_JOBS \
+    JOB(GAME)
+
+#ifdef USER_TASK_INCLUDES
+#include "GameTask.hpp"
+#endif
+
+
+//#define STATE_HANDLER_OVERRIDE_INCLUDE "OsuStateHandler.hpp"
+//#define STATE_HANDLER_OVERRIDE OsuStateHandler

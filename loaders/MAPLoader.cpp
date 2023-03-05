@@ -28,7 +28,7 @@
 #include <sstream>
 #include <string>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map);
 
@@ -45,12 +45,12 @@ bool LoadMAP(const std::filesystem::path &path, MapInfo &map)
     const std::string objectIdentifiers = "NSPO";
     const std::string eventIdentifiers = "E";
 
-    log::info("Loading map: ", path);
+    log::Info("Loading map: ", path);
     std::ifstream ifs(path);
 
     if (!ifs.is_open()) {
         ifs.close();
-        log::error("Failed to load map, could not open the file");
+        log::Error("Failed to load map, could not open the file");
         return false;
     }
 
@@ -130,12 +130,12 @@ void ReadObject(float &time, char type, std::stringstream &line, MapInfo &map)
     }
 }
 
-void ReadMeta(char type, std::stringstream &line, MapInfo &map)
+void ReadMeta(char , std::stringstream &, MapInfo &)
 {
 }
 
-void ReadEvent(float &elementTime, char type, std::stringstream &line,
-               MapInfo &map)
+void ReadEvent(float &, char , std::stringstream &,
+               MapInfo &)
 {}
 
 void ReadString(std::stringstream &from, std::string &to)
@@ -147,4 +147,4 @@ void ReadString(std::stringstream &from, std::string &to)
     }
 }
 
-NS_END
+}

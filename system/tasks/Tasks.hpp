@@ -37,10 +37,20 @@
 #define USER_PERSISTENT_TASKS_INCLUDES
 #include "config.hpp"
 
-NS_BEGIN
-
-namespace tasks
+namespace PROJECT_NAMESPACE::tasks
 {
+
+enum class ThreadState {
+    Running, Inactive, Sleeping, Dead
+};
+
+struct ThreadInfo {
+    std::thread::id id;
+    ThreadState state{ThreadState::Sleeping};
+    void* taskPtr{nullptr};
+};
+
+constexpr unsigned int BASE_TASK_THREAD_COUNT = 16;
 
 namespace detail
 {
@@ -58,6 +68,10 @@ int Update();
 void Start();
 
 void Stop();
+
+size_t GetTaskQueueLength();
+size_t GetTaskThreadCount();
+std::vector<ThreadInfo> GetThreadStates();
 
 template<typename TaskT, typename ... TaskArgsT>
 auto MakeSimple(TaskT &&task, TaskArgsT &&... args)
@@ -129,5 +143,3 @@ void StopNamed()
 }
 
 }
-
-NS_END

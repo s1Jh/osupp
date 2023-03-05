@@ -25,7 +25,7 @@
 #include "define.hpp"
 #include <chrono>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr unsigned int DEFAULT_FRAMERATE = 60;
 
@@ -53,4 +53,4 @@ private:
     double frameTime;
 };
 
-NS_END
+}

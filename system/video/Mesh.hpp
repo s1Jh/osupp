@@ -32,7 +32,7 @@
 #include <vector>
 #include <filesystem>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -129,4 +129,4 @@ Resource<video::Mesh> Load(const std::filesystem::path &path);
 template<>
 Resource<video::Mesh> Create();
 
-NS_END
+}

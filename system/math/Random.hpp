@@ -24,9 +24,7 @@
 
 #include "define.hpp"
 
-#include "Vec2.hpp"
-#include "Vec3.hpp"
-#include "Vec4.hpp"
+#include "Vector.hpp"
 #include "Constraint.hpp"
 
 #include <optional>
@@ -34,9 +32,7 @@
 #include <random>
 #include <type_traits>
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
 namespace Random
@@ -47,7 +43,7 @@ typename std::enable_if<std::is_arithmetic<T>::value, T>::type
 Scalar(
     T min = std::numeric_limits<T>::min(),
     T max = std::numeric_limits<T>::max(),
-    std::optional<unsigned int> seed = {false}
+    std::optional<unsigned int> seed = {}
 );
 
 template<typename T>
@@ -56,7 +52,7 @@ vec2d<T> Vec2(
         std::numeric_limits<T>::min()},
     vec2d<T> max = {std::numeric_limits<T>::max(),
         std::numeric_limits<T>::max()},
-    std::optional<unsigned int> seed = {false}
+    std::optional<unsigned int> seed = {}
 );
 
 template<typename T>
@@ -65,7 +61,7 @@ vec3d<T> Vec3(
         std::numeric_limits<T>::min()},
     vec3d<T> max = {std::numeric_limits<T>::max(),
         std::numeric_limits<T>::max()},
-    std::optional<unsigned int> seed = {false}
+    std::optional<unsigned int> seed = {}
 );
 
 template<typename T>
@@ -74,7 +70,7 @@ vec4d<T> Vec4(
         std::numeric_limits<T>::min()},
     vec4d<T> max = {std::numeric_limits<T>::max(),
         std::numeric_limits<T>::max()},
-    std::optional<unsigned int> seed = {false}
+    std::optional<unsigned int> seed = {}
 );
 
 } // namespace Random
@@ -155,5 +151,3 @@ T Perlin2D(
 }
 
 }
-
-NS_END

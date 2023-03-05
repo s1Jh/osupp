@@ -25,10 +25,11 @@
 
 #include <utility>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
-void Slider::onUpdate(double delta)
+void Slider::onUpdate()
 {
+    double delta = getGame().getDelta();
     // update texture animations
     bodyTexture.update(delta);
     ball.update(delta);
@@ -41,10 +42,11 @@ void Slider::onUpdate(double delta)
     ballUnderlay.update(delta);
 }
 
-void Slider::onLogicUpdate(double delta)
+void Slider::onLogicUpdate()
 {
+    auto& game = getGame();
     double timeLength = getEndTime() - getStartTime();
-    double timeRunning = ctx.game.getCurrentTime() - startPoint;
+    double timeRunning = game.getCurrentTime() - startPoint;
 
     timeRunning = math::Clamp(timeRunning, 0.0, timeLength);
 
@@ -56,7 +58,8 @@ void Slider::onLogicUpdate(double delta)
 
     TravelDirection nextDirection = currentRepeat % 2 == 1 ? TravelDirection::Backward : TravelDirection::Forward;
     if (currentDirection != nextDirection && repeatsLeft > 0) {
-        ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBounce.ref());
+//      audio.getSFXChannel().playSound(game.getSamples().sliderBounce.ref());
+//      game.playSoundEffect(SLIDER_BOUNCE);
         currentDirection = nextDirection;
     }
 
@@ -75,36 +78,37 @@ void Slider::onLogicUpdate(double delta)
 
     const float maxSOFSizeMultiplier = 2.0;
     const float SOFGrowthFactor = 6.0f;
-    auto maxSOFSize = (float) ctx.game.getCircleSize() * maxSOFSizeMultiplier;
+    auto maxSOFSize = (float) game.getCircleSize() * maxSOFSizeMultiplier;
 
-    auto growthChunk = float(maxSOFSize * SOFGrowthFactor * delta);
+    auto growthChunk = float(maxSOFSize * SOFGrowthFactor * game.getDelta());
 
     if (isActive()) {
         SOF.radius = maxSOFSize;
         visualRingSize += growthChunk;
     } else {
-        SOF.radius = ctx.game.getCircleSize();
+        SOF.radius = game.getCircleSize();
         visualRingSize -= growthChunk;
     }
 
     visualRingSize = math::Clamp(
-        visualRingSize, ctx.game.getCircleSize(),
-        ctx.game.getCircleSize() * maxSOFSizeMultiplier
+        visualRingSize, game.getCircleSize(),
+        game.getCircleSize() * maxSOFSizeMultiplier
     );
 }
 
 void Slider::onBegin()
 {
-    startPoint = math::Min(ctx.game.getCurrentTime(), getStartTime());
+    auto& game = getGame();
+    startPoint = math::Min(game.getCurrentTime(), getStartTime());
 
-    ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
+//    audio.getSFXChannel().playSound(game.getSamples().hit.ref());
     started = true;
 }
 
 HitResult Slider::onFinish()
 {
     if (!started) {
-        ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
+//        audio.getSFXChannel().playSound(game.getSamples().miss.ref());
         return HitResult::MISSED;
     }
     if (broken) {
@@ -116,7 +120,7 @@ HitResult Slider::onFinish()
 
 void Slider::onRaise()
 {
-    ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().sliderBreak.ref());
+//    audio.getSFXChannel().playSound(game.getSamples().sliderBreak.ref());
     broken = true;
 }
 
@@ -128,8 +132,204 @@ void Slider::onPress()
 Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObjectArguments &args)
     : OsuHitObject(std::move(templateIn), args), currentDirection(TravelDirection::Forward),
       broken(false), started(false), progression(0.0), curvePosition(0.0)
+{}
+
+void Slider::onDraw(video::LambdaRender& gfx)
 {
-    const auto &skin = ctx.activeSkin;
+    auto& game = getGame();
+    /*============================================================================================================*/
+    // Prepare some constant variables.
+    const auto &objectTransform = getObjectTransform();
+    const auto circleSize = game.getCircleSize();
+    const auto alpha = getAlpha();
+    
+    float snakeInEnd;
+    /*============================================================================================================*/
+    // Draw the curve body.
+
+    if (!preBakedTexture->uploaded()) {
+        SliderTrailDrawInfo info{
+            .trailTexture = bodyTexture.getTexture(),
+            .thickness = circleSize
+        };
+        preBakedTexture = DrawTrailToTexture(gfx, curve, info);
+    }
+
+    if (bodyTexture.getTexture() && bodyShader) {
+        float start = 0.0f;
+        bool useTexture = true;
+
+        // TODO: customization of fade in/out animations
+        if (isFadingIn()) {
+            useTexture = false;
+            auto hw = game.getHitWindow();
+            auto snakeInPeriod = float(game.getApproachTime() - hw);
+            auto end = float(getStartTime() - hw);
+            snakeInEnd = 1.0f + float((game.getCurrentTime() - end) / snakeInPeriod);
+            snakeInEnd = math::SmoothStep(snakeInEnd);
+        }
+
+        if (repeatsLeft <= 1 && objectTemplate->repeats > 1) {
+            useTexture = false;
+            snakeInEnd = (float) curvePosition;
+        }
+
+        auto tint = bodyTexture.getTint();
+        // TODO: customization of slider trail oppacity
+        tint.a = alpha * 0.8f;
+        // uncomment for rainbow sliders :D
+        tint.r = float(math::Cos(game.getCurrentTime())) / 2.0f + 0.5f;
+        tint.g = float(math::Cos(game.getCurrentTime() + math::PI * 1/3)) / 2.0f + 0.5f;
+        tint.b = float(math::Cos(game.getCurrentTime() + math::PI * 2/3)) / 2.0f + 0.5f;
+
+        SliderTrailDrawInfo sliderInfo = {
+            .useTexture = useTexture,
+            .bakedTexture = preBakedTexture,
+
+            .trailTexture = bodyTexture.getTexture(),
+
+            .start = start,
+            .end = snakeInEnd,
+            .thickness = circleSize,
+            .tint = tint,
+
+            .transform = objectTransform
+        };
+        gfx.draw(DrawSliderTrail{curve, sliderInfo});
+    }
+    /*============================================================================================================*/
+    // Draw curve decorations such as bonus points.
+
+    ObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
+    for (const auto &node : interpolatedPath) {
+        if (node.bonus) {
+            hitPointInfo.destination.position = node.position;
+            gfx.draw(DrawObject{hitPoint, hitPointInfo});
+        }
+    }
+
+    /*============================================================================================================*/
+    // Draw the start decorations.
+    const auto &startBumperPosition = interpolatedPath.front().position;
+
+    ObjectDrawInfo headInfo = {
+        {{circleSize, circleSize}, startBumperPosition},
+        alpha,
+        (Mat3f) video::Transform2D{
+            .rotate = startBumperAngle,
+            .rotationCenter = startBumperPosition
+        } * objectTransform
+    };
+
+    gfx.draw(DrawObject{head, headInfo});
+
+    if (repeatsLeft >= 3) {
+        gfx.draw(DrawObject{headRepeat, headInfo});
+    }
+
+    /*============================================================================================================*/
+    // Draw the end decorations.
+    auto endBumperPosition = interpolatedPath.back().position;
+
+    if (isFadingIn()) {
+        endBumperPosition = curve.get<math::CurveType::STRAIGHT>(snakeInEnd);
+    }
+
+    ObjectDrawInfo tailInfo = {
+        {{circleSize, circleSize}, endBumperPosition},
+        alpha,
+        (Mat3f) video::Transform2D{.rotate = endBumperAngle,
+            .rotationCenter = endBumperPosition} *
+            objectTransform};
+
+    gfx.draw(DrawObject{tail, tailInfo});
+
+    if (repeatsLeft >= 2) {
+        gfx.draw(DrawObject{tailRepeat, tailInfo});
+    }
+
+    /*============================================================================================================*/
+    // Draw the approach circle underneath the ball which is our starting target
+    drawApproachCircle(gfx);
+
+    /*============================================================================================================*/
+    // Draw the ball moving across the slider.
+    const auto ballDirection = findNormal(curvePosition);
+    const auto ballAngle = std::atan2(ballDirection[1], ballDirection[0]);
+
+    ObjectDrawInfo ballInfo = {
+        {{circleSize, circleSize}, SOF.position}, alpha,
+        (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
+            objectTransform};
+
+    gfx.draw(DrawObject{ballUnderlay, ballInfo});
+    gfx.draw(DrawObject{ball, ballInfo});
+    gfx.draw(DrawObject{ballOverlay, ballInfo});
+
+    ObjectDrawInfo ringInfo = {
+        {{visualRingSize, visualRingSize}, SOF.position}, alpha,
+        (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
+            objectTransform};
+    if (isActive()) {
+        gfx.draw(DrawObject{ballRing, ringInfo});
+    }
+}
+
+void Slider::onReset()
+{
+    currentDirection = TravelDirection::Forward;
+    started = false;
+    broken = false;
+    curvePosition = 0.0;
+    progression = 0.0;
+    repeatsLeft = objectTemplate->repeats;
+    SOF.position = getStartPosition();
+}
+
+fvec2d Slider::findDirection(double t)
+{
+    // Clamp the parameter to <0; t-ε>.
+    // This is done so that if t=1, calling curve.get(t+ε) would yield the same
+    // result as calling curve.get(t). because the value of t is clamped in the
+    // calculation.
+    t = math::Clamp(t, 0.0, 1.0 - SLIDER_DIRECTION_EPSILON);
+
+    // We find the direction vector by pointing a vector from the requested
+    // parametric position t and another position equal to t + ε, with ε being a
+    // small positive offset. We normalize this vector and return.
+    auto targetPosition = curve.get<math::CurveType::STRAIGHT>(t);
+    auto offsetPosition = curve.get<math::CurveType::STRAIGHT>(t + SLIDER_DIRECTION_EPSILON);
+    return math::Normalize(offsetPosition - targetPosition);
+}
+
+fvec2d Slider::findNormal(double t)
+{ return math::Normal(findDirection(t)); }
+
+fvec2d Slider::getStartPosition() const
+{
+    return interpolatedPath.front().position;
+}
+
+fvec2d Slider::getEndPosition() const
+{
+    if (objectTemplate->repeats % 2 == 1) {
+        return interpolatedPath.back().position;
+    } else {
+        return interpolatedPath.front().position;
+    }
+}
+HitObjectFunction Slider::getActivationFunction() const
+{
+    if (getState() == HitObjectState::READY && getGame().getCurrentTime() < getStartTime()) {
+        return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_PRESSED;
+    } else {
+        return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_HELD;
+    }
+}
+void Slider::onCreate(Resource<Skin> &skin)
+{
+    auto& game = getGame();
+    auto& args = getArguments();
 
     startPoint = getStartTime();
 
@@ -148,7 +348,7 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
     /*============================================================================================================*/
     // Initialize the variables to their defaults.
     auto &path = objectTemplate->path;
-    SOF = {ctx.game.getCircleSize(),
+    SOF = {game.getCircleSize(),
         {path.front().position}};
     repeatsLeft = objectTemplate->repeats;
 
@@ -205,201 +405,10 @@ Slider::Slider(std::shared_ptr<ObjectTemplateSlider> templateIn, const HitObject
     curve.setIteratorRange(interpolatedPath.begin(), interpolatedPath.end());
 
     auto startBumperDirection = findNormal(0.0);
-    startBumperAngle = std::atan2(startBumperDirection.y, startBumperDirection.x);
+    startBumperAngle = std::atan2(startBumperDirection[1], startBumperDirection[0]);
     auto endBumperDirection = findNormal(1.0);
     // Needs to be flipped, add π.
-    endBumperAngle = std::atan2(endBumperDirection.y, endBumperDirection.x) + math::fPI;
+    endBumperAngle = std::atan2(endBumperDirection[1], endBumperDirection[0]) + math::fPI;
 }
 
-void Slider::onDraw()
-{
-    /*============================================================================================================*/
-    // Prepare some constant variables.
-    const auto &objectTransform = getObjectTransform();
-    const auto circleSize = ctx.game.getCircleSize();
-    const auto alpha = getAlpha();
-    
-    float snakeInEnd;
-    /*============================================================================================================*/
-    // Draw the curve body.
-
-    if (!preBakedTexture.uploaded()) {
-        SliderTrailDrawInfo info{
-            .trailTexture = bodyTexture.getTexture().get(),
-            .thickness = circleSize
-        };
-        preBakedTexture = DrawTrailToTexture(ctx.gfx, curve, info);
-    }
-
-    if (bodyTexture.getTexture() && bodyShader) {
-        float start = 0.0f;
-        bool useTexture = true;
-
-        // TODO: customization of fade in/out animations
-        if (isFadingIn()) {
-            useTexture = false;
-            auto hw = ctx.game.getHitWindow();
-            auto snakeInPeriod = float(ctx.game.getApproachTime() - hw);
-            auto end = float(getStartTime() - hw);
-            snakeInEnd = 1.0f + float((ctx.game.getCurrentTime() - end) / snakeInPeriod);
-            snakeInEnd = math::SmoothStep(snakeInEnd);
-        }
-
-        if (repeatsLeft <= 1 && objectTemplate->repeats > 1) {
-            useTexture = false;
-            snakeInEnd = (float) curvePosition;
-        }
-
-        auto tint = bodyTexture.getTint();
-        // TODO: customization of slider trail oppacity
-        tint.a = alpha * 0.8f;
-        // uncomment for rainbow sliders :D
-//        tint.r = float(math::Cos(ctx.game.getCurrentTime())) / 2.0f + 0.5f;
-//        tint.g = float(math::Cos(ctx.game.getCurrentTime() + math::PI * 1/3)) / 2.0f + 0.5f;
-//        tint.b = float(math::Cos(ctx.game.getCurrentTime() + math::PI * 2/3)) / 2.0f + 0.5f;
-
-        SliderTrailDrawInfo sliderInfo = {
-            .useTexture = useTexture,
-            .bakedTexture = &preBakedTexture,
-
-            .trailTexture = bodyTexture.getTexture().get(),
-
-            .start = start,
-            .end = snakeInEnd,
-            .thickness = circleSize,
-            .tint = tint,
-
-            .transform = objectTransform
-        };
-        ctx.gfx.draw(DrawSliderTrail{curve, sliderInfo});
-    }
-    /*============================================================================================================*/
-    // Draw curve decorations such as bonus points.
-
-    ObjectDrawInfo hitPointInfo = {SOF, alpha, objectTransform};
-    for (const auto &node : interpolatedPath) {
-        if (node.bonus) {
-            hitPointInfo.destination.position = node.position;
-            ctx.gfx.draw(DrawObject{hitPoint, hitPointInfo});
-        }
-    }
-
-    /*============================================================================================================*/
-    // Draw the start decorations.
-    const auto &startBumperPosition = interpolatedPath.front().position;
-
-    ObjectDrawInfo headInfo = {
-        {{circleSize, circleSize}, startBumperPosition},
-        alpha,
-        (Mat3f) video::Transform2D{
-            .rotate = startBumperAngle,
-            .rotationCenter = startBumperPosition
-        } * objectTransform
-    };
-
-    ctx.gfx.draw(DrawObject{head, headInfo});
-
-    if (repeatsLeft >= 3) {
-        ctx.gfx.draw(DrawObject{headRepeat, headInfo});
-    }
-
-    /*============================================================================================================*/
-    // Draw the end decorations.
-    auto endBumperPosition = interpolatedPath.back().position;
-
-    if (isFadingIn()) {
-        endBumperPosition = curve.get<math::CurveType::STRAIGHT>(snakeInEnd);
-    }
-
-    ObjectDrawInfo tailInfo = {
-        {{circleSize, circleSize}, endBumperPosition},
-        alpha,
-        (Mat3f) video::Transform2D{.rotate = endBumperAngle,
-            .rotationCenter = endBumperPosition} *
-            objectTransform};
-
-    ctx.gfx.draw(DrawObject{tail, tailInfo});
-
-    if (repeatsLeft >= 2) {
-        ctx.gfx.draw(DrawObject{tailRepeat, tailInfo});
-    }
-
-    /*============================================================================================================*/
-    // Draw the approach circle underneath the ball which is our starting target
-    drawApproachCircle();
-
-    /*============================================================================================================*/
-    // Draw the ball moving across the slider.
-    const auto ballDirection = findNormal(curvePosition);
-    const auto ballAngle = std::atan2(ballDirection.y, ballDirection.x);
-
-    ObjectDrawInfo ballInfo = {
-        {{circleSize, circleSize}, SOF.position}, alpha,
-        (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
-            objectTransform};
-
-    ctx.gfx.draw(DrawObject{ballUnderlay, ballInfo});
-    ctx.gfx.draw(DrawObject{ball, ballInfo});
-    ctx.gfx.draw(DrawObject{ballOverlay, ballInfo});
-
-    ObjectDrawInfo ringInfo = {
-        {{visualRingSize, visualRingSize}, SOF.position}, alpha,
-        (Mat3f) video::Transform2D{.rotate = ballAngle, .rotationCenter = SOF.position} *
-            objectTransform};
-    if (isActive()) {
-        ctx.gfx.draw(DrawObject{ballRing, ringInfo});
-    }
-}
-
-void Slider::onReset()
-{
-    currentDirection = TravelDirection::Forward;
-    started = false;
-    broken = false;
-    curvePosition = 0.0;
-    progression = 0.0;
-    repeatsLeft = objectTemplate->repeats;
-    SOF.position = getStartPosition();
-}
-
-fvec2d Slider::findDirection(double t)
-{
-    // Clamp the parameter to <0; t-ε>.
-    // This is done so that if t=1, calling curve.get(t+ε) would yield the same
-    // result as calling curve.get(t). because the value of t is clamped in the
-    // calculation.
-    t = math::Clamp(t, 0.0, 1.0 - SLIDER_DIRECTION_EPSILON);
-
-    // We find the direction vector by pointing a vector from the requested
-    // parametric position t and another position equal to t + ε, with ε being a
-    // small positive offset. We normalize this vector and return.
-    auto targetPosition = curve.get<math::CurveType::STRAIGHT>(t);
-    auto offsetPosition = curve.get<math::CurveType::STRAIGHT>(t + SLIDER_DIRECTION_EPSILON);
-    return math::Normalize(offsetPosition - targetPosition);
-}
-
-fvec2d Slider::findNormal(double t)
-{ return math::Normal(findDirection(t)); }
-
-fvec2d Slider::getStartPosition() const
-{
-    return interpolatedPath.front().position;
-}
-
-fvec2d Slider::getEndPosition() const
-{
-    if (objectTemplate->repeats % 2 == 1) {
-        return interpolatedPath.back().position;
-    } else {
-        return interpolatedPath.front().position;
-    }
-}
-HitObjectFunction Slider::getActivationFunction() const
-{
-    if (getState() == HitObjectState::READY && ctx.game.getCurrentTime() < getStartTime()) {
-        return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_PRESSED;
-    } else {
-        return HitObjectFunction::CURSOR_ENTER | HitObjectFunction::BUTTON_HELD;
-    }
-}
 }

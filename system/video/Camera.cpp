@@ -24,7 +24,7 @@
 
 #include "Math.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 Camera2D::Camera2D()
     : aspectRatio(1.f), position({0.f, 0.f}), rotation(0.f),
@@ -46,6 +46,9 @@ const Mat3f &Camera2D::getMatrix() const
 void Camera2D::setAspectRatio(float ratio)
 { aspectRatio = ratio; }
 
+float Camera2D::getAspectRatio() const
+{ return aspectRatio; }
+
 void Camera2D::rotate(float amount)
 { rotation += amount; }
 
@@ -66,4 +69,4 @@ void Camera2D::translate(const fvec2d &amount)
 void Camera2D::setPosition(const fvec2d &in)
 { position = in; }
 
-NS_END
+}

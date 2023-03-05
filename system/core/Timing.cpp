@@ -24,7 +24,7 @@
 
 #include <thread>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 Timing::Timing() noexcept
     : delta(0.0), phase(false)
@@ -72,4 +72,4 @@ double Timing::getTime() const
                       .count()) / 1000.0;
 }
 
-NS_END
+}

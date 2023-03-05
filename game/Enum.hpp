@@ -27,7 +27,7 @@
 #include "EnumOperators.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 /*====================================================================================================================*/
 /*  Enumerations */
@@ -141,4 +141,4 @@ enum class HitObjectFunction : uint8_t
 
 ENABLE_BITMASK_OPERATORS(HitObjectFunction)
 
-NS_END
+}

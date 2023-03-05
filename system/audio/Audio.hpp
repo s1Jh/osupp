@@ -24,11 +24,12 @@
 
 #include "define.hpp"
 #include "EnumOperators.hpp"
+#include "Settings.hpp"
 
 #include <string>
 #include <vector>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class AudioDevice;
 
@@ -121,7 +122,7 @@ struct AudioDeviceSpec {
 
 extern std::vector<AudioDeviceSpec> GetAudioDevices();
 extern AudioDeviceSpec GetDefaultAudioDevice();
-extern AudioDevice GetAudioDevice(const std::string& name);
+extern AudioDevice GetAudioDevice(const std::string& name, Settings& settings);
 
 
-NS_END
+}

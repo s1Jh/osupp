@@ -24,16 +24,16 @@
 
 #include "define.hpp"
 
-#include <Vec2.hpp>
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <filesystem>
 
+#include "Vector.hpp"
 #include "Color.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class df2
 {
@@ -153,4 +153,4 @@ private:
     std::map<const std::string, df2> entries;
 };
 
-NS_END
+}

@@ -37,7 +37,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 struct FFmpegCtx {
 	bool valid{true};
@@ -122,7 +122,7 @@ void ExtractFFmpegSamplesAppend(FFmpegCtx& ctx, std::vector<SampleT>& read)
 			return (float)reinterpret_cast<double*>(stream)[offset];
 
 		default:
-			log::error("Unknown sample format: ", avFormat);
+			log::Error("Unknown sample format: ", avFormat);
 			return 0;
 		}
 	};
@@ -181,4 +181,4 @@ std::vector<SampleT> ExtractFFmpegSamples(FFmpegCtx& ctx) {
 	return read;
 }
 
-NS_END
+}

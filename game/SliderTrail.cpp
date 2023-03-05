@@ -1,10 +1,11 @@
 #include "SliderTrail.hpp"
 
 #include "GL.hpp"
+#include "Util.hpp"
 #include "LambdaRender.hpp"
 #include "StandardDrawCalls.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr const char *SLIDER_TRAIL_VERTEX_SHADER =
     "#version 330 core\n"
@@ -30,7 +31,7 @@ constexpr const char *SLIDER_TRAIL_FRAGMENT_SHADER =
     "uniform vec2 resolution;"
     "uniform vec2 A;"
     "uniform vec2 B;"
-    "uniform float thickness;"
+    "uniform float radius;"
     "uniform vec4 fill;"
 
     "uniform mat3 camera;"
@@ -39,55 +40,55 @@ constexpr const char *SLIDER_TRAIL_FRAGMENT_SHADER =
     "out vec4 FragColor;"
 
     "vec2 normal(vec2 inputVector) {"
-        "return vec2(inputVector.y, -inputVector.x);"
+        "return vec2(inputVector[1], -inputVector[0]);"
     "}"
 
-    "float aspectRatio = resolution.x / resolution.y;"
+    "float aspectRatio = resolution[0] / resolution[1];"
 
     "float findDistance(vec2 p1, vec2 p2, float thickness) {"
 
-    "vec2 uv = gl_FragCoord.xy / resolution.xy;"
+    "vec2 uv = gl_FragCoord[0]y / resolution[0]y;"
     "uv *= 2.0f;"
     "uv -= 1.0f;"
-    "uv.x *= aspectRatio;"
+    "uv[0] *= aspectRatio;"
 
     "vec2 normalVector = normal(p1 - p2);"
     "vec2 intersectNormal = p1 - p2;"
 
-    "float a1 = normalVector.x;"
-    "float b1 = normalVector.y;"
-    "float c1 = -(a1*p1.x + b1 * p1.y);"
+    "float a1 = normalVector[0];"
+    "float b1 = normalVector[1];"
+    "float c1 = -(a1*p1[0] + b1 * p1[1]);"
 
-    "float a2 = intersectNormal.x;"
-    "float b2 = intersectNormal.y;"
-    "float c2 = -(a2*uv.x + b2 * uv.y);"
+    "float a2 = intersectNormal[0];"
+    "float b2 = intersectNormal[1];"
+    "float c2 = -(a2*uv[0] + b2 * uv[1]);"
 
     "vec2 intersect;"
 
-    "intersect.x = (b1*c2 - b2*c1) / (a1*b2 - a2*b1);"
-    "intersect.y = (a2*c1 - a1*c2) / (a1*b2 - a2*b1);"
+    "intersect[0] = (b1*c2 - b2*c1) / (a1*b2 - a2*b1);"
+    "intersect[1] = (a2*c1 - a1*c2) / (a1*b2 - a2*b1);"
 
     "const float margin = 0.000001f;"
 
-    "float smallerX = min(p1.x, p2.x) - margin;"
-    "float smallerY = min(p1.y, p2.y) - margin;"
-    "float biggerX = max(p1.x, p2.x) + margin;"
-    "float biggerY = max(p1.y, p2.y) + margin;"
+    "float smallerX = min(p1[0], p2[0]) - margin;"
+    "float smallerY = min(p1[1], p2[1]) - margin;"
+    "float biggerX = max(p1[0], p2[0]) + margin;"
+    "float biggerY = max(p1[1], p2[1]) + margin;"
 
     "float factor = 1.0f;"
 
-    "if (((smallerX <= intersect.x) && (intersect.x <= biggerX)) &&"
-        "((smallerY <= intersect.y) && (intersect.y <= biggerY))) {"
-        "factor = abs(a1 * uv.x + b1 * uv.y + c1) / sqrt(pow(a1, 2) + pow(b1, 2));"
+    "if (((smallerX <= intersect[0]) && (intersect[0] <= biggerX)) &&"
+        "((smallerY <= intersect[1]) && (intersect[1] <= biggerY))) {"
+        "factor = abs(a1 * uv[0] + b1 * uv[1] + c1) / sqrt(pow(a1, 2) + pow(b1, 2));"
     "} else {"
-        "if (intersect.x < smallerX) {"
-            "if (intersect.y < smallerY) {"
+        "if (intersect[0] < smallerX) {"
+            "if (intersect[1] < smallerY) {"
                 "factor = distance(uv, vec2(smallerX, smallerY));"
             "} else {"
                 "factor = distance(uv, vec2(smallerX, biggerY));"
             "}"
         "} else {"
-            "if (intersect.y < smallerY) {"
+            "if (intersect[1] < smallerY) {"
                 "factor = distance(uv, vec2(biggerX, smallerY));"
             "} else {"
                 "factor = distance(uv, vec2(biggerX, biggerY));"
@@ -102,8 +103,9 @@ constexpr const char *SLIDER_TRAIL_FRAGMENT_SHADER =
 
     "void main()"
     "{"
-    "vec2 tA = vec3(transform * vec3(A, 1.0f)).xy;"
-    "vec2 tB = vec3(transform * vec3(B, 1.0f)).xy;"
+    "float thickness = radius / 2.f;"
+    "vec2 tA = vec3(transform * vec3(A, 1.0f))[0]y;"
+    "vec2 tB = vec3(transform * vec3(B, 1.0f))[0]y;"
     "float factor = findDistance(tA, tB, thickness);"
     "if (factor < 0.0f) {"
         "discard;"
@@ -123,7 +125,7 @@ void DrawSliderSegment(
     if (!Init) {
         sliderShader.fromString(SLIDER_TRAIL_VERTEX_SHADER, SLIDER_TRAIL_FRAGMENT_SHADER);
         if (!sliderShader.upload()) {
-            log::error("Failed to upload slider shader!");
+            log::Error("Failed to upload slider shader!");
         }
         Init = true;
         CheckGLh("DrawSliderSegment: Init");
@@ -131,10 +133,10 @@ void DrawSliderSegment(
 
     float thickness = info.thickness;
 
-    auto right = (float) math::Max(seg.A.x, seg.B.x) + thickness;
-    auto left = (float) math::Min(seg.A.x, seg.B.x) - thickness;
-    auto top = (float) math::Max(seg.A.y, seg.B.y) + thickness;
-    auto bottom = (float) math::Min(seg.A.y, seg.B.y) - thickness;
+    auto right = (float) math::Max(seg.A[0], seg.B[0]) + thickness;
+    auto left = (float) math::Min(seg.A[0], seg.B[0]) - thickness;
+    auto top = (float) math::Max(seg.A[1], seg.B[1]) + thickness;
+    auto bottom = (float) math::Min(seg.A[1], seg.B[1]) - thickness;
 
     frect rect = {
         {
@@ -150,16 +152,13 @@ void DrawSliderSegment(
     Mat3f shape = math::MakeScaleMatrix<float>(rect.size) *
         math::MakeTranslationMatrix<float>(rect.position);
 
-    auto tint = info.tint;
-    tint.a = 1.0f;
-
     DrawMesh::Call(
-        renderer, renderer.getMeshes().rectMask, sliderShader,
+        renderer, renderer.getMeshes().screenRectMask, sliderShader,
         video::Shader::Uniforms{
-            {"resolution", (fvec2d) renderer.getWindow().size()},
+            {"resolution", (fvec2d) renderer.getSize()},
             {"A", seg.A},
             {"B", seg.B},
-            {"thickness", thickness},
+            {"radius", thickness},
             {"shape", shape}
         },
         video::Shader::Textures{
@@ -176,8 +175,8 @@ video::Texture DrawTrailToTexture(
 )
 {
     CheckGLh("DrawTrailToTexture");
-    static unsigned int frame = 0, color = 0, depth = 0;
-    auto size = renderer.getWindow().size();
+    unsigned int frame = 0, color = 0, depth = 0;
+    auto size = renderer.getSize();
     glGenFramebuffers(1, &frame);
     glBindFramebuffer(GL_FRAMEBUFFER, frame);
     CheckGLh("DrawTrailToTexture: Gen/Bind frame");
@@ -249,10 +248,10 @@ void Draw(
     CheckGLh("start");
     static bool Init = false;
     static unsigned int frame = 0, color = 0, depth = 0;
-    auto size = renderer.getWindow().size();
+    auto size = renderer.getSize();
     static isize initSize = {0, 0};
     if (size != initSize) {
-        log::debug("Recreating slider buffer texture");
+        log::Debug("Recreating slider buffer texture");
         glDeleteTextures(1, &color);
         glDeleteRenderbuffers(1, &depth);
         glDeleteFramebuffers(1, &frame);
@@ -289,13 +288,15 @@ void Draw(
         Init = true;
     }
 
+    auto rect = SCREEN_RECT<float>;
+    rect.size.w /= renderer.camera.getAspectRatio();
+
     if (info.useTexture) {
         DrawRect::Call(
-            renderer, UNIT_RECT<float>,
+            renderer, rect,
             video::VisualAppearance{
                 .texture = info.bakedTexture,
-                .fillColor = info.tint,
-                .flags = video::AppearanceFlags::IGNORE_CAMERA
+                .fillColor = info.tint
             },
             info.transform
         );
@@ -356,18 +357,17 @@ void Draw(
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthFunc(GL_ALWAYS);
 
-        video::Texture tex(color);
+        Resource<video::Texture> tex(color);
 
         DrawRect::Call(
-            renderer, UNIT_RECT<float>,
+            renderer, rect,
             video::VisualAppearance{
-                .texture = &tex,
-                .fillColor = info.tint,
-                .flags = video::AppearanceFlags::IGNORE_CAMERA
+                .texture = tex,
+                .fillColor = info.tint
             },
             info.transform
         );
     }
 }
 
-NS_END
+}

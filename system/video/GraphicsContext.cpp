@@ -19,15 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  ******************************************************************************/
-#include "GraphicsContext.hpp"
-
-#define GLFW_DLL
-#include <GLFW/glfw3.h>
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_main.h>
 #include <cstring>
 
 #include "GL.hpp"
 #include "Log.hpp"
 #include "Error.hpp"
+#include "StrUtil.hpp"
 
 #define GLEXT(ret, name, ...) \
 name##proc * gl##name;
@@ -46,56 +46,60 @@ GL_FUNC_LIST_SHARED
 
 #undef GLEXT
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE::video {
 
-namespace video
+class GraphicsApi
 {
+public:
+	GraphicsApi();
+};
 
-namespace detail
+static GraphicsApi Api;
+
+void OnGLFWError(int code, const char* description)
 {
-
-void OnGLFWError(int code, const char* description) {
-    log::custom("GLFW", description, " (", code, ")");
+	log::Custom(log::Severity::ERR, "GLFW", description, " (", code, ")");
 }
 
-bool InitPlatformVideo()
+GraphicsApi::GraphicsApi()
 {
-    log::info("Initializing GLFW");
-    glfwSetErrorCallback(OnGLFWError);
+	log::Logger logger("GFX", log::Severity::INF);
 
-    if (glfwInit() != GLFW_TRUE) {
-        error::Raise(error::Code::GLFW_ERROR, "Could not initialize GLFW");
-        return false;
-    }
+	logger("Initializing SDL2");
 
-    log::info("GLFW version: ", glfwGetVersionString());
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+		error::Raise(error::Code::API_LOAD_FAIL, "Could not initialize SDL2");
+	}
 
-    log::info("Loading OpenGL functions");
+	SDL_version ver;
+	SDL_GetVersion(&ver);
+	logger("SDL2 version:", Concatenate(ver.major, ".", ver.minor, ".", ver.patch));
+
+	logger("Loading OpenGL functions");
 #if defined(LINUX)
-    void *libGL = dlopen("libGL.so", RTLD_LAZY);
-    if (!libGL) {
-        error::Raise(error::Code::GL_NOT_LOADED, "Unable to open libGL.so");
-    }
+	void *libGL = dlopen("libGL.so", RTLD_LAZY);
+	if (!libGL) {
+		error::Raise(error::Code::API_LOAD_FAIL, "Unable to open libGL.so");
+	}
 
 #define GLEXT(ret, name, ...)                                              \
 	gl##name = (name##proc *) dlsym(libGL, "gl" #name);                    \
 	if (!gl##name) {                                                       \
-		error::Raise(error::Code::GL_NOT_LOADED, "Function gl" #name " couldn't be loaded"); \
-    	return false;                                                                       \
+		error::Raise(error::Code::API_LOAD_FAIL, "Function gl" #name " couldn't be loaded"); \
 	}
 
-    GL_FUNC_LIST_SHARED
-    GL_FUNC_LIST_LINUX
+	GL_FUNC_LIST_SHARED
+	GL_FUNC_LIST_LINUX
 
 #undef GLEXT
 
 #elif defined(WINDOWS)
-    HMODULE dll = LoadLibraryA("opengl32.dll");
+	HMODULE dll = LoadLibraryA("opengl32.dll");
 	typedef PROC WINAPI
 		wglGetProcAddressproc(LPCSTR
 							  lpszProc);
 	if (!dll) {
-		error::Raise(error::Code::GL_NOT_LOADED, "Unable to open opengl32.dll");
+		error::Raise(error::Code::API_LOAD_FAIL, "Unable to open opengl32.dll");
 	}
 	auto *wglGetProcAddress = (wglGetProcAddressproc *)GetProcAddress(dll, "wglGetProcAddress");
 
@@ -104,8 +108,7 @@ bool InitPlatformVideo()
     if (!gl##name) { \
         gl##name = (name##proc*)GetProcAddress(dll, "gl" #name); \
         if (!gl##name) {         \
-            error::Raise(error::Code::GL_NOT_LOADED, "Function gl" #name " couldn't be loaded"); \
-        	return false;        \
+            error::Raise(error::Code::API_LOAD_FAIL, "Function gl" #name " couldn't be loaded"); \
 		}   \
     }
 
@@ -117,52 +120,6 @@ bool InitPlatformVideo()
 #else
 #error "OpenGL loading for this platform is not implemented yet."
 #endif
-
-//    log::info("OpenGL version: ", glGetString(GL_VERSION));
-//    log::info("GLSL version: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
-//    log::info("Renderer: ", glGetString(GL_RENDERER));
-//    log::info("Vendor: ", glGetString(GL_VENDOR));
-
-    return true;
 }
 
 }
-
-bool IsExtensionSupported(const char *extList, const char *extension)
-{
-	const char *start;
-	const char *where, *terminator;
-
-	/* Extension names should not have spaces. */
-	where = strchr(extension, ' ');
-	if (where || *extension == '\0') {
-		return false;
-	}
-
-	/* It takes a bit of care to be fool-proof about parsing the
-		OpenGL extensions string. Don't be fooled by sub-strings,
-		etc. */
-	for (start = extList;;) {
-		where = strstr(start, extension);
-
-		if (!where) {
-			break;
-		}
-
-		terminator = where + strlen(extension);
-
-		if (where == start || *(where - 1) == ' ') {
-			if (*terminator == ' ' || *terminator == '\0') {
-				return true;
-			}
-		}
-
-		start = terminator;
-	}
-
-	return false;
-}
-
-}
-
-NS_END

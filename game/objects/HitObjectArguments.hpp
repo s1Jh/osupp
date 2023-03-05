@@ -23,7 +23,7 @@
 
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 struct HitObjectArguments {
 	unsigned int objectSeed{0};
@@ -31,4 +31,4 @@ struct HitObjectArguments {
 	unsigned int mapSeed{0};
 };
 
-NS_END
+}

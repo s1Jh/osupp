@@ -26,7 +26,7 @@
 
 #include <utility>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 void Note::onBegin()
 {
@@ -40,14 +40,14 @@ HitResult Note::onFinish()
 {
     if (!wasHit) {
         // object wasn't hit, return miss
-		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
+//		ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().miss.ref());
         return HitResult::MISSED;
     }
-	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
+//	ctx.audio.getSFXChannel().playSound(ctx.game.getSamples().hit.ref());
     // negative if hit before the start time
     double hitDelta = getTimeStarted() - getStartTime();
     // should be in the interval < -hitWindow; +hitWindow >
-    int rank = 3 - math::Abs(int(3 * hitDelta / ctx.game.getHitWindow()));
+    int rank = 3 - math::Abs(int(3 * hitDelta / getGame().getHitWindow()));
     rank = math::Clamp(rank, 1, 3);
     return (HitResult) rank;
 }
@@ -55,30 +55,24 @@ HitResult Note::onFinish()
 Note::Note(std::shared_ptr<ObjectTemplateNote> t, const HitObjectArguments& args) :
 	OsuHitObject(std::move(t), args)
 {
-    SOF = {ctx.game.getCircleSize(), objectTemplate->position};
-
-    const auto &skin = ctx.activeSkin;
-
-    noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE, args);
-    noteOverlay = skin->createObjectSprite(NOTE_OVERLAY_SPRITE, args);
-    noteUnderlay = skin->createObjectSprite(NOTE_UNDERLAY_SPRITE, args);
 }
 
-void Note::onDraw()
+void Note::onDraw(video::LambdaRender& gfx)
 {
 	const auto& objectTransform = getObjectTransform();
 
-	drawApproachCircle();
+	drawApproachCircle(gfx);
 
     ObjectDrawInfo info{SOF, getAlpha(), objectTransform};
 
-    ctx.gfx.draw(DrawObject{noteUnderlay, info});
-    ctx.gfx.draw(DrawObject{noteBase, info});
-	ctx.gfx.draw(DrawObject{noteOverlay, info});
+    gfx.draw(DrawObject{noteUnderlay, info});
+    gfx.draw(DrawObject{noteBase, info});
+	gfx.draw(DrawObject{noteOverlay, info});
 }
 
-void Note::onUpdate(double delta)
+void Note::onUpdate()
 {
+    double delta = getGame().getDelta();
     noteBase.update(delta);
     noteOverlay.update(delta);
     noteUnderlay.update(delta);
@@ -96,4 +90,16 @@ HitObjectFunction Note::getActivationFunction() const
 	return HitObjectFunction::BUTTON_PRESSED | HitObjectFunction::CURSOR_ENTER;
 }
 
-NS_END
+void Note::onCreate(Resource<Skin> &skin)
+{
+    auto& args = getArguments();
+    auto& game = getGame();
+
+    SOF = {game.getCircleSize(), objectTemplate->position};
+
+    noteBase = skin->createObjectSprite(NOTE_BASE_SPRITE, args);
+    noteOverlay = skin->createObjectSprite(NOTE_OVERLAY_SPRITE, args);
+    noteUnderlay = skin->createObjectSprite(NOTE_UNDERLAY_SPRITE, args);
+}
+
+}

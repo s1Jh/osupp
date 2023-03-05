@@ -25,14 +25,14 @@
 #include "define.hpp"
 
 #include "Util.hpp"
-#include "Vec3.hpp"
+#include "Vector.hpp"
 
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh)
 {
@@ -65,19 +65,19 @@ bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh)
         else if (id == "v") {
             // vertex
             fvec3d v;
-            line >> v.x >> v.y >> v.z;
+            line >> v[0] >> v[1] >> v[2];
             verts.push_back(v);
         }
         else if (id == "vt") {
             // vertex uv
             fvec3d v;
-            line >> v.x >> v.y >> v.z;
+            line >> v[0] >> v[1] >> v[2];
             uvs.push_back(v);
         }
         else if (id == "vn") {
             // vertex normal
             fvec3d v;
-            line >> v.x >> v.y >> v.z;
+            line >> v[0] >> v[1] >> v[2];
             normals.push_back(v);
         }
         else if (id == "f") {
@@ -106,21 +106,21 @@ bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh)
         }
     }
 
-    log::info("Read: ", verts.size(), " vertex positions, ", uvs.size(),
+    log::Info("Read: ", verts.size(), " vertex positions, ", uvs.size(),
               " uv coordinates, ", normals.size(), " normals");
 
     for (unsigned int i = 0; i < verts.size(); i++) {
-        mesh.insertVertex({i < verts.size() ? verts[i].x : 0.f,
-                           i < verts.size() ? verts[i].y : 0.f,
-                           i < verts.size() ? verts[i].z : 0.f,
+        mesh.insertVertex({i < verts.size() ? verts[i][0] : 0.f,
+                           i < verts.size() ? verts[i][1] : 0.f,
+                           i < verts.size() ? verts[i][2] : 0.f,
 
-                           i < uvs.size() ? uvs[i].x : 0.f,
-                           i < uvs.size() ? uvs[i].y : 0.f,
-                           i < uvs.size() ? uvs[i].z : 0.f,
+                           i < uvs.size() ? uvs[i][0] : 0.f,
+                           i < uvs.size() ? uvs[i][1] : 0.f,
+                           i < uvs.size() ? uvs[i][2] : 0.f,
 
-                           i < normals.size() ? normals[i].x : 0.f,
-                           i < normals.size() ? normals[i].y : 0.f,
-                           i < normals.size() ? normals[i].z : 0.f});
+                           i < normals.size() ? normals[i][0] : 0.f,
+                           i < normals.size() ? normals[i][1] : 0.f,
+                           i < normals.size() ? normals[i][2] : 0.f});
     }
 
     for (auto &face: faces) {
@@ -133,4 +133,4 @@ bool LoadOBJ(const std::filesystem::path &fpath, video::Mesh &mesh)
     return true;
 }
 
-NS_END
+}

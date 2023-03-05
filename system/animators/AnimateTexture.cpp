@@ -26,7 +26,7 @@
 
 #include "Rect.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -121,4 +121,4 @@ void AnimateTexture::firstTransform(Sprite &sprite)
 
 }
 
-NS_END
+}

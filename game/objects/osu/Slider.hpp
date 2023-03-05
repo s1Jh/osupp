@@ -28,7 +28,7 @@
 #include "SliderTemplate.hpp"
 #include "HitObjectArguments.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr const char *SLIDER_HEAD_SPRITE = "slider_head";
 
@@ -82,16 +82,16 @@ protected:
 	{
 		Forward, Backward
 	};
-
+    void onCreate(Resource<Skin> &resource) override;
     [[nodiscard]] fvec2d findDirection(double t);
 
     [[nodiscard]] fvec2d findNormal(double t);
 
     void onReset() override;
 
-	void onUpdate(double delta) override;
+	void onUpdate() override;
 
-    void onLogicUpdate(double delta) override;
+    void onLogicUpdate() override;
 
     void onBegin() override;
 
@@ -99,14 +99,14 @@ protected:
 
     void onRaise() override;
 
-    void onDraw() override;
+    void onDraw(video::LambdaRender& gfx) override;
 
     void onPress() override;
 
 private:
     Resource<video::Shader> bodyShader;
 
-    video::Texture preBakedTexture;
+    Resource<video::Texture> preBakedTexture;
 
     ObjectSprite bodyTexture;
 	ObjectSprite ballRing;
@@ -137,4 +137,4 @@ private:
     double curvePosition;
 };
 
-NS_END
+}

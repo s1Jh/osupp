@@ -23,9 +23,12 @@
 
 #include "define.hpp"
 
-#include <tuple>
+#include "Matrix.hpp"
 
-NS_BEGIN
+#include <tuple>
+#include <cstdint>
+
+namespace PROJECT_NAMESPACE {
 
 template<typename ... Args>
 void Draw(Args...)
@@ -45,6 +48,9 @@ struct BaseRenderTask
 {
     virtual inline void invoke(video::LambdaRender&)
     {}
+
+    uint8_t layer;
+    Mat4<float> matrix;
 };
 
 } // detail
@@ -73,4 +79,4 @@ struct RenderTask: public detail::BaseRenderTask
 
 } // video
 
-NS_END
+}

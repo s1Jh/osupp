@@ -30,7 +30,7 @@
 
 #include <vector>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class MapManager
 {
@@ -42,6 +42,8 @@ public:
 
 	[[nodiscard]] bool isLoading() const;
 	[[nodiscard]] size_t size() const;
+    [[nodiscard]] size_t remaining() const;
+
 
     void clear();
 
@@ -55,4 +57,4 @@ private:
 	MapStorageType maps;
 };
 
-NS_END
+}

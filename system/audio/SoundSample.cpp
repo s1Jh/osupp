@@ -26,7 +26,7 @@
 
 #include "AudioUtil.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<> const std::vector<std::string> Resource<SoundSample>::allowedExtensions = {".wav", ".mp3", ".ogg"};
 
@@ -96,4 +96,4 @@ bool SoundSample::isStreaming() const
 	return false;
 }
 
-NS_END
+}

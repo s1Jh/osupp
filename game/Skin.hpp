@@ -35,7 +35,9 @@
 #include <unordered_map>
 #include <filesystem>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
+
+constexpr time::FPS DEFAULT_TEXTURE_FPS = 60;
 
 class Skin
 {
@@ -52,7 +54,7 @@ public:
 
     Skin() = default;
 
-    [[nodiscard]] FPS_t getAnimationFramerate(const std::string &object) const;
+    [[nodiscard]] time::FPS getAnimationFramerate(const std::string &object) const;
     Resource<video::Texture> getTexture(const std::string &object);
 	[[nodiscard]] color getTint(const std::string &object, unsigned int seed = 0) const;
 	[[nodiscard]] int getFrameCount(const std::string &object) const;
@@ -63,6 +65,8 @@ public:
 
     ObjectSprite createObjectSprite(const std::string &object, const HitObjectArguments &args);
 
+    [[nodiscard]] const df2& getGuiMarkup() const;
+
     static const std::map<std::string, std::pair<std::string, std::string>> StaticGameShaders;
 private:
 
@@ -72,7 +76,7 @@ private:
         std::filesystem::path path;
         Resource<video::Texture> texture;
         std::vector<color8> tints = {WHITE};
-        FPS_t animationFPS = DEFAULT_TEXTURE_FPS;
+        time::FPS animationFPS = DEFAULT_TEXTURE_FPS;
         int animationFrames = -1;
     };
     struct ShaderInfo
@@ -89,6 +93,7 @@ private:
     std::unordered_map<std::string, TextureInfo> textures;
     std::unordered_map<std::string, ShaderInfo> shaders;
     std::unordered_map<std::string, SoundInfo> sounds;
+    df2 guiMarkup;
 };
 
 template<>
@@ -96,4 +101,4 @@ Resource<Skin> Load(const std::filesystem::path &path);
 
 template<> const std::vector<std::string> Resource<Skin>::allowedExtensions;
 
-NS_END
+}

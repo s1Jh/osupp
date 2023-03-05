@@ -26,13 +26,13 @@
 
 #include "Image.hpp"
 #include "Resource.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "GLResource.hpp"
 
 #include <memory>
 #include <filesystem>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -80,4 +80,4 @@ Resource<video::Texture> Load(const std::filesystem::path&);
 template<>
 Resource<video::Texture> Create();
 
-NS_END
+}

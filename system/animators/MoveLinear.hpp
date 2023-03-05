@@ -25,9 +25,9 @@
 #include "define.hpp"
 
 #include "Sprite.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -48,4 +48,4 @@ private:
 
 }
 
-NS_END
+}

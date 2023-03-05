@@ -22,58 +22,58 @@
 
 #pragma once
 
-#include "Traits.hpp"
-#include "Vec3.hpp"
-
 #include "define.hpp"
+
+#include "Vector.hpp"
+
 #include <type_traits>
 
-NS_BEGIN
-
-template<typename T> requires std::is_arithmetic_v<T>
-struct sphere
+namespace PROJECT_NAMESPACE
 {
-    template<typename C>
-    inline operator sphere<C>()
+
+    template <typename T>
+        requires std::is_arithmetic_v<T>
+    struct sphere
     {
-        return sphere<C>{(C) radius, (vec3d<C>) position};
+        template <typename C>
+        inline operator sphere<C>()
+        {
+            return sphere<C>{(C)radius, (vec3d<C>)position};
+        }
+
+        T radius;
+        vec3d<T> position = {0, 0};
+    };
+
+    template <typename T>
+    std::string ToString(const sphere<T> dt)
+    {
+        return ToString(dt.radius) + '@' + ToString(dt.position);
     }
 
-    T radius;
-    vec3d <T> position = {0, 0};
-};
+    template <typename T>
+    std::optional<sphere<T>> FromString(const std::string &str)
+    {
+        WRAP_CONSTEXPR_ASSERTION("Not implemented!");
+        return {};
+    }
 
-template<typename T>
-std::ostream &operator<<(std::ostream &os, const sphere<T> &dt)
-{
-    os << dt.radius << "@" << dt.position;
+    template <typename T>
+    inline sphere<T> Scale(sphere<T> sphere, float amount)
+    {
+        return {sphere.position, sphere.size * amount};
+    }
 
-    return os;
+    template <typename T>
+    inline sphere<T> Translate(sphere<T> sphere, vec2d<T> amount)
+    {
+        sphere.position += amount;
+        return sphere;
+    }
+
+    using fsphere = sphere<float>;
+    using isphere = sphere<int>;
+    using usphere = sphere<unsigned int>;
+    using dsphere = sphere<double>;
+
 }
-
-template<typename T>
-inline sphere<T> Scale(sphere<T> sphere, float amount)
-{
-    return {sphere.position, sphere.size * amount};
-}
-
-template<typename T>
-inline sphere<T> Translate(sphere<T> sphere, vec2d <T> amount)
-{
-    sphere.position += amount;
-    return sphere;
-}
-
-using fsphere = sphere<float>;
-using isphere = sphere<int>;
-using usphere = sphere<unsigned int>;
-using dsphere = sphere<double>;
-
-template<typename T>
-struct IsShape<sphere<T>>
-{
-    static const bool enable = true;
-    static const ShapeType type = ShapeType::SPHERE;
-};
-
-NS_END

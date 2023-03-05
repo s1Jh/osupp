@@ -27,9 +27,8 @@
 #include "Random.hpp"
 #include "Resource.hpp"
 #include "Context.hpp"
-#include "Slider.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<> const std::vector<std::string> Resource<Skin>::allowedExtensions = {".skin"};
 
@@ -74,13 +73,16 @@ Resource<Skin> Load(const std::filesystem::path &path)
             }
         }
 
-        log::info(
+        log::Info(
             "Added object texture override ", entry.first, " (texture: ", texPath, ", @",
             object.animationFPS, " FPS, ", object.tints.size(), " tint(s))."
         );
     }
 
-    log::info("Loading skin assets...");
+    auto guiMarkupPath = settings["gui"].str("gui.df");
+    r->guiMarkup = df2::read(r->directory / guiMarkupPath);
+
+    log::Info("Loading skin assets...");
 
     for (auto &texture : r->textures) {
         texture.second.texture = Load<video::Texture>(texture.second.path);
@@ -99,14 +101,14 @@ Resource<Skin> Load(const std::filesystem::path &path)
         failed += !bool(sound.second.sound);
     }
 
-    log::info("Loaded skin ", path);
+    log::Info("Loaded skin ", path);
     if (failed != 0) {
-        log::info("Failed to load ", failed, " assets");
+        log::Info("Failed to load ", failed, " assets");
     }
     return r;
 }
 
-FPS_t Skin::getAnimationFramerate(const std::string &object) const
+time::FPS Skin::getAnimationFramerate(const std::string &object) const
 {
     if (textures.contains(object)) {
         return textures.at(object).animationFPS;
@@ -135,10 +137,10 @@ Resource<video::Texture> Skin::getTexture(const std::string &object)
     newTexture.path = files::Get(object, directory, Resource<video::Texture>::allowedExtensions);
     newTexture.texture = Load<video::Texture>(newTexture.path);
     if (!newTexture.texture) {
-        log::error("Failed to load texture ", object);
+        log::Error("Failed to load texture ", object);
     }
     if (!newTexture.texture->upload()) {
-        log::error("Failed to upload texture ", object);
+        log::Error("Failed to upload texture ", object);
     }
 
     return newTexture.texture;
@@ -205,4 +207,9 @@ Resource<SoundSample> Skin::getSound(const std::string &object)
     return newSound.sound;
 }
 
-NS_END
+const df2 &Skin::getGuiMarkup() const
+{
+    return guiMarkup;
+}
+
+}

@@ -25,7 +25,7 @@
 #include "Math.hpp"
 #include "Helpers.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 void ObjectSprite::update(double delta)
 {
@@ -58,7 +58,7 @@ void ObjectSprite::setTexture(const Resource<video::Texture> &textureIn)
     }
 }
 
-void ObjectSprite::setFPS(FPS_t fps)
+void ObjectSprite::setFPS(time::FPS fps)
 { frameTime = 1.0f / float(fps); }
 
 void ObjectSprite::setFrameTime(float frameTimeIn)
@@ -109,15 +109,15 @@ void Draw(video::LambdaRender &renderer, const ObjectSprite &object, const Objec
 
     color tint = object.tint;
     tint.a = info.alpha;
-
+    
     DrawRect::Call(
         renderer,
         info.destination,
-        video::VisualAppearance{.texture = object.texture.get(), .fillColor = tint},
+        video::VisualAppearance{.texture = object.texture, .fillColor = tint},
         info.transform
     );
 
     object.texture->setClipArea(UNIT_RECT<float>);
 }
 
-NS_END
+}

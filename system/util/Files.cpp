@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <utility>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace files
 {
@@ -168,4 +168,4 @@ MultiDirectorySearch::MultiDirectorySearch()
 
 }
 
-NS_END
+}

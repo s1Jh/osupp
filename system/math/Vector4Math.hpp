@@ -23,44 +23,40 @@
 
 #include "define.hpp"
 
-#include "Vec4.hpp"
+#include "Vector.hpp"
 #include "Exponential.hpp"
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-template<typename T>
-inline T Mag(const vec4d<T> &v)
-{
-	return Sqrt(Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2) + Pow(v.w, 2));
-}
+	template <typename T>
+	inline T Mag(const vec4d<T> &v)
+	{
+		return Sqrt(Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2) + Pow(v.w, 2));
+	}
 
-template<typename T>
-inline T Mag2(const vec4d<T> &v)
-{
-	return Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2) + Pow(v.w, 2);
-}
+	template <typename T>
+	inline T Mag2(const vec4d<T> &v)
+	{
+		return Pow(v.x, 2) + Pow(v.y, 2) + Pow(v.z, 2) + Pow(v.w, 2);
+	}
 
-template<typename T>
-inline vec4d<T> Normalize(const vec4d<T> &v)
-{
-	return v / Mag(v);
-}
+	template <typename T>
+	inline vec4d<T> Normalize(const vec4d<T> &v)
+	{
+		return v / Mag(v);
+	}
 
-template<typename T1>
-inline vec4d<T1> Negate(const vec4d<T1> &A)
-{
-	return vec4d<T1>{-A.x, -A.y, -A.z, -A.w};
-}
+	template <typename T1>
+	inline vec4d<T1> Negate(const vec4d<T1> &A)
+	{
+		return vec4d<T1>{-A.x, -A.y, -A.z, -A.w};
+	}
 
-template<typename T1, typename T2>
-inline T1 Distance(const vec4d<T1> &a, const vec4d<T2> &b)
-{
-	return Mag(a - b);
-}
+	template <typename T1, typename T2>
+	inline T1 Distance(const vec4d<T1> &a, const vec4d<T2> &b)
+	{
+		return Mag(a - b);
+	}
 
 }
-
-NS_END

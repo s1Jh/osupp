@@ -10,68 +10,83 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(ROOT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 set(SYSTEM_DIRECTORY ${ROOT_DIRECTORY}/system)
+set(	VIDEO_DIRECTORY ${SYSTEM_DIRECTORY}/video)
+set(	INPUT_DIRECTORY ${SYSTEM_DIRECTORY}/input)
+set(	ANIMATORS_DIRECTORY ${VIDEO_DIRECTORY}/animators)
+set(	TYPES_DIRECTORY ${SYSTEM_DIRECTORY}/types)
+set(	UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
+set(	AUDIO_DIRECTORY ${SYSTEM_DIRECTORY}/audio)
+set(	CORE_DIRECTORY ${SYSTEM_DIRECTORY}/core)
+set(	MATH_DIRECTORY ${SYSTEM_DIRECTORY}/math)
+set(	TASKS_DIRECTORY ${SYSTEM_DIRECTORY}/tasks)
+set(	GUI_DIRECTORY ${SYSTEM_DIRECTORY}/gui)
+set(		GUI_OBJECTS_DIRECTORY ${GUI_DIRECTORY}/objects)
+set(	STATE_DIRECTORY ${SYSTEM_DIRECTORY}/state)
 set(GAME_DIRECTORY ${ROOT_DIRECTORY}/game)
-set(VIDEO_DIRECTORY ${SYSTEM_DIRECTORY}/video)
-set(INPUT_DIRECTORY ${SYSTEM_DIRECTORY}/input)
-set(ANIMATORS_DIRECTORY ${SYSTEM_DIRECTORY}/animators)
-set(TYPES_DIRECTORY ${SYSTEM_DIRECTORY}/types)
-set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
-set(AUDIO_DIRECTORY ${SYSTEM_DIRECTORY}/audio)
-set(CORE_DIRECTORY ${SYSTEM_DIRECTORY}/core)
-set(UTIL_DIRECTORY ${SYSTEM_DIRECTORY}/util)
-set(MATH_DIRECTORY ${SYSTEM_DIRECTORY}/math)
-set(TASKS_DIRECTORY ${SYSTEM_DIRECTORY}/tasks)
+set(	GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
+set(	OBJECT_DIRECTORY ${GAME_DIRECTORY}/objects)
+set(		OSU_OBJECT_DIRECTORY ${OBJECT_DIRECTORY}/osu)
+set(	MAPPERS_DIRECTORY ${GAME_DIRECTORY}/mappers)
+set(	STATES_DIRECTORY ${GAME_DIRECTORY}/states)
+set(	COMPAT_DIRECTORY ${GAME_DIRECTORY}/compat)
 set(EXTERNALS_DIRECTORY ${ROOT_DIRECTORY}/external)
-set(IMGUI_DIRECTORY ${EXTERNALS_DIRECTORY}/imgui)
-set(STB_DIRECTORY ${EXTERNALS_DIRECTORY}/stb)
-set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
-set(GAMEMODE_DIRECTORY ${ROOT_DIRECTORY}/gamemodes)
-set(OBJECT_DIRECTORY ${GAME_DIRECTORY}/objects)
-set(OSU_OBJECT_DIRECTORY ${OBJECT_DIRECTORY}/osu)
+set(	IMGUI_DIRECTORY ${EXTERNALS_DIRECTORY}/imgui)
+set(	STB_DIRECTORY ${EXTERNALS_DIRECTORY}/stb)
+set(	DATE_DIRECTORY ${EXTERNALS_DIRECTORY}/date)
+set(	NAMEOF_DIRECTORY ${EXTERNALS_DIRECTORY}/nameof)
 set(ASSET_DIRECTORY ${ROOT_DIRECTORY}/assets)
-set(COMPAT_DIRECTORY ${GAME_DIRECTORY}/compat)
-set(STATES_DIRECTORY ${GAME_DIRECTORY}/states)
-set(MAPPERS_DIRECTORY ${GAME_DIRECTORY}/mappers)
+set(LOADER_DIRECTORY ${ROOT_DIRECTORY}/loaders)
 
 set(DIRECTORIES
         ${ROOT_DIRECTORY}
         ${SYSTEM_DIRECTORY}
-        ${VIDEO_DIRECTORY}
-        ${INPUT_DIRECTORY}
-        ${ANIMATORS_DIRECTORY}
-        ${TYPES_DIRECTORY}
-        ${UTIL_DIRECTORY}
-        ${AUDIO_DIRECTORY}
-		${MATH_DIRECTORY}
-        ${CORE_DIRECTORY}
-        ${UTIL_DIRECTORY}
-        ${EXTERNALS_DIRECTORY}
-		${IMGUI_DIRECTORY}
-		${STB_DIRECTORY}
-        ${LOADER_DIRECTORY}
-        ${GAMEMODE_DIRECTORY}
-        ${OBJECT_DIRECTORY}
-        ${OSU_OBJECT_DIRECTORY}
-        ${GAME_DIRECTORY}
-        ${ASSET_DIRECTORY}
-		${COMPAT_DIRECTORY}
-        ${STATES_DIRECTORY}
-		${TASKS_DIRECTORY}
-        ${MAPPERS_DIRECTORY}
+        	${VIDEO_DIRECTORY}
+        	${INPUT_DIRECTORY}
+        	${ANIMATORS_DIRECTORY}
+        	${TYPES_DIRECTORY}
+        	${UTIL_DIRECTORY}
+			${GUI_DIRECTORY}
+				${GUI_OBJECTS_DIRECTORY}
+        	${AUDIO_DIRECTORY}
+			${MATH_DIRECTORY}
+        	${CORE_DIRECTORY}
+        	${UTIL_DIRECTORY}
+			${STATE_DIRECTORY}
+			${TASKS_DIRECTORY}
+
+		${EXTERNALS_DIRECTORY}
+			${IMGUI_DIRECTORY}
+			${STB_DIRECTORY}
+			${DATE_DIRECTORY}/include
+			${NAMEOF_DIRECTORY}/include
+
+		${GAME_DIRECTORY}
+        	${GAMEMODE_DIRECTORY}
+        	${OBJECT_DIRECTORY}
+        		${OSU_OBJECT_DIRECTORY}
+			${COMPAT_DIRECTORY}
+        	${STATES_DIRECTORY}
+        	${MAPPERS_DIRECTORY}
+
+		${ASSET_DIRECTORY}
+
+		${LOADER_DIRECTORY}
         )
 
 set(SOURCES
-        ${CORE_DIRECTORY}/Setting.cpp
-        ${CORE_DIRECTORY}/Context.cpp
-		${CORE_DIRECTORY}/Main.cpp
         ${CORE_DIRECTORY}/Timing.cpp
-        ${CORE_DIRECTORY}/State.cpp
+		${CORE_DIRECTORY}/Time.cpp
 		${CORE_DIRECTORY}/Program.cpp
 		${CORE_DIRECTORY}/Error.cpp
-        ${CORE_DIRECTORY}/StateHandler.cpp
+		${CORE_DIRECTORY}/ToFromString.cpp
+		${CORE_DIRECTORY}/Log.cpp
 
         ${INPUT_DIRECTORY}/Keyboard.cpp
         ${INPUT_DIRECTORY}/Mouse.cpp
+
+		${STATE_DIRECTORY}/Context.cpp
+		${STATE_DIRECTORY}/BaseState.cpp
+		${STATE_DIRECTORY}/BaseStateHandler.cpp
 
 		${COMPAT_DIRECTORY}/Import.cpp
 
@@ -79,6 +94,8 @@ set(SOURCES
         ${MAPPERS_DIRECTORY}/AutoPilot.cpp
 
 		${TASKS_DIRECTORY}/Tasks.cpp
+
+		${TYPES_DIRECTORY}/ConversionFunctions.cpp
 
         ${AUDIO_DIRECTORY}/Audio.cpp
         ${AUDIO_DIRECTORY}/AudioDevice.cpp
@@ -99,30 +116,51 @@ set(SOURCES
         ${VIDEO_DIRECTORY}/Mesh.cpp
         ${VIDEO_DIRECTORY}/Camera.cpp
         ${VIDEO_DIRECTORY}/GraphicsContext.cpp
+		${VIDEO_DIRECTORY}/AnimationController.cpp
+		${VIDEO_DIRECTORY}/IAnimation.cpp
 
         ${IMGUI_DIRECTORY}/imgui.cpp
         ${IMGUI_DIRECTORY}/imgui_draw.cpp
         ${IMGUI_DIRECTORY}/imgui_demo.cpp
-        ${IMGUI_DIRECTORY}/backends/imgui_impl_glfw.cpp
+        ${IMGUI_DIRECTORY}/backends/imgui_impl_sdl.cpp
         ${IMGUI_DIRECTORY}/backends/imgui_impl_opengl3.cpp
         ${IMGUI_DIRECTORY}/imgui_tables.cpp
         ${IMGUI_DIRECTORY}/imgui_widgets.cpp
         ${IMGUI_DIRECTORY}/misc/cpp/imgui_stdlib.cpp
         ${IMGUI_DIRECTORY}/misc/freetype/imgui_freetype.cpp
 
-		${UTIL_DIRECTORY}/Timer.cpp
+		${UTIL_DIRECTORY}/Setting.cpp
 		${UTIL_DIRECTORY}/Files.cpp
 		${UTIL_DIRECTORY}/Settings.cpp
 		${UTIL_DIRECTORY}/Locale.cpp
 		${UTIL_DIRECTORY}/df2.cpp
         ${UTIL_DIRECTORY}/Util.cpp
-        ${UTIL_DIRECTORY}/Log.cpp
+		${UTIL_DIRECTORY}/StrUtil.cpp
+
+		${GUI_DIRECTORY}/GuiElement.cpp
+		${GUI_DIRECTORY}/GuiRoot.cpp
+		${GUI_DIRECTORY}/GuiState.cpp
+		${GUI_DIRECTORY}/GuiUtil.cpp
+		${GUI_DIRECTORY}/GuiCollections.cpp
+		${GUI_DIRECTORY}/GuiPrototype.cpp
+		${GUI_DIRECTORY}/GuiTask.cpp
+		${GUI_DIRECTORY}/GuiModal.cpp
+		${GUI_DIRECTORY}/GuiIContainsElements.cpp
+		${GUI_DIRECTORY}/GuiIContainsModals.cpp		
+		${GUI_DIRECTORY}/GuiVariable.cpp
+		${GUI_DIRECTORY}/GuiRegistry.cpp
+
+		${GUI_OBJECTS_DIRECTORY}/GuiRect.cpp
+		${GUI_OBJECTS_DIRECTORY}/GuiButton.cpp
+		${GUI_OBJECTS_DIRECTORY}/GuiBackground.cpp
+		${GUI_OBJECTS_DIRECTORY}/GuiKeyBind.cpp
 
 		${MATH_DIRECTORY}/Curve.cpp
 
-        ${ANIMATORS_DIRECTORY}/AnimateTexture.cpp
-        ${ANIMATORS_DIRECTORY}/DisableAfter.cpp
         ${ANIMATORS_DIRECTORY}/MoveLinear.cpp
+		${ANIMATORS_DIRECTORY}/BopToBpm.cpp
+		${ANIMATORS_DIRECTORY}/CircleAbout.cpp
+		${ANIMATORS_DIRECTORY}/LookAt.cpp
 
         ${LOADER_DIRECTORY}/OBJLoader.cpp
         ${LOADER_DIRECTORY}/MAPLoader.cpp
@@ -145,6 +183,7 @@ set(SOURCES
         ${GAME_DIRECTORY}/MapInfo.cpp
         ${GAME_DIRECTORY}/Skin.cpp
 		${GAME_DIRECTORY}/SliderTrail.cpp
+		${GAME_DIRECTORY}/GameTask.cpp
 )
 
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -152,15 +191,15 @@ set(OpenGL_GL_PREFERENCE GLVND)
 if (MSVC)
 
 else()
-	find_package(glfw3 3.3 REQUIRED)
+	find_package(SDL2 REQUIRED)
 	find_package(OpenGL REQUIRED)
 	find_package(OpenAL REQUIRED)
 	find_package(GLEW REQUIRED)
 	find_package(Freetype REQUIRED)
 	find_package(FFmpeg REQUIRED avcodec avformat avutil)
 
-	set(GLFW_HEADERS "")
-	set(GLFW_LIBS glfw)
+	set(SDL_HEADERS ${SDL2_INCLUDE_DIRS})
+	set(SDL_LIBS SDL2::SDL2)
 
 	if (${OPENAL_FOUND})
 		set(OAL_HEADERS "${OPENAL_INCLUDE_DIR}")
@@ -220,10 +259,14 @@ function(ConfigureLibrary LIBRARY_NAME)
 endfunction()
 
 ConfigureLibrary(OGL)
-ConfigureLibrary(GLFW)
+ConfigureLibrary(SDL)
 ConfigureLibrary(OAL)
 ConfigureLibrary(FFMPEG)
 ConfigureLibrary(FT2)
+
+add_library(date STATIC ${DATE_DIRECTORY}/src/tz.cpp)
+target_compile_definitions(date PUBLIC USE_OS_TZDB)
+set(LIBS "${LIBS};date")
 
 string(STRIP "${LIBS}" LIBS)
 

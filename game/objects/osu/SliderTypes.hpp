@@ -26,11 +26,11 @@
 
 #include "Curve.hpp"
 #include "Line.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 
 #include <list>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 struct SliderNode: public math::BaseCurveNode
 {
@@ -62,4 +62,4 @@ struct ActiveSliderNode: public math::BaseCurveNode
 using SliderPathT = std::list<SliderNode>;
 using ActiveSliderPathT = std::list<ActiveSliderNode>;
 
-NS_END
+}

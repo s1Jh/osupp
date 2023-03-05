@@ -25,12 +25,13 @@
 #include "define.hpp"
 
 #include "Log.hpp"
+#include "StrUtil.hpp"
 
 #include <vector>
 #include <locale>
 #include <codecvt>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace detail
 {
@@ -84,28 +85,4 @@ static T GetParam(const std::vector<std::string> &params, unsigned int param, T 
     return backup;
 }
 
-std::size_t ReplaceAll(std::string& inout, std::string_view what, std::string_view with);
-std::size_t RemoveAll(std::string& inout, std::string_view what);
-
-/**
- * String trimming functions from https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring/217605#217605
- */
-
-void LTrim(std::string &s);
-void RTrim(std::string &s);
-void Trim(std::string &s);
-
-std::string LTrimCopy(std::string s);
-std::string RTrimCopy(std::string s);
-std::string TrimCopy(std::string s);
-
-std::string ToUTF8(const std::u16string &s);
-std::string ToUTF8(const std::u32string &s);
-
-std::u16string ToUTF16(const std::string &s);
-std::u16string ToUTF16(const std::u32string &s);
-
-std::u32string ToUTF32(const std::string &s);
-std::u32string ToUTF32(const std::u16string &s);
-
-NS_END
+}

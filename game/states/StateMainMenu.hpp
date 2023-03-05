@@ -24,16 +24,15 @@
 
 #include "define.hpp"
 
-#include "State.hpp"
+#include "BaseState.hpp"
 #include "Context.hpp"
 #include "SoundStream.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 DECLARE_STATE(GameState::MainMenu)
 {
 public:
-    explicit State();
     int update(double delta) override;
     int draw() override;
     int exit() override;
@@ -44,9 +43,9 @@ private:
     void showMainMenuTab();
     void showSettingsTab();
 
+    bool showDebugCtrl{true};
 	Resource<MapInfo> selectedMap{nullptr};
     Resource<SoundStream> radio;
-    Context &ctx;
 };
 
-NS_END
+}

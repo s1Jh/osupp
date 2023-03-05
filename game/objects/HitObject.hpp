@@ -24,20 +24,19 @@
 
 #include "define.hpp"
 
-#include "AnimateTexture.hpp"
 #include "GameManager.hpp"
 #include "BaseHitObject.hpp"
 #include "BaseObjectTemplate.hpp"
 #include "Enum.hpp"
 #include "Math.hpp"
 #include "Util.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "Context.hpp"
 
 #include <memory>
 #include <string>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<typename TemplateT, typename FlagT, FlagT FlagsIn>
 requires IsTemplateV<TemplateT>
@@ -64,4 +63,4 @@ protected:
 	const static FlagT Flags = FlagsIn;
 };
 
-NS_END
+}

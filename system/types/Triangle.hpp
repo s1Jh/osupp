@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include "Traits.hpp"
-#include "Vec2.hpp"
-
 #include "define.hpp"
+
+#include "Vector.hpp"
+
 #include <type_traits>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T> requires std::is_arithmetic_v<T>
 struct triangle
@@ -41,11 +42,4 @@ using utriangle = triangle<unsigned int>;
 using ftriangle = triangle<float>;
 using dtriangle = triangle<double>;
 
-template<typename T>
-struct IsShape<triangle<T>>
-{
-    static const bool enable = true;
-    static const ShapeType type = ShapeType::TRIANGLE;
-};
-
-NS_END
+}

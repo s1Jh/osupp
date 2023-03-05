@@ -34,7 +34,7 @@
 #include <filesystem>
 #include <memory>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -76,4 +76,4 @@ private:
 template<>
 Resource<video::Image> Load(const std::filesystem::path& path);
 
-NS_END
+}

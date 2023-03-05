@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include "Line.hpp"
-#include "Traits.hpp"
-
 #include "define.hpp"
+
+#include "Line.hpp"
+
 #include <vector>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T>
 struct polygon
@@ -74,11 +75,4 @@ inline polygon<T> Translate(const polygon<T> &poly, vec2d<float> amount)
     return n;
 }
 
-template<typename T>
-struct IsShape<polygon<T>>
-{
-    static const bool enable = true;
-    static const ShapeType type = ShapeType::POLYGON;
-};
-
-NS_END
+}

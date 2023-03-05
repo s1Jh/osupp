@@ -26,9 +26,7 @@
 #include <type_traits>
 #include <cmath>
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
 template<typename T1, typename T2>
@@ -53,5 +51,3 @@ T1 Sqrt(T1 x, T2 root)
 }
 
 }
-
-NS_END

@@ -27,10 +27,12 @@
 #include "Settings.hpp"
 #include "Util.hpp"
 #include "Setting.hpp"
+#include "ToFromString.hpp"
+
+namespace PROJECT_NAMESPACE {
 
 
-NS_BEGIN
-
+// TODO: This all needs to be redone once df2 rewrite is done.
 void Settings::iterateSettingsSearch(
     InactiveSettingStorageT &entries, const df2 &clump, const std::string &previousName)
 {
@@ -54,23 +56,19 @@ void Settings::iterateSettingsSearch(
                 iterateSettingsSearch(entries, setting.second, thisName + '.');
                 break;
             case df2::EntryType::COLOR:
-                push(std::to_string(value.col().r) + ','
-                         + std::to_string(value.col().g) + ','
-                         + std::to_string(value.col().b) + ','
-                         + std::to_string(value.col().a));
+                push(ToString(value.col()));
                 break;
             case df2::EntryType::VECTOR:
-                push(std::to_string(value.vec().x) + ';' + std::to_string(value.vec().y));
+                push(ToString(value.vec()));
                 break;
-
             case df2::EntryType::INTEGER:
-                push(std::to_string(value.integer()));
+                push(ToString(value.integer()));
                 break;
             case df2::EntryType::REAL:
-                push(std::to_string(value.real()));
+                push(ToString(value.real()));
                 break;
             case df2::EntryType::BOOLEAN:
-                push(value.boolean() ? "true" : "false");
+                push(ToString(value.boolean()));
                 break;
             case df2::EntryType::STRING:
                 push(value.str());
@@ -100,11 +98,11 @@ detail::BaseSetting::BaseSetting(SettingType typeIn) noexcept
 
 void Settings::apply()
 {
-    log::debug("Invoking callbacks");
+    log::Debug("Invoking callbacks");
 
 	for (const auto& setting : activeValues) {
 		if (setting.second->wasChanged()) {
-			log::debug("Invoking ", setting.first);
+			log::Debug("Invoking ", setting.first);
 			invokeCallback<SettingCallbacks::SETTING_CHANGED>(setting.first);
 		}
 	}
@@ -190,8 +188,12 @@ void SetSettingFromString(std::shared_ptr<detail::BaseSetting> &setting, const s
 #define SETTING_TYPE(Name, Storage ) \
 	case SettingType::Name: { \
 		auto cast = std::static_pointer_cast<Setting<Storage>>(setting); \
-		if (!bool(cast->getMetadata().flags & SettingFlags::READONLY)) \
-			cast->set(SettingMetadata<Storage>::fromString(value)); \
+		if (!bool(cast->getMetadata().flags & SettingFlags::READONLY)) { \
+            auto wrapped = FromString<Storage>(value);                 \
+            if (bool(wrapped)) {         \
+                cast->set(wrapped.value()); \
+            } \
+        } \
 		break; \
 	}
 
@@ -211,7 +213,7 @@ std::string GetStringFromSetting(const std::shared_ptr<detail::BaseSetting> &val
 	case SettingType::Name: { \
 		auto cast = std::static_pointer_cast<Setting<Storage>>(value); \
 		if (bool(cast->getMetadata().flags & SettingFlags::WRITE_TO_FILE)) \
-			return SettingMetadata<Storage>::toString(cast->get()); \
+			return ToString<Storage>(cast->get()); \
 		return ""; \
 	}
 
@@ -223,4 +225,4 @@ std::string GetStringFromSetting(const std::shared_ptr<detail::BaseSetting> &val
 	}
 }
 
-NS_END
+}

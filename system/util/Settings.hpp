@@ -32,8 +32,9 @@
 #include "Math.hpp"
 #include "Setting.hpp"
 #include "df2.hpp"
+#include "ToFromString.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 enum class SettingCallbacks
 {
@@ -72,12 +73,14 @@ class Settings: public detail::Callbacks<SettingCallbacks>
 public:
     using ActiveSettingStorageT = std::map<std::string, std::shared_ptr<detail::BaseSetting>>;
     using InactiveSettingStorageT = std::unordered_map<std::string, std::string>;
-    // Settings access functions. When called, they will first check if a valid Setting object has already been
+
+    // Settings access functions. When called, they will first check if a valid setting object has already been
     // created, if not they will create a new one and format it as necessary. Once it is created or if it already
-    // exists, the corresponding SharedValue object will be returned which the caller may then use to access
+    // exists, the corresponding Setting object will be returned which the caller may then use to access
     // the value without having to re-do the lookup each time.
     template<typename T>
     Setting<T> getSetting(const std::string &key);
+
     template<typename T, typename ... InitArgs>
     Setting<T> addSetting(const std::string &key, InitArgs... args);
 
@@ -127,7 +130,10 @@ Setting<T> Settings::addSetting(const std::string &key, InitArgs... args)
         T value = meta.initial;
 
         if (savedValues.contains(key)) {
-            value = meta.fromString(savedValues[key]);
+            auto wrapped = FromString<T>(savedValues[key]);
+            if (bool(wrapped)) {
+                value = wrapped.value();
+            }
         }
 
         auto ptr = std::make_shared<Setting<T>>(value, meta);
@@ -138,4 +144,4 @@ Setting<T> Settings::addSetting(const std::string &key, InitArgs... args)
     return getSetting<T>(key);
 }
 
-NS_END
+}

@@ -22,13 +22,14 @@
 
 #pragma once
 
-#include "Traits.hpp"
-#include "Vec3.hpp"
-
 #include "define.hpp"
+
+#include "Vector.hpp"
+
 #include <type_traits>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T> requires std::is_arithmetic_v<T>
 struct line3
@@ -47,11 +48,4 @@ using iline3 = line3<int>;
 using uline3 = line3<unsigned int>;
 using dline3 = line3<double>;
 
-template<typename T>
-struct IsShape<line3<T>>
-{
-    static const bool enable = true;
-    static const ShapeType type = ShapeType::LINE3;
-};
-
-NS_END
+}

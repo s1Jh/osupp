@@ -25,7 +25,7 @@
 
 #include "HitObject.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 enum class OsuHitObjectFlags : uint8_t
 {
@@ -48,36 +48,35 @@ class OsuHitObject : public HitObject<TemplateT, OsuHitObjectFlags, Flags>
 public:
 	explicit OsuHitObject(std::shared_ptr<TemplateT> templateIn, const HitObjectArguments& argsIn) :
 		HitObject<TemplateT, OsuHitObjectFlags, Flags>(std::move(templateIn)), args(argsIn)
-	{
-		approachCircle = this->ctx.activeSkin->createObjectSprite(APPROACH_CIRCLE_SPRITE, args);
-	}
+	{}
 
 protected:
-	void drawApproachCircle()
+	void drawApproachCircle(video::LambdaRender& gfx)
 	{
 		// HACK: Since drawApproachCircle only gets called once during the draw, we can
 		//		 also update the sprite animation. This will break if the approach circle
 		// 		 for whatever reason gets drawn twice during one frame. The animation will
 		//		 be sped up as a result. Also, we lose const-ness on this function.
-		approachCircle.update(this->ctx.timing.getDelta());
+        auto& game = this->getGame();
+		approachCircle.update(game.getDelta());
 		const auto &transform = this->getObjectTransform();
 
 		if (this->isApproachCircleDrawn()) {
 			const auto scale = 4.0f;  // how big will the circle be at -ar
 			const auto offset = 1.0f; // how big the circle will be at 0
 
-			float slope = (scale - offset) / this->ctx.game.getApproachTime();
+			float slope = (scale - offset) / game.getApproachTime();
 
-			float x = this->ctx.game.getCurrentTime() - this->getStartTime();
+			float x = game.getCurrentTime() - this->getStartTime();
 			float y = x * -slope + offset;
 
-			float acSize = this->ctx.game.getCircleSize() * y;
+			float acSize = game.getCircleSize() * y;
 			acSize = math::Max(acSize, 0.0);
 
-			this->ctx.gfx.draw(DrawObject{approachCircle, ObjectDrawInfo{
+			gfx.draw(DrawObject{approachCircle, ObjectDrawInfo{
 				{{acSize, acSize}, this->SOF.position},
 				this->getAlpha(), transform
-			}});
+			}}, video::APPROACH_CIRCLES);
 		}
 	}
 
@@ -103,9 +102,14 @@ protected:
 		return MAT3_NO_TRANSFORM<float>;
 	}
 
+    [[nodiscard]] const HitObjectArguments& getArguments() const
+    {
+        return args;
+    }
+
 private:
 	HitObjectArguments args;
 	ObjectSprite approachCircle;
 };
 
-NS_END
+}

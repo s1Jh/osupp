@@ -29,104 +29,121 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 constexpr float VOLUME_SLIDER_MULTIPLIER = 0.01f;
 
 Channel &AudioDevice::getMusicChannel()
 {
-	return musicChannel;
+    return musicChannel;
 }
 
 Channel &AudioDevice::getSFXChannel()
 {
-	Channel *lowestPriority = &sfxChannels[0];
+    Channel *lowestPriority = &sfxChannels[0];
 
-	// return the first free channel found, otherwise return the last channel with the lowest playing priority
-	for (auto& channel : sfxChannels) {
-		if (channel.getState() == ChannelState::FREE)
-			return channel;
+    // return the first free channel found, otherwise return the last channel with the lowest playing priority
+    for (auto &channel : sfxChannels) {
+        if (channel.getState() == ChannelState::FREE) {
+            return channel;
+        }
 
-		if (channel.getSoundPriority() <= lowestPriority->getSoundPriority()) {
-			lowestPriority = &channel;
-		}
-	}
+        if (channel.getSoundPriority() <= lowestPriority->getSoundPriority()) {
+            lowestPriority = &channel;
+        }
+    }
 
-	return *lowestPriority;
+    return *lowestPriority;
 }
 
-AudioDevice::AudioDevice(const AudioDeviceSpec& specIn, unsigned int sfxChannelsIn) : spec(specIn)
+AudioDevice::AudioDevice(const AudioDeviceSpec &specIn, Settings &settings)
+    : spec(specIn)
 {
-	held = std::shared_ptr<ALContainer>(new ALContainer{nullptr, nullptr}, ALContextDeleter);
+    held = std::shared_ptr<ALContainer>(new ALContainer{nullptr, nullptr}, ALContextDeleter);
 
-	held->device = (detail::ALCdevice*) alcOpenDevice(specIn.name.c_str());
+    held->device = (detail::ALCdevice *) alcOpenDevice(specIn.name.c_str());
 
-	if (!held->device) {
-		log::error("Failed to open device: ", specIn.name);
-		return;
-	}
+    if (!held->device) {
+        log::Error("Failed to open device: ", specIn.name);
+        return;
+    }
 
-	auto freqSetting = GetContext().settings.addSetting<int>("setting.audio.frequency", 44100,
-															 SettingFlags::WRITE_TO_FILE, 1000, 48000).get();
+    auto freqSetting = settings.addSetting<int>(
+        "setting.audio.frequency", 44100,
+        SettingFlags::WRITE_TO_FILE, 1000, 48000
+    ).get();
 
-	const int params[] = {AL_FREQUENCY, freqSetting, 0};
+    const int params[] = {AL_FREQUENCY, freqSetting, 0};
 
-	held->context = (detail::ALCcontext*) alcCreateContext((ALCdevice*)held->device, params);
+    held->context = (detail::ALCcontext *) alcCreateContext((ALCdevice *) held->device, params);
 
-	if (!held->context) {
-		log::error("Failed to create context for device: ", specIn.name);
-		return;
-	}
-	if (!alcMakeContextCurrent((ALCcontext*) held->context)) {
-		log::error("Failed to make OpenAL context current");
-	}
+    if (!held->context) {
+        log::Error("Failed to create context for device: ", specIn.name);
+        return;
+    }
+    if (!alcMakeContextCurrent((ALCcontext *) held->context)) {
+        log::Error("Failed to make OpenAL context current");
+    }
 
-	sfxChannels.resize(math::Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
-	std::for_each(sfxChannels.begin(), sfxChannels.end(), [](Channel& channel) { channel.setup(); });
-	musicChannel.setup();
+    auto sfxChannelCount = settings.addSetting<int>(
+        "setting.audio.sfx_channels",
+        static_cast<int>(DEFAULT_SFX_CHANNELS),
+        SettingFlags::HIDDEN | SettingFlags::WRITE_TO_FILE,
+        1,
+        MAX_SFX_CHANNELS
+    );
 
-	musicChannelVolume = GetContext().settings.addSetting<float>(
-		"setting.audio.music_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
-	sfxChannelVolume = GetContext().settings.addSetting<float>(
-		"setting.audio.sfx_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f);
+    sfxChannels.resize(math::Clamp(sfxChannelCount.get(), 1, MAX_SFX_CHANNELS));
+    std::for_each(
+        sfxChannels.begin(), sfxChannels.end(), [](Channel &channel)
+        { channel.setup(); }
+    );
+    musicChannel.setup();
 
-	log::info("Successfully initiated device ", specIn.name, " @", freqSetting, "Hz");
+    musicChannelVolume = settings.addSetting<float>(
+        "setting.audio.music_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f
+    );
+    sfxChannelVolume = settings.addSetting<float>(
+        "setting.audio.sfx_volume", 100.0f, SettingFlags::WRITE_TO_FILE, 0.0f, 100.f
+    );
+
+    log::Info("Successfully initiated device ", specIn.name, " @", freqSetting, "Hz");
 }
 
-AudioDevice::AudioDevice(unsigned int sfxChannelsIn)
+AudioDevice::AudioDevice()
 {
-	sfxChannels.resize(math::Clamp(sfxChannelsIn, 1, MAX_SFX_CHANNELS));
 }
 
 void AudioDevice::process()
 {
-	musicChannel.update();
+    musicChannel.update();
 
-	for (auto& channel : sfxChannels)
-		channel.update();
+    for (auto &channel : sfxChannels)
+        channel.update();
 
-	setMusicVolume(musicChannelVolume.get() * VOLUME_SLIDER_MULTIPLIER);
-	setSfxVolume(sfxChannelVolume.get() * VOLUME_SLIDER_MULTIPLIER);
+    setMusicVolume(musicChannelVolume.get() * VOLUME_SLIDER_MULTIPLIER);
+    setSfxVolume(sfxChannelVolume.get() * VOLUME_SLIDER_MULTIPLIER);
 }
 
 void AudioDevice::ALContextDeleter(AudioDevice::ALContainer *container)
 {
-	log::debug("Closing audio device ", container);
-	alcDestroyContext((ALCcontext*) container->context);
-	alcCloseDevice((ALCdevice*) container->device);
+    log::Debug("Closing audio device ", container);
+    alcDestroyContext((ALCcontext *) container->context);
+    alcCloseDevice((ALCdevice *) container->device);
 }
 
 void AudioDevice::setMusicVolume(float fraction)
 {
-	musicChannel.setVolume(fraction, 0);
+    musicChannel.setVolume(fraction, 0);
 }
 
 void AudioDevice::setSfxVolume(float fraction)
 {
-	for (auto& channel : sfxChannels) {
-		channel.setVolume(fraction, 0);
-	}
+    for (auto &channel : sfxChannels) {
+        channel.setVolume(fraction, 0);
+    }
 }
 
-NS_END
+}
 

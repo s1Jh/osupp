@@ -24,7 +24,7 @@
 
 #include "Math.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -48,4 +48,4 @@ MoveLinear::MoveLinear(
 
 }
 
-NS_END
+}

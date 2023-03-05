@@ -26,9 +26,9 @@
 #include "InputMapper.hpp"
 #include "Context.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
-class AutoPilot : public InputMapper, public ContextAware
+class AutoPilot : public InputMapper
 {
 public:
 	AutoPilot();
@@ -37,7 +37,7 @@ public:
 	[[nodiscard]] bool isKeyReleased() const override;
 	[[nodiscard]] bool isKeyPressing(BlockMode mode) const override;
 	[[nodiscard]] fvec2d getCursor() const override;
-	void update() override;
+	void update(const GameManager&) override;
 
 private:
 	fvec2d target;
@@ -47,4 +47,4 @@ private:
 	Setting<float> maxVelocity;
 };
 
-NS_END
+}

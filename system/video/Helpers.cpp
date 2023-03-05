@@ -3,8 +3,10 @@
 #include "MatrixMath.hpp"
 #include "Constraint.hpp"
 #include "Shaders.hpp"
+#include "Util.hpp"
+#include "GL.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video::helpers
 {
@@ -20,7 +22,7 @@ void DrawGeneric2DShape(
     if (!wasInit) {
         shader.fromString(STATIC_SHAPE_SHADER_VERT, STATIC_SHAPE_SHADER_FRAG);
         if (!shader.upload()) {
-            log::error("Failed to upload the generic 2D shape shader!");
+            log::Error("Failed to upload the generic 2D shape shader!");
         }
         wasInit = true;
     }
@@ -85,7 +87,7 @@ void DrawLineSegment(
     if (!wasInit) {
         lineShader.fromString(LINE_SHADER_VERT, LINE_SHADER_FRAG);
         if (!lineShader.upload()) {
-            log::error("Failed to upload the generic line shader!");
+            log::Error("Failed to upload the generic line shader!");
         }
         wasInit = true;
     }
@@ -95,7 +97,7 @@ void DrawLineSegment(
     lineShader.use();
     CheckGLh("Set shader");
 
-    lineShader.set("resolution", (fvec2d) renderer.getWindow().size());
+    lineShader.set("resolution", (fvec2d) renderer.getSize());
     lineShader.set("transform", transform);
     if (bool(appearance.flags & video::AppearanceFlags::IGNORE_CAMERA)) {
         lineShader.set("camera", MAT3_NO_TRANSFORM<float>);
@@ -106,10 +108,10 @@ void DrawLineSegment(
 
     auto offset = appearance.outlineWidth;
 
-    auto right = (float) math::Max(seg.A.x, seg.B.x) + offset;
-    auto left = (float) math::Min(seg.A.x, seg.B.x) - offset;
-    auto top = (float) math::Max(seg.A.y, seg.B.y) + offset;
-    auto bottom = (float) math::Min(seg.A.y, seg.B.y) - offset;
+    auto right = (float) math::Max(seg.A[0], seg.B[0]) + offset;
+    auto left = (float) math::Min(seg.A[0], seg.B[0]) - offset;
+    auto top = (float) math::Max(seg.A[1], seg.B[1]) + offset;
+    auto bottom = (float) math::Min(seg.A[1], seg.B[1]) - offset;
 
     frect rect = {
         {
@@ -147,4 +149,4 @@ void DrawLineSegment(
 
 }
 
-NS_END
+}

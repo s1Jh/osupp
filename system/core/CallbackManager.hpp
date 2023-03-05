@@ -32,7 +32,7 @@
 #include <mutex>
 #include <type_traits>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace detail
 {
@@ -118,7 +118,7 @@ public:
             auto *new_handle =
                 (VirtualCallbackHandle<CBGroup> *) std::malloc(ptr->size);
             if (!new_handle) {
-                log::error("Failed to allocate space for a new handle");
+                log::Error("Failed to allocate space for a new handle");
                 continue;
             }
 
@@ -141,7 +141,7 @@ public:
             auto *new_handle =
                 (VirtualCallbackHandle<CBGroup> *) std::malloc(ptr->size);
             if (!new_handle) {
-                log::error("Failed to allocate space for a new handle");
+                log::Error("Failed to allocate space for a new handle");
                 continue;
             }
 
@@ -331,4 +331,4 @@ std::vector<std::unique_ptr<typename StaticCallbacks<CBGroup>::VirtualHandle>>
 
 } // detail
 
-NS_END
+}

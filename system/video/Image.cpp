@@ -28,7 +28,7 @@
 
 #include <cstring>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -102,7 +102,7 @@ void Image::setPixel(uvec2d pos, color8 col)
 	if (!data)
 		return;
 
-	data.get()[(pos.y % height) * width + (pos.x % width)] = col;
+	data.get()[(pos[1] % height) * width + (pos[0] % width)] = col;
 }
 
 void Image::setRectArea(irect area, color col)
@@ -110,8 +110,8 @@ void Image::setRectArea(irect area, color col)
 	if (!data)
 		return;
 
-	for (int x = area.position.x; x < area.position.x + area.size.w; x++) {
-		for (int y = area.position.y; y < area.position.y + area.size.h; y++) {
+	for (int x = area.position[0]; x < area.position[0] + area.size.w; x++) {
+		for (int y = area.position[1]; y < area.position[1] + area.size.h; y++) {
 			setPixel(isize{x, y}, col);
 		}
 	}
@@ -155,10 +155,10 @@ Resource<video::Image> Load(const std::filesystem::path &path)
 
 	stbi_image_free(data);
 
-//    log::info("Loaded image ", path, " Dimensions: ", width, " x ",
+//    log::Info("Loaded image ", path, " Dimensions: ", width, " x ",
 //              std::to_string(height), " Channels: ", channels);
 
 	return r;
 }
 
-NS_END
+}

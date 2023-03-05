@@ -27,10 +27,10 @@
 #include "MapInfo.hpp"
 #include <filesystem>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 bool LoadMAP(const std::filesystem::path& fpath, MapInfo &map);
 
 bool LoadOSU(const std::filesystem::path &pathIn, MapInfo &map);
 
-NS_END
+}

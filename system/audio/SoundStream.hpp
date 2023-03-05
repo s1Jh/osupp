@@ -29,7 +29,7 @@
 #include "Sound.hpp"
 #include "AudioUtil.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class SoundStream : public detail::BaseSound
 {
@@ -54,4 +54,4 @@ Resource<SoundStream> Load(const std::filesystem::path &path);
 
 template<> const std::vector<std::string> Resource<SoundStream>::allowedExtensions;
 
-NS_END
+}

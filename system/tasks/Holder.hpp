@@ -30,7 +30,7 @@
 
 #include "Message.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace tasks
 {
@@ -145,4 +145,4 @@ struct WrappedTaskHolder: public TaskHolder<std::invoke_result_t<TaskT, TaskArgs
 
 }
 
-NS_END
+}

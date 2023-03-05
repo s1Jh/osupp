@@ -24,10 +24,10 @@
 #include <vector>
 #include "define.hpp"
 #include "InputMapper.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "Keyboard.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 class HumanInput : public InputMapper
 {
@@ -37,10 +37,12 @@ public:
 	[[nodiscard]] bool isKeyReleased() const override;
 	[[nodiscard]] bool isKeyPressing(BlockMode) const override;
 	[[nodiscard]] fvec2d getCursor() const override;
-	void update() override;
+	void update(const GameManager&) override;
 
 private:
-	std::vector<Key> activationKeys;
+    fvec2d pos;
+    bool pressed, released, pressing;
+	std::vector<input::Key> activationKeys;
 };
 
-NS_END
+}

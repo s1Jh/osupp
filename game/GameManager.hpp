@@ -33,7 +33,7 @@
 
 #include <list>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 constexpr const char *APPROACH_CIRCLE_SPRITE = "approach_circle";
 
@@ -49,10 +49,11 @@ constexpr const char *COMBO_BREAK_SOUND = "combo_break_sound";
 
 class BaseHitObject;
 
-struct SampleSet {
+struct SampleSet
+{
 	Resource<SoundSample> hit;
 	Resource<SoundSample> miss;
-    Resource<SoundSample> comboBreak;
+	Resource<SoundSample> comboBreak;
 	Resource<SoundSample> sliderBounce;
 	Resource<SoundSample> sliderSlide;
 	Resource<SoundSample> sliderBreak;
@@ -63,53 +64,53 @@ struct SampleSet {
 class GameManager
 {
 public:
-    using StorageT = std::list<std::shared_ptr<BaseHitObject>>;
+	using StorageT = std::list<std::shared_ptr<BaseHitObject>>;
 
 	explicit GameManager();
 
-    virtual void update(double delta);
+	virtual void update(double delta);
 
-    virtual void draw();
+	virtual void draw(video::LambdaRender& gfx);
 
-    [[nodiscard]] double getCurrentTime() const;
+	[[nodiscard]] double getCurrentTime() const;
 
 	void scrobble(double amount);
 
 	void setCurrentTime(double newTime);
 
-    [[nodiscard]] const frect &getPlayField() const;
+	[[nodiscard]] const frect &getPlayField() const;
 
-    void setPlayField(const frect &playField);
+	void setPlayField(const frect &playField);
 
-    [[nodiscard]] Resource<MapInfo> getMap() const;
+	[[nodiscard]] Resource<MapInfo> getMap() const;
 
-    bool setMap(Resource<MapInfo> map);
+	bool setMap(Resource<MapInfo> map);
 
 	void skipToFirst();
 
-    void reset();
+	void reset();
 
 	[[nodiscard]] fvec2d getCursorPosition() const;
 
-    [[nodiscard]] const Mat3f &getTransform() const;
+	[[nodiscard]] const Mat3f &getTransform() const;
 
-    [[nodiscard]] float getCircleSize();
+	[[nodiscard]] float getCircleSize() const;
 
-    [[nodiscard]] float getApproachTime();
+	[[nodiscard]] float getApproachTime() const;
 
-    [[nodiscard]] float getFadeTime();
+	[[nodiscard]] float getFadeTime() const;
 
-    [[nodiscard]] float getHitWindow();
+	[[nodiscard]] float getHitWindow() const;
 
-	[[nodiscard]] float getHpDrain();
+	[[nodiscard]] float getHpDrain() const;
 
-	[[nodiscard]] float getStartOffset();
+	[[nodiscard]] float getStartOffset() const;
 
 	[[nodiscard]] const SampleSet &getSamples() const;
 
 	[[nodiscard]] bool isFinished() const;
 
-	void setInputMapper(std::unique_ptr<InputMapper>&& mapper);
+	void setInputMapper(std::unique_ptr<InputMapper> &&mapper);
 
 	[[nodiscard]] std::weak_ptr<BaseHitObject> getCurrentObject() const;
 
@@ -117,20 +118,25 @@ public:
 
 	[[nodiscard]] std::weak_ptr<BaseHitObject> getNextObject() const;
 
-	[[nodiscard]] const StorageT& getStoredObjects() const;
+	[[nodiscard]] const StorageT &getStoredObjects() const;
+
+    [[nodiscard]] double getDelta() const;
 
 private:
 	unsigned int loadObjects(unsigned int amount);
-	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject& object) const;
+	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject &object) const;
 
+    // FIXME: need to somehow pass the skin to this point
+    Resource<Skin> skin;
+    double delta{};
 	std::unique_ptr<InputMapper> input{nullptr};
 	StorageT::iterator last{};
 	StorageT activeObjects{};
 	Resource<MapInfo> info{nullptr};
 	SampleSet samples{};
-    Mat3f transform{MAT3_NO_TRANSFORM<float>};
-    frect playField{UNIT_RECT<float>};
-    double currentTime{0.0};
+	Mat3f transform{MAT3_NO_TRANSFORM<float>};
+	frect playField{UNIT_RECT<float>};
+	double currentTime{0.0};
 
 	MapInfo::StorageT::const_iterator lastLoadedObject;
 
@@ -152,4 +158,4 @@ private:
 	float maxUT = 0.0f;
 };
 
-NS_END
+}

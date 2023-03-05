@@ -23,13 +23,16 @@
 #pragma once
 
 #include "define.hpp"
-#include <iostream>
-#include <string>
+
+#include "ToFromString.hpp"
+
+#include <cstdint>
 
 #define DECOMPOSE_COLOR_RGBA(obj) obj.r, obj.g, obj.b, obj.a
 #define DECOMPOSE_COLOR_RGB(obj) obj.r, obj.g, obj.b
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
 struct color8;
 struct color;
@@ -49,23 +52,7 @@ struct color
 
     inline operator color8() const;
 
-    inline operator uint32_t() const
-    {
-        uint32_t rval = 0;
-        rval |= ((uint32_t) (r * 255.f)) << 0;
-        rval |= ((uint32_t) (g * 255.f)) << 8;
-        rval |= ((uint32_t) (b * 255.f)) << 16;
-        rval |= ((uint32_t) (a * 255.f)) << 24;
-        return rval;
-    }
-    inline explicit operator std::string() const
-    {
-        return std::string("(")
-            + std::to_string(r) + ' '
-            + std::to_string(g) + ' '
-            + std::to_string(b) + ' '
-            + std::to_string(a) + ')';
-    }
+    inline operator uint32_t() const;
 };
 
 struct color8
@@ -91,40 +78,68 @@ struct color8
 
     inline operator color() const;
 
-    inline operator uint32_t() const
-    {
-        uint32_t rval = 0;
-        rval |= ((uint32_t) (r)) << 0;
-        rval |= ((uint32_t) (g)) << 8;
-        rval |= ((uint32_t) (b)) << 16;
-        rval |= ((uint32_t) (a)) << 24;
-        return rval;
-    }
-
-    inline explicit operator std::string() const
-    {
-        return std::string("(")
-            + std::to_string(r) + ' '
-            + std::to_string(g) + ' '
-            + std::to_string(b) + ' '
-            + std::to_string(a) + ')';
-    }
+    inline operator uint32_t() const;
 };
 
 inline color::operator color8() const
 { return {r, g, b, a}; }
 
+inline color::operator unsigned int() const
+{
+    uint32_t rval = 0;
+    rval |= ((uint32_t) (r * 255.f)) << 0;
+    rval |= ((uint32_t) (g * 255.f)) << 8;
+    rval |= ((uint32_t) (b * 255.f)) << 16;
+    rval |= ((uint32_t) (a * 255.f)) << 24;
+    return rval;
+}
+
 inline color8::operator color() const
 { return {r, g, b, a}; }
 
-inline std::ostream &operator<<(std::ostream &os, const color &dt)
+inline color8::operator uint32_t() const
 {
-    os << "(" << dt.r << " " << dt.g << " " << dt.b << " " << dt.a << ")";
-
-    return os;
+    uint32_t rval = 0;
+    rval |= ((uint32_t) (r)) << 0;
+    rval |= ((uint32_t) (g)) << 8;
+    rval |= ((uint32_t) (b)) << 16;
+    rval |= ((uint32_t) (a)) << 24;
+    return rval;
 }
 
-constexpr color TRANSPARENT = {0x00, 0x00, 0x00, 0x00};
+/**
+ * Converts a string representation of color into color.
+ * @param in String repr.
+ * @return Color.
+ */
+template<>
+std::optional<color> FromString<color>(const std::string &in);
+
+/**
+ * Converts a color to string representation.
+ * @param in Color.
+ * @return String repr.
+ */
+template<>
+std::string ToString<color>(const color &in);
+
+/**
+ * Converts a string representation of color into color.
+ * @param in String repr.
+ * @return Color.
+ */
+template<>
+std::optional<color8> FromString<color8>(const std::string &in);
+
+/**
+ * Converts a color to string representation.
+ * @param in Color.
+ * @return String repr.
+ */
+template<>
+std::string ToString<color8>(const color8 &in);
+
+constexpr color INVISIBLE = {0x00, 0x00, 0x00, 0x00};
 
 constexpr color AMARANTH = {0xE5, 0x2B, 0x50};
 
@@ -300,4 +315,4 @@ constexpr color WHITE = {0xFF, 0xFF, 0xFF};
 
 constexpr color YELLOW = {0xFF, 0xFF, 0x00};
 
-NS_END
+}

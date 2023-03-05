@@ -22,23 +22,23 @@
 
 #pragma once
 
-#include <iostream>
-
-#include "Size.hpp"
-#include "Traits.hpp"
-#include "Vec2.hpp"
 #include "define.hpp"
 
-NS_BEGIN
+#include "Size.hpp"
+#include "Vector.hpp"
+#include "ToFromString.hpp"
+
+namespace PROJECT_NAMESPACE
+{
 
 template<typename T>
 struct rect
 {
     constexpr rect()
-        : size({1.0, 1.0}), position({0.0, 0.0})
+        : size({1, 1}), position({0, 0})
     {}
 
-    constexpr rect(::PROJECT_NAMESPACE::size<T> _size, vec2d<T> _pos = {0.f, 0.f})
+    constexpr rect(::PROJECT_NAMESPACE::size<T> _size, vec2d<T> _pos = {0, 0})
         : size(_size), position(_pos)
     {}
 
@@ -52,7 +52,8 @@ struct rect
     vec2d<T> position = {0, 0};
 };
 
-template<typename T> constexpr rect<T> UNIT_RECT = rect<T>{{1, 1}, {0, 0}};
+template<typename T> constexpr rect<T> UNIT_RECT{};
+template<typename T> constexpr rect<T> SCREEN_RECT{{2, 2}, {0, 0}};
 
 template<typename T>
 std::ostream &operator<<(std::ostream &os, const rect<T> &dt)
@@ -80,11 +81,4 @@ using irect = rect<int>;
 using urect = rect<unsigned int>;
 using drect = rect<double>;
 
-template<typename T>
-struct IsShape<rect<T>>
-{
-    static const bool enable = true;
-    static const ShapeType type = ShapeType::RECTANGLE;
-};
-
-NS_END
+}

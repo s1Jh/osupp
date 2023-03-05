@@ -28,7 +28,7 @@
 #include "Enum.hpp"
 #include "Context.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 /**
  * The following class encompasses all logic surrounding hit objects.
@@ -43,7 +43,7 @@ NS_BEGIN
  * an object is considered to be done. This can occur either when a player
  *successfully hits the object, or misses it entirely.
  *
- * A update() method is called each frame when the object is in a active state.
+ * A update method is called each frame when the object is in a active state.
  *
  * When a player first interacts with a hit object, the begin() method is
  *called. This will transfer the object into the Active state. This also sets
@@ -56,10 +56,15 @@ NS_BEGIN
  * This method will return how well the object has been hit.
  **/
 
-class BaseHitObject : public ContextAware
+class GameManager;
+
+class BaseHitObject
 {
+    friend class GameManager;
 public:
-    void update(double delta);
+    void create(Resource<Skin>&);
+
+    void update();
 
     void begin();
 
@@ -67,7 +72,7 @@ public:
 
     void raise();
 
-    void draw();
+    void draw(video::LambdaRender&);
 
 	[[nodiscard]] HitResult finish();
 
@@ -130,11 +135,11 @@ protected:
 
     [[nodiscard]] float getAlpha() const;
 
-    virtual void onDraw();
+    virtual void onDraw(video::LambdaRender& gfx);
 
-    virtual void onUpdate(double delta);
+    virtual void onUpdate();
 
-    virtual void onLogicUpdate(double delta);
+    virtual void onLogicUpdate();
 
     virtual void onBegin();
 
@@ -143,6 +148,8 @@ protected:
     virtual void onRaise();
 
     virtual void onReset();
+
+    virtual void onCreate(Resource<Skin>&);
 
     [[nodiscard]] virtual HitResult onFinish();
 
@@ -153,7 +160,11 @@ protected:
 
 	fcircle SOF;
 
+    GameManager &getGame();
+    const GameManager &getGame() const;
+
 private:
+    GameManager* game;
 	bool finished;
 	double timeStarted;
 	double timeFinished;
@@ -161,4 +172,4 @@ private:
     HitObjectState state;
 };
 
-NS_END
+}

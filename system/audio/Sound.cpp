@@ -25,7 +25,7 @@
 
 #include <AL/al.h>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace detail
 {
@@ -59,4 +59,4 @@ void BaseSound::reset()
 }
 }
 
-NS_END
+}

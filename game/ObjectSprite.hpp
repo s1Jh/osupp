@@ -30,8 +30,9 @@
 #include "Types.hpp"
 #include "Shader.hpp"
 #include "SliderTypes.hpp"
+#include "Time.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 struct ObjectDrawInfo
 {
@@ -53,7 +54,7 @@ public:
     void update(double delta);
 
     void setTexture(const Resource<video::Texture> &texture);
-    void setFPS(FPS_t fps);
+    void setFPS(time::FPS fps);
     void setTotalFrames(int frames);
     void setFrameTime(float frameTime);
     void setTint(const color &tint);
@@ -77,4 +78,4 @@ using DrawObject = video::RenderTask<const ObjectSprite &, const ObjectDrawInfo 
 template<>
 void Draw(video::LambdaRender &renderer, const ObjectSprite &, const ObjectDrawInfo &);
 
-NS_END
+}

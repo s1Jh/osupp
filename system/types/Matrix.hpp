@@ -22,48 +22,45 @@
 
 #pragma once
 
-#include <array>
-#include <cstddef>
-
 #include "define.hpp"
+
+#include <cstddef>
 #include <type_traits>
+#include <array>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE
+{
 
-template<typename T, unsigned int w, unsigned int h> requires std::is_arithmetic_v<T>
+template<typename T, unsigned long w, unsigned long h> requires std::is_arithmetic_v<T>
 class Mat
 {
-    friend class CollumnView;
-
-    friend class RowView;
-
 public:
     inline constexpr explicit Mat(T fill = 0)
     {
-        for (unsigned int x = 0; x < w; x++)
-            for (unsigned int y = 0; y < h; y++)
-                m_Values[x][y] = fill;
+        for (unsigned long x = 0; x < w; x++)
+            for (unsigned long y = 0; y < h; y++)
+                at(x, y) = fill;
     }
 
-    inline constexpr explicit Mat(std::array<float, w * h> data)
+    inline constexpr explicit Mat(std::array<T, w * h> data)
     {
-        for (unsigned int x = 0; x < w; x++)
-            for (unsigned int y = 0; y < h; y++)
-                m_Values[x][y] = data[y * w + x];
+        for (unsigned long x = 0; x < w; x++)
+            for (unsigned long y = 0; y < h; y++)
+                at(x, y) = data.at(y * w + x);
     }
 
     Mat(const Mat &other)
     {
-        for (unsigned int x = 0; x < w; x++)
-            for (unsigned int y = 0; y < h; y++)
-                m_Values[x][y] = other.m_Values[x][y];
+        for (unsigned long x = 0; x < w; x++)
+            for (unsigned long y = 0; y < h; y++)
+                at(x, y) = other.at(x, y);
     }
 
     Mat(const Mat &&other) noexcept
     {
-        for (unsigned int x = 0; x < w; x++)
-            for (unsigned int y = 0; y < h; y++)
-                m_Values[x][y] = other.m_Values[x][y];
+        for (unsigned long x = 0; x < w; x++)
+            for (unsigned long y = 0; y < h; y++)
+                at(x, y) = other.at(x, y);
     }
 
     inline Mat &operator=(const Mat &other)
@@ -71,123 +68,41 @@ public:
         if (this == &other)
             return *this;
 
-        for (unsigned int x = 0; x < w; x++)
-            for (unsigned int y = 0; y < h; y++)
-                m_Values[x][y] = other.m_Values[x][y];
+        for (unsigned long x = 0; x < w; x++)
+            for (unsigned long y = 0; y < h; y++)
+                at(x, y) = other.at(x, y);
 
         return *this;
     }
 
     inline Mat &operator=(Mat &&other) noexcept
     {
-        for (unsigned int x = 0; x < w; x++)
-            for (unsigned int y = 0; y < h; y++)
-                m_Values[x][y] = other.m_Values[x][y];
+        for (unsigned long x = 0; x < w; x++)
+            for (unsigned long y = 0; y < h; y++)
+                at(x, y) = other.at(x, y);
 
         return *this;
     }
 
-    class CollumnView
+    constexpr T& at(unsigned long r, unsigned long c) noexcept
     {
-    public:
-        CollumnView(Mat<T, w, h> &original, size_t column)
-            : m_Original(original), m_uCollumn(column)
-        {}
-
-        inline T &operator[](int row)
-        {
-            return m_Original.m_Values[row % h][m_uCollumn];
-        }
-
-    private:
-        Mat<T, w, h> &m_Original;
-        size_t m_uCollumn;
-    };
-
-    class ConstCollumnView
-    {
-    public:
-        ConstCollumnView(const Mat<T, w, h> &original, size_t column)
-            : m_Original(original), m_uCollumn(column)
-        {}
-
-        inline T operator[](int row) const
-        {
-            return m_Original.m_Values[row % h][m_uCollumn];
-        }
-
-    private:
-        const Mat<T, w, h> &m_Original;
-        size_t m_uCollumn;
-    };
-
-    class RowView
-    {
-    public:
-        RowView(Mat<T, w, h> &original, size_t row)
-            : m_Original(original), m_uRow(row)
-        {}
-
-        inline T &operator[](int col)
-        {
-            return m_Original.m_Values[m_uRow][col % w];
-        }
-
-    private:
-        Mat<T, w, h> &m_Original;
-        size_t m_uRow;
-    };
-
-    class ConstRowView
-    {
-    public:
-        ConstRowView(const Mat<T, w, h> &original, size_t row)
-            : m_Original(original), m_uRow(row)
-        {}
-
-        inline T operator[](int col) const
-        {
-            return m_Original.m_Values[m_uRow][col % w];
-        }
-
-    private:
-        const Mat<T, w, h> &m_Original;
-        size_t m_uRow;
-    };
-
-    inline CollumnView column_view(size_t col)
-    {
-        return CollumnView(*this, col % w);
+        return values[(r * w + c) % (w*h)];
     }
 
-    inline ConstCollumnView column_view(size_t col) const
+    constexpr const T& at(unsigned long r, unsigned long c) const noexcept
     {
-        return ConstCollumnView(*this, col % w);
+        return values[(r * w + c) % (w*h)];
     }
-
-    inline RowView row_view(size_t row)
-    { return RowView(*this, row % h); }
-
-    inline ConstRowView row_view(size_t row) const
-    {
-        return ConstRowView(*this, row % h);
-    }
-
-    inline RowView operator[](size_t row)
-    { return row_view(row); }
-
-    inline ConstRowView operator[](size_t row) const
-    { return row_view(row); }
 
     T *GetPtr()
-    { return (T *) m_Values; }
+    { return (T *) values; }
 
     const T *GetCPtr() const
-    { return (T *) m_Values; }
+    { return (T *) values; }
 
 private:
-    // [columns][rows]
-    T m_Values[h][w];
+    // [columns, rows]
+    T values[w*h] = {};
 };
 
 template<typename T, size_t I> using SquareMatrix = Mat<T, I, I>;
@@ -333,7 +248,7 @@ bool operator==(const Mat<L, Lw, Lh> &left, const Mat<R, Rw, Rh> &right)
 
     for (int y = 0; y < Rw; y++)
         for (int x = 0; x < Lh; x++) {
-            if (left[y][x] != right[y][x])
+            if (left.at(y, x) != right.at(y, x))
                 return false;
         }
 
@@ -348,7 +263,7 @@ bool operator!=(const Mat<L, Lw, Lh> &left, const Mat<R, Rw, Rh> &right)
 
     for (int y = 0; y < Rw; y++)
         for (int x = 0; x < Lh; x++) {
-            if (left[y][x] != right[y][x])
+            if (left.at(y, x) != right.at(y, x))
                 return true;
         }
 
@@ -356,7 +271,7 @@ bool operator!=(const Mat<L, Lw, Lh> &left, const Mat<R, Rw, Rh> &right)
 }
 
 // for assymetric operations or otherwise not expanded operations
-template<typename L, int Lw, int Lh, typename R, int Rw, int Rh>
+template<typename L, unsigned long Lw, unsigned long Lh, typename R, unsigned long Rw, unsigned long Rh>
 typename std::enable_if<((Rw != Lw || Rh != Lh) || Lw > 4),
                         Mat<R, Rw, Lh>>::type
 operator*(const Mat<L, Lw, Lh> &left, const Mat<R, Rw, Rh> &right)
@@ -366,13 +281,16 @@ operator*(const Mat<L, Lw, Lh> &left, const Mat<R, Rw, Rh> &right)
 
     Mat<R, Rw, Lh> result;
 
-    for (int y = 0; y < Rw; y++)
-        for (int x = 0; x < Lh; x++) {
+    for (unsigned long c = 0; c < Rw; c++)
+        for (unsigned long r = 0; r < Lh; r++) {
             R accum = 0;
-            for (int z = 0; z < Rh; z++)
-                accum += left.row_view(y)[z] * right.column_view(x)[z];
+            for (unsigned long z = 0; z < Rh; z++) {
+                auto lhs = left.at(z, r);
+                auto rhs = right.at(z, c);
+                accum += lhs * rhs;
+            }
 
-            result[y][x] = accum;
+            result.at(r, c) = accum;
         }
 
     return result;
@@ -383,10 +301,10 @@ Mat2<L> operator*(const Mat2<L> &left, const Mat2<R> &right)
 {
     Mat2<L> res;
 
-    res[0][0] = left[0][0] * right[0][0] + left[0][1] * right[1][0];
-    res[0][1] = left[0][0] * right[0][0] + left[0][1] * right[1][1];
-    res[1][0] = left[1][0] * right[0][1] + left[1][1] * right[1][0];
-    res[1][1] = left[1][0] * right[0][1] + left[1][1] * right[1][1];
+    res.at(0, 0) = left.at(0, 0) * right.at(0, 0) + left.at(0, 1) * right.at(1, 0);
+    res.at(0, 1) = left.at(0, 0) * right.at(0, 1) + left.at(0, 1) * right.at(1, 1);
+    res.at(1, 0) = left.at(1, 0) * right.at(0, 1) + left.at(1, 1) * right.at(1, 0);
+    res.at(1, 1) = left.at(1, 0) * right.at(0, 1) + left.at(1, 1) * right.at(1, 1);
 
     return res;
 }
@@ -396,24 +314,17 @@ Mat3<L> operator*(const Mat3<L> &left, const Mat3<R> &right)
 {
     Mat3<L> res;
 
-    res[0][0] = left[0][0] * right[0][0] + left[0][1] * right[1][0] +
-        left[0][2] * right[2][0];
-    res[0][1] = left[0][0] * right[0][1] + left[0][1] * right[1][1] +
-        left[0][2] * right[2][1];
-    res[0][2] = left[0][0] * right[0][2] + left[0][1] * right[1][2] +
-        left[0][2] * right[2][2];
-    res[1][0] = left[1][0] * right[0][0] + left[1][1] * right[1][0] +
-        left[1][2] * right[2][0];
-    res[1][1] = left[1][0] * right[0][1] + left[1][1] * right[1][1] +
-        left[1][2] * right[2][1];
-    res[1][2] = left[1][0] * right[0][2] + left[1][1] * right[1][2] +
-        left[1][2] * right[2][2];
-    res[2][0] = left[2][0] * right[0][0] + left[2][1] * right[1][0] +
-        left[2][2] * right[2][0];
-    res[2][1] = left[2][0] * right[0][1] + left[2][1] * right[1][1] +
-        left[2][2] * right[2][1];
-    res[2][2] = left[2][0] * right[0][2] + left[2][1] * right[1][2] +
-        left[2][2] * right[2][2];
+    res.at(0, 0) = left.at(0, 0) * right.at(0, 0) + left.at(0, 1) * right.at(1, 0) + left.at(0, 2) * right.at(2, 0);
+    res.at(0, 1) = left.at(0, 0) * right.at(0, 1) + left.at(0, 1) * right.at(1, 1) + left.at(0, 2) * right.at(2, 1);
+    res.at(0, 2) = left.at(0, 0) * right.at(0, 2) + left.at(0, 1) * right.at(1, 2) + left.at(0, 2) * right.at(2, 2);
+
+    res.at(1, 0) = left.at(1, 0) * right.at(0, 0) + left.at(1, 1) * right.at(1, 0) + left.at(1, 2) * right.at(2, 0);
+    res.at(1, 1) = left.at(1, 0) * right.at(0, 1) + left.at(1, 1) * right.at(1, 1) + left.at(1, 2) * right.at(2, 1);
+    res.at(1, 2) = left.at(1, 0) * right.at(0, 2) + left.at(1, 1) * right.at(1, 2) + left.at(1, 2) * right.at(2, 2);
+
+    res.at(2, 0) = left.at(2, 0) * right.at(0, 0) + left.at(2, 1) * right.at(1, 0) + left.at(2, 2) * right.at(2, 0);
+    res.at(2, 1) = left.at(2, 0) * right.at(0, 1) + left.at(2, 1) * right.at(1, 1) + left.at(2, 2) * right.at(2, 1);
+    res.at(2, 2) = left.at(2, 0) * right.at(0, 2) + left.at(2, 1) * right.at(1, 2) + left.at(2, 2) * right.at(2, 2);
 
     return res;
 }
@@ -423,38 +334,38 @@ Mat4<L> operator*(const Mat4<L> &left, const Mat4<R> &right)
 {
     Mat4<L> res;
 
-    res[0][0] = left[0][0] * right[0][0] + left[0][1] * right[1][0] +
-        left[0][2] * right[2][0] + left[0][3] * right[3][0];
-    res[0][1] = left[0][0] * right[0][1] + left[0][1] * right[1][1] +
-        left[0][2] * right[2][1] + left[0][3] * right[3][1];
-    res[0][2] = left[0][0] * right[0][2] + left[0][1] * right[1][2] +
-        left[0][2] * right[2][2] + left[0][3] * right[3][2];
-    res[0][3] = left[0][0] * right[0][3] + left[0][1] * right[1][3] +
-        left[0][2] * right[2][3] + left[0][3] * right[3][3];
-    res[1][0] = left[1][0] * right[0][0] + left[1][1] * right[1][0] +
-        left[1][2] * right[2][0] + left[1][3] * right[3][0];
-    res[1][1] = left[1][0] * right[0][1] + left[1][1] * right[1][1] +
-        left[1][2] * right[2][1] + left[1][3] * right[3][1];
-    res[1][2] = left[1][0] * right[0][2] + left[1][1] * right[1][2] +
-        left[1][2] * right[2][2] + left[1][3] * right[3][2];
-    res[1][3] = left[1][0] * right[0][3] + left[1][1] * right[1][3] +
-        left[1][2] * right[2][3] + left[1][3] * right[3][3];
-    res[2][0] = left[2][0] * right[0][0] + left[2][1] * right[1][0] +
-        left[2][2] * right[2][0] + left[2][3] * right[3][0];
-    res[2][1] = left[2][0] * right[0][1] + left[2][1] * right[1][1] +
-        left[2][2] * right[2][1] + left[2][3] * right[3][1];
-    res[2][2] = left[2][0] * right[0][2] + left[2][1] * right[1][2] +
-        left[2][2] * right[2][2] + left[2][3] * right[3][2];
-    res[2][3] = left[2][0] * right[0][3] + left[2][1] * right[1][3] +
-        left[2][2] * right[2][3] + left[2][3] * right[3][3];
-    res[3][0] = left[3][0] * right[0][0] + left[3][1] * right[1][0] +
-        left[3][2] * right[2][0] + left[3][3] * right[3][0];
-    res[3][1] = left[3][0] * right[0][1] + left[3][1] * right[1][1] +
-        left[3][2] * right[2][1] + left[3][3] * right[3][1];
-    res[3][2] = left[3][0] * right[0][2] + left[3][1] * right[1][2] +
-        left[3][2] * right[2][2] + left[3][3] * right[3][2];
-    res[3][3] = left[3][0] * right[0][3] + left[3][1] * right[1][3] +
-        left[3][2] * right[2][3] + left[3][3] * right[3][3];
+    res.at(0, 0) = left.at(0, 0) * right.at(0, 0) + left.at(0, 1) * right.at(1, 0) +
+        left.at(0, 2) * right.at(2, 0) + left.at(0, 3) * right.at(3, 0);
+    res.at(0, 1) = left.at(0, 0) * right.at(0, 1) + left.at(0, 1) * right.at(1, 1) +
+        left.at(0, 2) * right.at(2, 1) + left.at(0, 3) * right.at(3, 1);
+    res.at(0, 2) = left.at(0, 0) * right.at(0, 2) + left.at(0, 1) * right.at(1, 2) +
+        left.at(0, 2) * right.at(2, 2) + left.at(0, 3) * right.at(3, 2);
+    res.at(0, 3) = left.at(0, 0) * right.at(0, 3) + left.at(0, 1) * right.at(1, 3) +
+        left.at(0, 2) * right.at(2, 3) + left.at(0, 3) * right.at(3, 3);
+    res.at(1, 0) = left.at(1, 0) * right.at(0, 0) + left.at(1, 1) * right.at(1, 0) +
+        left.at(1, 2) * right.at(2, 0) + left.at(1, 3) * right.at(3, 0);
+    res.at(1, 1) = left.at(1, 0) * right.at(0, 1) + left.at(1, 1) * right.at(1, 1) +
+        left.at(1, 2) * right.at(2, 1) + left.at(1, 3) * right.at(3, 1);
+    res.at(1, 2) = left.at(1, 0) * right.at(0, 2) + left.at(1, 1) * right.at(1, 2) +
+        left.at(1, 2) * right.at(2, 2) + left.at(1, 3) * right.at(3, 2);
+    res.at(1, 3) = left.at(1, 0) * right.at(0, 3) + left.at(1, 1) * right.at(1, 3) +
+        left.at(1, 2) * right.at(2, 3) + left.at(1, 3) * right.at(3, 3);
+    res.at(2, 0) = left.at(2, 0) * right.at(0, 0) + left.at(2, 1) * right.at(1, 0) +
+        left.at(2, 2) * right.at(2, 0) + left.at(2, 3) * right.at(3, 0);
+    res.at(2, 1) = left.at(2, 0) * right.at(0, 1) + left.at(2, 1) * right.at(1, 1) +
+        left.at(2, 2) * right.at(2, 1) + left.at(2, 3) * right.at(3, 1);
+    res.at(2, 2) = left.at(2, 0) * right.at(0, 2) + left.at(2, 1) * right.at(1, 2) +
+        left.at(2, 2) * right.at(2, 2) + left.at(2, 3) * right.at(3, 2);
+    res.at(2, 3) = left.at(2, 0) * right.at(0, 3) + left.at(2, 1) * right.at(1, 3) +
+        left.at(2, 2) * right.at(2, 3) + left.at(2, 3) * right.at(3, 3);
+    res.at(3, 0) = left.at(3, 0) * right.at(0, 0) + left.at(3, 1) * right.at(1, 0) +
+        left.at(3, 2) * right.at(2, 0) + left.at(3, 3) * right.at(3, 0);
+    res.at(3, 1) = left.at(3, 0) * right.at(0, 1) + left.at(3, 1) * right.at(1, 1) +
+        left.at(3, 2) * right.at(2, 1) + left.at(3, 3) * right.at(3, 1);
+    res.at(3, 2) = left.at(3, 0) * right.at(0, 2) + left.at(3, 1) * right.at(1, 2) +
+        left.at(3, 2) * right.at(2, 2) + left.at(3, 3) * right.at(3, 2);
+    res.at(3, 3) = left.at(3, 0) * right.at(0, 3) + left.at(3, 1) * right.at(1, 3) +
+        left.at(3, 2) * right.at(2, 3) + left.at(3, 3) * right.at(3, 3);
 
     return res;
 }
@@ -467,7 +378,7 @@ inline Mat<R, W, H> operator+(const Mat<L, W, H> &left,
 
     for (int y = 0; y < W; y++)
         for (int x = 0; x < H; x++)
-            result[y][x] = left[y][x] + right[y][x];
+            result.at(y, x) = left.at(y, x) + right.at(y, x);
 
     return result;
 }
@@ -480,9 +391,9 @@ inline Mat<R, W, H> operator-(const Mat<L, W, H> &left,
 
     for (int y = 0; y < W; y++)
         for (int x = 0; x < H; x++)
-            result[y][x] = left[y][x] - right[y][x];
+            result.at(y, x) = left.at(y, x) - right.at(y, x);
 
     return result;
 }
 
-NS_END
+}

@@ -28,16 +28,14 @@
 #include "Matrix.hpp"
 #include "Resource.hpp"
 #include "Texture.hpp"
-#include "Vec2.hpp"
-#include "Vec3.hpp"
-#include "Vec4.hpp"
+#include "Vector.hpp"
 #include "GLResource.hpp"
 
 #include <string>
 #include <unordered_map>
 #include <variant>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 namespace video
 {
@@ -106,7 +104,7 @@ public:
 #undef SHADER_INTER_CAST_SETTER_METHODS
 #endif
 
-    using Textures = std::unordered_map<int, Texture *>;
+    using Textures = std::unordered_map<int, Resource<video::Texture>>;
 	using AnyUniform =
 		std::variant<int, float, unsigned int, double, fvec2d, ivec2d, uvec2d,
 					 dvec2d, fvec3d, ivec3d, uvec3d, dvec3d, fvec4d, ivec4d,
@@ -137,4 +135,4 @@ Resource<video::Shader> Load(const std::filesystem::path &path);
 template<>
 Resource<video::Shader> Create();
 
-NS_END
+}

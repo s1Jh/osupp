@@ -24,88 +24,87 @@
 #include "define.hpp"
 
 #include "Rect.hpp"
-#include "Vec2.hpp"
+#include "Vector.hpp"
 #include "Line.hpp"
 #include "Exponential.hpp"
+#include "Range.hpp"
 
 #include <optional>
 
-NS_BEGIN
-
-namespace math
+namespace PROJECT_NAMESPACE::math
 {
 
-template<typename T1, typename T2>
-T1 Pyth(T1 a, T2 b)
-{
-	return Sqrt(Pow(a, 2) + Pow(b, 2));
-}
-
-template<typename RT, typename PT>
-bool Intersects(rect<RT> rect, vec2d<PT> p)
-{
-	return (InRange(p.x, rect.position.x, rect.position.x + rect.size.w) &&
-		InRange(p.y, rect.position.y, rect.position.y + rect.size.h));
-}
-
-template<typename R1, typename R2>
-bool Intersects(rect<R1> left, rect <R2> right)
-{
-	return ((InRange(left.position.x, right.position.x,
-					 right.position.x + right.size.w) ||
-		InRange(left.position.x + left.size.w, right.position.x,
-				right.position.x + right.size.w)) &&
-		(InRange(left.position.y, right.position.y,
-				 right.position.y + right.size.h) ||
-			InRange(left.position.y + left.size.h, right.position.y,
-					right.position.y + right.size.h)));
-}
-
-template<typename LineT, typename PointT>
-double GetSide(line<LineT> P, vec2d<PointT> A)
-{
-	return (P.B.x - P.A.x) * (A.y - P.A.y) - (P.B.y - P.A.y) * (A.x - P.A.x);
-}
-
-template<typename T1, typename T2>
-std::optional<vec2d<T1>> GetIntersect(line<T1> L1, line<T2> L2)
-{
-	auto det = [](double a, double b, double c, double d) -> double
+	template <typename T1, typename T2>
+	T1 Pyth(T1 a, T2 b)
 	{
-		return a * d - b * c;
-	};
-
-	float x1 = L1.A.x;
-	float x2 = L1.B.x;
-	float x3 = L2.A.x;
-	float x4 = L2.B.x;
-
-	float y1 = L1.A.y;
-	float y2 = L1.B.y;
-	float y3 = L2.A.y;
-	float y4 = L2.B.y;
-
-	double det1 = det(x1, y1, x2, y2);
-	double det2 = det(x3, y3, x4, y4);
-	double x1mx2 = x1 - x2;
-	double x3mx4 = x3 - x4;
-	double y1my2 = y1 - y2;
-	double y3my4 = y3 - y4;
-
-	double xnom = det(det1, x1mx2, det2, x3mx4);
-	double ynom = det(det1, y1my2, det2, y3my4);
-	double denom = det(x1mx2, y1my2, x3mx4, y3my4);
-	if (denom == 0.0) // Lines don't seem to cross
-	{
-		return {};
+		return Sqrt(Pow(a, 2) + Pow(b, 2));
 	}
 
-	double ixOut = xnom / denom;
-	double iyOut = ynom / denom;
+	template <typename RT, typename PT>
+	bool Intersects(rect<RT> rect, vec2d<PT> p)
+	{
+		auto halfW = rect.size.w / 2;
+		auto halfH = rect.size.h / 2;
+		return (InRange(p[0], rect.position[0] - halfW, rect.position[0] + halfW) &&
+				InRange(p[1], rect.position[1] - halfH, rect.position[1] + halfH));
+	}
 
-	return vec2d<T1>{ixOut, iyOut};
+	template <typename R1, typename R2>
+	bool Intersects(rect<R1> left, rect<R2> right)
+	{
+		return ((InRange(left.position[0], right.position[0],
+						 right.position[0] + right.size.w) ||
+				 InRange(left.position[0] + left.size.w, right.position[0],
+						 right.position[0] + right.size.w)) &&
+				(InRange(left.position[1], right.position[1],
+						 right.position[1] + right.size.h) ||
+				 InRange(left.position[1] + left.size.h, right.position[1],
+						 right.position[1] + right.size.h)));
+	}
+
+	template <typename LineT, typename PointT>
+	double GetSide(line<LineT> P, vec2d<PointT> A)
+	{
+		return (P.B[0] - P.A[0]) * (A[1] - P.A[1]) - (P.B[1] - P.A[1]) * (A[0] - P.A[0]);
+	}
+
+	template <typename T1, typename T2>
+	std::optional<vec2d<T1>> GetIntersect(line<T1> L1, line<T2> L2)
+	{
+		auto det = [](double a, double b, double c, double d) -> double
+		{
+			return a * d - b * c;
+		};
+
+		float x1 = L1.A[0];
+		float x2 = L1.B[0];
+		float x3 = L2.A[0];
+		float x4 = L2.B[0];
+
+		float y1 = L1.A[1];
+		float y2 = L1.B[1];
+		float y3 = L2.A[1];
+		float y4 = L2.B[1];
+
+		double det1 = det(x1, y1, x2, y2);
+		double det2 = det(x3, y3, x4, y4);
+		double x1mx2 = x1 - x2;
+		double x3mx4 = x3 - x4;
+		double y1my2 = y1 - y2;
+		double y3my4 = y3 - y4;
+
+		double xnom = det(det1, x1mx2, det2, x3mx4);
+		double ynom = det(det1, y1my2, det2, y3my4);
+		double denom = det(x1mx2, y1my2, x3mx4, y3my4);
+		if (denom == 0.0) // Lines don't seem to cross
+		{
+			return {};
+		}
+
+		double ixOut = xnom / denom;
+		double iyOut = ynom / denom;
+
+		return vec2d<T1>{ixOut, iyOut};
+	}
+
 }
-
-}
-
-NS_END

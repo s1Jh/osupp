@@ -27,7 +27,7 @@
 #include "Sound.hpp"
 #include "Audio.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 // Forward decl, since we include Channel.hpp in AudioDevice.hpp
 class AudioDevice;
@@ -79,4 +79,4 @@ private:
 	ChannelState state{ChannelState::FREE};
 };
 
-NS_END
+}

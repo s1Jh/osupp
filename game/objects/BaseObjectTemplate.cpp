@@ -24,7 +24,7 @@
 
 #include "define.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 HitObjectType BaseObjectTemplate::getType() const
 { return this->type; }
@@ -33,4 +33,4 @@ BaseObjectTemplate::BaseObjectTemplate(HitObjectType type)
     : type(type)
 {}
 
-NS_END
+}

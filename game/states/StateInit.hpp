@@ -24,10 +24,10 @@
 
 #include "define.hpp"
 
-#include "State.hpp"
+#include "BaseState.hpp"
 #include "Context.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 DECLARE_STATE(GameState::Init)
 {
@@ -41,4 +41,4 @@ private:
     int lastLoaded = 0;
 };
 
-NS_END
+}

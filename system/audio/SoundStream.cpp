@@ -24,7 +24,7 @@
 
 #include <libavcodec/avcodec.h>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<> const std::vector<std::string> Resource<SoundStream>::allowedExtensions = {".wav", ".mp3", ".ogg"};
 
@@ -79,4 +79,4 @@ void SoundStream::reset()
 		av_seek_frame(ctx.format, ctx.audioStreamIndex, 0, 0);
 }
 
-NS_END
+}

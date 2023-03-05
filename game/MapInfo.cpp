@@ -25,10 +25,12 @@
 #include "HitObjects.hpp"
 #include "MapLoaders.hpp"
 #include "Util.hpp"
+#include "Skin.hpp"
+
 
 #include <fstream>
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 template<> const std::vector<std::string> Resource<MapInfo>::allowedExtensions = {".map", ".osu"};
 
@@ -110,7 +112,7 @@ Resource<MapInfo> Load(const std::filesystem::path &path)
 	} else if (path.extension() == ".map") {
 		success = LoadMAP(path, *r);
 	} else {
-		log::error("Unrecognized file type");
+		log::Error("Unrecognized file type");
 		return nullptr;
 	}
 
@@ -118,7 +120,7 @@ Resource<MapInfo> Load(const std::filesystem::path &path)
 		return r;
 	}
 
-	log::error("Failed to load map");
+	log::Error("Failed to load map");
 	return nullptr;
 }
 
@@ -127,4 +129,4 @@ const std::filesystem::path &MapInfo::getDirectory() const
 	return directory;
 }
 
-NS_END
+}

@@ -8,19 +8,19 @@
 #include "ObjectSprite.hpp"
 #include "Shader.hpp"
 
-NS_BEGIN
+namespace PROJECT_NAMESPACE {
 
 struct SliderTrailDrawInfo {
-    bool useTexture;
-    video::Texture *bakedTexture;
+    bool useTexture{false};
+    Resource<video::Texture> bakedTexture{nullptr};
 
-    video::Texture *trailTexture;
+    Resource<video::Texture> trailTexture{nullptr};
 
-    float start;
-    float end;
+    float start{0.f};
+    float end{1.f};
 
-    float thickness;
-    color tint;
+    float thickness{1.f};
+    color tint{};
 
     Mat3f transform{};
 };
@@ -40,4 +40,4 @@ void Draw(
 
 using DrawSliderTrail = video::RenderTask<const math::Curve<SliderPathT::iterator> &, const SliderTrailDrawInfo&>;
 
-NS_END
+}
