@@ -22,9 +22,10 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "OsuHitObject.hpp"
 #include "SpinnerTemplate.hpp"
-#include "define.hpp"
 
 namespace PROJECT_NAMESPACE {
 

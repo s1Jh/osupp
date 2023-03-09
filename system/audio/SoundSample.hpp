@@ -26,7 +26,7 @@
 
 #include "Sound.hpp"
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 class SoundSample : public detail::BaseSound
 {

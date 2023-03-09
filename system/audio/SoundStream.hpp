@@ -29,7 +29,7 @@
 #include "Sound.hpp"
 #include "AudioUtil.hpp"
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 class SoundStream : public detail::BaseSound
 {

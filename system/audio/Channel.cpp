@@ -28,7 +28,7 @@
 #include <cmath>
 #include <fstream>
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 void Channel::generateBuffer(unsigned int buffer, const detail::BaseSound::BufferT &data)
 {

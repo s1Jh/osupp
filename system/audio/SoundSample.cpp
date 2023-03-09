@@ -26,7 +26,7 @@
 
 #include "AudioUtil.hpp"
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 template<> const std::vector<std::string> Resource<SoundSample>::allowedExtensions = {".wav", ".mp3", ".ogg"};
 

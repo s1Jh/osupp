@@ -33,7 +33,7 @@
 
 #include <AL/al.h>
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 namespace detail {
 typedef struct ALCdevice ALCdevice;

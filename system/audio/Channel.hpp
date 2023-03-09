@@ -27,7 +27,7 @@
 #include "Sound.hpp"
 #include "Audio.hpp"
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 // Forward decl, since we include Channel.hpp in AudioDevice.hpp
 class AudioDevice;

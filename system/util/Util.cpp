@@ -24,10 +24,6 @@
 
 #include "GL.hpp"
 
-#define GLFW_DLL
-
-#include <GLFW/glfw3.h>
-
 #include <cstdlib>
 #include <fstream>
 #include <sstream>

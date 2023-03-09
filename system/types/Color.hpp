@@ -39,18 +39,18 @@ struct color;
 
 struct color
 {
-    constexpr color()
-        : r(0), g(0), b(0), a(1)
+    constexpr color() noexcept
+		: r(0), g(0), b(0), a(1)
     {}
 
-    constexpr color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a = 0xff)
+    constexpr color(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a = 0xff) noexcept
         : r(float(_r) / 255.f), g(float(_g) / 255.f), b(float(_b) / 255.f),
           a(float(_a) / 255.f)
     {}
 
-    float r, g, b, a;
+	constexpr color(const color8& col) noexcept;
 
-    inline operator color8() const;
+    float r, g, b, a;
 
     inline operator uint32_t() const;
 };
@@ -61,30 +61,29 @@ struct color8
         : r(0), g(0), b(0), a(255)
     {}
 
-    constexpr color8(float _r, float _g, float _b, float _a = 0xff)
-        : r(uint8_t(_r * 255.f)), g(uint8_t(_g * 255.f)), b(uint8_t(_b * 255.f)),
+    constexpr color8(float _r, float _g, float _b, float _a = 0xff) noexcept
+		: r(uint8_t(_r * 255.f)), g(uint8_t(_g * 255.f)), b(uint8_t(_b * 255.f)),
           a(uint8_t(_a * 255.f))
-    {}
+	{}
 
-    constexpr explicit color8(uint32_t rgba)
-    {
+    constexpr explicit color8(uint32_t rgba) noexcept
+	{
         r = (rgba & (0xff << 0)) >> 0;
         g = (rgba & (0xff << 8)) >> 8;
         b = (rgba & (0xff << 16)) >> 16;
         a = (rgba & (0xff << 24)) >> 24;
     }
 
-    uint8_t r, g, b, a;
+	constexpr color8(const color& c) noexcept : color8(c.r, c.g, c.b, c.a) {}
 
-    inline operator color() const;
+    uint8_t r, g, b, a;
 
     inline operator uint32_t() const;
 };
 
-inline color::operator color8() const
-{ return {r, g, b, a}; }
+constexpr color::color(const color8& col) noexcept : color(col.r, col.g, col.b, col.a) {}
 
-inline color::operator unsigned int() const
+inline color::operator uint32_t() const
 {
     uint32_t rval = 0;
     rval |= ((uint32_t) (r * 255.f)) << 0;
@@ -93,9 +92,6 @@ inline color::operator unsigned int() const
     rval |= ((uint32_t) (a * 255.f)) << 24;
     return rval;
 }
-
-inline color8::operator color() const
-{ return {r, g, b, a}; }
 
 inline color8::operator uint32_t() const
 {

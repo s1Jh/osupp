@@ -38,6 +38,7 @@ int GameTask::operator()()
 
         timing.await();
     }
+	return 0;
 }
 
 void GameTask::receive(const ConfigureGameRuntime &msg)

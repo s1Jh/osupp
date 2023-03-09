@@ -34,7 +34,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 static std::mutex DeviceMutex;
 static std::vector<AudioDeviceSpec> DeviceListing;

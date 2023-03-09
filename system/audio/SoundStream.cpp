@@ -24,7 +24,7 @@
 
 #include <libavcodec/avcodec.h>
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 template<> const std::vector<std::string> Resource<SoundStream>::allowedExtensions = {".wav", ".mp3", ".ogg"};
 

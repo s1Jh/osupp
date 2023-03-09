@@ -21,8 +21,10 @@
  ******************************************************************************/
 #pragma once
 
-#include <vector>
 #include "define.hpp"
+
+#include <vector>
+
 #include "InputMapper.hpp"
 #include "Vector.hpp"
 #include "Keyboard.hpp"

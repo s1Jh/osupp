@@ -32,7 +32,7 @@
 #include <vector>
 #include <memory>
 
-namespace osupp::video
+namespace PROJECT_NAMESPACE::video
 {
     // TODO: Camera
     class LambdaRender

@@ -265,7 +265,12 @@ ConfigureLibrary(FFMPEG)
 ConfigureLibrary(FT2)
 
 add_library(date STATIC ${DATE_DIRECTORY}/src/tz.cpp)
-target_compile_definitions(date PUBLIC USE_OS_TZDB)
+if (NOT MSVC)
+	target_compile_definitions(date PUBLIC USE_OS_TZDB)
+else()
+	target_compile_definitions(date PUBLIC )
+endif()
+
 set(LIBS "${LIBS};date")
 
 string(STRIP "${LIBS}" LIBS)
@@ -286,7 +291,7 @@ add_executable(${TARGET_NAME} ${SOURCES})
 
 # Set the proper warning levels
 if (MSVC)
-    target_compile_options(${TARGET_NAME} PRIVATE /W4 /Zc:preprocessor)
+    target_compile_options(${TARGET_NAME} PRIVATE /W4 /Zc:preprocessor /Zc:__cplusplus)
 else ()
     target_compile_options(${TARGET_NAME} PRIVATE -Wall -Wextra -Wpedantic)
 endif ()

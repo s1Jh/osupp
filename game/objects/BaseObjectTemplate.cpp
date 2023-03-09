@@ -22,8 +22,6 @@
 
 #include "BaseObjectTemplate.hpp"
 
-#include "define.hpp"
-
 namespace PROJECT_NAMESPACE {
 
 HitObjectType BaseObjectTemplate::getType() const

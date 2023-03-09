@@ -22,10 +22,10 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "Matrix.hpp"
 #include "Vector.hpp"
-#include "Vector.hpp"
-#include "define.hpp"
 
 namespace PROJECT_NAMESPACE {
 
@@ -36,7 +36,7 @@ public:
 
     enum class Direction
     {
-        UP, DOWN, LEFT, RIGHT, OUT, IN
+//        UP, DOWN, LEFT, RIGHT, OUT, IN
     };
 
     void setPosition(const fvec2d &in);

@@ -103,6 +103,9 @@ typedef unsigned char *GLubyteptr;
 #define GL_TEXTURE0                       0x84C0
 //#define GL_VERTEX_SHADER                  0x8B31
 //#define GL_LINK_STATUS                    0x0
+#define GL_CLAMP_TO_BORDER				  0x812d
+#define GL_RENDERBUFFER  				  0x8d41
+#define GL_DEPTH_ATTACHMENT				  0x8d00
 
 typedef char GLchar;
 typedef unsigned int GLenum;
@@ -116,7 +119,7 @@ typedef ptrdiff_t GLsizeiptr;
 /***************************************************************/
 /* Includes                                                    */
 /***************************************************************/
-#include <GL/gl.h>
+#include <gl/GL.h>
 
 #ifdef X11
 #include <GL/glx.h>

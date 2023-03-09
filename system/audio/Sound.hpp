@@ -30,7 +30,7 @@
 #include <vector>
 #include <list>
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 constexpr unsigned int DEFAULT_SOUND_BUFFER_CHUNKS = 4;
 constexpr unsigned int DEFAULT_SOUND_BUFFER_SIZE = 1024;

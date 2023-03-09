@@ -52,9 +52,13 @@ Time SinceStart()
 Time Local()
 {
 	auto now = chr::system_clock::now();
-	auto zn = date::make_zoned(date::current_zone(), now);
 
-	return chr::duration_cast<chr::seconds>(zn.get_local_time().time_since_epoch()).count();
+	try {
+		auto zn = date::make_zoned(date::current_zone(), now);
+		return chr::duration_cast<chr::seconds>(zn.get_local_time().time_since_epoch()).count();
+	} catch (std::runtime_error& e) {
+		return now.time_since_epoch().count();
+	}
 }
 
 Time UTC(int offset)

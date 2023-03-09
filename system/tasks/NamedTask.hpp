@@ -30,7 +30,7 @@
 #define PERSISTENT_JOBS
 #endif
 
-namespace osupp::tasks
+namespace PROJECT_NAMESPACE::tasks
 {
 
 

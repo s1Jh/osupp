@@ -232,7 +232,7 @@ void GameManager::draw(video::LambdaRender &gfx)
     }
 #ifdef WINDOWS
     if (last == activeObjects.begin()) {
-        activeObjects.front()->draw();
+        activeObjects.front()->draw(gfx);
     }
 #endif
 }

@@ -37,7 +37,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 struct FFmpegCtx {
 	bool valid{true};

@@ -22,11 +22,12 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "OsuHitObject.hpp"
 #include "HitObjectArguments.hpp"
 #include "ObjectSprite.hpp"
 #include "NoteTemplate.hpp"
-#include "define.hpp"
 
 namespace PROJECT_NAMESPACE {
 

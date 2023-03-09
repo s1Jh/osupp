@@ -22,10 +22,11 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include <cstdint>
 
 #include "EnumOperators.hpp"
-#include "define.hpp"
 
 namespace PROJECT_NAMESPACE {
 

@@ -29,100 +29,133 @@
 #include <string>
 #include <vector>
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE
+{
 
-class AudioDevice;
+	namespace audio
+	{
 
-constexpr unsigned int MAX_SFX_CHANNELS = 64;
-constexpr unsigned int DEFAULT_SFX_CHANNELS = 16;
-constexpr unsigned int AUDIO_STREAMING_BUFFERS = 4;
+		class AudioDevice;
 
-enum class SampleFormat {
-	IS_STEREO = 0b001,
-	TYPE = 0b110,
+		constexpr unsigned int MAX_SFX_CHANNELS = 64;
+		constexpr unsigned int DEFAULT_SFX_CHANNELS = 16;
+		constexpr unsigned int AUDIO_STREAMING_BUFFERS = 4;
 
-	TYPE8 = 0 << 1,
-	TYPE16 = 1 << 1,
+		enum class SampleFormat
+		{
+			IS_STEREO = 0b001,
+			TYPE = 0b110,
 
-	MONO8 = TYPE8,
-	MONO16 = TYPE16,
+			TYPE8 = 0 << 1,
+			TYPE16 = 1 << 1,
 
-	STEREO8 = TYPE8 | IS_STEREO,
-	STEREO16 = TYPE16 | IS_STEREO,
-};
+			MONO8 = TYPE8,
+			MONO16 = TYPE16,
 
-ENABLE_BITMASK_OPERATORS(SampleFormat)
+			STEREO8 = TYPE8 | IS_STEREO,
+			STEREO16 = TYPE16 | IS_STEREO,
+		};
 
-template <typename SampleT>
-using MonoSample = SampleT;
+		template <typename SampleT>
+		using MonoSample = SampleT;
 
-template <typename SampleT>
-struct StereoSample {
-	SampleT left, right;
-};
+		template <typename SampleT>
+		struct StereoSample
+		{
+			SampleT left, right;
+		};
 
-using MonoSample8 = MonoSample<uint8_t>;
-using MonoSample16 = MonoSample<int16_t>;
-using StereoSample8 = StereoSample<uint8_t>;
-using StereoSample16 = StereoSample<int16_t>;
+		using MonoSample8 = MonoSample<uint8_t>;
+		using MonoSample16 = MonoSample<int16_t>;
+		using StereoSample8 = StereoSample<uint8_t>;
+		using StereoSample16 = StereoSample<int16_t>;
 
-template <typename T>
-struct SampleInfo {
-	const static bool enable = false;
-};
+		template <typename T>
+		struct SampleInfo
+		{
+			const static bool enable = false;
+		};
 
-#define DECLARE_MONO_SAMPLE_INFO(Type, EnumType) \
-template <> \
-struct SampleInfo<MonoSample<Type>> { \
-	const static bool enable = true; \
-	const static SampleFormat format = EnumType; \
-	const static size_t size = sizeof(MonoSample<Type>); \
-};
+#define DECLARE_MONO_SAMPLE_INFO(Type, EnumType)             \
+	template <>                                              \
+	struct SampleInfo<MonoSample<Type>>                      \
+	{                                                        \
+		const static bool enable = true;                     \
+		const static SampleFormat format = EnumType;         \
+		const static size_t size = sizeof(MonoSample<Type>); \
+	};
 
-#define DECLARE_STEREO_SAMPLE_INFO(Type, EnumType) \
-template <> \
-struct SampleInfo<StereoSample<Type>> { \
-	const static bool enable = true; \
-	const static SampleFormat format = EnumType; \
-	const static size_t size = sizeof(StereoSample<Type>); \
-};
+#define DECLARE_STEREO_SAMPLE_INFO(Type, EnumType)             \
+	template <>                                                \
+	struct SampleInfo<StereoSample<Type>>                      \
+	{                                                          \
+		const static bool enable = true;                       \
+		const static SampleFormat format = EnumType;           \
+		const static size_t size = sizeof(StereoSample<Type>); \
+	};
 
-DECLARE_MONO_SAMPLE_INFO(uint8_t, SampleFormat::MONO8)
-DECLARE_MONO_SAMPLE_INFO(int16_t, SampleFormat::MONO16)
+		DECLARE_MONO_SAMPLE_INFO(uint8_t, SampleFormat::MONO8)
+		DECLARE_MONO_SAMPLE_INFO(int16_t, SampleFormat::MONO16)
 
-DECLARE_STEREO_SAMPLE_INFO(uint8_t, SampleFormat::STEREO8)
-DECLARE_STEREO_SAMPLE_INFO(int16_t, SampleFormat::STEREO16)
+		DECLARE_STEREO_SAMPLE_INFO(uint8_t, SampleFormat::STEREO8)
+		DECLARE_STEREO_SAMPLE_INFO(int16_t, SampleFormat::STEREO16)
 
-enum class SoundType {
-	SAMPLE, STREAM, RECORD
-};
+		enum class SoundType
+		{
+			SAMPLE,
+			STREAM,
+			RECORD
+		};
 
-enum class SoundPriority {
-	VERY_LOW, LOW, MEDIUM, HIGH, VERY_HIGH
-};
+		enum class SoundPriority
+		{
+			VERY_LOW,
+			LOW,
+			MEDIUM,
+			HIGH,
+			VERY_HIGH
+		};
 
-enum class ChannelState {
-	FREE, PLAYING, PAUSED, STOPPED
-};
+		enum class ChannelState
+		{
+			FREE,
+			PLAYING,
+			PAUSED,
+			STOPPED
+		};
 
-enum class AudioDeviceType {
-	UNRECOGNIZED, DISPLAY_PORT, HANDSET, HDMI, HEADPHONES, HEADSET, LINE, MICROPHONE, NETWORK, SPDIF, SPEAKERS
-};
+		enum class AudioDeviceType
+		{
+			UNRECOGNIZED,
+			DISPLAY_PORT,
+			HANDSET,
+			HDMI,
+			HEADPHONES,
+			HEADSET,
+			LINE,
+			MICROPHONE,
+			NETWORK,
+			SPDIF,
+			SPEAKERS
+		};
 
-struct AudioDeviceSpec {
-	int id;
-	std::string name;
-	std::string driver;
-	bool available;
-	bool systemDefault;
-	bool input;
-	bool loopBack;
-	AudioDeviceType type;
-};
+		struct AudioDeviceSpec
+		{
+			int id;
+			std::string name;
+			std::string driver;
+			bool available;
+			bool systemDefault;
+			bool input;
+			bool loopBack;
+			AudioDeviceType type;
+		};
 
-extern std::vector<AudioDeviceSpec> GetAudioDevices();
-extern AudioDeviceSpec GetDefaultAudioDevice();
-extern AudioDevice GetAudioDevice(const std::string& name, Settings& settings);
+		extern std::vector<AudioDeviceSpec> GetAudioDevices();
+		extern AudioDeviceSpec GetDefaultAudioDevice();
+		extern AudioDevice GetAudioDevice(const std::string &name, Settings &settings);
 
+	}
 
+	ENABLE_BITMASK_OPERATORS(audio::SampleFormat)
 }

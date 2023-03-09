@@ -22,10 +22,11 @@
 
 #pragma once
 
+#include "define.hpp"
+
 #include "BaseObjectTemplate.hpp"
 #include "SliderTypes.hpp"
 #include "Vector.hpp"
-#include "define.hpp"
 
 namespace PROJECT_NAMESPACE {
 

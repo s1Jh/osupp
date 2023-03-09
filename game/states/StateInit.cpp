@@ -31,6 +31,7 @@ namespace PROJECT_NAMESPACE {
 int State<GameState::Init>::update(double)
 {
     setState(GameState::MainMenu);
+	return 0;
 }
 
 int State<GameState::Init>::draw()

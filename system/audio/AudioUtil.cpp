@@ -23,7 +23,7 @@
 
 #include "Log.hpp"
 
-namespace PROJECT_NAMESPACE {
+namespace PROJECT_NAMESPACE::audio {
 
 FFmpegCtx OpenFFmpegContext(const std::filesystem::path &path)
 {
