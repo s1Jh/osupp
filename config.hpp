@@ -61,7 +61,3 @@
 #ifdef USER_TASK_INCLUDES
 #include "GameTask.hpp"
 #endif
-
-
-//#define STATE_HANDLER_OVERRIDE_INCLUDE "OsuStateHandler.hpp"
-//#define STATE_HANDLER_OVERRIDE OsuStateHandler

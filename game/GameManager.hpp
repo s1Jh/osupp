@@ -122,6 +122,8 @@ public:
 
     [[nodiscard]] double getDelta() const;
 
+    void setSkin(Resource<Skin>);
+
 private:
 	unsigned int loadObjects(unsigned int amount);
 	[[nodiscard]] bool resolveFunction(HitObjectFunction func, const BaseHitObject &object) const;

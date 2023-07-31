@@ -1,12 +1,12 @@
-[submodule "external/imgui"]
-	path = external/imgui
-	url = https://github.com/ocornut/imgui.git
+[submodule "external/date"]
+	path = external/date
+	url = https://github.com/HowardHinnant/date.git
 [submodule "external/stb"]
 	path = external/stb
 	url = https://github.com/nothings/stb.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui.git
 [submodule "external/nameof"]
 	path = external/nameof
 	url = https://github.com/Neargye/nameof
-[submodule "external/date"]
-	path = external/date
-	url = https://github.com/HowardHinnant/date

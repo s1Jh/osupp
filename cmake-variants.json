@@ -36,7 +36,8 @@
             "linux" : {
                 "short": "Linux",
                 "settings": {
-                    "PLATFORM": "LINUX"
+                    "PLATFORM": "LINUX",
+                    "CMAKE_MODULE_PATH": "/home/sijh/Projects/osupp"
                 }
             }
         }

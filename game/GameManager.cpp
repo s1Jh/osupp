@@ -467,7 +467,6 @@ unsigned int GameManager::loadObjects(unsigned int amount)
         return 0;
     }
 
-
     unsigned int loaded = 0;
     auto it = lastLoadedObject;
     for (it = lastLoadedObject; (it != templates.end()) && (loaded < amount); loaded++, it++) {

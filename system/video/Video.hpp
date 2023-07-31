@@ -26,10 +26,13 @@ constexpr size_t DEFAULT_RENDER_LAYER = RENDER_LAYERS / 2;
 constexpr const char *GL_VERSION_STR = "330 core";
 constexpr const char *GL_VERSION_PREPROCESSOR = "#version 330 core";
 
+<<<<<<< HEAD
 #define LAYER(NAME, EXPR, ...) constexpr size_t NAME = EXPR;
     USER_LAYER_DEFINITIONS
 #undef LAYER
 
+=======
+>>>>>>> 61d5d19 (Updating the state handler)
 enum class WindowMode
 {
     NONE, WINDOWED, FULLSCREEN, WINDOWED_BORDERLESS

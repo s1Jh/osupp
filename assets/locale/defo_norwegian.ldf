@@ -1,0 +1,75 @@
+
+"locale" {
+    "name" = "English"
+    "credits" = "s1Jh"
+
+    "translations" {
+        "setting.gfx.width" = "Window width in norwegian"
+        "setting.gfx.height" = "Window height in norwegian"
+        "setting.gfx.fullscreen" = "Fullscreen in norwegian"
+        "setting.gfx.refresh_rate" = "Window refresh rate in norwegian"
+        "setting.gfx.resolution" = "Rendering resolution in norwegian"
+        "setting.paths" = "Search paths in norwegian"
+        "setting.user.skin" = "Skin in norwegian"
+        "setting.user.locale" = "Language in norwegian"
+        "setting.audio.device" = "Audio device in norwegian"
+        "setting.audio.frequency" = "Sampling rate in norwegian"
+        "setting.audio.music_volume" = "Music volume in norwegian"
+        "setting.audio.sfx_volume" = "Effect volume in norwegian"
+
+
+        "ui.main.title" = "Control panel in norwegian"
+
+        "ui.main.version.version" = "Version: %i.%i.%i (%s %s) in norwegian"
+        "ui.main.version.build" = "Build: %s %s %s in norwegian"
+        "ui.main.version.title" = "Game version in norwegian"
+
+        "ui.main.about.title" = "About in norwegian"
+        "ui.main.about.imgui_version" = "ImGui version in norwegian"
+        "ui.main.about.game_version" = "Game version in norwegian"
+
+        "ui.main.debug.title" = "Debug in norwegian"
+        "ui.main.debug.purge" = "Purge unused assets in norwegian"
+        "ui.main.debug.localisations" = "Show localisations in norwegian"
+        "ui.main.debug.resources" = "Show loaded resources in norwegian"
+        "ui.main.debug.imgui" = "ImGui debug menus in norwegian"
+        "ui.main.debug.imgui.debugger" = "ImGui debugger in norwegian"
+        "ui.main.debug.imgui.logger" = "ImGui logger in norwegian"
+        "ui.main.debug.imgui.stack" = "ImGui stack in norwegian"
+        "ui.main.debug.imgui.theme" = "Set ImGui theme in norwegian"
+        "ui.main.debug.imgui.theme.light" = "Light in norwegian"
+        "ui.main.debug.imgui.theme.dark" = "Dark in norwegian"
+        "ui.main.debug.imgui.theme.classic" = "Classic (Blue-ish) in norwegian"
+
+        "ui.main.maps.title" = "Maps in norwegian"
+        "ui.main.maps.caption" = "Map listing: in norwegian"
+        "ui.main.maps.filter" = "Search maps: in norwegian"
+        "ui.main.maps.reload" = "Reload maps in norwegian"
+        "ui.main.maps.exit" = "Exit in norwegian"
+        "ui.main.maps.name" = "Name in norwegian"
+        "ui.main.maps.length" = "Length in norwegian"
+        "ui.main.maps.star_rating" = "SR in norwegian"
+        "ui.main.maps.overall_difficulty" = "OD in norwegian"
+        "ui.main.maps.approach_rate" = "AR in norwegian"
+        "ui.main.maps.circle_size" = "CS in norwegian"
+        "ui.main.maps.hit_window" = "HW in norwegian"
+        "ui.main.maps.hp_drain" = "HP in norwegian"
+
+        "ui.main.settings.title" = "Settings in norwegian"
+        "ui.main.settings.read" = "Read in norwegian"
+        "ui.main.settings.write" = "Write in norwegian"
+        "ui.main.settings.apply" = "Apply in norwegian"
+        "ui.main.settings.filter" = "Search setting: in norwegian"
+        "ui.main.settings.key" = "Key in norwegian"
+        "ui.main.settings.value" = "Value in norwegian"
+
+        "ui.main.localisations.title" = "Localisations in norwegian"
+        "ui.main.localisations.caption" = "Locale debug in norwegian"
+        "ui.main.localisations.key" = "Key in norwegian"
+        "ui.main.localisations.value" = "Value in norwegian"
+        "ui.main.localisations.name_credit" = "%s locale by %s in norwegian"
+        "ui.main.localisations.time" = "Time format: %s in norwegian"
+        "ui.main.localisations.date" = "Date format: %s in norwegian"
+        "ui.main.localisations.decimal" = "Decimal separator: %s"
+    }
+}

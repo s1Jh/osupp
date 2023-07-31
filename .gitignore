@@ -2,6 +2,7 @@
 cmake*/
 .*/**
 *.kdev4
+build/
 
 # default skin - only add once we all have custom assets
 assets/skins/default
