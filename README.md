@@ -1,3 +1,5 @@
+ abandoned probably lol
+
 // TODO: Make this readme better.
 
 # osu++
